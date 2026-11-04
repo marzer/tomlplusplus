@@ -92,11 +92,12 @@ TOML_NAMESPACE_START
 	{
 		if (&rhs != this)
 		{
-			node::operator=(rhs);
-			elems_.clear();
-			elems_.reserve(rhs.elems_.size());
+			vector_type copy;
+			copy.reserve(rhs.elems_.size());
 			for (const auto& elem : rhs)
-				elems_.emplace_back(impl::make_node(elem));
+				copy.emplace_back(impl::make_node(elem));
+			node::operator=(rhs);
+			elems_.swap(copy);
 		}
 		return *this;
 	}
@@ -107,7 +108,8 @@ TOML_NAMESPACE_START
 		if (&rhs != this)
 		{
 			node::operator=(std::move(rhs));
-			elems_ = std::move(rhs.elems_);
+			vector_type stolen = std::move(rhs.elems_);
+			elems_.swap(stolen);
 		}
 		return *this;
 	}

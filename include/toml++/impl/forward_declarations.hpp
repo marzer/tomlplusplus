@@ -764,6 +764,39 @@ TOML_IMPL_NAMESPACE_START
 	{};
 #endif
 
+	template <typename T>
+	struct float_limits
+	{
+		TOML_NODISCARD
+		static T lowest()
+		{
+			return (std::numeric_limits<T>::lowest)();
+		}
+
+		TOML_NODISCARD
+		static T highest()
+		{
+			return (std::numeric_limits<T>::max)();
+		}
+	};
+#if TOML_ENABLE_FLOAT16
+	template <>
+	struct float_limits<_Float16>
+	{
+		TOML_NODISCARD
+		static constexpr _Float16 lowest() noexcept
+		{
+			return static_cast<_Float16>(-65504.0f);
+		}
+
+		TOML_NODISCARD
+		static constexpr _Float16 highest() noexcept
+		{
+			return static_cast<_Float16>(65504.0f);
+		}
+	};
+#endif
+
 	// floating-point traits
 	template <>
 	struct value_traits<float> : float_traits<float>

@@ -16,7 +16,61 @@
 #include "print_to_stream.hpp"
 #include "table.hpp"
 #include "array.hpp"
+#include "unicode.hpp"
 #include "header_start.hpp"
+
+TOML_ANON_NAMESPACE_START
+{
+	TOML_INTERNAL_LINKAGE
+	bool yaml_block_scalar_preserves(std::string_view str) noexcept
+	{
+		if (str.back() == '\n')
+			return false;
+
+		impl::utf8_decoder decoder;
+		bool contains_newline = false;
+		bool seen_content	  = false;
+		for (auto c : str)
+		{
+			decoder(static_cast<uint8_t>(c));
+			if (decoder.error())
+				return false;
+			if (!decoder.has_code_point())
+				continue;
+
+			const auto cp = decoder.codepoint;
+			if (cp == U'\n')
+			{
+				contains_newline = true;
+				continue;
+			}
+			if ((cp == U' ' && !seen_content) || impl::is_nontab_control_character(cp)
+				|| impl::is_non_ascii_vertical_whitespace(cp) || impl::is_yaml_unprintable(cp))
+				return false;
+			seen_content = true;
+		}
+		return contains_newline && !decoder.needs_more_input();
+	}
+
+	TOML_INTERNAL_LINKAGE
+	bool yaml_plain_scalar_is_string(std::string_view str) noexcept
+	{
+		if (str.empty() || str.front() == '-' || str.front() == '+' || (str.front() >= '0' && str.front() <= '9'))
+			return false;
+		if (str.length() > 5u)
+			return true;
+
+		char lower[5];
+		for (size_t i = 0; i < str.length(); i++)
+			lower[i] = str[i] >= 'A' && str[i] <= 'Z' ? static_cast<char>(str[i] - 'A' + 'a') : str[i];
+		const auto word = std::string_view{ lower, str.length() };
+		for (auto keyword : { "y"sv, "n"sv, "yes"sv, "no"sv, "on"sv, "off"sv, "true"sv, "false"sv, "null"sv })
+			if (word == keyword)
+				return false;
+		return true;
+	}
+}
+TOML_ANON_NAMESPACE_END;
 
 TOML_NAMESPACE_START
 {
@@ -29,11 +83,7 @@ TOML_NAMESPACE_START
 			return;
 		}
 
-		bool contains_newline = false;
-		for (auto c = str->c_str(), e = str->c_str() + str->length(); c < e && !contains_newline; c++)
-			contains_newline = *c == '\n';
-
-		if (contains_newline)
+		if (TOML_ANON_NAMESPACE::yaml_block_scalar_preserves(*str))
 		{
 			print_unformatted("|-"sv);
 
@@ -59,7 +109,11 @@ TOML_NAMESPACE_START
 			decrease_indent();
 		}
 		else
-			print_string(*str, false, true);
+			print_string(*str,
+						 false,
+						 TOML_ANON_NAMESPACE::yaml_plain_scalar_is_string(*str),
+						 true,
+						 impl::string_dialect::yaml);
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -82,11 +136,12 @@ TOML_NAMESPACE_START
 			}
 			parent_is_array = false;
 
-			print_string(k.str(), false, true);
-			if (terse_kvps())
-				print_unformatted(":"sv);
-			else
-				print_unformatted(": "sv);
+			print_string(k.str(),
+						 false,
+						 TOML_ANON_NAMESPACE::yaml_plain_scalar_is_string(k.str()),
+						 true,
+						 impl::string_dialect::yaml);
+			print_unformatted(": "sv);
 
 			const auto type = v.type();
 			TOML_ASSUME(type != node_type::none);

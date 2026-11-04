@@ -222,14 +222,23 @@ jobs:
               working-directory: build
               run: ctest --output-on-failure
 
+            - name: Build and test without exceptions, with unreleased features
+              if: matrix.coverage
+              run: |
+                  cmake -S . -B build-alt -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.type }} -Dtomlplusplus_BUILD_TESTS=ON \
+                    -Dtomlplusplus_PEDANTIC=ON -Dtomlplusplus_WERROR=ON ${{ matrix.args }} \
+                    -Dtomlplusplus_EXCEPTIONS=OFF -Dtomlplusplus_UNRELEASED_FEATURES=ON
+                  cmake --build build-alt
+                  ctest --test-dir build-alt --output-on-failure
+
             - name: Report coverage
               if: matrix.coverage
               env:
-                  TOMLPLUSPLUS_COVERAGE_MIN_LINES: "81.4"
-                  TOMLPLUSPLUS_COVERAGE_MIN_FUNCTIONS: "83.7"
-                  TOMLPLUSPLUS_COVERAGE_MIN_REGIONS: "74.1"
-                  TOMLPLUSPLUS_COVERAGE_MIN_BRANCHES: "71.8"
-              run: python3 tools/coverage.py build
+                  TOMLPLUSPLUS_COVERAGE_MIN_LINES: "97.0"
+                  TOMLPLUSPLUS_COVERAGE_MIN_FUNCTIONS: "97.0"
+                  TOMLPLUSPLUS_COVERAGE_MIN_REGIONS: "80.8"
+                  TOMLPLUSPLUS_COVERAGE_MIN_BRANCHES: "79.0"
+              run: python3 tools/coverage.py build build-alt
 
             - name: Upload coverage report
               if: matrix.coverage

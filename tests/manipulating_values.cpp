@@ -173,6 +173,11 @@ TEST_CASE("values - construction")
 	check_value(one<unsigned long long>, type_tag<int64_t>{});
 	check_value(true, type_tag<bool>{});
 	check_value(false, type_tag<bool>{});
+	check_value(one<float>, type_tag<double>{});
+	check_value(one<double>, type_tag<double>{});
+	check_value(date{ 2024, 1, 2 }, type_tag<date>{});
+	check_value(toml::time{ 3, 4, 5 }, type_tag<toml::time>{});
+	check_value(date_time{ date{ 2024, 1, 2 }, toml::time{ 3, 4, 5 } }, type_tag<date_time>{});
 	check_value("kek", type_tag<std::string>{});
 	check_value("kek"s, type_tag<std::string>{});
 	check_value("kek"sv, type_tag<std::string>{});
@@ -720,11 +725,15 @@ namespace string_like_types
 
 		array arr;
 		arr.emplace_back<std::string>(str);
+		arr.push_back(T{ text });
 		CHECK(*arr.get_as<std::string>(0) == text);
+		CHECK(*arr.get_as<std::string>(1) == text);
 
 		table tbl;
 		tbl.emplace<std::string>("k", str);
+		tbl.insert("inserted", T{ text });
 		CHECK(tbl["k"] == text);
+		CHECK(tbl["inserted"] == text);
 	}
 }
 
@@ -794,4 +803,18 @@ TEST_CASE("string-like types - retrieval is not noexcept when copying can throw"
 	static_assert(!noexcept(std::declval<const node&>().value<potentially_throwing_copy_string>()));
 	static_assert(!noexcept(std::declval<const node&>().value_exact<potentially_throwing_copy_string>()));
 	static_assert(!noexcept(std::declval<const node&>().value_or(std::declval<potentially_throwing_copy_string>())));
+}
+
+TEST_CASE("string-like types - retrieval works when copying can throw")
+{
+	table tbl{ { "k", "x"sv }, { "i", 1 } };
+	const node& str		= *tbl.get("k");
+	const node& integer = *tbl.get("i");
+
+	CHECK(str.value<potentially_throwing_copy_string>()->text == "x"sv);
+	CHECK(str.value_exact<potentially_throwing_copy_string>()->text == "x"sv);
+	CHECK(str.value_or(potentially_throwing_copy_string{ "y"sv }).text == "x"sv);
+	CHECK(!integer.value<potentially_throwing_copy_string>());
+	CHECK(!integer.value_exact<potentially_throwing_copy_string>());
+	CHECK(integer.value_or(potentially_throwing_copy_string{ "y"sv }).text == "y"sv);
 }

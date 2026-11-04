@@ -11,7 +11,9 @@ TEST_CASE("user feedback")
 {
 	SECTION("tomlplusplus/issues/313")
 	{
-		parsing_should_fail(FILE_LINE_ARGS, "a = 2026-10-13 1\n"sv);
+		parsing_should_fail(FILE_LINE_ARGS,
+							"a = 2026-10-13 1\n"sv,
+							"1:16: Error while parsing key-value pair: expected a comment or whitespace, saw '1'"sv);
 	}
 
 	SECTION("tomlplusplus/issues/49") // https://github.com/marzer/tomlplusplus/issues/49#issuecomment-664428571
@@ -87,9 +89,11 @@ TEST_CASE("user feedback")
 		// - overlong numeric literals
 		// all should fail to parse, but correctly issue an error (not crash!)
 
-		parsing_should_fail(FILE_LINE_ARGS, "#\xf1\x63");
-		parsing_should_fail(FILE_LINE_ARGS, "1= 0x6cA#+\xf1");
-		parsing_should_fail(FILE_LINE_ARGS, "p=06:06:06#\x0b\xff");
+		parsing_should_fail(FILE_LINE_ARGS, "#\xf1\x63", "1:2: Encountered invalid utf-8 sequence"sv);
+		parsing_should_fail(FILE_LINE_ARGS,
+							"1= 0x6cA#+\xf1",
+							"1:11: Encountered EOF during incomplete utf-8 code point sequence"sv);
+		parsing_should_fail(FILE_LINE_ARGS, "p=06:06:06#\x0b\xff", "1:13: Encountered invalid utf-8 sequence"sv);
 		parsing_should_fail(
 			FILE_LINE_ARGS,
 			"''''d' 't' '+o\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c"
@@ -97,10 +101,12 @@ TEST_CASE("user feedback")
 			"\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c"
 			"\x0c\x0c\x0c\x0c\x0c\x0c\x0cop1\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c"
 			"\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c"
-			"\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c' 'ml'\n\n%\x87");
+			"\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c' 'ml'\n\n%\x87",
+			R"(1:15: Error while parsing literal string: vertical tabs '\v' and form-feeds '\f' are not legal line breaks in TOML)"sv);
 		parsing_should_fail(
 			FILE_LINE_ARGS,
-			R"(t =[ 9, 2, 1,"r", 100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000.0 ])");
+			R"(t =[ 9, 2, 1,"r", 100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000.0 ])",
+			"1:19: Error while parsing value: numeric value too long to identify type - cannot exceed 126 characters"sv);
 	}
 
 	SECTION("tomlplusplus/issues/67") // https://github.com/marzer/tomlplusplus/issues/67
@@ -167,12 +173,17 @@ b = []
 		// 1. pathologically-nested inputs
 		// 2. a particular sequence of malformed UTF-8
 
-		parsing_should_fail(FILE_LINE_ARGS, "fl =[ [[[[[[[[[[[[[[[\x36\x80\x86\x00\x00\x00\x2D\x36\x9F\x20\x00"sv);
+		parsing_should_fail(FILE_LINE_ARGS,
+							"fl =[ [[[[[[[[[[[[[[[\x36\x80\x86\x00\x00\x00\x2D\x36\x9F\x20\x00"sv,
+							"1:23: Encountered invalid utf-8 sequence"sv);
 
 		std::string s(2048_sz, '[');
 		constexpr auto start = "fl =[ "sv;
 		memcpy(s.data(), start.data(), start.length());
-		parsing_should_fail(FILE_LINE_ARGS, std::string_view{ s });
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			std::string_view{ s },
+			"1:134: Error while parsing value: exceeded maximum nested value depth of 128 (TOML_MAX_NESTED_VALUES)"sv);
 
 		// deeply nested inline tables should also fail gracefully, not stack overflow
 		{
@@ -183,14 +194,32 @@ b = []
 			nested_tables += "1";
 			for (size_t i = 0; i < 2048; i++)
 				nested_tables += "}";
-			parsing_should_fail(FILE_LINE_ARGS, std::string_view{ nested_tables });
+			parsing_should_fail(
+				FILE_LINE_ARGS,
+				std::string_view{ nested_tables },
+				"1:390: Error while parsing value: exceeded maximum nested value depth of 128 (TOML_MAX_NESTED_VALUES)"sv);
 		}
 	}
 
 	SECTION("tomlplusplus/issues/295") // https://github.com/marzer/tomlplusplus/issues/295
 	{
-		parsing_should_fail(FILE_LINE_ARGS, "\xcc\xaa"sv);
-		parsing_should_fail(FILE_LINE_ARGS, "\xcf\xaa"sv);
+#if TOML_LANG_UNRELEASED
+		parsing_should_fail(FILE_LINE_ARGS,
+							"\xcc\xaa"sv,
+							"1:2: Error while parsing key-value pair: encountered end-of-file"sv);
+		parsing_should_fail(FILE_LINE_ARGS,
+							"\xcf\xaa"sv,
+							"1:2: Error while parsing key-value pair: encountered end-of-file"sv);
+#else
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			"\xcc\xaa"sv,
+			"1:1: Error while parsing root table: expected keys, tables, whitespace or comments, saw '\xcc\xaa'"sv);
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			"\xcf\xaa"sv,
+			"1:1: Error while parsing root table: expected keys, tables, whitespace or comments, saw '\xcf\xaa'"sv);
+#endif
 	}
 
 	SECTION("tomlplusplus/issues/112") // https://github.com/marzer/tomlplusplus/issues/112
@@ -204,7 +233,7 @@ b = []
 			[a.b] # should cause redefinition error here
 			  u = 0
 		)",
-							6);
+							"6:4: Error while parsing table header: cannot redefine existing table 'a.b'"sv);
 
 		parsing_should_fail(FILE_LINE_ARGS,
 							R"(
@@ -213,7 +242,7 @@ b = []
 			[a.b] # should cause redefinition error here
 			  u = 0
 		)",
-							4);
+							"4:4: Error while parsing table header: cannot redefine existing table 'a.b'"sv);
 	}
 
 	SECTION("tomlplusplus/issues/125") // https://github.com/marzer/tomlplusplus/issues/125
@@ -247,8 +276,14 @@ b = []
 
 	SECTION("tomlplusplus/issues/128") // https://github.com/marzer/tomlplusplus/issues/128
 	{
-		parsing_should_fail(FILE_LINE_ARGS, "\f"sv);
-		parsing_should_fail(FILE_LINE_ARGS, "\v"sv);
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			"\f"sv,
+			R"(1:1: Error while parsing root table: vertical tabs '\v' and form-feeds '\f' are not legal line breaks in TOML)"sv);
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			"\v"sv,
+			R"(1:1: Error while parsing root table: vertical tabs '\v' and form-feeds '\f' are not legal line breaks in TOML)"sv);
 		parsing_should_succeed(FILE_LINE_ARGS, " "sv);
 		parsing_should_succeed(FILE_LINE_ARGS, "\t"sv);
 		parsing_should_succeed(FILE_LINE_ARGS, "\n"sv);
@@ -256,11 +291,13 @@ b = []
 
 	SECTION("tomlplusplus/issues/129") // https://github.com/marzer/tomlplusplus/issues/129
 	{
-		parsing_should_fail(FILE_LINE_ARGS, R"(
+		parsing_should_fail(FILE_LINE_ARGS,
+							R"(
 			hex = 0x
 			oct = 0o
 			bin = 0b
-		)"sv);
+		)"sv,
+							R"(2:12: Error while parsing hexadecimal integer: expected hexadecimal digit, saw '\n')"sv);
 	}
 
 	SECTION("tomlplusplus/issues/130") // https://github.com/marzer/tomlplusplus/issues/130
@@ -273,56 +310,108 @@ b = []
 
 	SECTION("tomlplusplus/issues/131") // https://github.com/marzer/tomlplusplus/issues/131
 	{
-		parsing_should_fail(FILE_LINE_ARGS, R"(
+		parsing_should_fail(FILE_LINE_ARGS,
+							R"(
 			a={}
 			[a.b]
-		)"sv);
+		)"sv,
+							"3:4: Error while parsing table header: cannot insert 'a.b' into existing inline table"sv);
 	}
 
 	SECTION("tomlplusplus/issues/132") // https://github.com/marzer/tomlplusplus/issues/132
 	{
-		parsing_should_fail(FILE_LINE_ARGS, "#\r"sv);
+		parsing_should_fail(FILE_LINE_ARGS,
+							"#\r"sv,
+							R"(1:3: Error while parsing comment: expected '\n' after '\r', saw EOF)"sv);
 	}
 
 	SECTION("tomlplusplus/issues/134") // https://github.com/marzer/tomlplusplus/issues/134
 	{
 		// binary
+		// uint64_t max
 		parsing_should_fail(
 			FILE_LINE_ARGS,
-			"val = 0b11111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111"sv); // uint64_t
-																								  // max
+			"val = 0b11111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111"sv,
+			"1:7: Error while parsing binary integer: '0b1111111111111111111111111111111111111111111111111111111111111111' is not representable as a signed 64-bit integer"sv);
+		// int64_t max + 1
 		parsing_should_fail(
 			FILE_LINE_ARGS,
-			"val = 0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000"sv); // int64_t
-																								  // max
-																								  // + 1
+			"val = 0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000"sv,
+			"1:7: Error while parsing binary integer: '0b1000000000000000000000000000000000000000000000000000000000000000' is not representable as a signed 64-bit integer"sv);
 		parse_expected_value(FILE_LINE_ARGS,
 							 "0b01111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111"sv,
 							 INT64_MAX); // int64_t max
 
 		// octal
-		parsing_should_fail(FILE_LINE_ARGS, " val = 0o1777777777777777777777"sv); // uint64_t max
-		parsing_should_fail(FILE_LINE_ARGS, " val = 0o1000000000000000000000"sv); // int64_t max + 1
+		// uint64_t max
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			" val = 0o1777777777777777777777"sv,
+			"1:8: Error while parsing octal integer: '0o1777777777777777777777' is not representable as a signed 64-bit integer"sv);
+		// int64_t max + 1
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			" val = 0o1000000000000000000000"sv,
+			"1:8: Error while parsing octal integer: '0o1000000000000000000000' is not representable as a signed 64-bit integer"sv);
 		parse_expected_value(FILE_LINE_ARGS, "      0o0777777777777777777777"sv, INT64_MAX);
 
 		// decimal
-		parsing_should_fail(FILE_LINE_ARGS, " val =  100000000000000000000"sv);
-		parsing_should_fail(FILE_LINE_ARGS, " val =   18446744073709551615"sv); // uint64_t max
-		parsing_should_fail(FILE_LINE_ARGS, " val =   10000000000000000000"sv);
-		parsing_should_fail(FILE_LINE_ARGS, " val =    9999999999999999999"sv);
-		parsing_should_fail(FILE_LINE_ARGS, " val =    9223372036854775808"sv); // int64_t max + 1
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			" val =  100000000000000000000"sv,
+			"1:9: Error while parsing decimal integer: '100000000000000000000' is not representable as a signed 64-bit integer"sv);
+		// uint64_t max
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			" val =   18446744073709551615"sv,
+			"1:10: Error while parsing decimal integer: '18446744073709551615' is not representable as a signed 64-bit integer"sv);
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			" val =   10000000000000000000"sv,
+			"1:10: Error while parsing decimal integer: '10000000000000000000' is not representable as a signed 64-bit integer"sv);
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			" val =    9999999999999999999"sv,
+			"1:11: Error while parsing decimal integer: '9999999999999999999' is not representable as a signed 64-bit integer"sv);
+		// int64_t max + 1
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			" val =    9223372036854775808"sv,
+			"1:11: Error while parsing decimal integer: '9223372036854775808' is not representable as a signed 64-bit integer"sv);
 		parse_expected_value(FILE_LINE_ARGS, "         9223372036854775807"sv, INT64_MAX);
 		parse_expected_value(FILE_LINE_ARGS, "         1000000000000000000"sv, 1000000000000000000LL);
 		parse_expected_value(FILE_LINE_ARGS, "        -1000000000000000000"sv, -1000000000000000000LL);
 		parse_expected_value(FILE_LINE_ARGS, "        -9223372036854775808"sv, INT64_MIN);
-		parsing_should_fail(FILE_LINE_ARGS, " val =   -9223372036854775809"sv); // int64_t min - 1
-		parsing_should_fail(FILE_LINE_ARGS, " val =  -10000000000000000000"sv);
-		parsing_should_fail(FILE_LINE_ARGS, " val =  -18446744073709551615"sv); // -(uint64_t max)
-		parsing_should_fail(FILE_LINE_ARGS, " val = -100000000000000000000"sv);
+		// int64_t min - 1
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			" val =   -9223372036854775809"sv,
+			"1:10: Error while parsing decimal integer: '-9223372036854775809' is not representable as a signed 64-bit integer"sv);
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			" val =  -10000000000000000000"sv,
+			"1:9: Error while parsing decimal integer: '-10000000000000000000' is not representable as a signed 64-bit integer"sv);
+		// -(uint64_t max)
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			" val =  -18446744073709551615"sv,
+			"1:9: Error while parsing decimal integer: '-18446744073709551615' is not representable as a signed 64-bit integer"sv);
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			" val = -100000000000000000000"sv,
+			"1:8: Error while parsing decimal integer: '-100000000000000000000' is not representable as a signed 64-bit integer"sv);
 
 		// hexadecimal
-		parsing_should_fail(FILE_LINE_ARGS, " val = 0xFFFFFFFFFFFFFFFF"sv); // uint64_t max
-		parsing_should_fail(FILE_LINE_ARGS, " val = 0x8000000000000000"sv); // int64_t max + 1
+		// uint64_t max
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			" val = 0xFFFFFFFFFFFFFFFF"sv,
+			"1:8: Error while parsing hexadecimal integer: '0xFFFFFFFFFFFFFFFF' is not representable as a signed 64-bit integer"sv);
+		// int64_t max + 1
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			" val = 0x8000000000000000"sv,
+			"1:8: Error while parsing hexadecimal integer: '0x8000000000000000' is not representable as a signed 64-bit integer"sv);
 		parse_expected_value(FILE_LINE_ARGS, "      0x7FFFFFFFFFFFFFFF"sv, INT64_MAX);
 	}
 
@@ -341,7 +430,8 @@ b = []
 							"0=0\n"
 							"\u2000\u2000\n"
 							"1=1\n"
-							"2=2\n"sv);
+							"2=2\n"sv,
+							R"(2:1: Error while parsing root table: expected space or tab, saw '\u2000')"sv);
 	}
 
 	SECTION("tomlplusplus/issues/152") // https://github.com/marzer/tomlplusplus/issues/152
@@ -376,11 +466,13 @@ b = []
 
 	SECTION("toml/issues/908") // https://github.com/toml-lang/toml/issues/908
 	{
-		parsing_should_fail(FILE_LINE_ARGS, R"(
+		parsing_should_fail(FILE_LINE_ARGS,
+							R"(
 			a = [{ b = 1 }]
 			[a.c]
 			foo = 1
-		)"sv);
+		)"sv,
+							"3:5: Error while parsing table header: cannot redefine existing array as table"sv);
 
 		parsing_should_succeed(FILE_LINE_ARGS, R"(
 			[[a]]
@@ -393,10 +485,12 @@ b = []
 
 	SECTION("tomlplusplus/issues/169") // https://github.com/marzer/tomlplusplus/issues/169
 	{
-		parsing_should_fail(FILE_LINE_ARGS, R"(
+		parsing_should_fail(FILE_LINE_ARGS,
+							R"(
 			[a]
 			b = [c"]
-		)"sv);
+		)"sv,
+							"3:9: Error while parsing value: could not determine value type"sv);
 	}
 
 	SECTION("tomlplusplus/issues/179") // https://github.com/marzer/tomlplusplus/issues/179
@@ -441,7 +535,11 @@ b = []
 		parsing_should_succeed(FILE_LINE_ARGS, "  a      = \"x\\ty\""sv);
 		parsing_should_succeed(FILE_LINE_ARGS, "\"a\"    = \"x\\ty\""sv);
 		parsing_should_succeed(FILE_LINE_ARGS, "\"a\tb\" = \"x\\ty\""sv);
-		parsing_should_fail(FILE_LINE_ARGS, "\"a\nb\" = \"x\\ty\""sv); // literal newline in single-line key
+		// literal newline in single-line key
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			"\"a\nb\" = \"x\\ty\""sv,
+			"1:3: Error while parsing string: unescaped control characters other than TAB (U+0009) are explicitly prohibited"sv);
 
 		static constexpr auto input = R"(
 								"a"    = "x\ty"
@@ -501,6 +599,7 @@ b = []
 				 "alpha = 1\nbeta = 2\n\n # last line # "sv,
 				 "alpha = 1\nbeta = 2\n\n # last line # \n"sv,
 				 "alpha = 1\r\nbeta = 2\r\n\r\n # last line # \r\n"sv,
+				 "alpha = 1\r\nbeta = 2\r\n\r\n # last line # \r"sv,
 			 })
 		{
 			CHECK(!toml::get_line(input, 0));

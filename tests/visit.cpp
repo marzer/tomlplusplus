@@ -59,8 +59,9 @@ TEST_CASE("node::visit")
 		});
 
 	// check noexcept
-	static constexpr auto throwing_visitor	   = [](auto&&) noexcept(false) {};
-	static constexpr auto non_throwing_visitor = [](auto&&) noexcept(true) {};
+	unsigned calls{};
+	const auto throwing_visitor		= [&](auto&&) noexcept(false) { calls++; };
+	const auto non_throwing_visitor = [&](auto&&) noexcept(true) { calls++; };
 	static_assert(!noexcept(static_cast<node&>(val).visit(throwing_visitor)));
 	static_assert(!noexcept(static_cast<node&&>(val).visit(throwing_visitor)));
 	static_assert(!noexcept(static_cast<const node&>(val).visit(throwing_visitor)));
@@ -69,6 +70,15 @@ TEST_CASE("node::visit")
 	static_assert(noexcept(static_cast<node&&>(val).visit(non_throwing_visitor)));
 	static_assert(noexcept(static_cast<const node&>(val).visit(non_throwing_visitor)));
 	static_assert(noexcept(static_cast<const node&&>(val).visit(non_throwing_visitor)));
+	static_cast<node&>(val).visit(throwing_visitor);
+	static_cast<node&&>(val).visit(throwing_visitor);
+	static_cast<const node&>(val).visit(throwing_visitor);
+	static_cast<const node&&>(val).visit(throwing_visitor);
+	static_cast<node&>(val).visit(non_throwing_visitor);
+	static_cast<node&&>(val).visit(non_throwing_visitor);
+	static_cast<const node&>(val).visit(non_throwing_visitor);
+	static_cast<const node&&>(val).visit(non_throwing_visitor);
+	CHECK(calls == 8u);
 
 	// check return
 	static constexpr auto returns_boolean = [](auto& v) noexcept { return toml::is_integer<decltype(v)>; };
@@ -110,12 +120,18 @@ TEST_CASE("node_view::visit")
 		});
 
 	// check noexcept
-	static constexpr auto throwing_visitor	   = [](auto&&) noexcept(false) {};
-	static constexpr auto non_throwing_visitor = [](auto&&) noexcept(true) {};
+	unsigned calls{};
+	const auto throwing_visitor		= [&](auto&&) noexcept(false) { calls++; };
+	const auto non_throwing_visitor = [&](auto&&) noexcept(true) { calls++; };
 	static_assert(!noexcept(view.visit(throwing_visitor)));
 	static_assert(!noexcept(cview.visit(throwing_visitor)));
 	static_assert(noexcept(view.visit(non_throwing_visitor)));
 	static_assert(noexcept(cview.visit(non_throwing_visitor)));
+	view.visit(throwing_visitor);
+	cview.visit(throwing_visitor);
+	view.visit(non_throwing_visitor);
+	cview.visit(non_throwing_visitor);
+	CHECK(calls == 4u);
 
 	// check return
 	static constexpr auto returns_boolean = [](auto&& v) noexcept { return toml::is_integer<decltype(v)>; };

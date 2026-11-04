@@ -165,7 +165,7 @@ TOML_NAMESPACE_START
 		///
 		/// \out
 		/// array was not homogeneous!
-		///	first non-match was a floating-point at line 1, column 18
+		///	first non-match was a floating-point at line 1, column 18 to line 1, column 21
 		/// \eout
 		///
 		/// \param	ntype	A TOML node type. <br>
@@ -191,10 +191,11 @@ TOML_NAMESPACE_START
 		///
 		/// \detail \cpp
 		/// auto arr = toml::array{ 1, 2, 3 };
-		/// std::cout << "homogenous: "sv << arr.is_homogeneous(toml::node_type::none) << "\n";
-		/// std::cout << "all floats: "sv << arr.is_homogeneous(toml::node_type::floating_point) << "\n";
-		/// std::cout << "all arrays: "sv << arr.is_homogeneous(toml::node_type::array) << "\n";
-		/// std::cout << "all ints:   "sv << arr.is_homogeneous(toml::node_type::integer) << "\n";
+		/// std::cout << std::boolalpha;
+		/// std::cout << "homogeneous: "sv << arr.is_homogeneous(toml::node_type::none) << "\n";
+		/// std::cout << "all floats:  "sv << arr.is_homogeneous(toml::node_type::floating_point) << "\n";
+		/// std::cout << "all arrays:  "sv << arr.is_homogeneous(toml::node_type::array) << "\n";
+		/// std::cout << "all ints:    "sv << arr.is_homogeneous(toml::node_type::integer) << "\n";
 		/// \ecpp
 		///
 		/// \out
@@ -220,17 +221,18 @@ TOML_NAMESPACE_START
 		///
 		/// \detail \cpp
 		/// auto arr = toml::array{ 1, 2, 3 };
-		/// std::cout << "homogenous:   "sv << arr.is_homogeneous() << "\n";
+		/// std::cout << std::boolalpha;
+		/// std::cout << "homogeneous:  "sv << arr.is_homogeneous() << "\n";
 		/// std::cout << "all doubles:  "sv << arr.is_homogeneous<double>() << "\n";
 		/// std::cout << "all arrays:   "sv << arr.is_homogeneous<toml::array>() << "\n";
 		/// std::cout << "all integers: "sv << arr.is_homogeneous<int64_t>() << "\n";
 		/// \ecpp
 		///
 		/// \out
-		/// homogeneous: true
-		/// all floats:  false
-		/// all arrays:  false
-		/// all ints:    true
+		/// homogeneous:  true
+		/// all doubles:  false
+		/// all arrays:   false
+		/// all integers: true
 		/// \eout
 		///
 		/// \tparam	ElemType	A TOML node or value type. <br>
@@ -1033,16 +1035,16 @@ TOML_NAMESPACE_START
 		/// toml::path path1("foo.bar[2]");
 		/// toml::path path2("foo.bar[4].kek");
 		/// std::cout << config.at_path(path1) << "\n";
-		/// std::cout << config.at_path(path1.parent_path()) << "\n";
+		/// std::cout << config.at_path(path1.parent()) << "\n";
 		/// std::cout << config.at_path(path2) << "\n";
-		/// std::cout << config.at_path(path2.parent_path()) << "\n";
+		/// std::cout << config.at_path(path2.parent()) << "\n";
 		/// \ecpp
 		///
 		/// \out
 		/// 2
 		/// [ 0, 1, 2, [ 3 ], { kek = 4 } ]
 		/// 4
-		/// { kek  = 4 }
+		/// { kek = 4 }
 		/// \eout
 		///
 		///

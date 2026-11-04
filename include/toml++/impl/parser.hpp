@@ -63,6 +63,23 @@ TOML_NAMESPACE_START
 	TOML_EXPORTED_FREE_FUNCTION
 	parse_result TOML_CALLCONV parse(std::string_view doc, std::string && source_path);
 
+	/// \brief	Parses a TOML document from a string view.
+	///
+	/// \param 	doc				The TOML document to parse. Must be valid UTF-8.
+	/// \param 	source_path		The path used to initialize each node's `source().path`. A null pointer is the same as
+	/// 						an empty path.
+	///
+	/// \returns	\conditional_return{With exceptions}
+	///				A toml::table.
+	/// 			\conditional_return{Without exceptions}
+	///				A toml::parse_result.
+	TOML_NODISCARD
+	TOML_ALWAYS_INLINE
+	parse_result parse(std::string_view doc, const char* source_path)
+	{
+		return parse(doc, source_path ? std::string_view{ source_path } : std::string_view{});
+	}
+
 	/// \brief	Parses a TOML document from a file.
 	///
 	/// \detail \cpp
@@ -131,6 +148,23 @@ TOML_NAMESPACE_START
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
 	parse_result TOML_CALLCONV parse(std::u8string_view doc, std::string && source_path);
+
+	/// \brief	Parses a TOML document from a char8_t string view.
+	///
+	/// \param 	doc				The TOML document to parse. Must be valid UTF-8.
+	/// \param 	source_path		The path used to initialize each node's `source().path`. A null pointer is the same as
+	/// 						an empty path.
+	///
+	/// \returns	\conditional_return{With exceptions}
+	///				A toml::table.
+	/// 			\conditional_return{Without exceptions}
+	///				A toml::parse_result.
+	TOML_NODISCARD
+	TOML_ALWAYS_INLINE
+	parse_result parse(std::u8string_view doc, const char* source_path)
+	{
+		return parse(doc, source_path ? std::string_view{ source_path } : std::string_view{});
+	}
 
 	/// \brief	Parses a TOML document from a file.
 	///
@@ -316,6 +350,23 @@ TOML_NAMESPACE_START
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
 	parse_result TOML_CALLCONV parse(std::istream & doc, std::string && source_path);
+
+	/// \brief	Parses a TOML document from a stream.
+	///
+	/// \param 	doc				The TOML document to parse. Must be valid UTF-8.
+	/// \param 	source_path		The path used to initialize each node's `source().path`. A null pointer is the same as
+	/// 						an empty path.
+	///
+	/// \returns	\conditional_return{With exceptions}
+	///				A toml::table.
+	/// 			\conditional_return{Without exceptions}
+	///				A toml::parse_result.
+	TOML_NODISCARD
+	TOML_ALWAYS_INLINE
+	parse_result parse(std::istream & doc, const char* source_path)
+	{
+		return parse(doc, source_path ? std::string_view{ source_path } : std::string_view{});
+	}
 
 	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 

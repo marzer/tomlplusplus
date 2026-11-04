@@ -295,6 +295,27 @@ TOML_NAMESPACE_START
 #endif
 		}
 
+		/// \brief	Constructs a toml value with the given flags.
+		///
+		/// \tparam	T		The initial value's type.
+		/// \param 	val		The initial value, forwarded to the internal value's constructor.
+		/// \param 	flags	The value's flags. toml::preserve_source_value_flags leaves them empty.
+		TOML_HIDDEN_CONSTRAINT((impl::value_variadic_ctor_allowed<value<ValueType>, impl::remove_cvref<T>>::value),
+							   typename T)
+		TOML_NODISCARD_CTOR
+		explicit value(T&& val, value_flags flags)
+#if !TOML_DISABLE_NOEXCEPT_NOEXCEPT
+			noexcept(noexcept(
+				value_type(impl::native_value_maker<value_type, std::decay_t<T>>::make(static_cast<T&&>(val)))))
+#endif
+			: val_(impl::native_value_maker<value_type, std::decay_t<T>>::make(static_cast<T&&>(val))),
+			  flags_{ flags == preserve_source_value_flags ? value_flags{} : flags }
+		{
+#if TOML_LIFETIME_HOOKS
+			TOML_VALUE_CREATED;
+#endif
+		}
+
 		/// \brief	Copy constructor.
 		TOML_NODISCARD_CTOR
 		value(const value& other) noexcept //
@@ -737,7 +758,7 @@ TOML_NAMESPACE_START
 
 		/// \brief	Returns a reference to the underlying value (const rvalue overload).
 		TOML_PURE_INLINE_GETTER
-		explicit operator const value_type&&() && noexcept
+		explicit operator const value_type&&() const&& noexcept
 		{
 			return static_cast<const value_type&&>(val_);
 		}
@@ -1130,9 +1151,9 @@ TOML_NAMESPACE_START
 					else if constexpr (is_natively_one_of<T, double>)
 					{
 						const int64_t val = *ref_cast<int64_t>();
-						if constexpr (std::numeric_limits<T>::digits < 64)
+						if constexpr (value_traits<T>::digits < 64)
 						{
-							constexpr auto largest_whole_float = (int64_t{ 1 } << std::numeric_limits<T>::digits);
+							constexpr auto largest_whole_float = (int64_t{ 1 } << value_traits<T>::digits);
 							if (val < -largest_whole_float || val > largest_whole_float)
 								return {};
 						}
@@ -1160,7 +1181,7 @@ TOML_NAMESPACE_START
 						{
 							const double val = *ref_cast<double>();
 							if (impl::fpclassify(val) == fp_class::ok
-								&& (val < (std::numeric_limits<T>::lowest)() || val > (std::numeric_limits<T>::max)()))
+								&& (val < float_limits<T>::lowest() || val > float_limits<T>::highest()))
 								return {};
 							return { static_cast<T>(val) };
 						}
@@ -1170,8 +1191,8 @@ TOML_NAMESPACE_START
 					else if constexpr (is_natively_one_of<T, int64_t>)
 					{
 						const double val = *ref_cast<double>();
-						if (impl::fpclassify(val) == fp_class::ok
-							&& static_cast<double>(static_cast<int64_t>(val)) == val)
+						if (impl::fpclassify(val) == fp_class::ok && val >= -9223372036854775808.0
+							&& val < 9223372036854775808.0 && static_cast<double>(static_cast<int64_t>(val)) == val)
 							return node_integer_cast<T>(static_cast<int64_t>(val));
 						return {};
 					}

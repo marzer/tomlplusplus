@@ -68,21 +68,24 @@ TOML_ANON_NAMESPACE_START
 
 			case node_type::integer:
 			{
-				auto val = (*static_cast<const value<int64_t>*>(&node)).get();
+				const auto val = (*static_cast<const value<int64_t>*>(&node)).get();
 				if (!val)
 					return 1u;
-				size_t weight = {};
+				size_t weight  = {};
+				auto magnitude = static_cast<uint64_t>(val);
 				if (val < 0)
 				{
 					weight += 1u;
-					val *= -1;
+					magnitude = 0u - magnitude;
 				}
-				return weight + static_cast<size_t>(log10(static_cast<double>(val))) + 1u;
+				return weight + static_cast<size_t>(log10(static_cast<double>(magnitude))) + 1u;
 			}
 
 			case node_type::floating_point:
 			{
 				auto val = (*static_cast<const value<double>*>(&node)).get();
+				if (const auto cls = impl::fpclassify(val); cls != impl::fp_class::ok)
+					return cls == impl::fp_class::neg_inf ? 4u : 3u;
 				if (val == 0.0)
 					return 3u;		// "0.0"
 				size_t weight = 2u; // ".0"

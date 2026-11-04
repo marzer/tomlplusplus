@@ -12,6 +12,9 @@
 TOML_NAMESPACE_START
 {
 	/// \brief	A local date.
+	///
+	/// \remarks The fields are not validated. Formatters print them as they are, so a field outside
+	/// 		 its range prints as invalid TOML.
 	struct TOML_TRIVIAL_ABI date
 	{
 		/// \brief	The year component.
@@ -110,6 +113,9 @@ TOML_NAMESPACE_START
 	};
 
 	/// \brief	A local time-of-day.
+	///
+	/// \remarks The fields are not validated. Formatters print them as they are, so a field outside
+	/// 		 its range prints as invalid TOML.
 	struct TOML_TRIVIAL_ABI time
 	{
 		/// \brief	The hour component, from 0 - 23.
@@ -118,7 +124,7 @@ TOML_NAMESPACE_START
 		/// \brief	The minute component, from 0 - 59.
 		uint8_t minute;
 
-		/// \brief	The second component, from 0 - 59.
+		/// \brief	The second component, from 0 - 59, or 60 for a leap second.
 		uint8_t second;
 
 		/// \brief	The fractional nanoseconds component, from 0 - 999999999.
@@ -218,9 +224,12 @@ TOML_NAMESPACE_START
 	};
 
 	/// \brief	A timezone offset.
+	///
+	/// \remarks The offset is not validated. Formatters print it as it is, so an offset outside
+	/// 		 its range prints as invalid TOML.
 	struct TOML_TRIVIAL_ABI time_offset
 	{
-		/// \brief	Offset from UTC+0, in minutes.
+		/// \brief	Offset from UTC+0, in minutes, from -1439 to 1439.
 		int16_t minutes;
 
 		/// \brief	Default constructor. Does not initialize the members.

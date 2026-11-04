@@ -142,10 +142,11 @@ TEST_CASE("parsing - arrays")
 			CHECK(tbl["integers"][1] == 2);
 			CHECK(tbl["integers"][2] == 3);
 		});
+}
 
-// toml/issues/665 (heterogeneous arrays)
-#if TOML_LANG_AT_LEAST(1, 0, 0)
-
+TEST_CASE("parsing - arrays (mixed types)")
+{
+	// toml/issues/665 (heterogeneous arrays)
 	parsing_should_succeed(FILE_LINE_ARGS,
 						   R"(
 								# Mixed-type arrays are allowed
@@ -183,17 +184,41 @@ TEST_CASE("parsing - arrays")
 							   CHECK(tbl["contributors"][1]["email"] == "bazqux@example.com"sv);
 							   CHECK(tbl["contributors"][1]["url"] == "https://example.com/bazqux"sv);
 						   });
+}
 
-#else
+TEST_CASE("parsing - arrays (value terminators where a value must start)")
+{
+	parsing_should_fail(FILE_LINE_ARGS,
+						"arr = [}]"sv,
+						"1:8: Error while parsing array: expected value or closing ']', saw '}'"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"arr = [1, }]"sv,
+						"1:11: Error while parsing array: expected value or closing ']', saw '}'"sv);
+	// U+2028 LINE SEPARATOR
+	parsing_should_fail(FILE_LINE_ARGS,
+						"arr = [\xE2\x80\xA8]"sv,
+						R"(1:8: Error while parsing array: expected value or closing ']', saw '\u2028')"sv);
+	// U+2029 PARAGRAPH SEPARATOR
+	parsing_should_fail(FILE_LINE_ARGS,
+						"arr = [1, \xE2\x80\xA9 2]"sv,
+						R"(1:11: Error while parsing array: expected value or closing ']', saw '\u2029')"sv);
+	// U+0085 NEXT LINE
+	parsing_should_fail(FILE_LINE_ARGS,
+						"arr = [1, \xC2\x85]"sv,
+						R"(1:11: Error while parsing array: expected value or closing ']', saw '\u0085')"sv);
+}
 
-	parsing_should_fail(FILE_LINE_ARGS, "numbers = [ 0.1, 0.2, 0.5, 1, 2, 5 ]"sv);
-
-#endif
-
-	// a value terminator where a value must start
-	parsing_should_fail(FILE_LINE_ARGS, "arr = [}]"sv);
-	parsing_should_fail(FILE_LINE_ARGS, "arr = [1, }]"sv);
-	parsing_should_fail(FILE_LINE_ARGS, "arr = [\xE2\x80\xA8]"sv);		// U+2028 LINE SEPARATOR
-	parsing_should_fail(FILE_LINE_ARGS, "arr = [1, \xE2\x80\xA9 2]"sv); // U+2029 PARAGRAPH SEPARATOR
-	parsing_should_fail(FILE_LINE_ARGS, "arr = [1, \xC2\x85]"sv);		// U+0085 NEXT LINE
+TEST_CASE("parsing - arrays (malformed)")
+{
+	parsing_should_fail(FILE_LINE_ARGS,
+						"arr = [,]"sv,
+						"1:8: Error while parsing array: expected value or closing ']', saw comma"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"arr = [1,,2]"sv,
+						"1:10: Error while parsing array: expected value or closing ']', saw comma"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"arr = [1 2]"sv,
+						"1:10: Error while parsing array: expected comma or closing ']', saw '2'"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "arr = [1"sv, "1:9: Error while parsing array: encountered end-of-file"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "arr = [1,"sv, "1:10: Error while parsing array: encountered end-of-file"sv);
 }

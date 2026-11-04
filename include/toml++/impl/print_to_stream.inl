@@ -120,24 +120,14 @@ TOML_ANON_NAMESPACE_START
 
 		if (base == 2)
 		{
-			const auto len = sizeof(T) * CHAR_BIT;
+			const auto v = static_cast<unsigned_type>(val);
+			size_t len	 = {};
+			for (auto bits = v; bits; bits >>= 1)
+				len++;
 			for (size_t i = len; i < min_digits; i++)
 				stream.put('0');
-
-			bool found_one	   = false;
-			const auto v	   = static_cast<unsigned_type>(val);
-			unsigned_type mask = unsigned_type{ 1 } << (len - 1u);
-			for (size_t i = 0; i < len; i++)
-			{
-				if ((v & mask))
-				{
-					stream.put('1');
-					found_one = true;
-				}
-				else if (found_one)
-					stream.put('0');
-				mask >>= 1;
-			}
+			for (size_t i = len; i-- > 0u;)
+				stream.put((v >> i) & 1u ? '1' : '0');
 		}
 		else
 		{
@@ -156,10 +146,7 @@ TOML_ANON_NAMESPACE_START
 
 	template <typename T>
 	TOML_INTERNAL_LINKAGE
-	void print_floating_point_to_stream(std::ostream & stream,
-										T val,
-										value_flags format,
-										[[maybe_unused]] bool relaxed_precision)
+	void print_floating_point_to_stream(std::ostream & stream, T val, [[maybe_unused]] bool relaxed_precision)
 	{
 		switch (impl::fpclassify(val))
 		{
@@ -181,14 +168,12 @@ TOML_ANON_NAMESPACE_START
 
 #if TOML_FLOAT_CHARCONV
 
-				const auto hex = !!(format & value_flags::format_as_hexadecimal);
 				char buf[charconv_buffer_length<T>];
-				auto res = hex ? std::to_chars(buf, buf + sizeof(buf), val, std::chars_format::hex)
-							   : std::to_chars(buf, buf + sizeof(buf), val);
+				auto res = std::to_chars(buf, buf + sizeof(buf), val);
 				auto str = std::string_view{ buf, static_cast<size_t>(res.ptr - buf) };
 
 				char buf2[charconv_buffer_length<T>];
-				if (!hex && relaxed_precision)
+				if (relaxed_precision)
 				{
 					res				= std::to_chars(buf2, buf2 + sizeof(buf2), val, std::chars_format::general, 6);
 					const auto str2 = std::string_view{ buf2, static_cast<size_t>(res.ptr - buf2) };
@@ -197,7 +182,7 @@ TOML_ANON_NAMESPACE_START
 				}
 
 				impl::print_to_stream(stream, str);
-				if (!hex && needs_decimal_point(str))
+				if (needs_decimal_point(str))
 					toml::impl::print_to_stream(stream, ".0"sv);
 
 #else
@@ -206,12 +191,10 @@ TOML_ANON_NAMESPACE_START
 				ss.imbue(std::locale::classic());
 				if (!relaxed_precision)
 					ss.precision(std::numeric_limits<T>::max_digits10);
-				if (!!(format & value_flags::format_as_hexadecimal))
-					ss << std::hexfloat;
 				ss << val;
 				const auto str = std::move(ss).str();
 				impl::print_to_stream(stream, str);
-				if (!(format & value_flags::format_as_hexadecimal) && needs_decimal_point(str))
+				if (needs_decimal_point(str))
 					impl::print_to_stream(stream, ".0"sv);
 
 #endif
@@ -318,15 +301,15 @@ TOML_IMPL_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void TOML_CALLCONV print_to_stream(std::ostream & stream, float val, value_flags format, bool relaxed_precision)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, float val, value_flags, bool relaxed_precision)
 	{
-		TOML_ANON_NAMESPACE::print_floating_point_to_stream(stream, val, format, relaxed_precision);
+		TOML_ANON_NAMESPACE::print_floating_point_to_stream(stream, val, relaxed_precision);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void TOML_CALLCONV print_to_stream(std::ostream & stream, double val, value_flags format, bool relaxed_precision)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, double val, value_flags, bool relaxed_precision)
 	{
-		TOML_ANON_NAMESPACE::print_floating_point_to_stream(stream, val, format, relaxed_precision);
+		TOML_ANON_NAMESPACE::print_floating_point_to_stream(stream, val, relaxed_precision);
 	}
 
 	TOML_EXTERNAL_LINKAGE

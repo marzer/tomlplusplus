@@ -1,4 +1,5 @@
 #include <cstdint>
+#include <sstream>
 #include <fuzzer/FuzzedDataProvider.h>
 
 #include <toml++/toml.hpp>
@@ -19,17 +20,16 @@ extern "C" int LLVMFuzzerTestOneInput(const std::uint8_t* data, const std::size_
 	{
 		const toml::table tbl = toml::parse(fdp.ConsumeRandomLengthString());
 
+		std::ostringstream ss;
 		switch (fdp.ConsumeEnum<SerializationTest>())
 		{
-			case SerializationTest::JSON: static_cast<void>(toml::json_formatter{ tbl }); break;
-			case SerializationTest::YAML: static_cast<void>(toml::yaml_formatter{ tbl }); break;
-			case SerializationTest::TOML: static_cast<void>(toml::toml_formatter{ tbl });
+			case SerializationTest::JSON: ss << toml::json_formatter{ tbl }; break;
+			case SerializationTest::YAML: ss << toml::yaml_formatter{ tbl }; break;
+			case SerializationTest::TOML: ss << toml::toml_formatter{ tbl }; break;
 			default: break;
 		}
 	}
 	catch (const toml::parse_error&)
-	{
-		return -1;
-	}
+	{}
 	return 0;
 }

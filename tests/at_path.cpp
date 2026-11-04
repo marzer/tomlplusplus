@@ -62,6 +62,7 @@ TEST_CASE("at_path")
 		CHECK(tbl["b"][0] == at_path(tbl, "b[0]"));
 		CHECK(tbl["b"][0] == at_path(tbl, "b[0]     "));
 		CHECK(tbl["b"][0] == at_path(tbl, "b[ 0\t]")); // whitespace is allowed inside indexer
+		CHECK(tbl["b"][0] == at_path(tbl, "b[\t0 ]"));
 
 		CHECK(tbl["b"][1]);
 		CHECK(tbl["b"][1] != tbl["b"][0]);
@@ -116,4 +117,59 @@ TEST_CASE("at_path")
 		CHECK(tbl["b"][2]["c"] == arr.at_path("[2].c"));
 		CHECK(tbl["b"][2]["c"] == arr.at_path("[2]   \t.c")); // whitespace is allowed after indexers
 	}
+
+	SECTION("paths that do not resolve")
+	{
+		CHECK(!at_path(tbl, "z"));
+		CHECK(!at_path(tbl, "d.z"));
+		CHECK(!at_path(tbl, "a.b"));
+		CHECK(!at_path(tbl, "b.c"));
+		CHECK(!at_path(tbl, "a[0]"));
+		CHECK(!at_path(tbl, "[0]"));
+		CHECK(!at_path(tbl, "b[3]"));
+		CHECK(!at_path(tbl, "b[2]..c"));
+		CHECK(!at_path(tbl, "b[2]."));
+	}
+
+	SECTION("malformed paths")
+	{
+		CHECK(!at_path(tbl, "b["));
+		CHECK(!at_path(tbl, "b[]"));
+		CHECK(!at_path(tbl, "b[ ]"));
+		CHECK(!at_path(tbl, "b[x]"));
+		CHECK(!at_path(tbl, "b[1x]"));
+		CHECK(!at_path(tbl, "b[-1]"));
+		CHECK(!at_path(tbl, "b[0]x"));
+		CHECK(!at_path(tbl, "b[0]]"));
+		CHECK(!at_path(tbl, "b]"));
+		CHECK(!at_path(tbl, "]"));
+		CHECK(!at_path(tbl, "b[99999999999999999999999999]"));
+	}
+
+	SECTION("mutable views")
+	{
+		auto mtbl = tbl;
+		auto view = at_path(mtbl, "b[2].c");
+		static_assert(std::is_same_v<decltype(view), node_view<node>>);
+		static_assert(std::is_same_v<decltype(at_path(tbl, "")), node_view<const node>>);
+		REQUIRE(view);
+		view.ref<int64_t>() = 42;
+		CHECK(mtbl["b"][2]["c"] == 42);
+		CHECK(tbl["b"][2]["c"] == 4);
+	}
+}
+
+TEST_CASE("at_path - roots that cannot be traversed")
+{
+	const auto val = value{ 42 };
+	CHECK(!at_path(val, "a"));
+	CHECK(!at_path(val, "[0]"));
+	CHECK(!at_path(val, ""));
+
+	const table empty_table;
+	CHECK(!at_path(empty_table, "a"));
+	CHECK(!at_path(empty_table, ""));
+
+	const array empty_array;
+	CHECK(!at_path(empty_array, "[0]"));
 }

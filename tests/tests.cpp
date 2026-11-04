@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "tests.hpp"
+#include <optional>
 
 bool parsing_should_succeed(std::string_view test_file,
 							uint32_t test_line,
@@ -74,6 +75,7 @@ bool parsing_should_succeed(std::string_view test_file,
 			FORCE_FAIL("Parse error on line "sv << result.error().source().begin.line << ", column "sv
 												<< result.error().source().begin.column << ":\n"sv
 												<< result.error().description());
+			return false;
 		}
 	}
 
@@ -94,6 +96,7 @@ bool parsing_should_succeed(std::string_view test_file,
 			FORCE_FAIL("Parse error on line "sv << result.error().source().begin.line << ", column "sv
 												<< result.error().source().begin.column << ":\n"sv
 												<< result.error().description());
+			return false;
 		}
 	}
 
@@ -102,107 +105,85 @@ bool parsing_should_succeed(std::string_view test_file,
 	return true;
 }
 
+namespace
+{
+	bool check_parse_error(const parse_error& err, std::optional<std::string_view> expected)
+	{
+		if (!expected)
+		{
+			SUCCEED();
+			return true;
+		}
+
+		const auto actual = std::to_string(err.source().begin.line) + ":" + std::to_string(err.source().begin.column)
+						  + ": " + std::string{ err.description() };
+		CHECK(actual == *expected);
+		return actual == *expected;
+	}
+
+	bool parsing_should_fail_impl(std::string_view test_file,
+								  uint32_t test_line,
+								  std::string_view toml_str,
+								  std::optional<std::string_view> expected)
+	{
+		INFO("["sv << test_file << ", line "sv << test_line << "] "sv
+				   << "parsing_should_fail(\""sv << toml_str << "\")"sv);
+
+		const auto check = [&](std::string_view mode, auto&& parse) -> bool
+		{
+			INFO(mode);
+
+#if TOML_EXCEPTIONS
+			try
+			{
+				[[maybe_unused]] auto res = parse();
+			}
+			catch (const parse_error& err)
+			{
+				return check_parse_error(err, expected);
+			}
+			catch (const std::exception& exc)
+			{
+				FORCE_FAIL("Expected parsing failure, saw exception: "sv << exc.what());
+				return false;
+			}
+			catch (...)
+			{
+				FORCE_FAIL("Expected parsing failure, saw unspecified exception"sv);
+				return false;
+			}
+#else
+			if (parse_result res = parse(); !res)
+				return check_parse_error(res.error(), expected);
+#endif
+
+			FORCE_FAIL("Expected parsing failure"sv);
+			return false;
+		};
+
+		const bool from_string = check("Parsing string directly"sv, [=]() { return toml::parse(toml_str); });
+		const bool from_stream = check("Parsing from a string stream"sv,
+									   [=]()
+									   {
+										   std::stringstream ss;
+										   ss.write(toml_str.data(), static_cast<std::streamsize>(toml_str.length()));
+										   return toml::parse(ss);
+									   });
+		return from_string && from_stream;
+	}
+}
+
 bool parsing_should_fail(std::string_view test_file,
 						 uint32_t test_line,
 						 std::string_view toml_str,
-						 source_index expected_failure_line,
-						 source_index expected_failure_column)
+						 std::string_view expected_error)
 {
-	INFO("["sv << test_file << ", line "sv << test_line << "] "sv
-			   << "parsing_should_fail(\""sv << toml_str << "\")"sv);
+	return parsing_should_fail_impl(test_file, test_line, toml_str, expected_error);
+}
 
-#if TOML_EXCEPTIONS
-
-	static constexpr auto run_tests = [](source_index ex_line, source_index ex_col, auto&& fn)
-	{
-		try
-		{
-			fn();
-		}
-		catch (const parse_error& err)
-		{
-			if (ex_line != static_cast<source_index>(-1) && err.source().begin.line != ex_line)
-			{
-				FORCE_FAIL("Expected parse_error at line "sv << ex_line << ", actually occured at line "sv
-															 << err.source().begin.line);
-				return false;
-			}
-
-			if (ex_col != static_cast<source_index>(-1) && err.source().begin.column != ex_col)
-			{
-				FORCE_FAIL("Expected parse_error at column "sv << ex_col << ", actually occured at column "sv
-															   << err.source().begin.column);
-				return false;
-			}
-
-			SUCCEED("parse_error thrown OK"sv);
-			return true;
-		}
-		catch (const std::exception& exc)
-		{
-			FORCE_FAIL("Expected parsing failure, saw exception: "sv << exc.what());
-			return false;
-		}
-		catch (...)
-		{
-			FORCE_FAIL("Expected parsing failure, saw unspecified exception"sv);
-			return false;
-		}
-
-		FORCE_FAIL("Expected parsing failure"sv);
-		return false;
-	};
-
-	auto result = run_tests(expected_failure_line,
-							expected_failure_column,
-							[=]() { [[maybe_unused]] auto res = toml::parse(toml_str); });
-	result		= result
-			   && run_tests(expected_failure_line,
-							expected_failure_column,
-							[=]()
-							{
-						   std::stringstream ss;
-						   ss.write(toml_str.data(), static_cast<std::streamsize>(toml_str.length()));
-						   [[maybe_unused]] auto res = toml::parse(ss);
-							});
-	return result;
-
-#else
-
-	static constexpr auto run_tests = [](source_index ex_line, source_index ex_col, auto&& fn)
-	{
-		if (parse_result result = fn(); !result)
-		{
-			if (ex_line != static_cast<source_index>(-1) && result.error().source().begin.line != ex_line)
-			{
-				FORCE_FAIL("Expected parse_error at line "sv << ex_line << ", actually occured at line "sv
-															 << result.error().source().begin.line);
-			}
-
-			if (ex_col != static_cast<source_index>(-1) && result.error().source().begin.column != ex_col)
-			{
-				FORCE_FAIL("Expected parse_error at column "sv << ex_col << ", actually occured at column "sv
-															   << result.error().source().begin.column);
-			}
-
-			SUCCEED("parse_error generated OK"sv);
-			return true;
-		}
-
-		FORCE_FAIL("Expected parsing failure"sv);
-	};
-
-	return run_tests(expected_failure_line, expected_failure_column, [=]() { return toml::parse(toml_str); })
-		&& run_tests(expected_failure_line,
-					 expected_failure_column,
-					 [=]()
-					 {
-						 std::stringstream ss;
-						 ss.write(toml_str.data(), static_cast<std::streamsize>(toml_str.length()));
-						 return toml::parse(ss);
-					 });
-
-#endif
+bool parsing_should_fail(std::string_view test_file, uint32_t test_line, std::string_view toml_str)
+{
+	return parsing_should_fail_impl(test_file, test_line, toml_str, std::nullopt);
 }
 
 template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const int&);

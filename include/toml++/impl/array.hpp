@@ -1261,7 +1261,7 @@ TOML_NAMESPACE_START
 		/// \brief	Removes the elements in the range [first, last) from the array.
 		///
 		/// \detail \cpp
-		/// auto arr = toml::array{ 1, "bad", "karma" 2 };
+		/// auto arr = toml::array{ 1, "bad", "karma", 2 };
 		/// std::cout << arr << "\n";
 		///
 		/// arr.erase(arr.cbegin() + 1, arr.cbegin() + 3);
@@ -1269,8 +1269,8 @@ TOML_NAMESPACE_START
 		/// \ecpp
 		///
 		/// \out
-		/// [ 1, 'bad', 'karma', 3 ]
-		/// [ 1, 3 ]
+		/// [ 1, 'bad', 'karma', 2 ]
+		/// [ 1, 2 ]
 		/// \eout
 		///
 		/// \param 	first	Iterator to the first element being erased.
@@ -1445,15 +1445,14 @@ TOML_NAMESPACE_START
 				case 1: return insert(pos, static_cast<ElemType&&>(val), flags);
 				default:
 				{
-					const auto start_idx = static_cast<size_t>(const_vector_iterator{ pos } - elems_.cbegin());
-					preinsertion_resize(start_idx, count);
-					size_t i = start_idx;
-					for (size_t e = start_idx + count - 1u; i < e; i++)
-						elems_[i] = impl::make_node(val, flags);
-
-					//# potentially move the initial value into the last element
-					elems_[i] = impl::make_node(static_cast<ElemType&&>(val), flags);
-					return iterator{ elems_.begin() + static_cast<ptrdiff_t>(start_idx) };
+					vector_type new_elems;
+					new_elems.reserve(count);
+					for (size_t i = 1u; i < count; i++)
+						new_elems.push_back(impl::make_node(val, flags));
+					new_elems.push_back(impl::make_node(static_cast<ElemType&&>(val), flags));
+					return iterator{ elems_.insert(const_vector_iterator{ pos },
+												   std::make_move_iterator(new_elems.begin()),
+												   std::make_move_iterator(new_elems.end())) };
 				}
 			}
 		}
@@ -1472,26 +1471,16 @@ TOML_NAMESPACE_START
 		/// 		 A copy of pos
 		/// 		 \conditional_return{All objects in the range were null toml::node_views}
 		/// 		 A copy of pos
-		template <typename Iter>
+		TOML_CONSTRAINED_TEMPLATE(!std::is_integral_v<Iter>, typename Iter)
 		iterator insert(const_iterator pos, Iter first, Iter last, value_flags flags = preserve_source_value_flags)
 		{
 			const auto distance = std::distance(first, last);
 			if (distance <= 0)
 				return iterator{ elems_.begin() + (const_vector_iterator{ pos } - elems_.cbegin()) };
 
-			auto count		 = distance;
+			vector_type new_elems;
+			new_elems.reserve(static_cast<size_t>(distance));
 			using deref_type = decltype(*first);
-			if constexpr (is_node_view<deref_type>)
-			{
-				for (auto it = first; it != last; it++)
-					if (!(*it))
-						count--;
-				if (!count)
-					return iterator{ elems_.begin() + (const_vector_iterator{ pos } - elems_.cbegin()) };
-			}
-			const auto start_idx = static_cast<size_t>(const_vector_iterator{ pos } - elems_.cbegin());
-			preinsertion_resize(start_idx, static_cast<size_t>(count));
-			size_t i = start_idx;
 			for (auto it = first; it != last; it++)
 			{
 				if constexpr (is_node_view<deref_type>)
@@ -1500,11 +1489,13 @@ TOML_NAMESPACE_START
 						continue;
 				}
 				if constexpr (std::is_rvalue_reference_v<deref_type>)
-					elems_[i++] = impl::make_node(std::move(*it), flags);
+					new_elems.push_back(impl::make_node(std::move(*it), flags));
 				else
-					elems_[i++] = impl::make_node(*it, flags);
+					new_elems.push_back(impl::make_node(*it, flags));
 			}
-			return iterator{ elems_.begin() + static_cast<ptrdiff_t>(start_idx) };
+			return iterator{ elems_.insert(const_vector_iterator{ pos },
+										   std::make_move_iterator(new_elems.begin()),
+										   std::make_move_iterator(new_elems.end())) };
 		}
 
 		/// \brief	Inserts a range of elements into the array at a specific position.
@@ -1713,7 +1704,7 @@ TOML_NAMESPACE_START
 				return true;
 
 			size_t i{};
-			for (auto& list_elem : rhs)
+			for (const auto& list_elem : rhs)
 			{
 				const auto elem = lhs.get_as<impl::native_type_of<element_type>>(i++);
 				if constexpr (impl::is_string_like<element_type>)

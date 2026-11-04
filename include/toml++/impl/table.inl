@@ -40,12 +40,12 @@ TOML_NAMESPACE_START
 		TOML_TABLE_CREATED;
 #endif
 
+		if TOML_UNLIKELY(b == e)
+			return;
+
 		TOML_ASSERT_ASSUME(b);
 		TOML_ASSERT_ASSUME(e);
 		TOML_ASSERT_ASSUME(b <= e);
-
-		if TOML_UNLIKELY(b == e)
-			return;
 
 		for (; b != e; b++)
 		{
@@ -86,11 +86,12 @@ TOML_NAMESPACE_START
 	{
 		if (&rhs != this)
 		{
-			node::operator=(rhs);
-			map_.clear();
+			map_type copy;
 			for (auto&& [k, v] : rhs.map_)
-				map_.emplace_hint(map_.end(), k, impl::make_node(*v));
+				copy.emplace_hint(copy.end(), k, impl::make_node(*v));
+			node::operator=(rhs);
 			inline_ = rhs.inline_;
+			map_.swap(copy);
 		}
 		return *this;
 	}
@@ -101,8 +102,9 @@ TOML_NAMESPACE_START
 		if (&rhs != this)
 		{
 			node::operator=(std::move(rhs));
-			map_	= std::move(rhs.map_);
-			inline_ = rhs.inline_;
+			inline_			= rhs.inline_;
+			map_type stolen = std::move(rhs.map_);
+			map_.swap(stolen);
 		}
 		return *this;
 	}

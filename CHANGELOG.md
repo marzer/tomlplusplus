@@ -25,7 +25,35 @@
 - fixed warnings from inside toml++ in code built with Clang's `-Weverything`, or with GCC's `-Wshadow` or `-Wunused-variable`
 - fixed MSVC warning C4702 (unreachable code) from the parser (#307) (@soniafergusonship)
 - fixed out-of-bounds read in `path::subpath()` when the arguments go past the end of the path (#319) (@aouxwoux)
-- fixed `toml_formatter` emitting multi-line strings that did not round-trip (`'''` inside the value, or a leading newline) (#323) (@arfa-21)
+- fixed `toml_formatter` emitting multi-line strings that did not round-trip (three single quotes inside the value, or a leading newline) (#323) (@arfa-21)
+- fixed incorrect source positions and misleading messages in a number of parse errors
+- fixed times with more than 64 digits of fractional seconds failing to parse
+- fixed leap seconds failing to parse
+- fixed subnormal floats failing to parse with libc++
+- fixed long or out-of-range hexadecimal floats parsing to the wrong value (`TOML_ENABLE_UNRELEASED_FEATURES`)
+- fixed `toml::parse()` returning an empty table for streams that can't seek, such as a piped `std::cin`
+- fixed `toml::parse()` not reporting a parse error for streams that have already failed or fail on their first read
+- fixed `toml::parse()` failing on streams with exceptions enabled for failbit or eofbit
+- fixed `toml::parse_file()` returning an empty table for a directory or a failed read
+- fixed a default-constructed `toml::key` leaving its source region uninitialised
+- fixed use-after-free or wrong results when assigning a `toml::table` or `toml::array` from a descendant or ancestor
+- fixed null-pointer dereference when inserting a `toml::array` into itself
+- fixed assertion failure when constructing a `toml::table` from an empty initialiser list
+- fixed `toml::array::insert(pos, count, value)` not compiling when `count` and `value` have the same integer type
+- fixed comparing a `toml::array` with a `std::vector<bool>` not compiling
+- fixed comparing a `node_view<node>` with a `node_view<const node>` not compiling on GCC 11
+- fixed exception-safety bugs in `toml::path_component`
+- fixed some explicit conversions of `toml::value` rvalues not compiling
+- fixed constructing a `toml::value` from a value and `value_flags` not compiling
+- fixed undefined behaviour in `value()` and `value_or()` when converting out-of-range floats to integers
+- fixed `value()` and `value_or()` rejecting most numbers when converting to `__float128` or `_Float16`
+- fixed formatters asserting on a failed `parse_result` when exceptions are disabled
+- fixed formatters dropping an incomplete UTF-8 sequence at the end of a string
+- fixed undefined behaviour in `toml_formatter` with arrays containing `INT64_MIN`, infinities or NaNs
+- fixed `toml_formatter` emitting leading blank lines when printed more than once
+- fixed keys containing U+1680, U+180E or U+FEFF incorrectly formatting as bare keys (`TOML_ENABLE_UNRELEASED_FEATURES`)
+- fixed `json_formatter` emitting invalid JSON with some format flags
+- fixed `yaml_formatter` emitting incorrect YAML for some strings, keys and format flags
 
 #### Additions
 
@@ -37,6 +65,7 @@
 - added `TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA` config to work around MSVC's legacy lambda processor (#247) (@N-Dekker)
 - added `TOML_DISABLE_NOEXCEPT_NOEXCEPT` config to work around an MSVC bug (on by default for VS 2022 17.13 and older) (#271) (@N-Dekker)
 - added IWYU pragmas to `toml++/toml.hpp` (#277) (@fnuecke)
+- added `const char*` source-path overloads of `toml::parse()`, so string literals work as source paths
 
 #### Changes
 

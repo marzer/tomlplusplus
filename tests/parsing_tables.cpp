@@ -18,13 +18,31 @@ TEST_CASE("parsing - tables")
 							   CHECK(tbl["table"].as_table()->empty());
 							   CHECK(tbl["table"].as_table()->size() == 0u);
 						   });
-	parsing_should_fail(FILE_LINE_ARGS, "[]"sv);
+	parsing_should_fail(
+		FILE_LINE_ARGS,
+		"[]"sv,
+		"1:2: Error while parsing table header: tables with blank bare keys are explicitly prohibited"sv);
 
-	parsing_should_fail(FILE_LINE_ARGS, "[[[1]]]"sv);
-	parsing_should_fail(FILE_LINE_ARGS, "[[[a]]]"sv);
-	parsing_should_fail(FILE_LINE_ARGS, "[[[]]"sv);
-	parsing_should_fail(FILE_LINE_ARGS, "[[="sv);
+	parsing_should_fail(
+		FILE_LINE_ARGS,
+		"[[[1]]]"sv,
+		"1:3: Error while parsing table header: expected bare key starting character or string delimiter, saw '['"sv);
+	parsing_should_fail(
+		FILE_LINE_ARGS,
+		"[[[a]]]"sv,
+		"1:3: Error while parsing table header: expected bare key starting character or string delimiter, saw '['"sv);
+	parsing_should_fail(
+		FILE_LINE_ARGS,
+		"[[[]]"sv,
+		"1:3: Error while parsing table header: expected bare key starting character or string delimiter, saw '['"sv);
+	parsing_should_fail(
+		FILE_LINE_ARGS,
+		"[[="sv,
+		"1:3: Error while parsing table header: expected bare key starting character or string delimiter, saw '='"sv);
+}
 
+TEST_CASE("parsing - tables (key-value pairs)")
+{
 	// "Under that, and until the next header or EOF, are the key/values of that table.
 	//  Key/value pairs within tables are not guaranteed to be in any specific order."
 	parsing_should_succeed(FILE_LINE_ARGS,
@@ -49,7 +67,10 @@ TEST_CASE("parsing - tables")
 							   CHECK(tbl["table-2"]["key1"] == "another string"sv);
 							   CHECK(tbl["table-2"]["key2"] == 456);
 						   });
+}
 
+TEST_CASE("parsing - tables (naming)")
+{
 	// "Naming rules for tables are the same as for keys." (i.e. can be quoted)
 	parsing_should_succeed(FILE_LINE_ARGS,
 						   R"(
@@ -65,7 +86,10 @@ TEST_CASE("parsing - tables")
 							   CHECK(tbl["dog"]["tater.man"].as_table()->size() == 1u);
 							   CHECK(tbl["dog"]["tater.man"]["type"]["name"] == "pug"sv);
 						   });
+}
 
+TEST_CASE("parsing - tables (whitespace)")
+{
 	// "Whitespace around the key is ignored. However, best practice is to not use any extraneous whitespace."
 	parsing_should_succeed(FILE_LINE_ARGS,
 						   R"(
@@ -92,7 +116,10 @@ TEST_CASE("parsing - tables")
 							   CHECK(tbl["j"]["k"].as_table());
 							   CHECK(tbl["j"]["k"]["l"].as_table());
 						   });
+}
 
+TEST_CASE("parsing - tables (implicit super-tables)")
+{
 	// "You don't need to specify all the super-tables if you don't want to. TOML knows how to do it for you."
 	parsing_should_succeed(FILE_LINE_ARGS,
 						   R"(
@@ -110,9 +137,13 @@ TEST_CASE("parsing - tables")
 							   CHECK(tbl["x"]["y"]["z"].as_table());
 							   CHECK(tbl["x"]["y"]["z"]["w"].as_table());
 						   });
+}
 
+TEST_CASE("parsing - tables (redefinition)")
+{
 	// "Like keys, you cannot define a table more than once. Doing so is invalid."
-	parsing_should_fail(FILE_LINE_ARGS, R"(
+	parsing_should_fail(FILE_LINE_ARGS,
+						R"(
 		# DO NOT DO THIS
 
 		[fruit]
@@ -120,8 +151,11 @@ TEST_CASE("parsing - tables")
 
 		[fruit]
 		orange = "orange"
-	)"sv);
-	parsing_should_fail(FILE_LINE_ARGS, R"(
+	)"sv,
+						"7:3: Error while parsing table header: cannot redefine existing table 'fruit'"sv);
+	parsing_should_fail(
+		FILE_LINE_ARGS,
+		R"(
 		# DO NOT DO THIS EITHER
 
 		[fruit]
@@ -129,8 +163,27 @@ TEST_CASE("parsing - tables")
 
 		[fruit.apple]
 		texture = "smooth"
-	)"sv);
+	)"sv,
+		"7:3: Error while parsing table header: cannot redefine existing string 'fruit.apple' as table"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"a = 1\n[a.b]"sv,
+						"2:2: Error while parsing table header: cannot redefine existing integer as table"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"a = 1\n[[a.b]]"sv,
+						"2:3: Error while parsing table header: cannot redefine existing integer as table"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"x.a = [1]\n[x.a.c.d]"sv,
+						"2:4: Error while parsing table header: cannot redefine existing array as table"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"[a.b]\n[a]\n[a.b]"sv,
+						"3:1: Error while parsing table header: cannot redefine existing table 'a.b'"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"[a]\n[a.b]\n[a]"sv,
+						"3:1: Error while parsing table header: cannot redefine existing table 'a'"sv);
+}
 
+TEST_CASE("parsing - tables (out of order)")
+{
 	// "Defining tables out-of-order is discouraged."
 	parsing_should_succeed(FILE_LINE_ARGS,
 						   R"(
@@ -160,7 +213,10 @@ TEST_CASE("parsing - tables")
 							   CHECK(tbl["fruit"]["orange"].as_table());
 							   CHECK(tbl["animal"].as_table());
 						   });
+}
 
+TEST_CASE("parsing - tables (root table)")
+{
 	// "The top-level table, also called the root table, starts at the beginning of the document
 	//  and ends just before the first table header (or EOF)."
 	parsing_should_succeed(FILE_LINE_ARGS,
@@ -187,7 +243,10 @@ TEST_CASE("parsing - tables")
 							   static constexpr auto member_since = toml::date{ 1999, 8, 4 };
 							   CHECK(*tbl["owner"]["member_since"].as_date() == member_since);
 						   });
+}
 
+TEST_CASE("parsing - tables (dotted keys)")
+{
 	// "Dotted keys create and define a table for each key part before the last one,
 	//  provided that such tables were not previously created."
 	parsing_should_succeed(FILE_LINE_ARGS,
@@ -211,39 +270,57 @@ TEST_CASE("parsing - tables")
 							   CHECK(tbl["fruit"]["apple"]["taste"]["sweet"].as_boolean());
 							   CHECK(*tbl["fruit"]["apple"]["taste"]["sweet"].as_boolean() == true);
 						   });
+}
 
+TEST_CASE("parsing - tables (headers can't redefine dotted-key tables)")
+{
 	// "Since tables cannot be defined more than once, redefining such tables using a [table] header is not allowed."
-	parsing_should_fail(FILE_LINE_ARGS, R"(
+	parsing_should_fail(FILE_LINE_ARGS,
+						R"(
 		[fruit]
 		apple.color = "red"
 		apple.taste.sweet = true
 
 		[fruit.apple]  # INVALID
-	)"sv);
-	parsing_should_fail(FILE_LINE_ARGS, R"(
+	)"sv,
+						"6:3: Error while parsing table header: cannot redefine existing table 'fruit.apple'"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						R"(
 		[fruit]
 		apple.color = "red"
 		apple.taste.sweet = true
 
 		[fruit.apple.taste]  # INVALID
-	)"sv);
+	)"sv,
+						"6:3: Error while parsing table header: cannot redefine existing table 'fruit.apple.taste'"sv);
+}
 
+TEST_CASE("parsing - tables (dotted keys can't redefine header tables)")
+{
 	// "Likewise, using dotted keys to redefine tables already defined in [table] form is not allowed."
-	parsing_should_fail(FILE_LINE_ARGS, R"(
+	parsing_should_fail(FILE_LINE_ARGS,
+						R"(
 		[fruit.apple.taste]
 		sweet = true
 
 		[fruit]
 		apple.taste = { sweet = false }  # INVALID
-	)"sv);
-	parsing_should_fail(FILE_LINE_ARGS, R"(
+	)"sv,
+						"6:17: Error while parsing key-value pair: cannot redefine existing table 'apple.taste'"sv);
+	parsing_should_fail(
+		FILE_LINE_ARGS,
+		R"(
 		[fruit.apple.taste]
 		sweet = true
 
 		[fruit]
 		apple.taste.foo = "bar"  # INVALID
-	)"sv);
+	)"sv,
+		"6:9: Error while parsing key-value pair: cannot redefine existing table as dotted key-value pair"sv);
+}
 
+TEST_CASE("parsing - tables (sub-tables of dotted-key tables)")
+{
 	// "The [table] form can, however, be used to define sub-tables within tables defined via dotted keys."
 	parsing_should_succeed(FILE_LINE_ARGS,
 						   R"(
@@ -265,17 +342,6 @@ TEST_CASE("parsing - tables")
 							   CHECK(tbl["fruit"]["apple"]["texture"]["smooth"].as_boolean());
 							   CHECK(*tbl["fruit"]["apple"]["texture"]["smooth"].as_boolean() == true);
 						   });
-	parsing_should_fail(FILE_LINE_ARGS, R"(
-		[fruit]
-		apple.color = "red"
-		apple.taste.sweet = true
-
-		[fruit.apple]
-		shape = "round"
-
-		[fruit.apple.texture]
-		smooth = true
-	)"sv);
 
 	// same as above but the table order is reversed.
 	// see: https://github.com/toml-lang/toml/issues/769
@@ -360,22 +426,36 @@ TEST_CASE("parsing - inline tables")
 							   CHECK(tbl["animal"]["type"].as_table()->size() == 1u);
 							   CHECK(tbl["animal"]["type"]["name"] == "pug"sv);
 						   });
+}
 
+TEST_CASE("parsing - inline tables (self-contained)")
+{
 	// "Inline tables are fully self-contained and define all keys and sub-tables within them.
 	//  Keys and sub-tables cannot be added outside the braces."
-	parsing_should_fail(FILE_LINE_ARGS, R"(
+	parsing_should_fail(
+		FILE_LINE_ARGS,
+		R"(
 		[product]
 		type = { name = "Nail" }
 		type.edible = false  # INVALID
-	)"sv);
+	)"sv,
+		"4:3: Error while parsing key-value pair: cannot redefine existing table as dotted key-value pair"sv);
+}
 
+TEST_CASE("parsing - inline tables (can't extend defined tables)")
+{
 	// "Similarly, inline tables cannot be used to add keys or sub-tables to an already-defined table."
-	parsing_should_fail(FILE_LINE_ARGS, R"(
+	parsing_should_fail(FILE_LINE_ARGS,
+						R"(
 		[product]
 		type.name = "Nail"
 		type = { edible = false }  # INVALID
-	)"sv);
+	)"sv,
+						"4:10: Error while parsing key-value pair: cannot redefine existing table 'type'"sv);
+}
 
+TEST_CASE("parsing - inline tables (newlines)")
+{
 	// "newlines are allowed between the curly braces [if] they are valid within a value."
 	parsing_should_succeed(FILE_LINE_ARGS,
 						   R"(
@@ -419,15 +499,20 @@ TEST_CASE("parsing - inline tables")
 	{
 		// "A terminating comma (also called trailing comma) is not permitted after the last key/value pair in an inline
 		// table."
-		parsing_should_fail(FILE_LINE_ARGS, R"(name = { first = "Tom", last = "Preston-Werner", })"sv);
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			R"(name = { first = "Tom", last = "Preston-Werner", })"sv,
+			"1:50: Error while parsing inline table: expected key-value pair, saw closing '}' (dangling comma)"sv);
 
 		// "No newlines are allowed between the curly braces unless they are valid within a value."
-		parsing_should_fail(FILE_LINE_ARGS, R"(
+		parsing_should_fail(FILE_LINE_ARGS,
+							R"(
 		name = {
 			first = "Tom",
 			last = "Preston-Werner"
 		}
-		)"sv);
+		)"sv,
+							R"(2:11: Error while parsing inline table: expected key or closing '}', saw '\n')"sv);
 	}
 #endif
 }
@@ -538,8 +623,13 @@ TEST_CASE("parsing - arrays-of-tables")
 							   CHECK(tbl["fruit"][1]["variety"].as<array>()->is_array_of_tables());
 							   CHECK(tbl["fruit"][1]["variety"][0]["name"] == "plantain"sv);
 						   });
+}
 
-	parsing_should_fail(FILE_LINE_ARGS, R"(
+TEST_CASE("parsing - arrays-of-tables (invalid documents)")
+{
+	parsing_should_fail(
+		FILE_LINE_ARGS,
+		R"(
 # INVALID TOML DOC
 [fruit.physical]  # subtable, but to which parent element should it belong?
   color = "red"
@@ -548,16 +638,22 @@ TEST_CASE("parsing - arrays-of-tables")
 [[fruit]]  # parser must throw an error upon discovering that "fruit" is
            # an array rather than a table
   name = "apple"
-)"sv);
+)"sv,
+		"7:1: Error while parsing table header: cannot redefine existing table 'fruit' as array-of-tables"sv);
 
-	parsing_should_fail(FILE_LINE_ARGS, R"(
+	parsing_should_fail(
+		FILE_LINE_ARGS,
+		R"(
 # INVALID TOML DOC
 fruit = []
 
 [[fruit]] # Not allowed
-)"sv);
+)"sv,
+		"5:1: Error while parsing table header: cannot redefine existing array 'fruit' as array-of-tables"sv);
 
-	parsing_should_fail(FILE_LINE_ARGS, R"(
+	parsing_should_fail(
+		FILE_LINE_ARGS,
+		R"(
 # INVALID TOML DOC
 [[fruit]]
   name = "apple"
@@ -568,9 +664,12 @@ fruit = []
   # INVALID: This table conflicts with the previous array of tables
   [fruit.variety]
     name = "granny smith"
-)"sv);
+)"sv,
+		"10:3: Error while parsing table header: cannot redefine existing array 'fruit.variety' as table"sv);
 
-	parsing_should_fail(FILE_LINE_ARGS, R"(
+	parsing_should_fail(
+		FILE_LINE_ARGS,
+		R"(
 # INVALID TOML DOC
 [[fruit]]
   name = "apple"
@@ -582,7 +681,8 @@ fruit = []
   # INVALID: This array of tables conflicts with the previous table
   [[fruit.physical]]
     color = "green"
-)"sv);
+)"sv,
+		"11:3: Error while parsing table header: cannot redefine existing table 'fruit.physical' as array-of-tables"sv);
 }
 
 TEST_CASE("parsing - keys")
@@ -625,4 +725,36 @@ e = { f.g = 79.5, h = 72.0 }
 							   check_key(tbl["a"]["b"]["e"]["f"], "g", { 5, 9 }, { 5, 10 });
 							   check_key(tbl["a"]["b"]["e"], "h", { 5, 19 }, { 5, 20 });
 						   });
+}
+
+TEST_CASE("parsing - tables (malformed)")
+{
+	parsing_should_fail(
+		FILE_LINE_ARGS,
+		"[ [a] ]"sv,
+		"1:3: Error while parsing table header: [[array-of-table]] brackets must be contiguous (i.e. [ [ this ] ] is prohibited)"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "[[a] ]"sv, "1:5: Error while parsing table header: expected ']', saw ' '"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "[[a]"sv, "1:5: Error while parsing table header: encountered end-of-file"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "[a"sv, "1:3: Error while parsing table header: encountered end-of-file"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "[a b]"sv, "1:4: Error while parsing table header: expected ']', saw 'b'"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "[[a b]]"sv, "1:5: Error while parsing table header: expected ']', saw 'b'"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"[a]x"sv,
+						"1:4: Error while parsing table header: expected a comment or whitespace, saw 'x'"sv);
+}
+
+TEST_CASE("parsing - inline tables (malformed)")
+{
+	parsing_should_fail(FILE_LINE_ARGS,
+						"tbl = {,}"sv,
+						"1:8: Error while parsing inline table: expected key-value pair or closing '}', saw comma"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"tbl = {b = 1,,c = 2}"sv,
+						"1:14: Error while parsing inline table: expected key-value pair or closing '}', saw comma"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"tbl = {b = 1 c = 2}"sv,
+						"1:14: Error while parsing inline table: expected comma or closing '}', saw 'c'"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"tbl = {b = 1"sv,
+						"1:13: Error while parsing inline table: encountered end-of-file"sv);
 }

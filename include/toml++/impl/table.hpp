@@ -677,7 +677,7 @@ TOML_NAMESPACE_START
 		///		{ "a", 42, },
 		///		{ "b", "is the meaning of life, apparently." }
 		///	};
-		/// if (auto val = arr.get_as<int64_t>("a"))
+		/// if (auto val = tbl.get_as<int64_t>("a"))
 		///		std::cout << R"(node ["a"] was an integer with value )"sv << **val << "\n";
 		/// \ecpp
 		///
@@ -787,9 +787,15 @@ TOML_NAMESPACE_START
 		/// @{
 
 		/// \brief A BidirectionalIterator for iterating over key-value pairs in a toml::table.
+		///
+		/// \attention The key-value pair it returns is stored inside the iterator, so reversing it with
+		/// 		   std::reverse_iterator or std::views::reverse gives dangling references.
 		using iterator = toml::table_iterator;
 
 		/// \brief A BidirectionalIterator for iterating over const key-value pairs in a toml::table.
+		///
+		/// \attention The key-value pair it returns is stored inside the iterator, so reversing it with
+		/// 		   std::reverse_iterator or std::views::reverse gives dangling references.
 		using const_iterator = toml::const_table_iterator;
 
 		/// \brief	Returns an iterator to the first key-value pair.
@@ -1283,13 +1289,16 @@ TOML_NAMESPACE_START
 		///	};
 		/// std::cout << tbl << "\n";
 		///
-		/// tbl.erase(tbl.begin() + 1);
+		/// tbl.erase(std::next(tbl.begin()));
 		/// std::cout << tbl << "\n";
 		/// \ecpp
 		///
 		/// \out
-		/// { a = 1, b = 2, c = 3 }
-		/// { a = 1, c = 3 }
+		/// a = 1
+		/// b = 2
+		/// c = 3
+		/// a = 1
+		/// c = 3
 		/// \eout
 		///
 		/// \param 	pos		Iterator to the key-value pair being erased.
@@ -1310,13 +1319,16 @@ TOML_NAMESPACE_START
 		///	};
 		/// std::cout << tbl << "\n";
 		///
-		/// tbl.erase(tbl.cbegin() + 1);
+		/// tbl.erase(std::next(tbl.cbegin()));
 		/// std::cout << tbl << "\n";
 		/// \ecpp
 		///
 		/// \out
-		/// { a = 1, b = 2, c = 3 }
-		/// { a = 1, c = 3 }
+		/// a = 1
+		/// b = 2
+		/// c = 3
+		/// a = 1
+		/// c = 3
 		/// \eout
 		///
 		/// \param 	pos		Iterator to the key-value pair being erased.
@@ -1338,13 +1350,17 @@ TOML_NAMESPACE_START
 		///	};
 		/// std::cout << tbl << "\n";
 		///
-		/// tbl.erase(tbl.cbegin() + 1, tbl.cbegin() + 3);
+		/// tbl.erase(std::next(tbl.cbegin()), std::next(tbl.cbegin(), 3));
 		/// std::cout << tbl << "\n";
 		/// \ecpp
 		///
 		/// \out
-		/// { a = 1, b = "bad", c = "karma", d = 2 }
-		/// { a = 1, d = 2 }
+		/// a = 1
+		/// b = 'bad'
+		/// c = 'karma'
+		/// d = 2
+		/// a = 1
+		/// d = 2
 		/// \eout
 		///
 		/// \param 	begin	Iterator to the first key-value pair being erased.
@@ -1372,10 +1388,13 @@ TOML_NAMESPACE_START
 		/// \ecpp
 		///
 		/// \out
-		/// { a = 1, b = 2, c = 3 }
-		/// true
-		/// false
-		/// { a = 1, c = 3 }
+		/// a = 1
+		/// b = 2
+		/// c = 3
+		/// 1
+		/// 0
+		/// a = 1
+		/// c = 3
 		/// \eout
 		///
 		/// \param 	key		Key to erase.
@@ -1408,15 +1427,17 @@ TOML_NAMESPACE_START
 		/// \detail \cpp
 		///
 		/// auto tbl = toml::table{ { "a", 1 }, { "b", toml::array{ } }, { "c", toml::array{ toml::table{}, toml::array{} } } };
-		/// std::cout << arr << "\n";
+		/// std::cout << tbl << "\n";
 		///
-		/// arr.prune();
-		/// std::cout << arr << "\n";
+		/// tbl.prune();
+		/// std::cout << tbl << "\n";
 		/// \ecpp
 		///
 		/// \out
-		/// { a = 1, b = [], c = [ {}, [] ] }
-		/// { a = 1 }
+		/// a = 1
+		/// b = []
+		/// c = [ {}, [] ]
+		/// a = 1
 		/// \eout
 		///
 		/// \param recursive Should child arrays and tables themselves be pruned?

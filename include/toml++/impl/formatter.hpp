@@ -33,6 +33,19 @@ TOML_IMPL_NAMESPACE_START
 		std::string_view indent;
 	};
 
+	enum class TOML_CLOSED_ENUM string_dialect : uint8_t
+	{
+		toml,
+		json,
+		yaml
+	};
+
+	TOML_CONST_GETTER
+	constexpr bool is_yaml_unprintable(char32_t c) noexcept
+	{
+		return (c >= U'\x80' && c <= U'\x9F' && c != U'\x85') || c == U'\xFFFE' || c == U'\xFFFF';
+	}
+
 	class TOML_EXPORTED_CLASS formatter
 	{
 	  private:
@@ -159,6 +172,13 @@ TOML_IMPL_NAMESPACE_START
 						  bool allow_multi_line			= true,
 						  bool allow_bare				= false,
 						  bool allow_literal_whitespace = true);
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		void print_string(std::string_view str,
+						  bool allow_multi_line,
+						  bool allow_bare,
+						  bool allow_literal_whitespace,
+						  string_dialect dialect);
 
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const value<std::string>&);

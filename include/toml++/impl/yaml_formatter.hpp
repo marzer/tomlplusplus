@@ -16,6 +16,8 @@ TOML_NAMESPACE_START
 	///
 	/// \availability This class is only available when #TOML_ENABLE_FORMATTERS is enabled.
 	///
+	/// \remarks Flags that would make YAML read a value back as something else are ignored.
+	///
 	/// \detail \cpp
 	/// auto some_toml = toml::parse(R"(
 	///		[fruit]
@@ -58,8 +60,9 @@ TOML_NAMESPACE_START
 
 		static constexpr impl::formatter_constants constants = {
 			//
-			format_flags::quote_dates_and_times | format_flags::indentation, // mandatory
-			format_flags::allow_multi_line_strings,							 // ignored
+			format_flags::quote_dates_and_times | format_flags::indentation,			 // mandatory
+			format_flags::allow_multi_line_strings | format_flags::terse_key_value_pairs //
+				| format_flags::allow_binary_integers,									 // ignored
 			".inf"sv,
 			"-.inf"sv,
 			".NAN"sv,

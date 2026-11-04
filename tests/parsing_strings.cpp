@@ -66,7 +66,9 @@ str7 = """"This," she said, "is just a pointless statement.""""
 							   CHECK(tbl["str7"] == R"("This," she said, "is just a pointless statement.")"sv);
 						   });
 
-	parsing_should_fail(FILE_LINE_ARGS, R"(str5 = """Here are three quotation marks: """.""")"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						R"(str5 = """Here are three quotation marks: """.""")"sv,
+						"1:46: Error while parsing key-value pair: expected a comment or whitespace, saw '.'"sv);
 
 	parsing_should_succeed(FILE_LINE_ARGS,
 						   R"(
@@ -127,9 +129,13 @@ str = ''''That's still pointless', she said.'''
 							   CHECK(tbl["str"] == R"('That's still pointless', she said.)"sv);
 						   });
 
-	parsing_should_fail(FILE_LINE_ARGS, R"(apos15 = '''Here are fifteen apostrophes: ''''''''''''''''''  # INVALID)"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						R"(apos15 = '''Here are fifteen apostrophes: ''''''''''''''''''  # INVALID)"sv,
+						"1:48: Error while parsing key-value pair: expected a comment or whitespace, saw '''"sv);
+}
 
-	// value tests
+TEST_CASE("parsing - strings (values)")
+{
 	parse_expected_value(FILE_LINE_ARGS,
 						 R"("The quick brown fox jumps over the lazy dog")"sv,
 						 "The quick brown fox jumps over the lazy dog"sv);
@@ -154,14 +160,20 @@ str = ''''That's still pointless', she said.'''
 #endif // UNICODE_LITERALS_OK
 
 	parse_expected_value(FILE_LINE_ARGS, R"("\"\u03B1\u03B2\u03B3\"")"sv, "\"\u03B1\u03B2\u03B3\""sv);
+}
 
+TEST_CASE("parsing - strings (escape sequences)")
+{
 // toml/pull/796 (\xHH unicode scalars)
 #if TOML_LANG_UNRELEASED
 	parse_expected_value(FILE_LINE_ARGS,
 						 R"("\x00\x10\x20\x30\x40\x50\x60\x70\x80\x90\x11\xFF\xEE")"sv,
 						 "\u0000\u0010\u0020\u0030\u0040\u0050\u0060\u0070\u0080\u0090\u0011\u00FF\u00EE"sv);
 #else
-	parsing_should_fail(FILE_LINE_ARGS, R"(str = "\x00\x10\x20\x30\x40\x50\x60\x70\x80\x90\x11\xFF\xEE")"sv);
+	parsing_should_fail(
+		FILE_LINE_ARGS,
+		R"(str = "\x00\x10\x20\x30\x40\x50\x60\x70\x80\x90\x11\xFF\xEE")"sv,
+		R"(1:9: Error while parsing string: escape sequence '\x' is not supported in TOML 1.0.0 and earlier)"sv);
 #endif
 
 	// toml/pull/790
@@ -169,43 +181,139 @@ str = ''''That's still pointless', she said.'''
 	parse_expected_value(FILE_LINE_ARGS, R"("\e[31mfoo\e[0m")"sv, "\x1B[31mfoo\x1B[0m"sv);
 
 #else
-	parsing_should_fail(FILE_LINE_ARGS, R"("\e[31mfoo\e[0m")"sv);
+	parsing_should_fail(
+		FILE_LINE_ARGS,
+		R"(str = "\e[31mfoo\e[0m")"sv,
+		R"(1:9: Error while parsing string: escape sequence '\e' is not supported in TOML 1.0.0 and earlier)"sv);
 #endif
 
 	// check 8-digit \U scalars with insufficient digits
-	parsing_should_fail(FILE_LINE_ARGS, R"(str = "\U1234567")"sv);
-	parsing_should_fail(FILE_LINE_ARGS, R"(str = "\U123456")"sv);
-	parsing_should_fail(FILE_LINE_ARGS, R"(str = "\U12345")"sv);
-	parsing_should_fail(FILE_LINE_ARGS, R"(str = "\U1234")"sv);
-	parsing_should_fail(FILE_LINE_ARGS, R"(str = "\U123")"sv);
-	parsing_should_fail(FILE_LINE_ARGS, R"(str = "\U12")"sv);
-	parsing_should_fail(FILE_LINE_ARGS, R"(str = "\U1")"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						R"(str = "\U1234567")"sv,
+						R"(1:17: Error while parsing unicode scalar sequence: expected hex digit, saw '"')"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						R"(str = "\U123456")"sv,
+						R"(1:16: Error while parsing unicode scalar sequence: expected hex digit, saw '"')"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						R"(str = "\U12345")"sv,
+						R"(1:15: Error while parsing unicode scalar sequence: expected hex digit, saw '"')"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						R"(str = "\U1234")"sv,
+						R"(1:14: Error while parsing unicode scalar sequence: expected hex digit, saw '"')"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						R"(str = "\U123")"sv,
+						R"(1:13: Error while parsing unicode scalar sequence: expected hex digit, saw '"')"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						R"(str = "\U12")"sv,
+						R"(1:12: Error while parsing unicode scalar sequence: expected hex digit, saw '"')"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						R"(str = "\U1")"sv,
+						R"(1:11: Error while parsing unicode scalar sequence: expected hex digit, saw '"')"sv);
 
 	// check 4-digit \u scalars with insufficient digits
-	parsing_should_fail(FILE_LINE_ARGS, R"(str = "\u123")"sv);
-	parsing_should_fail(FILE_LINE_ARGS, R"(str = "\u12")"sv);
-	parsing_should_fail(FILE_LINE_ARGS, R"(str = "\u1")"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						R"(str = "\u123")"sv,
+						R"(1:13: Error while parsing unicode scalar sequence: expected hex digit, saw '"')"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						R"(str = "\u12")"sv,
+						R"(1:12: Error while parsing unicode scalar sequence: expected hex digit, saw '"')"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						R"(str = "\u1")"sv,
+						R"(1:11: Error while parsing unicode scalar sequence: expected hex digit, saw '"')"sv);
 
 	// check 2-digit \x scalars with insufficient digits
-	parsing_should_fail(FILE_LINE_ARGS, R"(str = "\x1")"sv);
+#if TOML_LANG_UNRELEASED
+	parsing_should_fail(FILE_LINE_ARGS,
+						R"(str = "\x1")"sv,
+						R"(1:11: Error while parsing unicode scalar sequence: expected hex digit, saw '"')"sv);
+#endif
+}
 
+TEST_CASE("parsing - strings (quotes next to multi-line delimiters)")
+{
 	// ML string examples from https://github.com/toml-lang/toml/issues/725
 	parse_expected_value(FILE_LINE_ARGS, R"( """ """          )"sv, R"( )"sv);
 	parse_expected_value(FILE_LINE_ARGS, R"( """ """"         )"sv, R"( ")"sv);
 	parse_expected_value(FILE_LINE_ARGS, R"( """ """""        )"sv, R"( "")"sv);
-	parsing_should_fail(FILE_LINE_ARGS, R"(v= """ """"""       )"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						R"(v= """ """"""       )"sv,
+						R"(1:13: Error while parsing key-value pair: expected a comment or whitespace, saw '"')"sv);
 	parse_expected_value(FILE_LINE_ARGS, R"( ''' '''          )"sv, R"( )"sv);
 	parse_expected_value(FILE_LINE_ARGS, R"( ''' ''''         )"sv, R"( ')"sv);
 	parse_expected_value(FILE_LINE_ARGS, R"( ''' '''''        )"sv, R"( '')"sv);
-	parsing_should_fail(FILE_LINE_ARGS, R"(v= ''' ''''''       )"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						R"(v= ''' ''''''       )"sv,
+						"1:13: Error while parsing key-value pair: expected a comment or whitespace, saw '''"sv);
 	parse_expected_value(FILE_LINE_ARGS, R"( """"""           )"sv, R"()"sv);
 	parse_expected_value(FILE_LINE_ARGS, R"( """" """         )"sv, R"(" )"sv);
 	parse_expected_value(FILE_LINE_ARGS, R"( """"" """        )"sv, R"("" )"sv);
-	parsing_should_fail(FILE_LINE_ARGS, R"(v= """""" """       )"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						R"(v= """""" """       )"sv,
+						R"(1:11: Error while parsing key-value pair: expected a comment or whitespace, saw '"')"sv);
 	parse_expected_value(FILE_LINE_ARGS, R"( ''''''           )"sv, R"()"sv);
 	parse_expected_value(FILE_LINE_ARGS, R"( '''' '''         )"sv, R"(' )"sv);
 	parse_expected_value(FILE_LINE_ARGS, R"( ''''' '''        )"sv, R"('' )"sv);
-	parsing_should_fail(FILE_LINE_ARGS, R"(v= '''''' '''       )"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						R"(v= '''''' '''       )"sv,
+						"1:11: Error while parsing key-value pair: expected a comment or whitespace, saw '''"sv);
 	parse_expected_value(FILE_LINE_ARGS, R"( """""\""""""     )"sv, R"(""""")"sv);
 	parse_expected_value(FILE_LINE_ARGS, R"( """""\"""\"""""" )"sv, R"("""""""")"sv);
+}
+
+TEST_CASE("parsing - strings (malformed)")
+{
+	parsing_should_fail(
+		FILE_LINE_ARGS,
+		R"(str = """foo \ x""")"sv,
+		"1:16: Error while parsing string: line-ending backslashes must be the last non-whitespace character on the line"sv);
+	parsing_should_fail(
+		FILE_LINE_ARGS,
+		R"(str = "\uD800")"sv,
+		"1:8: Error while parsing unicode scalar sequence: unicode surrogates (U+D800 - U+DFFF) are explicitly prohibited"sv);
+	parsing_should_fail(
+		FILE_LINE_ARGS,
+		R"(str = "\uDFFF")"sv,
+		"1:8: Error while parsing unicode scalar sequence: unicode surrogates (U+D800 - U+DFFF) are explicitly prohibited"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						R"(str = "\U00110000")"sv,
+						"1:8: Error while parsing unicode scalar sequence: values greater than U+10FFFF are invalid"sv);
+	parsing_should_fail(
+		FILE_LINE_ARGS,
+		R"(str = "\U0000D800")"sv,
+		"1:8: Error while parsing unicode scalar sequence: unicode surrogates (U+D800 - U+DFFF) are explicitly prohibited"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						R"(str = "\q")"sv,
+						R"(1:9: Error while parsing string: unknown escape sequence '\q')"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						R"(str = """\q""")"sv,
+						R"(1:11: Error while parsing string: unknown escape sequence '\q')"sv);
+	parsing_should_fail(
+		FILE_LINE_ARGS,
+		R"(str = """\uD800""")"sv,
+		"1:10: Error while parsing unicode scalar sequence: unicode surrogates (U+D800 - U+DFFF) are explicitly prohibited"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "str = \"\xED\xA0\x80\""sv, "1:8: Encountered invalid utf-8 sequence"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						R"(str = "abc)"sv,
+						"1:11: Error while parsing string: encountered end-of-file"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						R"(str = 'abc)"sv,
+						"1:11: Error while parsing literal string: encountered end-of-file"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						R"(str = """abc)"sv,
+						"1:13: Error while parsing string: encountered end-of-file"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						R"(str = '''abc)"sv,
+						"1:13: Error while parsing literal string: encountered end-of-file"sv);
+	parsing_should_fail(
+		FILE_LINE_ARGS,
+		"str = 'a\x01'"sv,
+		"1:9: Error while parsing literal string: control characters other than TAB (U+0009) are explicitly prohibited"sv);
+	parsing_should_fail(
+		FILE_LINE_ARGS,
+		"str = '''a\x01'''"sv,
+		"1:11: Error while parsing literal string: control characters other than TAB (U+0009) are explicitly prohibited"sv);
+	parsing_should_fail(
+		FILE_LINE_ARGS,
+		"str = \"a\x01\""sv,
+		"1:9: Error while parsing string: unescaped control characters other than TAB (U+0009) are explicitly prohibited"sv);
 }

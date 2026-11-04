@@ -57,18 +57,7 @@ constexpr size_t operator""_sz(unsigned long long n) noexcept
 #define FILE_LINE_ARGS trim_file_path(std::string_view{ __FILE__ }), __LINE__
 #define BOM_PREFIX	   "\xEF\xBB\xBF"
 
-#if TOML_EXCEPTIONS
-#define FORCE_FAIL(...) FAIL(__VA_ARGS__)
-#else
-#define FORCE_FAIL(...)                                                                                                \
-	do                                                                                                                 \
-	{                                                                                                                  \
-		FAIL(__VA_ARGS__);                                                                                             \
-		std::exit(-1);                                                                                                 \
-		TOML_UNREACHABLE;                                                                                              \
-	}                                                                                                                  \
-	while (false)
-#endif
+#define FORCE_FAIL(...) FAIL_CHECK(__VA_ARGS__)
 
 #define CHECK_SYMMETRIC_RELOP(lhs, op, rhs, result)                                                                    \
 	CHECK(((lhs)op(rhs)) == (result));                                                                                 \
@@ -134,8 +123,9 @@ bool parsing_should_succeed(std::string_view test_file,
 bool parsing_should_fail(std::string_view test_file,
 						 uint32_t test_line,
 						 std::string_view toml_str,
-						 source_index expected_failure_line	  = static_cast<source_index>(-1),
-						 source_index expected_failure_column = static_cast<source_index>(-1));
+						 std::string_view expected_error);
+
+bool parsing_should_fail(std::string_view test_file, uint32_t test_line, std::string_view toml_str);
 
 TOML_PURE_GETTER
 constexpr std::string_view trim_file_path(std::string_view sv) noexcept
@@ -363,7 +353,7 @@ inline bool parse_expected_value(std::string_view test_file,
 										   }
 									   });
 
-			if (!parse_ok || value_ok)
+			if (!parse_ok || !value_ok)
 				return false;
 		}
 	}

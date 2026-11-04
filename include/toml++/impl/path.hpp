@@ -50,6 +50,11 @@ TOML_NAMESPACE_START
 			::new (static_cast<void*>(storage.bytes)) std::string{ key };
 		}
 
+		static void store_key(std::string&& key, storage_t& storage) noexcept
+		{
+			::new (static_cast<void*>(storage.bytes)) std::string{ std::move(key) };
+		}
+
 		static void store_index(size_t index, storage_t& storage) noexcept
 		{
 			::new (static_cast<void*>(storage.bytes)) std::size_t{ index };
@@ -228,12 +233,12 @@ TOML_NAMESPACE_START
 	///
 	/// // can use with tbl.at_path or operator[]
 	/// std::cout << "second cat: " << tbl[the_path] << "\n";
-	/// std::cout << "cats: " << tbl.at_path(the_path.parent_path()) << "\n";
+	/// std::cout << "cats: " << tbl.at_path(the_path.parent()) << "\n";
 	/// \ecpp
 	///
 	/// \out
-	/// second cat: lion
-	/// cats: ['tiger', 'lion', 'puma']
+	/// second cat: 'lion'
+	/// cats: [ 'tiger', 'lion', 'puma' ]
 	/// \eout
 	class TOML_EXPORTED_CLASS path
 	{
@@ -777,7 +782,7 @@ TOML_NAMESPACE_START
 		/// using namespace toml::literals;
 		///
 		/// auto path = "main.settings.devices[2]"_tpath;
-		/// std::cout << path.parent_path() << "\n";
+		/// std::cout << path.parent() << "\n";
 		/// \ecpp
 		///
 		/// \out
@@ -809,16 +814,16 @@ TOML_NAMESPACE_START
 	/// toml::path path1("foo.bar[2]");
 	/// toml::path path2("foo.bar[4].kek");
 	/// std::cout << toml::at_path(config, path1) << "\n";
-	/// std::cout << toml::at_path(config, path1.parent_path()) << "\n";
+	/// std::cout << toml::at_path(config, path1.parent()) << "\n";
 	/// std::cout << toml::at_path(config, path2) << "\n";
-	/// std::cout << toml::at_path(config, path2.parent_path()) << "\n";
+	/// std::cout << toml::at_path(config, path2.parent()) << "\n";
 	/// \ecpp
 	///
 	/// \out
 	/// 2
 	/// [ 0, 1, 2, [ 3 ], { kek = 4 } ]
 	/// 4
-	/// { kek  = 4 }
+	/// { kek = 4 }
 	/// \eout
 	///
 	///

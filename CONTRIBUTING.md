@@ -13,6 +13,15 @@ directive to `include/toml++/toml.hpp`.
 
 <br>
 
+## Code style
+
+For the most part the library tries to look like idiomatic standard-library-style C++, so between that and using `pre-commit`/`clang-format`, there's not much to think about.
+
+One thing to be very aware of is compile times - the library is primarly a header-only project, so
+many choices are made to avoid including certain expensive standard-library headers (e.g. `<filesystem>`, `<algorithm>`).
+
+<br>
+
 ## Generated files
 
 `toml.hpp` and a few other files are derived from `include` and `VERSION.txt`. You shouldn't need to do anything to keep
@@ -65,6 +74,21 @@ or later works; `pipx install meson` gets the latest.
 The tests run once per locale, and a run whose locale isn't installed is reported as skipped. On Debian and Ubuntu,
 `sudo apt install locales-all` installs all of them.
 
+### Writing tests
+
+A test for a document that must fail to parse states the error it expects, as `line:column: description`:
+
+```cpp
+parsing_should_fail(FILE_LINE_ARGS, "int = 0o8"sv, "1:9: Error while parsing octal integer: expected octal digit, saw '8'"sv);
+```
+
+When the expectation is wrong, the test prints the error it saw, so a first run can supply one. Read it against the
+input before keeping it. Where a build option changes the error, put each expectation under the option, as the
+`TOML_LANG_UNRELEASED` blocks in the parsing tests do.
+
+The conformance tests generated from toml-test call `parsing_should_fail` without an expectation. Hand-written tests
+always give one.
+
 ### Coverage
 
 Coverage needs Clang, plus the `llvm-profdata` and `llvm-cov` of the same version on `PATH`:
@@ -79,6 +103,10 @@ python3 tools/coverage.py build
 
 The HTML report goes in `build/coverage/html`. The report for `master` is on the
 [homepage](https://marzer.github.io/tomlplusplus/coverage/).
+
+CI also builds the tests with `-Dtomlplusplus_EXCEPTIONS=OFF -Dtomlplusplus_UNRELEASED_FEATURES=ON`, and measures the two
+builds together, so that code compiled out of one build still counts. Give `coverage.py` several build directories to
+merge them the same way.
 
 <br>
 

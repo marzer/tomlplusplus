@@ -45,33 +45,56 @@ def badge(percent):
     )
 
 
+def file_table(files):
+    rows = [
+        r'| File | Missed lines | Lines | Functions | Regions | Branches |',
+        r'| :--- | ---: | ---: | ---: | ---: | ---: |',
+    ]
+    missed = []
+    for f in files:
+        s = f[r'summary']
+        count = s[r'lines'][r'count'] - s[r'lines'][r'covered']
+        if count:
+            missed.append((count, Path(f[r'filename']).resolve().relative_to(ROOT / r'include').as_posix(), s))
+    for count, name, s in sorted(missed, key=lambda row: (-row[0], row[1])):
+        percents = r' | '.join(rf'{s[m][r"percent"]:.2f}%' for m in FLOORS)
+        rows.append(rf'| {name} | {count} | {percents} |')
+    return '\n'.join(rows)
+
+
 def main():
     parser = ArgumentParser(
-        description=r'Reports coverage of include/ from the tests of a tomlplusplus_COVERAGE build.'
+        description=r'Reports coverage of include/ from the tests of one or more tomlplusplus_COVERAGE builds, merged.'
     )
-    parser.add_argument(r'build_dir', type=Path, help=r'a build directory in which ctest has been run')
+    parser.add_argument(r'build_dirs', type=Path, nargs=r'+', help=r'build directories in which ctest has been run')
     args = parser.parse_args()
 
-    build_dir = args.build_dir.resolve()
-    profiles = sorted((build_dir / r'profiles').glob(r'*.profraw'))
-    if not profiles:
-        sys.exit(
-            rf'error: no profiles in {build_dir / "profiles"}; configure with tomlplusplus_COVERAGE=ON and run ctest'
-        )
+    build_dirs = [d.resolve() for d in args.build_dirs]
+    profiles = []
+    for build_dir in build_dirs:
+        found = sorted((build_dir / r'profiles').glob(r'*.profraw'))
+        if not found:
+            sys.exit(
+                rf'error: no profiles in {build_dir / "profiles"}; configure with tomlplusplus_COVERAGE=ON and run ctest'
+            )
+        profiles += found
 
-    out_dir = build_dir / r'coverage'
+    out_dir = build_dirs[0] / r'coverage'
     out_dir.mkdir(exist_ok=True)
     profdata = out_dir / r'coverage.profdata'
     subprocess.run([r'llvm-profdata', r'merge', r'-sparse', *profiles, r'-o', profdata], check=True)
 
     sources = sorted(str(p) for p in (ROOT / r'include').rglob(r'*') if p.suffix in (r'.h', r'.hpp', r'.inl'))
-    common = [str(build_dir / r'tests' / r'tomlplusplus_tests'), rf'-instr-profile={profdata}']
+    binaries = [str(d / r'tests' / r'tomlplusplus_tests') for d in build_dirs]
+    common = [binaries[0], *(arg for b in binaries[1:] for arg in (r'-object', b)), rf'-instr-profile={profdata}']
     llvm_cov(r'report', *common, *sources)
     llvm_cov(r'show', *common, r'-format=html', rf'-output-dir={out_dir / "html"}', *sources)
     with open(out_dir / r'coverage.lcov', r'w', encoding=r'utf-8') as lcov:
         llvm_cov(r'export', *common, r'-format=lcov', *sources, stdout=lcov)
-    summary = llvm_cov(r'export', *common, r'-summary-only', *sources, capture_output=True, text=True).stdout
-    totals = json.loads(summary)[r'data'][0][r'totals']
+    summary = json.loads(
+        llvm_cov(r'export', *common, r'-summary-only', *sources, capture_output=True, text=True).stdout
+    )[r'data'][0]
+    totals = summary[r'totals']
     (out_dir / r'html' / r'badge.svg').write_text(badge(totals[r'lines'][r'percent']), encoding=r'utf-8')
 
     floors = {metric: float(os.environ[var]) for metric, var in FLOORS.items() if os.environ.get(var)}
@@ -83,10 +106,11 @@ def main():
         floor = rf'{floors[metric]:.2f}%' if metric in floors else r'-'
         rows.append(rf'| {metric} | {t["covered"]} | {t["count"]} | {t["percent"]:.2f}% | {floor} |')
     table = '\n'.join(rows)
-    print(f'\n{table}\n\nHTML report: {out_dir / "html" / "index.html"}')
+    files = file_table(summary[r'files'])
+    print(f'\n{table}\n\n{files}\n\nHTML report: {out_dir / "html" / "index.html"}')
     if os.environ.get(r'GITHUB_STEP_SUMMARY'):
         with open(os.environ[r'GITHUB_STEP_SUMMARY'], r'a', encoding=r'utf-8') as step_summary:
-            print(f'## Coverage of include/\n\n{table}\n', file=step_summary)
+            print(f'## Coverage of include/\n\n{table}\n\n### Files with missed lines\n\n{files}\n', file=step_summary)
 
     for metric in failed:
         print(rf'error: {metric} coverage {totals[metric]["percent"]:.2f}% is below the {floors[metric]:.2f}% floor')
