@@ -134,7 +134,8 @@ global_args += cpp.get_supported_arguments(
 	'-Wno-c2y-extensions',
 	'-Wno-unsafe-buffer-usage',
 	'-Wno-unsafe-buffer-usage-in-libc-call',
-	'-Wno-nrvo'
+	'-Wno-nrvo',
+	'-Wno-poison-system-directories'
 )
 if is_clang
 	global_args += cpp.get_supported_arguments('-Wno-switch-default')

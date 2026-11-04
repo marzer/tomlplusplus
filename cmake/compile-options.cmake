@@ -103,6 +103,7 @@ function(tomlplusplus_set_compile_options target)
           -Wno-c2y-extensions
           -Wno-unsafe-buffer-usage
           -Wno-nrvo
+          -Wno-poison-system-directories
       )
     endif()
   elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
