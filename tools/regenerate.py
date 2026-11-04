@@ -15,6 +15,50 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 VERSION_FILE = ROOT / 'VERSION.txt'
 TRIPLET = r'[0-9]+(?:[.][0-9]+){2}'
+UNDEF_BLOCK = re.compile(r'(?m)^(#if TOML_UNDEF_MACROS\n)(?:#undef [A-Za-z0-9_]+\n)*(#endif)$')
+PUBLIC_MACROS = (
+    r'INCLUDE_TOMLPLUSPLUS_H',
+    r'POXY_IMPLEMENTATION_DETAIL',
+    r'TOML_ALL_INLINE',
+    r'TOML_API',
+    r'TOML_CALLCONV',
+    r'TOML_CONCAT',
+    r'TOML_CONCAT_1',
+    r'TOML_CONFIG_HEADER',
+    r'TOML_CUDA',
+    r'TOML_ENABLE_FORMATTERS',
+    r'TOML_ENABLE_PARSER',
+    r'TOML_ENABLE_SIMD',
+    r'TOML_ENABLE_UNRELEASED_FEATURES',
+    r'TOML_ENABLE_WINDOWS_COMPAT',
+    r'TOML_ENABLE_FLOAT16',
+    r'TOML_EXCEPTIONS',
+    r'TOML_EXPORTED_CLASS',
+    r'TOML_EXPORTED_FREE_FUNCTION',
+    r'TOML_EXPORTED_MEMBER_FUNCTION',
+    r'TOML_EXPORTED_STATIC_FUNCTION',
+    r'TOML_HEADER_ONLY',
+    r'TOML_LANG_MAJOR',
+    r'TOML_LANG_MINOR',
+    r'TOML_LANG_PATCH',
+    r'TOML_LIB_MAJOR',
+    r'TOML_LIB_MINOR',
+    r'TOML_LIB_PATCH',
+    r'TOML_LIB_SINGLE_HEADER',
+    r'TOML_MAX_NESTED_VALUES',
+    r'TOML_MAX_DOTTED_KEYS_DEPTH',
+    r'TOML_NAMESPACE_END',
+    r'TOML_NAMESPACE_START',
+    r'TOML_OPTIONAL_TYPE',
+    r'TOML_SMALL_FLOAT_TYPE',
+    r'TOML_SMALL_INT_TYPE',
+    r'TOML_UNDEF_MACROS',
+    r'TOMLPLUSPLUS_H',
+    r'TOMLPLUSPLUS_HPP',
+    r'TOML_SHARED_LIB',
+    r'TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA',
+    r'TOML_DISABLE_NOEXCEPT_NOEXCEPT',
+)
 
 
 def read_text_file(path):
@@ -207,75 +251,21 @@ def generate_single_header(version, read_file):
         write(toml_h)
         write('')
 
-        output_str = output.getvalue().strip()
+        return output.getvalue().strip() + '\n'
 
-        # analyze the output to find any potentially missing #undefs
-        if 1:
-            re_define = re.compile(r'^\s*#\s*define\s+([a-zA-Z0-9_]+)(?:$|\s|\()')
-            re_undef = re.compile(r'^\s*#\s*undef\s+([a-zA-Z0-9_]+)(?:$|\s|//)')
-            defines = dict()
-            for output_line in output_str.splitlines():
-                defined = True
-                m = re_define.match(output_line)
-                if not m:
-                    defined = False
-                    m = re_undef.match(output_line)
-                if m:
-                    defines[m.group(1)] = defined
-            ignore_list = (  # macros that are meant to stay public (user configs etc)
-                r'INCLUDE_TOMLPLUSPLUS_H',
-                r'POXY_IMPLEMENTATION_DETAIL',
-                r'TOML_ALL_INLINE',
-                r'TOML_API',
-                r'TOML_CALLCONV',
-                r'TOML_CONCAT',
-                r'TOML_CONCAT_1',
-                r'TOML_CONFIG_HEADER',
-                r'TOML_CUDA',
-                r'TOML_ENABLE_FORMATTERS',
-                r'TOML_ENABLE_PARSER',
-                r'TOML_ENABLE_SIMD',
-                r'TOML_ENABLE_UNRELEASED_FEATURES',
-                r'TOML_ENABLE_WINDOWS_COMPAT',
-                r'TOML_ENABLE_FLOAT16',
-                r'TOML_EXCEPTIONS',
-                r'TOML_EXPORTED_CLASS',
-                r'TOML_EXPORTED_FREE_FUNCTION',
-                r'TOML_EXPORTED_MEMBER_FUNCTION',
-                r'TOML_EXPORTED_STATIC_FUNCTION',
-                r'TOML_HEADER_ONLY',
-                r'TOML_LANG_MAJOR',
-                r'TOML_LANG_MINOR',
-                r'TOML_LANG_PATCH',
-                r'TOML_LIB_MAJOR',
-                r'TOML_LIB_MINOR',
-                r'TOML_LIB_PATCH',
-                r'TOML_LIB_SINGLE_HEADER',
-                r'TOML_MAX_NESTED_VALUES',
-                r'TOML_MAX_DOTTED_KEYS_DEPTH',
-                r'TOML_NAMESPACE_END',
-                r'TOML_NAMESPACE_START',
-                r'TOML_OPTIONAL_TYPE',
-                r'TOML_SMALL_FLOAT_TYPE',
-                r'TOML_SMALL_INT_TYPE',
-                r'TOML_UNDEF_MACROS',
-                r'TOMLPLUSPLUS_H',
-                r'TOMLPLUSPLUS_HPP',
-                r'TOML_SHARED_LIB',
-                r'TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA',
-                r'TOML_DISABLE_NOEXCEPT_NOEXCEPT',
-            )
-            set_defines = []
-            for define, currently_set in defines.items():
-                if currently_set and define not in ignore_list:
-                    set_defines.append(define)
-            if len(set_defines) > 0:
-                set_defines.sort()
-                print(f"Potentially missing #undefs:")
-                for define in set_defines:
-                    print(f"\t#undef {define}")
 
-        return output_str + '\n'
+def with_generated_undefs(text, single_header):
+    defined = dict()
+    for match in re.finditer(r'(?m)^\s*#\s*(define|undef)\s+([A-Za-z0-9_]+)', UNDEF_BLOCK.sub('', single_header)):
+        defined[match.group(2)] = match.group(1) == r'define'
+    names = sorted(
+        (n for n, d in defined.items() if d and n not in PUBLIC_MACROS), key=lambda n: n.replace('_', ' ').lower()
+    )
+    undefs = ''.join(rf'#undef {name}' + '\n' for name in names)
+    text, count = UNDEF_BLOCK.subn(lambda m: m.group(1) + undefs + m.group(2), text)
+    if count != 1:
+        sys.exit(r'error: include/toml++/toml.hpp: no "#if TOML_UNDEF_MACROS" block of #undefs found')
+    return text
 
 
 def parse_version():
@@ -342,9 +332,13 @@ def main():
 
     outputs = {ROOT / path: apply_rules(path, rules) for path, rules in version_rules(major, minor, patch).items()}
     outputs[ROOT / 'CHANGELOG.md'] = updated_changelog(version)
-    outputs[ROOT / 'toml.hpp'] = generate_single_header(
-        version, lambda path: outputs[path] if path in outputs else read_text_file(path)
-    )
+
+    def read(path):
+        return outputs[path] if path in outputs else read_text_file(path)
+
+    toml_hpp = ROOT / 'include' / 'toml++' / 'toml.hpp'
+    outputs[toml_hpp] = with_generated_undefs(read(toml_hpp), generate_single_header(version, read))
+    outputs[ROOT / 'toml.hpp'] = generate_single_header(version, read)
 
     stale = [path for path, text in outputs.items() if not path.exists() or read_text_file(path) != text]
 

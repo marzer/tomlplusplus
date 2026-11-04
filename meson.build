@@ -133,7 +133,6 @@ global_args += cpp.get_supported_arguments(
 	'-Wno-float-equal',
 	'-Wno-c2y-extensions',
 	'-Wno-unsafe-buffer-usage',
-	'-Wno-unsafe-buffer-usage-in-libc-call',
 	'-Wno-nrvo',
 	'-Wno-poison-system-directories'
 )

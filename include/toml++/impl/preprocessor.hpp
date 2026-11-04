@@ -59,7 +59,7 @@
 //#=====================================================================================================================
 
 #ifndef TOML_MAKE_VERSION
-#define TOML_MAKE_VERSION(major, minor, patch) (((major) * 10000) + ((minor) * 100) + ((patch)))
+#define TOML_MAKE_VERSION(major, minor, patch) (((major) * 1000000) + ((minor) * 1000) + ((patch)))
 #endif
 
 #ifndef TOML_INTELLISENSE
@@ -94,28 +94,36 @@
 #if TOML_CLANG && defined(__apple_build_version__)
 #undef TOML_CLANG
 #define TOML_CLANG_VERSION TOML_MAKE_VERSION(__clang_major__, __clang_minor__, __clang_patchlevel__)
-#if TOML_CLANG_VERSION >= TOML_MAKE_VERSION(15, 0, 0)
-#define TOML_CLANG 16
-#elif TOML_CLANG_VERSION >= TOML_MAKE_VERSION(14, 3, 0)
-#define TOML_CLANG 15
-#elif TOML_CLANG_VERSION >= TOML_MAKE_VERSION(14, 0, 0)
-#define TOML_CLANG 14
-#elif TOML_CLANG_VERSION >= TOML_MAKE_VERSION(13, 1, 6)
-#define TOML_CLANG 13
-#elif TOML_CLANG_VERSION >= TOML_MAKE_VERSION(13, 0, 0)
-#define TOML_CLANG 12
-#elif TOML_CLANG_VERSION >= TOML_MAKE_VERSION(12, 0, 5)
-#define TOML_CLANG 11
-#elif TOML_CLANG_VERSION >= TOML_MAKE_VERSION(12, 0, 0)
-#define TOML_CLANG 10
-#elif TOML_CLANG_VERSION >= TOML_MAKE_VERSION(11, 0, 3)
-#define TOML_CLANG 9
-#elif TOML_CLANG_VERSION >= TOML_MAKE_VERSION(11, 0, 0)
-#define TOML_CLANG 8
-#elif TOML_CLANG_VERSION >= TOML_MAKE_VERSION(10, 0, 1)
-#define TOML_CLANG 7
-#else
+#if TOML_CLANG_VERSION <= TOML_MAKE_VERSION(10, 0, 0)
 #define TOML_CLANG 6 // not strictly correct but doesn't matter below this
+#elif TOML_CLANG_VERSION <= TOML_MAKE_VERSION(10, 0, 1)
+#define TOML_CLANG 7
+#elif TOML_CLANG_VERSION <= TOML_MAKE_VERSION(11, 0, 0)
+#define TOML_CLANG 8
+#elif TOML_CLANG_VERSION <= TOML_MAKE_VERSION(11, 0, 3)
+#define TOML_CLANG 9
+#elif TOML_CLANG_VERSION <= TOML_MAKE_VERSION(12, 0, 0)
+#define TOML_CLANG 10
+#elif TOML_CLANG_VERSION <= TOML_MAKE_VERSION(12, 0, 5)
+#define TOML_CLANG 11
+#elif TOML_CLANG_VERSION <= TOML_MAKE_VERSION(13, 0, 0)
+#define TOML_CLANG 12
+#elif TOML_CLANG_VERSION <= TOML_MAKE_VERSION(13, 1, 6)
+#define TOML_CLANG 13
+#elif TOML_CLANG_VERSION <= TOML_MAKE_VERSION(14, 0, 0)
+#define TOML_CLANG 14
+#elif TOML_CLANG_VERSION <= TOML_MAKE_VERSION(14, 0, 3)
+#define TOML_CLANG 15
+#elif TOML_CLANG_VERSION <= TOML_MAKE_VERSION(15, 0, 0)
+#define TOML_CLANG 16
+#elif TOML_CLANG_VERSION <= TOML_MAKE_VERSION(16, 0, 0)
+#define TOML_CLANG 17
+#elif TOML_CLANG_VERSION <= TOML_MAKE_VERSION(17, 0, 0)
+#define TOML_CLANG 19
+#elif TOML_CLANG_VERSION <= TOML_MAKE_VERSION(21, 0, 0)
+#define TOML_CLANG 21
+#else
+#define TOML_CLANG __clang_major__
 #endif
 #undef TOML_CLANG_VERSION
 #endif
@@ -366,26 +374,6 @@
 #else
 #define TOML_PRAGMA_CLANG(decl)
 #endif
-#if TOML_CLANG >= 8
-#define TOML_PRAGMA_CLANG_GE_8(decl) TOML_PRAGMA_CLANG(decl)
-#else
-#define TOML_PRAGMA_CLANG_GE_8(decl)
-#endif
-#if TOML_CLANG >= 9
-#define TOML_PRAGMA_CLANG_GE_9(decl) TOML_PRAGMA_CLANG(decl)
-#else
-#define TOML_PRAGMA_CLANG_GE_9(decl)
-#endif
-#if TOML_CLANG >= 10
-#define TOML_PRAGMA_CLANG_GE_10(decl) TOML_PRAGMA_CLANG(decl)
-#else
-#define TOML_PRAGMA_CLANG_GE_10(decl)
-#endif
-#if TOML_CLANG >= 11
-#define TOML_PRAGMA_CLANG_GE_11(decl) TOML_PRAGMA_CLANG(decl)
-#else
-#define TOML_PRAGMA_CLANG_GE_11(decl)
-#endif
 #if TOML_GCC
 #define TOML_PRAGMA_GCC(decl) _Pragma(TOML_MAKE_STRING(GCC decl))
 #else
@@ -395,11 +383,6 @@
 #define TOML_PRAGMA_MSVC(...) __pragma(__VA_ARGS__)
 #else
 #define TOML_PRAGMA_MSVC(...)
-#endif
-#if TOML_ICC
-#define TOML_PRAGMA_ICC(...) __pragma(__VA_ARGS__)
-#else
-#define TOML_PRAGMA_ICC(...)
 #endif
 
 // TOML_ALWAYS_INLINE
@@ -471,18 +454,14 @@
 // pure + const
 #ifndef TOML_PURE
 #ifdef NDEBUG
-#define TOML_PURE                                                                                                      \
-	TOML_DECLSPEC(noalias)                                                                                             \
-	TOML_ATTR(pure)
+#define TOML_PURE TOML_ATTR(pure)
 #else
 #define TOML_PURE
 #endif
 #endif
 #ifndef TOML_CONST
 #ifdef NDEBUG
-#define TOML_CONST                                                                                                     \
-	TOML_DECLSPEC(noalias)                                                                                             \
-	TOML_ATTR(const)
+#define TOML_CONST TOML_ATTR(const)
 #else
 #define TOML_CONST
 #endif
@@ -521,10 +500,10 @@
 #define TOML_ASSUME(expr) __assume(expr)
 #elif TOML_ICC || TOML_CLANG || TOML_HAS_BUILTIN(__builtin_assume)
 #define TOML_ASSUME(expr) __builtin_assume(expr)
-#elif TOML_HAS_CPP_ATTR(assume) >= 202207
-#define TOML_ASSUME(expr) [[assume(expr)]]
 #elif TOML_HAS_ATTR(__assume__)
 #define TOML_ASSUME(expr) __attribute__((__assume__(expr)))
+#elif TOML_HAS_CPP_ATTR(assume) >= 202207
+#define TOML_ASSUME(expr) [[assume(expr)]]
 #else
 #define TOML_ASSUME(expr) static_cast<void>(0)
 #endif
@@ -664,59 +643,47 @@
 //======================================================================================================================
 
 #if TOML_CLANG
-
 #define TOML_PUSH_WARNINGS                                                                                             \
 	TOML_PRAGMA_CLANG(diagnostic push)                                                                                 \
 	TOML_PRAGMA_CLANG(diagnostic ignored "-Wunknown-warning-option")                                                   \
 	static_assert(true)
-
-#define TOML_DISABLE_SWITCH_WARNINGS                                                                                   \
-	TOML_PRAGMA_CLANG(diagnostic ignored "-Wswitch")                                                                   \
-	static_assert(true)
-
-#define TOML_DISABLE_ARITHMETIC_WARNINGS                                                                               \
-	TOML_PRAGMA_CLANG_GE_10(diagnostic ignored "-Wimplicit-int-float-conversion")                                      \
-	TOML_PRAGMA_CLANG(diagnostic ignored "-Wfloat-equal")                                                              \
-	TOML_PRAGMA_CLANG(diagnostic ignored "-Wdouble-promotion")                                                         \
-	TOML_PRAGMA_CLANG(diagnostic ignored "-Wchar-subscripts")                                                          \
-	TOML_PRAGMA_CLANG(diagnostic ignored "-Wshift-sign-overflow")                                                      \
-	static_assert(true)
-
-#define TOML_DISABLE_SPAM_WARNINGS                                                                                     \
-	TOML_PRAGMA_CLANG_GE_8(diagnostic ignored "-Wdefaulted-function-deleted")                                          \
-	TOML_PRAGMA_CLANG_GE_9(diagnostic ignored "-Wctad-maybe-unsupported")                                              \
-	TOML_PRAGMA_CLANG_GE_10(diagnostic ignored "-Wzero-as-null-pointer-constant")                                      \
-	TOML_PRAGMA_CLANG_GE_11(diagnostic ignored "-Wsuggest-destructor-override")                                        \
-	TOML_PRAGMA_CLANG(diagnostic ignored "-Wweak-vtables")                                                             \
-	TOML_PRAGMA_CLANG(diagnostic ignored "-Wweak-template-vtables")                                                    \
-	TOML_PRAGMA_CLANG(diagnostic ignored "-Wdouble-promotion")                                                         \
-	TOML_PRAGMA_CLANG(diagnostic ignored "-Wchar-subscripts")                                                          \
-	TOML_PRAGMA_CLANG(diagnostic ignored "-Wmissing-field-initializers")                                               \
-	TOML_PRAGMA_CLANG(diagnostic ignored "-Wpadded")                                                                   \
-	static_assert(true)
-
 #define TOML_POP_WARNINGS                                                                                              \
 	TOML_PRAGMA_CLANG(diagnostic pop)                                                                                  \
 	static_assert(true)
-
-#define TOML_DISABLE_WARNINGS                                                                                          \
-	TOML_PRAGMA_CLANG(diagnostic push)                                                                                 \
-	TOML_PRAGMA_CLANG(diagnostic ignored "-Weverything")                                                               \
-	static_assert(true, "")
-
-#define TOML_ENABLE_WARNINGS                                                                                           \
-	TOML_PRAGMA_CLANG(diagnostic pop)                                                                                  \
-	static_assert(true)
-
-#define TOML_SIMPLE_STATIC_ASSERT_MESSAGES 1
-
 #elif TOML_MSVC
-
 #define TOML_PUSH_WARNINGS                                                                                             \
 	__pragma(warning(push))                                                                                            \
 	static_assert(true)
+#define TOML_POP_WARNINGS                                                                                              \
+	__pragma(warning(pop))                                                                                             \
+	static_assert(true)
+#elif TOML_GCC
+#define TOML_PUSH_WARNINGS                                                                                             \
+	TOML_PRAGMA_GCC(diagnostic push)                                                                                   \
+	static_assert(true)
+#define TOML_POP_WARNINGS                                                                                              \
+	TOML_PRAGMA_GCC(diagnostic pop)                                                                                    \
+	static_assert(true)
+#else
+#define TOML_PUSH_WARNINGS static_assert(true)
+#define TOML_POP_WARNINGS  static_assert(true)
+#endif
 
-#if TOML_HAS_INCLUDE(<CodeAnalysis/Warnings.h>)
+#define TOML_DISABLE_CLANG_WARNING(...)                                                                                \
+	TOML_PRAGMA_CLANG(diagnostic ignored "-Wunknown-warning-option")                                                   \
+	TOML_PRAGMA_CLANG(diagnostic ignored __VA_ARGS__)                                                                  \
+	static_assert(true)
+
+#define TOML_DISABLE_GCC_WARNING(...)                                                                                  \
+	TOML_PRAGMA_GCC(diagnostic ignored "-Wpragmas")                                                                    \
+	TOML_PRAGMA_GCC(diagnostic ignored __VA_ARGS__)                                                                    \
+	static_assert(true)
+
+#define TOML_DISABLE_MSVC_WARNING(...)                                                                                 \
+	TOML_PRAGMA_MSVC(warning(disable : __VA_ARGS__))                                                                   \
+	static_assert(true)
+
+#if TOML_MSVC && TOML_HAS_INCLUDE(<CodeAnalysis/Warnings.h>)
 #pragma warning(push, 0)
 #include <CodeAnalysis/Warnings.h>
 #pragma warning(pop)
@@ -728,176 +695,268 @@
 #endif
 
 #define TOML_DISABLE_SWITCH_WARNINGS                                                                                   \
-	__pragma(warning(disable : 4061))                                                                                  \
-	__pragma(warning(disable : 4062))                                                                                  \
-	__pragma(warning(disable : 4063))                                                                                  \
-	__pragma(warning(disable : 5262))  /* switch-case implicit fallthrough (false-positive) */                         \
-	__pragma(warning(disable : 26819)) /* cg: unannotated fallthrough */                                               \
-	static_assert(true)
-
-#define TOML_DISABLE_SPAM_WARNINGS                                                                                     \
-	__pragma(warning(disable : 4127)) /* conditional expr is constant */                                               \
-	__pragma(warning(disable : 4324)) /* structure was padded due to alignment specifier */                            \
-	__pragma(warning(disable : 4348))                                                                                  \
-	__pragma(warning(disable : 4464)) /* relative include path contains '..' */                                        \
-	__pragma(warning(disable : 4505)) /* unreferenced local function removed */                                        \
-	__pragma(warning(disable : 4514)) /* unreferenced inline function has been removed */                              \
-	__pragma(warning(disable : 4582)) /* constructor is not implicitly called */                                       \
-	__pragma(warning(disable : 4619)) /*  there is no warning number 'XXXX' */                                         \
-	__pragma(warning(disable : 4623)) /* default constructor was implicitly defined as deleted */                      \
-	__pragma(warning(disable : 4625)) /* copy constructor was implicitly defined as deleted */                         \
-	__pragma(warning(disable : 4626)) /* assignment operator was implicitly defined as deleted */                      \
-	__pragma(warning(disable : 4710)) /* function not inlined */                                                       \
-	__pragma(warning(disable : 4711)) /* function selected for automatic expansion */                                  \
-	__pragma(warning(disable : 4820)) /* N bytes padding added */                                                      \
-	__pragma(warning(disable : 5026)) /* move constructor was implicitly defined as deleted	*/                         \
-	__pragma(warning(disable : 5027)) /* move assignment operator was implicitly defined as deleted	*/                 \
-	__pragma(warning(disable : 5039)) /* potentially throwing function passed to 'extern "C"' function */              \
-	__pragma(warning(disable : 5045)) /* Compiler will insert Spectre mitigation */                                    \
-	__pragma(warning(disable : 5264)) /* const variable is not used (false-positive) */                                \
-	__pragma(warning(disable : 26451))                                                                                 \
-	__pragma(warning(disable : 26490))                                                                                 \
-	__pragma(warning(disable : 26495))                                                                                 \
-	__pragma(warning(disable : 26812))                                                                                 \
-	__pragma(warning(disable : 26819))                                                                                 \
+	TOML_DISABLE_CLANG_WARNING("-Wswitch");                                                                            \
+	TOML_DISABLE_CLANG_WARNING("-Wswitch-enum");                                                                       \
+	TOML_DISABLE_CLANG_WARNING("-Wswitch-default");                                                                    \
+	TOML_DISABLE_CLANG_WARNING("-Wcovered-switch-default");                                                            \
+	TOML_DISABLE_GCC_WARNING("-Wswitch");                                                                              \
+	TOML_DISABLE_GCC_WARNING("-Wswitch-enum");                                                                         \
+	TOML_DISABLE_GCC_WARNING("-Wswitch-default");                                                                      \
+	TOML_DISABLE_MSVC_WARNING(4061);                                                                                   \
+	TOML_DISABLE_MSVC_WARNING(4062);                                                                                   \
+	TOML_DISABLE_MSVC_WARNING(4063);                                                                                   \
+	TOML_DISABLE_MSVC_WARNING(4468);                                                                                   \
+	TOML_DISABLE_MSVC_WARNING(5262);  /* switch-case implicit fallthrough (false-positive) */                          \
+	TOML_DISABLE_MSVC_WARNING(26819); /* cg: unannotated fallthrough */                                                \
 	static_assert(true)
 
 #define TOML_DISABLE_ARITHMETIC_WARNINGS                                                                               \
-	__pragma(warning(disable : 4365)) /* argument signed/unsigned mismatch */                                          \
-	__pragma(warning(disable : 4738)) /* storing 32-bit float result in memory */                                      \
-	__pragma(warning(disable : 5219)) /* implicit conversion from integral to float */                                 \
+	TOML_DISABLE_CLANG_WARNING("-Wimplicit-int-float-conversion");                                                     \
+	TOML_DISABLE_CLANG_WARNING("-Wfloat-equal");                                                                       \
+	TOML_DISABLE_CLANG_WARNING("-Wdouble-promotion");                                                                  \
+	TOML_DISABLE_CLANG_WARNING("-Wchar-subscripts");                                                                   \
+	TOML_DISABLE_CLANG_WARNING("-Wshift-sign-overflow");                                                               \
+	TOML_DISABLE_GCC_WARNING("-Wfloat-equal");                                                                         \
+	TOML_DISABLE_GCC_WARNING("-Wsign-conversion");                                                                     \
+	TOML_DISABLE_GCC_WARNING("-Wchar-subscripts");                                                                     \
+	TOML_DISABLE_MSVC_WARNING(4365); /* argument signed/unsigned mismatch */                                           \
+	TOML_DISABLE_MSVC_WARNING(4738); /* storing 32-bit float result in memory */                                       \
+	TOML_DISABLE_MSVC_WARNING(5219); /* implicit conversion from integral to float */                                  \
 	static_assert(true)
 
-#define TOML_POP_WARNINGS                                                                                              \
-	__pragma(warning(pop))                                                                                             \
+#define TOML_DISABLE_SUGGEST_ATTR_WARNINGS                                                                             \
+	TOML_DISABLE_GCC_WARNING("-Wsuggest-attribute=const");                                                             \
+	TOML_DISABLE_GCC_WARNING("-Wsuggest-attribute=pure");                                                              \
 	static_assert(true)
 
+#define TOML_DISABLE_SPAM_WARNINGS                                                                                     \
+	TOML_DISABLE_CLANG_WARNING("-Wdefaulted-function-deleted");                                                        \
+	TOML_DISABLE_CLANG_WARNING("-Wctad-maybe-unsupported");                                                            \
+	TOML_DISABLE_CLANG_WARNING("-Wzero-as-null-pointer-constant");                                                     \
+	TOML_DISABLE_CLANG_WARNING("-Wsuggest-destructor-override");                                                       \
+	TOML_DISABLE_CLANG_WARNING("-Wweak-vtables");                                                                      \
+	TOML_DISABLE_CLANG_WARNING("-Wweak-template-vtables");                                                             \
+	TOML_DISABLE_CLANG_WARNING("-Wdouble-promotion");                                                                  \
+	TOML_DISABLE_CLANG_WARNING("-Wchar-subscripts");                                                                   \
+	TOML_DISABLE_CLANG_WARNING("-Wmissing-field-initializers");                                                        \
+	TOML_DISABLE_CLANG_WARNING("-Wpadded");                                                                            \
+	TOML_DISABLE_CLANG_WARNING("-Wc++20-compat");                                                                      \
+	TOML_DISABLE_CLANG_WARNING("-Wc++2a-compat");                                                                      \
+	TOML_DISABLE_CLANG_WARNING("-Wc++98-compat");                                                                      \
+	TOML_DISABLE_CLANG_WARNING("-Wc++98-compat-pedantic");                                                             \
+	TOML_DISABLE_CLANG_WARNING("-Wc2y-extensions");                                                                    \
+	TOML_DISABLE_CLANG_WARNING("-Wcovered-switch-default");                                                            \
+	TOML_DISABLE_CLANG_WARNING("-Wdisabled-macro-expansion");                                                          \
+	TOML_DISABLE_CLANG_WARNING("-Wnrvo");                                                                              \
+	TOML_DISABLE_CLANG_WARNING("-Wpacked");                                                                            \
+	TOML_DISABLE_CLANG_WARNING("-Wtautological-pointer-compare");                                                      \
+	TOML_DISABLE_CLANG_WARNING("-Wunsafe-buffer-usage");                                                               \
+	TOML_DISABLE_CLANG_WARNING("-Wused-but-marked-unused");                                                            \
+	TOML_DISABLE_GCC_WARNING("-Wpadded");                                                                              \
+	TOML_DISABLE_GCC_WARNING("-Wcast-align");                                                                          \
+	TOML_DISABLE_GCC_WARNING("-Wcomment");                                                                             \
+	TOML_DISABLE_GCC_WARNING("-Wtype-limits");                                                                         \
+	TOML_DISABLE_GCC_WARNING("-Wuseless-cast");                                                                        \
+	TOML_DISABLE_GCC_WARNING("-Wchar-subscripts");                                                                     \
+	TOML_DISABLE_GCC_WARNING("-Wsubobject-linkage");                                                                   \
+	TOML_DISABLE_GCC_WARNING("-Wmissing-field-initializers");                                                          \
+	TOML_DISABLE_GCC_WARNING("-Wmaybe-uninitialized");                                                                 \
+	TOML_DISABLE_GCC_WARNING("-Wnoexcept");                                                                            \
+	TOML_DISABLE_GCC_WARNING("-Wnull-dereference");                                                                    \
+	TOML_DISABLE_GCC_WARNING("-Wduplicated-branches");                                                                 \
+	TOML_DISABLE_MSVC_WARNING(4127); /* conditional expr is constant */                                                \
+	TOML_DISABLE_MSVC_WARNING(4324); /* structure was padded due to alignment specifier */                             \
+	TOML_DISABLE_MSVC_WARNING(4348);                                                                                   \
+	TOML_DISABLE_MSVC_WARNING(4464); /* relative include path contains '..' */                                         \
+	TOML_DISABLE_MSVC_WARNING(4505); /* unreferenced local function removed */                                         \
+	TOML_DISABLE_MSVC_WARNING(4514); /* unreferenced inline function has been removed */                               \
+	TOML_DISABLE_MSVC_WARNING(4582); /* constructor is not implicitly called */                                        \
+	TOML_DISABLE_MSVC_WARNING(4619); /*  there is no warning number 'XXXX' */                                          \
+	TOML_DISABLE_MSVC_WARNING(4623); /* default constructor was implicitly defined as deleted */                       \
+	TOML_DISABLE_MSVC_WARNING(4625); /* copy constructor was implicitly defined as deleted */                          \
+	TOML_DISABLE_MSVC_WARNING(4626); /* assignment operator was implicitly defined as deleted */                       \
+	TOML_DISABLE_MSVC_WARNING(4686);                                                                                   \
+	TOML_DISABLE_MSVC_WARNING(4710); /* function not inlined */                                                        \
+	TOML_DISABLE_MSVC_WARNING(4711); /* function selected for automatic expansion */                                   \
+	TOML_DISABLE_MSVC_WARNING(4820); /* N bytes padding added */                                                       \
+	TOML_DISABLE_MSVC_WARNING(4848);                                                                                   \
+	TOML_DISABLE_MSVC_WARNING(4866);                                                                                   \
+	TOML_DISABLE_MSVC_WARNING(4946);                                                                                   \
+	TOML_DISABLE_MSVC_WARNING(5026); /* move constructor was implicitly defined as deleted	*/                          \
+	TOML_DISABLE_MSVC_WARNING(5027); /* move assignment operator was implicitly defined as deleted	*/                  \
+	TOML_DISABLE_MSVC_WARNING(5039); /* potentially throwing function passed to 'extern "C"' function */               \
+	TOML_DISABLE_MSVC_WARNING(5045); /* Compiler will insert Spectre mitigation */                                     \
+	TOML_DISABLE_MSVC_WARNING(5246);                                                                                   \
+	TOML_DISABLE_MSVC_WARNING(5264); /* const variable is not used (false-positive) */                                 \
+	TOML_DISABLE_MSVC_WARNING(26451);                                                                                  \
+	TOML_DISABLE_MSVC_WARNING(26490);                                                                                  \
+	TOML_DISABLE_MSVC_WARNING(26495);                                                                                  \
+	TOML_DISABLE_MSVC_WARNING(26812);                                                                                  \
+	TOML_DISABLE_MSVC_WARNING(26819);                                                                                  \
+	static_assert(true)
+
+#if TOML_CLANG
+#define TOML_DISABLE_WARNINGS                                                                                          \
+	TOML_PRAGMA_CLANG(diagnostic push)                                                                                 \
+	TOML_PRAGMA_CLANG(diagnostic ignored "-Weverything")                                                               \
+	static_assert(true, "")
+#elif TOML_MSVC
 #define TOML_DISABLE_WARNINGS                                                                                          \
 	__pragma(warning(push, 0))                                                                                         \
-	__pragma(warning(disable : 4348))                                                                                  \
-	__pragma(warning(disable : 4668))                                                                                  \
-	__pragma(warning(disable : 5105))                                                                                  \
-	__pragma(warning(disable : 5264))                                                                                  \
+	TOML_DISABLE_MSVC_WARNING(4348);                                                                                   \
+	TOML_DISABLE_MSVC_WARNING(4668);                                                                                   \
+	TOML_DISABLE_MSVC_WARNING(5105);                                                                                   \
+	TOML_DISABLE_MSVC_WARNING(5264);                                                                                   \
 	TOML_DISABLE_CODE_ANALYSIS_WARNINGS;                                                                               \
 	TOML_DISABLE_SWITCH_WARNINGS;                                                                                      \
 	TOML_DISABLE_SPAM_WARNINGS;                                                                                        \
 	TOML_DISABLE_ARITHMETIC_WARNINGS;                                                                                  \
 	static_assert(true)
-
-#define TOML_ENABLE_WARNINGS TOML_POP_WARNINGS
-
-#elif TOML_ICC
-
-#define TOML_PUSH_WARNINGS                                                                                             \
-	__pragma(warning(push))                                                                                            \
-	static_assert(true)
-
-#define TOML_DISABLE_SPAM_WARNINGS                                                                                     \
-	__pragma(warning(disable : 82))	  /* storage class is not first */                                                 \
-	__pragma(warning(disable : 111))  /* statement unreachable (false-positive) */                                     \
-	__pragma(warning(disable : 869))  /* unreferenced parameter */                                                     \
-	__pragma(warning(disable : 1011)) /* missing return (false-positive) */                                            \
-	__pragma(warning(disable : 2261)) /* assume expr side-effects discarded */                                         \
-	static_assert(true)
-
-#define TOML_POP_WARNINGS                                                                                              \
-	__pragma(warning(pop))                                                                                             \
-	static_assert(true)
-
-#define TOML_DISABLE_WARNINGS                                                                                          \
-	__pragma(warning(push, 0))                                                                                         \
-	TOML_DISABLE_SPAM_WARNINGS
-
-#define TOML_ENABLE_WARNINGS                                                                                           \
-	__pragma(warning(pop))                                                                                             \
-	static_assert(true)
-
 #elif TOML_GCC
-
-#define TOML_PUSH_WARNINGS                                                                                             \
-	TOML_PRAGMA_GCC(diagnostic push)                                                                                   \
-	static_assert(true)
-
-#define TOML_DISABLE_SWITCH_WARNINGS                                                                                   \
-	TOML_PRAGMA_GCC(diagnostic ignored "-Wswitch")                                                                     \
-	TOML_PRAGMA_GCC(diagnostic ignored "-Wswitch-enum")                                                                \
-	TOML_PRAGMA_GCC(diagnostic ignored "-Wswitch-default")                                                             \
-	static_assert(true)
-
-#define TOML_DISABLE_ARITHMETIC_WARNINGS                                                                               \
-	TOML_PRAGMA_GCC(diagnostic ignored "-Wfloat-equal")                                                                \
-	TOML_PRAGMA_GCC(diagnostic ignored "-Wsign-conversion")                                                            \
-	TOML_PRAGMA_GCC(diagnostic ignored "-Wchar-subscripts")                                                            \
-	static_assert(true)
-
-#define TOML_DISABLE_SUGGEST_ATTR_WARNINGS                                                                             \
-	TOML_PRAGMA_GCC(diagnostic ignored "-Wsuggest-attribute=const")                                                    \
-	TOML_PRAGMA_GCC(diagnostic ignored "-Wsuggest-attribute=pure")                                                     \
-	static_assert(true)
-
-#define TOML_DISABLE_SPAM_WARNINGS                                                                                     \
-	TOML_PRAGMA_GCC(diagnostic ignored "-Wpadded")                                                                     \
-	TOML_PRAGMA_GCC(diagnostic ignored "-Wcast-align")                                                                 \
-	TOML_PRAGMA_GCC(diagnostic ignored "-Wcomment")                                                                    \
-	TOML_PRAGMA_GCC(diagnostic ignored "-Wtype-limits")                                                                \
-	TOML_PRAGMA_GCC(diagnostic ignored "-Wuseless-cast")                                                               \
-	TOML_PRAGMA_GCC(diagnostic ignored "-Wchar-subscripts")                                                            \
-	TOML_PRAGMA_GCC(diagnostic ignored "-Wsubobject-linkage")                                                          \
-	TOML_PRAGMA_GCC(diagnostic ignored "-Wmissing-field-initializers")                                                 \
-	TOML_PRAGMA_GCC(diagnostic ignored "-Wmaybe-uninitialized")                                                        \
-	TOML_PRAGMA_GCC(diagnostic ignored "-Wnoexcept")                                                                   \
-	TOML_PRAGMA_GCC(diagnostic ignored "-Wnull-dereference")                                                           \
-	TOML_PRAGMA_GCC(diagnostic ignored "-Wduplicated-branches")                                                        \
-	static_assert(true)
-
-#define TOML_POP_WARNINGS                                                                                              \
-	TOML_PRAGMA_GCC(diagnostic pop)                                                                                    \
-	static_assert(true)
-
 #define TOML_DISABLE_WARNINGS                                                                                          \
 	TOML_PRAGMA_GCC(diagnostic push)                                                                                   \
-	TOML_PRAGMA_GCC(diagnostic ignored "-Wall")                                                                        \
-	TOML_PRAGMA_GCC(diagnostic ignored "-Wextra")                                                                      \
-	TOML_PRAGMA_GCC(diagnostic ignored "-Wpedantic")                                                                   \
 	TOML_DISABLE_SWITCH_WARNINGS;                                                                                      \
 	TOML_DISABLE_ARITHMETIC_WARNINGS;                                                                                  \
 	TOML_DISABLE_SUGGEST_ATTR_WARNINGS;                                                                                \
 	TOML_DISABLE_SPAM_WARNINGS;                                                                                        \
+	TOML_DISABLE_GCC_WARNING("-Wabi");                                                                                 \
+	TOML_DISABLE_GCC_WARNING("-Wabi-tag");                                                                             \
+	TOML_DISABLE_GCC_WARNING("-Waddress");                                                                             \
+	TOML_DISABLE_GCC_WARNING("-Waggregate-return");                                                                    \
+	TOML_DISABLE_GCC_WARNING("-Wall");                                                                                 \
+	TOML_DISABLE_GCC_WARNING("-Walloc-zero");                                                                          \
+	TOML_DISABLE_GCC_WARNING("-Walloca");                                                                              \
+	TOML_DISABLE_GCC_WARNING("-Warith-conversion");                                                                    \
+	TOML_DISABLE_GCC_WARNING("-Warray-bounds");                                                                        \
+	TOML_DISABLE_GCC_WARNING("-Wbuiltin-macro-redefined");                                                             \
+	TOML_DISABLE_GCC_WARNING("-Wc++17-extensions");                                                                    \
+	TOML_DISABLE_GCC_WARNING("-Wcast-qual");                                                                           \
+	TOML_DISABLE_GCC_WARNING("-Wchkp");                                                                                \
+	TOML_DISABLE_GCC_WARNING("-Wclass-memaccess");                                                                     \
+	TOML_DISABLE_GCC_WARNING("-Wclobbered");                                                                           \
+	TOML_DISABLE_GCC_WARNING("-Wcomma-subscript");                                                                     \
+	TOML_DISABLE_GCC_WARNING("-Wconditionally-supported");                                                             \
+	TOML_DISABLE_GCC_WARNING("-Wconversion");                                                                          \
+	TOML_DISABLE_GCC_WARNING("-Wctad-maybe-unsupported");                                                              \
+	TOML_DISABLE_GCC_WARNING("-Wctor-dtor-privacy");                                                                   \
+	TOML_DISABLE_GCC_WARNING("-Wdate-time");                                                                           \
+	TOML_DISABLE_GCC_WARNING("-Wdelete-non-virtual-dtor");                                                             \
+	TOML_DISABLE_GCC_WARNING("-Wdeprecated");                                                                          \
+	TOML_DISABLE_GCC_WARNING("-Wdeprecated-copy");                                                                     \
+	TOML_DISABLE_GCC_WARNING("-Wdeprecated-copy-dtor");                                                                \
+	TOML_DISABLE_GCC_WARNING("-Wdeprecated-declarations");                                                             \
+	TOML_DISABLE_GCC_WARNING("-Wdeprecated-enum-enum-conversion");                                                     \
+	TOML_DISABLE_GCC_WARNING("-Wdeprecated-enum-float-conversion");                                                    \
+	TOML_DISABLE_GCC_WARNING("-Wdisabled-optimization");                                                               \
+	TOML_DISABLE_GCC_WARNING("-Wdouble-promotion");                                                                    \
+	TOML_DISABLE_GCC_WARNING("-Wduplicated-cond");                                                                     \
+	TOML_DISABLE_GCC_WARNING("-Wempty-body");                                                                          \
+	TOML_DISABLE_GCC_WARNING("-Wendif-labels");                                                                        \
+	TOML_DISABLE_GCC_WARNING("-Wenum-compare");                                                                        \
+	TOML_DISABLE_GCC_WARNING("-Wextra");                                                                               \
+	TOML_DISABLE_GCC_WARNING("-Wextra-semi");                                                                          \
+	TOML_DISABLE_GCC_WARNING("-Wfloat-conversion");                                                                    \
+	TOML_DISABLE_GCC_WARNING("-Wformat");                                                                              \
+	TOML_DISABLE_GCC_WARNING("-Wformat-contains-nul");                                                                 \
+	TOML_DISABLE_GCC_WARNING("-Wformat-extra-args");                                                                   \
+	TOML_DISABLE_GCC_WARNING("-Wformat-nonliteral");                                                                   \
+	TOML_DISABLE_GCC_WARNING("-Wformat-security");                                                                     \
+	TOML_DISABLE_GCC_WARNING("-Wformat-signedness");                                                                   \
+	TOML_DISABLE_GCC_WARNING("-Wformat-zero-length");                                                                  \
+	TOML_DISABLE_GCC_WARNING("-Wignored-qualifiers");                                                                  \
+	TOML_DISABLE_GCC_WARNING("-Winit-self");                                                                           \
+	TOML_DISABLE_GCC_WARNING("-Winline");                                                                              \
+	TOML_DISABLE_GCC_WARNING("-Winterference-size");                                                                   \
+	TOML_DISABLE_GCC_WARNING("-Winvalid-imported-macros");                                                             \
+	TOML_DISABLE_GCC_WARNING("-Winvalid-pch");                                                                         \
+	TOML_DISABLE_GCC_WARNING("-Wliteral-suffix");                                                                      \
+	TOML_DISABLE_GCC_WARNING("-Wlogical-op");                                                                          \
+	TOML_DISABLE_GCC_WARNING("-Wlong-long");                                                                           \
+	TOML_DISABLE_GCC_WARNING("-Wmain");                                                                                \
+	TOML_DISABLE_GCC_WARNING("-Wmismatched-tags");                                                                     \
+	TOML_DISABLE_GCC_WARNING("-Wmissing-braces");                                                                      \
+	TOML_DISABLE_GCC_WARNING("-Wmissing-declarations");                                                                \
+	TOML_DISABLE_GCC_WARNING("-Wmissing-format-attribute");                                                            \
+	TOML_DISABLE_GCC_WARNING("-Wmissing-include-dirs");                                                                \
+	TOML_DISABLE_GCC_WARNING("-Wmissing-noreturn");                                                                    \
+	TOML_DISABLE_GCC_WARNING("-Wmultichar");                                                                           \
+	TOML_DISABLE_GCC_WARNING("-Wmultiple-inheritance");                                                                \
+	TOML_DISABLE_GCC_WARNING("-Wnamespaces");                                                                          \
+	TOML_DISABLE_GCC_WARNING("-Wnarrowing");                                                                           \
+	TOML_DISABLE_GCC_WARNING("-Wnoexcept-type");                                                                       \
+	TOML_DISABLE_GCC_WARNING("-Wnon-virtual-dtor");                                                                    \
+	TOML_DISABLE_GCC_WARNING("-Wnonnull");                                                                             \
+	TOML_DISABLE_GCC_WARNING("-Wold-style-cast");                                                                      \
+	TOML_DISABLE_GCC_WARNING("-Woverlength-strings");                                                                  \
+	TOML_DISABLE_GCC_WARNING("-Woverloaded-virtual");                                                                  \
+	TOML_DISABLE_GCC_WARNING("-Wpacked");                                                                              \
+	TOML_DISABLE_GCC_WARNING("-Wpacked-bitfield-compat");                                                              \
+	TOML_DISABLE_GCC_WARNING("-Wparentheses");                                                                         \
+	TOML_DISABLE_GCC_WARNING("-Wpedantic");                                                                            \
+	TOML_DISABLE_GCC_WARNING("-Wpessimizing-move");                                                                    \
+	TOML_DISABLE_GCC_WARNING("-Wpointer-arith");                                                                       \
+	TOML_DISABLE_GCC_WARNING("-Wredundant-decls");                                                                     \
+	TOML_DISABLE_GCC_WARNING("-Wredundant-tags");                                                                      \
+	TOML_DISABLE_GCC_WARNING("-Wregister");                                                                            \
+	TOML_DISABLE_GCC_WARNING("-Wreorder");                                                                             \
+	TOML_DISABLE_GCC_WARNING("-Wrestrict");                                                                            \
+	TOML_DISABLE_GCC_WARNING("-Wreturn-type");                                                                         \
+	TOML_DISABLE_GCC_WARNING("-Wsequence-point");                                                                      \
+	TOML_DISABLE_GCC_WARNING("-Wshadow");                                                                              \
+	TOML_DISABLE_GCC_WARNING("-Wshift-negative-value");                                                                \
+	TOML_DISABLE_GCC_WARNING("-Wsign-compare");                                                                        \
+	TOML_DISABLE_GCC_WARNING("-Wsign-promo");                                                                          \
+	TOML_DISABLE_GCC_WARNING("-Wstack-protector");                                                                     \
+	TOML_DISABLE_GCC_WARNING("-Wstrict-aliasing");                                                                     \
+	TOML_DISABLE_GCC_WARNING("-Wstrict-null-sentinel");                                                                \
+	TOML_DISABLE_GCC_WARNING("-Wstrict-overflow");                                                                     \
+	TOML_DISABLE_GCC_WARNING("-Wstring-compare");                                                                      \
+	TOML_DISABLE_GCC_WARNING("-Wstringop-overread");                                                                   \
+	TOML_DISABLE_GCC_WARNING("-Wstringop-truncation");                                                                 \
+	TOML_DISABLE_GCC_WARNING("-Wsuggest-final-methods");                                                               \
+	TOML_DISABLE_GCC_WARNING("-Wsuggest-final-types");                                                                 \
+	TOML_DISABLE_GCC_WARNING("-Wsuggest-override");                                                                    \
+	TOML_DISABLE_GCC_WARNING("-Wsynth");                                                                               \
+	TOML_DISABLE_GCC_WARNING("-Wsystem-headers");                                                                      \
+	TOML_DISABLE_GCC_WARNING("-Wtemplates");                                                                           \
+	TOML_DISABLE_GCC_WARNING("-Wterminate");                                                                           \
+	TOML_DISABLE_GCC_WARNING("-Wtrampolines");                                                                         \
+	TOML_DISABLE_GCC_WARNING("-Wtrigraphs");                                                                           \
+	TOML_DISABLE_GCC_WARNING("-Wundef");                                                                               \
+	TOML_DISABLE_GCC_WARNING("-Wuninitialized");                                                                       \
+	TOML_DISABLE_GCC_WARNING("-Wunknown-pragmas");                                                                     \
+	TOML_DISABLE_GCC_WARNING("-Wunreachable-code");                                                                    \
+	TOML_DISABLE_GCC_WARNING("-Wunsafe-loop-optimizations");                                                           \
+	TOML_DISABLE_GCC_WARNING("-Wunused");                                                                              \
+	TOML_DISABLE_GCC_WARNING("-Wunused-but-set-parameter");                                                            \
+	TOML_DISABLE_GCC_WARNING("-Wunused-but-set-variable");                                                             \
+	TOML_DISABLE_GCC_WARNING("-Wunused-function");                                                                     \
+	TOML_DISABLE_GCC_WARNING("-Wunused-label");                                                                        \
+	TOML_DISABLE_GCC_WARNING("-Wunused-local-typedefs");                                                               \
+	TOML_DISABLE_GCC_WARNING("-Wunused-macros");                                                                       \
+	TOML_DISABLE_GCC_WARNING("-Wunused-parameter");                                                                    \
+	TOML_DISABLE_GCC_WARNING("-Wunused-result");                                                                       \
+	TOML_DISABLE_GCC_WARNING("-Wunused-value");                                                                        \
+	TOML_DISABLE_GCC_WARNING("-Wunused-variable");                                                                     \
+	TOML_DISABLE_GCC_WARNING("-Wvariadic-macros");                                                                     \
+	TOML_DISABLE_GCC_WARNING("-Wvector-operation-performance");                                                        \
+	TOML_DISABLE_GCC_WARNING("-Wvirtual-inheritance");                                                                 \
+	TOML_DISABLE_GCC_WARNING("-Wvla");                                                                                 \
+	TOML_DISABLE_GCC_WARNING("-Wvolatile");                                                                            \
+	TOML_DISABLE_GCC_WARNING("-Wvolatile-register-var");                                                               \
+	TOML_DISABLE_GCC_WARNING("-Wwrite-strings");                                                                       \
+	TOML_DISABLE_GCC_WARNING("-Wzero-as-null-pointer-constant");                                                       \
 	static_assert(true)
-
-#define TOML_ENABLE_WARNINGS                                                                                           \
-	TOML_PRAGMA_GCC(diagnostic pop)                                                                                    \
-	static_assert(true)
-
-#endif
-
-#ifndef TOML_PUSH_WARNINGS
-#define TOML_PUSH_WARNINGS static_assert(true)
-#endif
-#ifndef TOML_DISABLE_CODE_ANALYSIS_WARNINGS
-#define TOML_DISABLE_CODE_ANALYSIS_WARNINGS static_assert(true)
-#endif
-#ifndef TOML_DISABLE_SWITCH_WARNINGS
-#define TOML_DISABLE_SWITCH_WARNINGS static_assert(true)
-#endif
-#ifndef TOML_DISABLE_SUGGEST_ATTR_WARNINGS
-#define TOML_DISABLE_SUGGEST_ATTR_WARNINGS static_assert(true)
-#endif
-#ifndef TOML_DISABLE_SPAM_WARNINGS
-#define TOML_DISABLE_SPAM_WARNINGS static_assert(true)
-#endif
-#ifndef TOML_DISABLE_ARITHMETIC_WARNINGS
-#define TOML_DISABLE_ARITHMETIC_WARNINGS static_assert(true)
-#endif
-#ifndef TOML_POP_WARNINGS
-#define TOML_POP_WARNINGS static_assert(true)
-#endif
-#ifndef TOML_DISABLE_WARNINGS
+#else
 #define TOML_DISABLE_WARNINGS static_assert(true)
 #endif
-#ifndef TOML_ENABLE_WARNINGS
-#define TOML_ENABLE_WARNINGS static_assert(true)
+
+#define TOML_ENABLE_WARNINGS TOML_POP_WARNINGS
+
+#if TOML_CLANG
+#define TOML_SIMPLE_STATIC_ASSERT_MESSAGES 1
 #endif
+
 #ifndef TOML_SIMPLE_STATIC_ASSERT_MESSAGES
 #define TOML_SIMPLE_STATIC_ASSERT_MESSAGES 0
 #endif
@@ -1208,12 +1267,27 @@
 #define TOML_ASSERT(expr) static_assert(true)
 #endif
 #ifndef TOML_ASSERT
+#ifdef __clang_tidy__
+TOML_DISABLE_WARNINGS;
+#include <cstdlib>
+TOML_ENABLE_WARNINGS;
+#define TOML_ASSERT(expr)                                                                                              \
+	do                                                                                                                 \
+	{                                                                                                                  \
+		TOML_DISABLE_WARNINGS;                                                                                         \
+		if (!(expr))	  /* NOLINT */                                                                                 \
+			std::abort(); /* NOLINT */                                                                                 \
+		TOML_ENABLE_WARNINGS;                                                                                          \
+	}                                                                                                                  \
+	while (false)
+#else
 #ifndef assert
 TOML_DISABLE_WARNINGS;
 #include <cassert>
 TOML_ENABLE_WARNINGS;
 #endif
 #define TOML_ASSERT(expr) assert(expr)
+#endif
 #endif
 #ifdef NDEBUG
 #define TOML_ASSERT_ASSUME(expr) TOML_ASSUME(expr)
