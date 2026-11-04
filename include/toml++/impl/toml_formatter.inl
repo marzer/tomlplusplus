@@ -126,6 +126,44 @@ TOML_NAMESPACE_START
 		}
 	}
 
+#if TOML_ENABLE_COMMENTS
+	TOML_EXTERNAL_LINKAGE
+	void toml_formatter::print_leading_comments(const node& nde)
+	{
+		// each comment gets its own line, directly above the node
+		for (auto& comment : nde.leading_comments())
+		{
+			print_newline();
+			print_indent();
+			print_unformatted('#');
+			if (!comment.empty())
+				print_unformatted(' ');
+			for (auto c : comment)
+				print_unformatted((c == '\n' || c == '\r') ? ' ' : c); // keep it on one line
+		}
+		if (!nde.leading_comments().empty())
+			print_newline(true);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	void toml_formatter::print_trailing_comment(const node& nde)
+	{
+		if (nde.trailing_comment().empty())
+			return;
+		print_unformatted(" # "sv);
+		for (auto c : nde.trailing_comment())
+			print_unformatted((c == '\n' || c == '\r') ? ' ' : c);
+	}
+#else
+	TOML_EXTERNAL_LINKAGE
+	void toml_formatter::print_leading_comments(const node&)
+	{}
+
+	TOML_EXTERNAL_LINKAGE
+	void toml_formatter::print_trailing_comment(const node&)
+	{}
+#endif
+
 	TOML_EXTERNAL_LINKAGE
 	void toml_formatter::print(const key& k)
 	{
@@ -256,6 +294,7 @@ TOML_NAMESPACE_START
 
 			pending_table_separator_ = true;
 			print_newline();
+			print_leading_comments(v);
 			print_indent();
 			print(k);
 			if (terse_kvps())
@@ -269,6 +308,7 @@ TOML_NAMESPACE_START
 				case node_type::array: print(*static_cast<const array*>(&v)); break;
 				default: print_value(v, type);
 			}
+			print_trailing_comment(v);
 		}
 
 		const auto print_key_path = [&]()
@@ -330,10 +370,12 @@ TOML_NAMESPACE_START
 				print_pending_table_separator();
 				if (indent_sub_tables())
 					increase_indent();
+				print_leading_comments(child_tbl);
 				print_indent();
 				print_unformatted("["sv);
 				print_key_path();
 				print_unformatted("]"sv);
+				print_trailing_comment(child_tbl);
 				pending_table_separator_ = true;
 			}
 
@@ -358,10 +400,12 @@ TOML_NAMESPACE_START
 			for (size_t i = 0; i < arr.size(); i++)
 			{
 				print_pending_table_separator();
+				print_leading_comments(arr[i]);
 				print_indent();
 				print_unformatted("[["sv);
 				print_key_path();
 				print_unformatted("]]"sv);
+				print_trailing_comment(arr[i]);
 				pending_table_separator_ = true;
 				print(*static_cast<const table*>(&arr[i]));
 			}

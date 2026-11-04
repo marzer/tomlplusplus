@@ -7,6 +7,7 @@ assert(build_tests)
 
 test_sources = files(
 	'at_path.cpp',
+	'comments.cpp',
 	'conformance_burntsushi_invalid.cpp',
 	'conformance_burntsushi_valid.cpp',
 	'conformance_iarna_invalid.cpp',

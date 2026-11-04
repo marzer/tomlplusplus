@@ -294,6 +294,7 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 -   **[@GiulioRomualdi](https://github.com/GiulioRomualdi)** - Added cmake+meson support
 -   **[@jonestristand](https://github.com/jonestristand)** - Designed and implemented the `toml::path`s feature
 -   **[@kcsaul](https://github.com/kcsaul)** - Fixed a bug
+-   **[@Lazrius](https://github.com/Lazrius)** - Comment parsing
 -   **[@levicki](https://github.com/levicki)** - Helped design some new features
 -   **[@mikomikotaishi](https://github.com/mikomikotaishi)** - Added support for C++20 modules and custom strings
 -   **[@moorereason](https://github.com/moorereason)** - Reported a whole bunch of bugs

@@ -50,6 +50,8 @@ is_icc = is_icc_cl or cpp.get_id() == 'intel'
 is_lld = cpp.get_linker_id() == 'ld.lld'
 has_exceptions = get_option('cpp_eh') != 'none'
 unreleased_features = get_option('unreleased_features')
+# changes the layout of toml::node, so consumers need it too
+user_args = get_option('enable_comments') ? cpp.get_supported_arguments('-DTOML_ENABLE_COMMENTS=1') : []
 
 build_tests = (get_option('build_tests') or is_devel) and not is_subproject
 build_examples = (get_option('build_examples') or is_devel) and not is_subproject

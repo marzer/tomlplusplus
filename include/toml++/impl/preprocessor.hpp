@@ -1083,6 +1083,20 @@
 ///  - toml::json_formatter
 ///  - toml::yaml_formatter
 
+// comments
+#if (defined(TOML_ENABLE_COMMENTS) && TOML_ENABLE_COMMENTS) || TOML_INTELLISENSE
+#undef TOML_ENABLE_COMMENTS
+#define TOML_ENABLE_COMMENTS 1
+#else
+#undef TOML_ENABLE_COMMENTS
+#define TOML_ENABLE_COMMENTS 0
+#endif
+/// \def		TOML_ENABLE_COMMENTS
+/// \brief	Enables parsing, storing and printing comments attached to nodes.
+/// \detail	Defaults to `0`. When enabled, toml::node gains leading_comments() and trailing_comment(), the parser
+/// 		fills them in for key-value pairs and table headers, and toml::toml_formatter prints them.
+/// \warning	This changes the layout of toml::node; define it consistently across your whole program.
+
 // SIMD
 #if !defined(TOML_ENABLE_SIMD) || (defined(TOML_ENABLE_SIMD) && TOML_ENABLE_SIMD) || TOML_INTELLISENSE
 #undef TOML_ENABLE_SIMD

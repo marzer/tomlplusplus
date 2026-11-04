@@ -53,6 +53,13 @@ TOML_NAMESPACE_START
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void print_pending_table_separator();
 
+		// no-ops unless TOML_ENABLE_COMMENTS is 1
+		TOML_EXPORTED_MEMBER_FUNCTION
+		void print_leading_comments(const node&);
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		void print_trailing_comment(const node&);
+
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const key&);
 

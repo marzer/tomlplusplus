@@ -152,12 +152,15 @@ TEST_CASE("user feedback")
 							   data,
 							   [](auto&& table)
 							   {
+								   TOML_UNUSED(table);
+#if !TOML_ENABLE_COMMENTS // the formatter would print the comments
 								   std::stringstream ss;
 								   ss << table;
 								   CHECK(ss.str() == R"(a = { key = 1 }
 b = []
 
 [[c]])"sv);
+#endif
 							   });
 	}
 

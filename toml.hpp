@@ -1029,6 +1029,15 @@
 #define TOML_ENABLE_FORMATTERS 1
 #endif
 
+// comments
+#if (defined(TOML_ENABLE_COMMENTS) && TOML_ENABLE_COMMENTS) || TOML_INTELLISENSE
+#undef TOML_ENABLE_COMMENTS
+#define TOML_ENABLE_COMMENTS 1
+#else
+#undef TOML_ENABLE_COMMENTS
+#define TOML_ENABLE_COMMENTS 0
+#endif
+
 // SIMD
 #if !defined(TOML_ENABLE_SIMD) || (defined(TOML_ENABLE_SIMD) && TOML_ENABLE_SIMD) || TOML_INTELLISENSE
 #undef TOML_ENABLE_SIMD
@@ -3807,6 +3816,10 @@ TOML_ENABLE_WARNINGS;
 
 //********  impl/node.hpp  *********************************************************************************************
 
+#if TOML_ENABLE_COMMENTS
+
+#endif
+
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
 #ifndef __clang__
@@ -3836,6 +3849,10 @@ TOML_NAMESPACE_START
 
 		friend class TOML_PARSER_TYPENAME;
 		source_region source_{};
+#if TOML_ENABLE_COMMENTS
+		std::vector<std::string> leading_comments_;
+		std::string trailing_comment_;
+#endif
 
 		template <typename T>
 		TOML_NODISCARD
@@ -4197,6 +4214,34 @@ TOML_NAMESPACE_START
 		{
 			return source_;
 		}
+
+#if TOML_ENABLE_COMMENTS || TOML_DOXYGEN
+
+		TOML_PURE_INLINE_GETTER
+		std::vector<std::string>& leading_comments() noexcept
+		{
+			return leading_comments_;
+		}
+
+		TOML_PURE_INLINE_GETTER
+		const std::vector<std::string>& leading_comments() const noexcept
+		{
+			return leading_comments_;
+		}
+
+		TOML_PURE_INLINE_GETTER
+		std::string& trailing_comment() noexcept
+		{
+			return trailing_comment_;
+		}
+
+		TOML_PURE_INLINE_GETTER
+		const std::string& trailing_comment() const noexcept
+		{
+			return trailing_comment_;
+		}
+
+#endif
 
 	  private:
 
@@ -10149,6 +10194,13 @@ TOML_NAMESPACE_START
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void print_pending_table_separator();
 
+		// no-ops unless TOML_ENABLE_COMMENTS is 1
+		TOML_EXPORTED_MEMBER_FUNCTION
+		void print_leading_comments(const node&);
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		void print_trailing_comment(const node&);
+
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const key&);
 
@@ -11038,24 +11090,42 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	node::node(node && other) noexcept //
 		: source_{ std::exchange(other.source_, {}) }
+#if TOML_ENABLE_COMMENTS
+		  ,
+		  leading_comments_{ std::move(other.leading_comments_) },
+		  trailing_comment_{ std::move(other.trailing_comment_) }
+#endif
 	{}
 
 	TOML_EXTERNAL_LINKAGE
-	node::node(const node& /*other*/) noexcept
+	node::node(const node& other) noexcept
+#if TOML_ENABLE_COMMENTS
+		: leading_comments_{ other.leading_comments_ },
+		  trailing_comment_{ other.trailing_comment_ }
+#endif
 	{
 		// does not copy source information - this is not an error
 		//
 		// see https://github.com/marzer/tomlplusplus/issues/49#issuecomment-665089577
+#if !TOML_ENABLE_COMMENTS
+		TOML_UNUSED(other);
+#endif
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	node& node::operator=(const node& /*rhs*/) noexcept
+	node& node::operator=(const node& rhs) noexcept
 	{
 		// does not copy source information - this is not an error
 		//
 		// see https://github.com/marzer/tomlplusplus/issues/49#issuecomment-665089577
 
 		source_ = {};
+#if TOML_ENABLE_COMMENTS
+		leading_comments_ = rhs.leading_comments_;
+		trailing_comment_ = rhs.trailing_comment_;
+#else
+		TOML_UNUSED(rhs);
+#endif
 		return *this;
 	}
 
@@ -11063,7 +11133,13 @@ TOML_NAMESPACE_START
 	node& node::operator=(node&& rhs) noexcept
 	{
 		if (&rhs != this)
+		{
 			source_ = std::exchange(rhs.source_, {});
+#if TOML_ENABLE_COMMENTS
+			leading_comments_ = std::move(rhs.leading_comments_);
+			trailing_comment_ = std::move(rhs.trailing_comment_);
+#endif
+		}
 		return *this;
 	}
 
@@ -13818,6 +13894,11 @@ TOML_IMPL_NAMESPACE_START
 		bool recording = false, recording_whitespace = true;
 		std::string_view current_scope;
 		size_t nested_values = {};
+#if TOML_ENABLE_COMMENTS
+		std::string comment_buffer;				   // text of the most recent comment
+		std::vector<std::string> pending_comments; // full-line comments waiting for the next node
+		node* last_inserted_value = {};
+#endif
 #if !TOML_EXCEPTIONS
 		mutable optional<parse_error> err;
 #endif
@@ -13989,6 +14070,12 @@ TOML_IMPL_NAMESPACE_START
 
 			advance_and_return_if_error({}); // skip the '#'
 
+#if TOML_ENABLE_COMMENTS
+			comment_buffer.clear();
+			if (!is_eof() && *cp == U' ') // drop the conventional single space after '#'
+				advance_and_return_if_error({});
+#endif
+
 			while (!is_eof())
 			{
 				if (consume_line_break())
@@ -14008,6 +14095,9 @@ TOML_IMPL_NAMESPACE_START
 						"unicode surrogates (U+D800 to U+DFFF) are explicitly prohibited in comments"sv);
 #endif
 
+#if TOML_ENABLE_COMMENTS
+				comment_buffer.append(cp->bytes, cp->count);
+#endif
 				advance_and_return_if_error({});
 			}
 
@@ -16186,9 +16276,24 @@ TOML_IMPL_NAMESPACE_START
 			node_ptr val = parse_value();
 			return_if_error({});
 
-			tbl->emplace_hint<node_ptr>(it, std::move(last_key), std::move(val));
+			[[maybe_unused]] auto inserted = tbl->emplace_hint<node_ptr>(it, std::move(last_key), std::move(val));
+#if TOML_ENABLE_COMMENTS
+			last_inserted_value = &inserted->second;
+#endif
 			return true;
 		}
+
+#if TOML_ENABLE_COMMENTS
+		// gives a node the full-line comments seen since the previous node, plus the same-line comment just read
+		void attach_comments(node& nde)
+		{
+			nde.leading_comments_ = std::move(pending_comments);
+			nde.trailing_comment_ = std::move(comment_buffer);
+			pending_comments.clear();
+			comment_buffer.clear();
+			last_inserted_value = nullptr;
+		}
+#endif
 
 		void parse_document()
 		{
@@ -16202,15 +16307,34 @@ TOML_IMPL_NAMESPACE_START
 			{
 				return_if_error();
 
-				// leading whitespace, line endings, comments
-				if (consume_leading_whitespace() || consume_line_break() || consume_comment())
+				// leading whitespace, line endings
+				if (consume_leading_whitespace() || consume_line_break())
 					continue;
+				return_if_error();
+
+				// comments
+				if (consume_comment())
+				{
+#if TOML_ENABLE_COMMENTS
+					pending_comments.push_back(std::move(comment_buffer));
+#endif
+					continue;
+				}
 				return_if_error();
 
 				// [tables]
 				// [[table array]]
 				if (*cp == U'[')
+				{
+#if TOML_ENABLE_COMMENTS
+					comment_buffer.clear();
+#endif
 					current_table = parse_table_header();
+#if TOML_ENABLE_COMMENTS
+					if (current_table)
+						attach_comments(*current_table);
+#endif
+				}
 
 				// bare_keys
 				// dotted.keys
@@ -16225,8 +16349,16 @@ TOML_IMPL_NAMESPACE_START
 					// (this is not done in parse_key_value_pair() because that is also used for inline tables)
 					consume_leading_whitespace();
 					return_if_error();
+#if TOML_ENABLE_COMMENTS
+					comment_buffer.clear(); // value parsing may have read comments (e.g. inside arrays)
+#endif
 					if (!is_eof() && !consume_comment() && !consume_line_break())
 						set_error("expected a comment or whitespace, saw '"sv, to_sv(cp), "'"sv);
+#if TOML_ENABLE_COMMENTS
+					return_if_error();
+					if (last_inserted_value)
+						attach_comments(*last_inserted_value);
+#endif
 				}
 
 				else // ??
@@ -17320,6 +17452,44 @@ TOML_NAMESPACE_START
 		}
 	}
 
+#if TOML_ENABLE_COMMENTS
+	TOML_EXTERNAL_LINKAGE
+	void toml_formatter::print_leading_comments(const node& nde)
+	{
+		// each comment gets its own line, directly above the node
+		for (auto& comment : nde.leading_comments())
+		{
+			print_newline();
+			print_indent();
+			print_unformatted('#');
+			if (!comment.empty())
+				print_unformatted(' ');
+			for (auto c : comment)
+				print_unformatted((c == '\n' || c == '\r') ? ' ' : c); // keep it on one line
+		}
+		if (!nde.leading_comments().empty())
+			print_newline(true);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	void toml_formatter::print_trailing_comment(const node& nde)
+	{
+		if (nde.trailing_comment().empty())
+			return;
+		print_unformatted(" # "sv);
+		for (auto c : nde.trailing_comment())
+			print_unformatted((c == '\n' || c == '\r') ? ' ' : c);
+	}
+#else
+	TOML_EXTERNAL_LINKAGE
+	void toml_formatter::print_leading_comments(const node&)
+	{}
+
+	TOML_EXTERNAL_LINKAGE
+	void toml_formatter::print_trailing_comment(const node&)
+	{}
+#endif
+
 	TOML_EXTERNAL_LINKAGE
 	void toml_formatter::print(const key& k)
 	{
@@ -17450,6 +17620,7 @@ TOML_NAMESPACE_START
 
 			pending_table_separator_ = true;
 			print_newline();
+			print_leading_comments(v);
 			print_indent();
 			print(k);
 			if (terse_kvps())
@@ -17463,6 +17634,7 @@ TOML_NAMESPACE_START
 				case node_type::array: print(*static_cast<const array*>(&v)); break;
 				default: print_value(v, type);
 			}
+			print_trailing_comment(v);
 		}
 
 		const auto print_key_path = [&]()
@@ -17524,10 +17696,12 @@ TOML_NAMESPACE_START
 				print_pending_table_separator();
 				if (indent_sub_tables())
 					increase_indent();
+				print_leading_comments(child_tbl);
 				print_indent();
 				print_unformatted("["sv);
 				print_key_path();
 				print_unformatted("]"sv);
+				print_trailing_comment(child_tbl);
 				pending_table_separator_ = true;
 			}
 
@@ -17552,10 +17726,12 @@ TOML_NAMESPACE_START
 			for (size_t i = 0; i < arr.size(); i++)
 			{
 				print_pending_table_separator();
+				print_leading_comments(arr[i]);
 				print_indent();
 				print_unformatted("[["sv);
 				print_key_path();
 				print_unformatted("]]"sv);
+				print_trailing_comment(arr[i]);
 				pending_table_separator_ = true;
 				print(*static_cast<const table*>(&arr[i]));
 			}

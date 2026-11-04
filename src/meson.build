@@ -11,6 +11,7 @@ lib_args = cpp.get_supported_arguments('-DTOML_HEADER_ONLY=0')
 if get_option('default_library') != 'static'
 	lib_args += cpp.get_supported_arguments('-DTOML_SHARED_LIB=1')
 endif
+lib_args += user_args
 if unreleased_features
 	lib_args += cpp.get_supported_arguments('-DTOML_ENABLE_UNRELEASED_FEATURES=1')
 endif

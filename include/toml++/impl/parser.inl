@@ -1080,6 +1080,11 @@ TOML_IMPL_NAMESPACE_START
 		bool recording = false, recording_whitespace = true;
 		std::string_view current_scope;
 		size_t nested_values = {};
+#if TOML_ENABLE_COMMENTS
+		std::string comment_buffer;				   // text of the most recent comment
+		std::vector<std::string> pending_comments; // full-line comments waiting for the next node
+		node* last_inserted_value = {};
+#endif
 #if !TOML_EXCEPTIONS
 		mutable optional<parse_error> err;
 #endif
@@ -1251,6 +1256,12 @@ TOML_IMPL_NAMESPACE_START
 
 			advance_and_return_if_error({}); // skip the '#'
 
+#if TOML_ENABLE_COMMENTS
+			comment_buffer.clear();
+			if (!is_eof() && *cp == U' ') // drop the conventional single space after '#'
+				advance_and_return_if_error({});
+#endif
+
 			while (!is_eof())
 			{
 				if (consume_line_break())
@@ -1270,6 +1281,9 @@ TOML_IMPL_NAMESPACE_START
 						"unicode surrogates (U+D800 to U+DFFF) are explicitly prohibited in comments"sv);
 #endif
 
+#if TOML_ENABLE_COMMENTS
+				comment_buffer.append(cp->bytes, cp->count);
+#endif
 				advance_and_return_if_error({});
 			}
 
@@ -3449,9 +3463,24 @@ TOML_IMPL_NAMESPACE_START
 			node_ptr val = parse_value();
 			return_if_error({});
 
-			tbl->emplace_hint<node_ptr>(it, std::move(last_key), std::move(val));
+			[[maybe_unused]] auto inserted = tbl->emplace_hint<node_ptr>(it, std::move(last_key), std::move(val));
+#if TOML_ENABLE_COMMENTS
+			last_inserted_value = &inserted->second;
+#endif
 			return true;
 		}
+
+#if TOML_ENABLE_COMMENTS
+		// gives a node the full-line comments seen since the previous node, plus the same-line comment just read
+		void attach_comments(node& nde)
+		{
+			nde.leading_comments_ = std::move(pending_comments);
+			nde.trailing_comment_ = std::move(comment_buffer);
+			pending_comments.clear();
+			comment_buffer.clear();
+			last_inserted_value = nullptr;
+		}
+#endif
 
 		void parse_document()
 		{
@@ -3465,15 +3494,34 @@ TOML_IMPL_NAMESPACE_START
 			{
 				return_if_error();
 
-				// leading whitespace, line endings, comments
-				if (consume_leading_whitespace() || consume_line_break() || consume_comment())
+				// leading whitespace, line endings
+				if (consume_leading_whitespace() || consume_line_break())
 					continue;
+				return_if_error();
+
+				// comments
+				if (consume_comment())
+				{
+#if TOML_ENABLE_COMMENTS
+					pending_comments.push_back(std::move(comment_buffer));
+#endif
+					continue;
+				}
 				return_if_error();
 
 				// [tables]
 				// [[table array]]
 				if (*cp == U'[')
+				{
+#if TOML_ENABLE_COMMENTS
+					comment_buffer.clear();
+#endif
 					current_table = parse_table_header();
+#if TOML_ENABLE_COMMENTS
+					if (current_table)
+						attach_comments(*current_table);
+#endif
+				}
 
 				// bare_keys
 				// dotted.keys
@@ -3488,8 +3536,16 @@ TOML_IMPL_NAMESPACE_START
 					// (this is not done in parse_key_value_pair() because that is also used for inline tables)
 					consume_leading_whitespace();
 					return_if_error();
+#if TOML_ENABLE_COMMENTS
+					comment_buffer.clear(); // value parsing may have read comments (e.g. inside arrays)
+#endif
 					if (!is_eof() && !consume_comment() && !consume_line_break())
 						set_error("expected a comment or whitespace, saw '"sv, to_sv(cp), "'"sv);
+#if TOML_ENABLE_COMMENTS
+					return_if_error();
+					if (last_inserted_value)
+						attach_comments(*last_inserted_value);
+#endif
 				}
 
 				else // ??

@@ -30,24 +30,42 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	node::node(node && other) noexcept //
 		: source_{ std::exchange(other.source_, {}) }
+#if TOML_ENABLE_COMMENTS
+		  ,
+		  leading_comments_{ std::move(other.leading_comments_) },
+		  trailing_comment_{ std::move(other.trailing_comment_) }
+#endif
 	{}
 
 	TOML_EXTERNAL_LINKAGE
-	node::node(const node& /*other*/) noexcept
+	node::node(const node& other) noexcept
+#if TOML_ENABLE_COMMENTS
+		: leading_comments_{ other.leading_comments_ },
+		  trailing_comment_{ other.trailing_comment_ }
+#endif
 	{
 		// does not copy source information - this is not an error
 		//
 		// see https://github.com/marzer/tomlplusplus/issues/49#issuecomment-665089577
+#if !TOML_ENABLE_COMMENTS
+		TOML_UNUSED(other);
+#endif
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	node& node::operator=(const node& /*rhs*/) noexcept
+	node& node::operator=(const node& rhs) noexcept
 	{
 		// does not copy source information - this is not an error
 		//
 		// see https://github.com/marzer/tomlplusplus/issues/49#issuecomment-665089577
 
 		source_ = {};
+#if TOML_ENABLE_COMMENTS
+		leading_comments_ = rhs.leading_comments_;
+		trailing_comment_ = rhs.trailing_comment_;
+#else
+		TOML_UNUSED(rhs);
+#endif
 		return *this;
 	}
 
@@ -55,7 +73,13 @@ TOML_NAMESPACE_START
 	node& node::operator=(node&& rhs) noexcept
 	{
 		if (&rhs != this)
+		{
 			source_ = std::exchange(rhs.source_, {});
+#if TOML_ENABLE_COMMENTS
+			leading_comments_ = std::move(rhs.leading_comments_);
+			trailing_comment_ = std::move(rhs.trailing_comment_);
+#endif
+		}
 		return *this;
 	}
 

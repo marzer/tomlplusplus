@@ -6,6 +6,7 @@ option('build_tt',				type: 'boolean', value: false,	description: 'Enable to bui
 option('pedantic',				type: 'boolean', value: false,	description: 'Enable as many compiler warnings as possible (default: false) (implied by devel)')
 option('permissive',			type: 'boolean', value: false,	description: 'Add compiler option /permissive (default: false, which implies /permissive-) (only relevant for MSVC)')
 option('time_trace',			type: 'boolean', value: false,	description: 'Enable the -ftime-trace option (Clang only)')
+option('enable_comments',		type: 'boolean', value: false,	description: 'Enable TOML_ENABLE_COMMENTS=1: parse, store and print comments (default: false)')
 option('unreleased_features',	type: 'boolean', value: false,	description: 'Enable TOML_UNRELEASED_FEATURES=1 (default: false) (only relevant when compiling the library)')
 
 option('generate_cmake_config',	type: 'boolean', value: true,	description: 'Generate a cmake package config file (default: true - no effect when included as a subproject)')

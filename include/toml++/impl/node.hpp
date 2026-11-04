@@ -7,6 +7,10 @@
 #include "std_utility.hpp"
 #include "forward_declarations.hpp"
 #include "source_region.hpp"
+#if TOML_ENABLE_COMMENTS
+#include "std_string.hpp"
+#include "std_vector.hpp"
+#endif
 #include "header_start.hpp"
 
 // workaround for this: https://github.com/marzer/tomlplusplus/issues/220
@@ -32,6 +36,10 @@ TOML_NAMESPACE_START
 
 		friend class TOML_PARSER_TYPENAME;
 		source_region source_{};
+#if TOML_ENABLE_COMMENTS
+		std::vector<std::string> leading_comments_;
+		std::string trailing_comment_;
+#endif
 
 		template <typename T>
 		TOML_NODISCARD
@@ -743,6 +751,45 @@ TOML_NAMESPACE_START
 		}
 
 		/// @}
+
+#if TOML_ENABLE_COMMENTS || TOML_DOXYGEN
+
+		/// \name Comments
+		/// @{
+
+		/// \brief	Returns the comment lines that precede this node (without the leading `#`).
+		/// \availability This function is only available when #TOML_ENABLE_COMMENTS is `1`.
+		TOML_PURE_INLINE_GETTER
+		std::vector<std::string>& leading_comments() noexcept
+		{
+			return leading_comments_;
+		}
+
+		/// \brief	Returns the comment lines that precede this node (const overload).
+		TOML_PURE_INLINE_GETTER
+		const std::vector<std::string>& leading_comments() const noexcept
+		{
+			return leading_comments_;
+		}
+
+		/// \brief	Returns the comment on the same line after this node (without the leading `#`).
+		/// \availability This function is only available when #TOML_ENABLE_COMMENTS is `1`.
+		TOML_PURE_INLINE_GETTER
+		std::string& trailing_comment() noexcept
+		{
+			return trailing_comment_;
+		}
+
+		/// \brief	Returns the comment on the same line after this node (const overload).
+		TOML_PURE_INLINE_GETTER
+		const std::string& trailing_comment() const noexcept
+		{
+			return trailing_comment_;
+		}
+
+		/// @}
+
+#endif
 
 	  private:
 		/// \cond

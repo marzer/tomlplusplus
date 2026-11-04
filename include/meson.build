@@ -11,11 +11,12 @@ endif
 
 if not build_lib # header-only mode
 
-	tomlplusplus_dep = declare_dependency(include_directories: include_dir)
+	tomlplusplus_dep = declare_dependency(include_directories: include_dir, compile_args: user_args)
 
 	if not is_subproject
 		import('pkgconfig').generate(
 			name: meson.project_name(),
+			extra_cflags: user_args,
 			description: 'Header-only TOML config file parser and serializer for C++',
 			install_dir: get_option('datadir')/'pkgconfig',
 			url: 'https://marzer.github.io/tomlplusplus'
