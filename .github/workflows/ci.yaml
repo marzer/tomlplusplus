@@ -29,20 +29,14 @@ concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
 
-env:
-    clang_version: "14"
-    gcc_version: "11"
-
 jobs:
     linux:
         strategy:
             fail-fast: false
             matrix:
                 compiler:
-                    - "clang"
-                    - "gcc"
-                linker:
-                    - "lld"
+                    - "clang++"
+                    - "g++"
                 type:
                     - "debug"
                     - "release"
@@ -53,51 +47,37 @@ jobs:
             run:
                 shell: bash
 
+        env:
+            CXX: ${{ matrix.compiler }}
+
         steps:
             - name: Install base dependencies
               run: |
                   sudo apt -y update
-                  sudo apt -y install --no-install-recommends git ninja-build libstdc++-${{ env.gcc_version }}-dev locales-all
+                  sudo apt -y install --no-install-recommends ninja-build locales-all
 
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v7
 
             - name: Install python dependencies
               run: |
-                  pip3 install --user --no-cache-dir --upgrade meson
+                  pipx install meson
                   pip3 install --user --no-cache-dir --upgrade -r tools/requirements.txt
+
+            - name: Print tool versions
+              run: |
+                  grep PRETTY_NAME /etc/os-release
+                  "$CXX" --version
+                  meson --version
+                  ninja --version
+                  python3 --version
 
             - name: Check toml.hpp
               run: |
                   cd tools
                   python3 ci_single_header_check.py
 
-            - name: Install lld
-              if: ${{ startsWith(matrix.linker, 'lld')  }}
-              run: |
-                  sudo apt -y install --no-install-recommends lld-${{ env.clang_version }}
-                  sudo update-alternatives --install /usr/bin/ld.lld ld.lld /usr/bin/ld.lld-${{ env.clang_version }} 1000
-
-            - name: Install clang
-              if: ${{ startsWith(matrix.compiler, 'clang')  }}
-              run: |
-                  sudo apt -y install --no-install-recommends clang-${{ env.clang_version }}
-                  sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-${{ env.clang_version }} 1000
-                  sudo update-alternatives --install /usr/bin/cc cc /usr/bin/clang-${{ env.clang_version }} 1000
-
-            - name: Install gcc
-              if: ${{ startsWith(matrix.compiler, 'gcc') }}
-              run: |
-                  sudo apt -y install --no-install-recommends gcc-${{ env.gcc_version }} g++-${{ env.gcc_version }}
-                  sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++-${{ env.gcc_version }} 1000
-                  sudo update-alternatives --install /usr/bin/cc cc /usr/bin/gcc-${{ env.gcc_version }} 1000
-
-            - name: Configure locales
-              run: |
-                  sudo locale-gen 'en_US.utf8' 'ja_JP.utf8' 'de_DE.utf8' 'it_IT.utf8' 'tr_TR.utf8' 'fi_FI.utf8' 'fr_FR.utf8' 'zh_CN.utf8'
-
             - name: Configure Meson
-              run: |
-                  CXX=c++ CXX_LD=${{ matrix.linker }} meson setup build --buildtype=${{ matrix.type }} -Ddevel=true -Db_lto=false
+              run: meson setup build --buildtype=${{ matrix.type }} -Ddevel=true -Db_lto=false
 
             - name: Build
               run: meson compile -C build
@@ -132,7 +112,7 @@ jobs:
                   python3 -m pip install -U pip
                   pip3 install meson ninja
 
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v7
 
             - uses: ilammy/msvc-dev-cmd@v1
               with:
@@ -146,55 +126,3 @@ jobs:
 
             - name: Test
               run: meson test -C build --verbose
-#  tipi-build-linux:
-#    name: tipi.build project build and dependency resolution
-#    runs-on: ubuntu-latest
-#    if: github.ref == 'refs/heads/master'
-#    container: tipibuild/tipi-ubuntu
-#
-#    env:
-#      HOME: /root
-#
-#    steps:
-#      - uses: actions/checkout@v3
-#      - run: mkdir -p ~/.tipi
-#
-#      # checking if the tomlplusplus project builds and passes tests
-#      - name: Build as project target linux-cxx17 (run tests 'odr_test_1' and 'main')
-#        run: tipi . --dont-upgrade --verbose -t linux-cxx17 --test "odr_test_1|main"
-#
-#      - name: Build as project target linux-cxx20 (run tests 'odr_test_1' and 'main')
-#        run: tipi . --dont-upgrade --verbose -t linux-cxx20 --test "odr_test_1|main"
-#
-#      - name: Cleanup project builds
-#        run: rm -r ./build
-#
-#      - name: "Get branch name and save to env"
-#        env:
-#          IS_PR: ${{ github.EVENT_NAME == 'pull_request' }}
-#        run: |
-#          if ${IS_PR}; then
-#            BRANCH_NAME="${GITHUB_HEAD_REF}"
-#          else
-#            BRANCH_NAME="${GITHUB_REF##*/}"
-#          fi
-#          echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
-#
-#      # trying if pulling the dependency with tipi works properly
-#      - name: Build as dependency
-#        run: |
-#          cd examples/
-#
-#          # create test directory and copy the simple_parser.cpp in there
-#          mkdir test-as-dep
-#          cp examples.h test-as-dep/.
-#          cp simple_parser.cpp test-as-dep/.
-#          cd test-as-dep/
-#
-#          # create a deps file referencing the commit that triggered this build as dependency
-#          mkdir .tipi
-#          echo '{ "requires": { "${{ github.event.repository.full_name }}": { "@": "${{ env.BRANCH_NAME }}" } } }' > .tipi/deps
-#
-#          # build
-#          tipi . --dont-upgrade --verbose -t linux-cxx17
-#          ./build/linux-cxx17/bin/simple_parser ../example.toml

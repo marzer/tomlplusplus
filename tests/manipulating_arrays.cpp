@@ -241,9 +241,9 @@ TEST_CASE("arrays - equality")
 		CHECK(arr1 == ilist);
 		CHECK(ilist == arr1);
 
-		ilist = { 2, 3, 4 };
-		CHECK(arr1 != ilist);
-		CHECK(ilist != arr1);
+		auto other_ilist = { 2, 3, 4 };
+		CHECK(arr1 != other_ilist);
+		CHECK(other_ilist != arr1);
 
 		auto ivec = std::vector{ 1, 2, 3 };
 		CHECK(arr1 == ivec);

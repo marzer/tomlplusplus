@@ -142,8 +142,15 @@ global_args += cpp.get_supported_arguments(
 	'-Wno-switch-enum',
 	'-Wno-covered-switch-default',
 	'-Wno-padded',
-	'-Wno-float-equal'
+	'-Wno-float-equal',
+	'-Wno-c2y-extensions',
+	'-Wno-unsafe-buffer-usage',
+	'-Wno-unsafe-buffer-usage-in-libc-call',
+	'-Wno-nrvo'
 )
+if is_clang
+	global_args += cpp.get_supported_arguments('-Wno-switch-default')
+endif
 if get_option('time_trace')
 	global_args += cpp.get_supported_arguments('-ftime-trace')
 endif
