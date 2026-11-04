@@ -11,6 +11,7 @@ test_sources = files(
 	'conformance_burntsushi_valid.cpp',
 	'conformance_iarna_invalid.cpp',
 	'conformance_iarna_valid.cpp',
+	'custom_string.cpp',
 	'formatters.cpp',
 	'for_each.cpp',
 	'impl_toml.cpp',

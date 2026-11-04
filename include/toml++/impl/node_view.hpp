@@ -662,7 +662,10 @@ TOML_NAMESPACE_START
 			else
 			{
 				const auto val = lhs.as<impl::native_type_of<T>>();
-				return val && *val == rhs;
+				if constexpr (impl::is_string_like<T>)
+					return val && *val == impl::string_like_to_view(rhs);
+				else
+					return val && *val == rhs;
 			}
 		}
 		TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&,

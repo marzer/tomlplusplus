@@ -44,7 +44,13 @@ TOML_DISABLE_ARITHMETIC_WARNINGS;
 	TOML_SA_VALUE_MESSAGE_U8STRING_VIEW																		\
 	TOML_SA_LIST_SEP "const char*"																			\
 	TOML_SA_VALUE_MESSAGE_CONST_CHAR8																		\
-		TOML_SA_LIST_END
+	TOML_SA_LIST_END																						\
+																											\
+	TOML_SA_LIST_NXT "A user-defined 'string-like' type (see toml::is_string_like)"							\
+	TOML_SA_LIST_BEG "with const char* data() const or const char* c_str() const"							\
+	TOML_SA_LIST_SEP "and size_t length() const"															\
+	TOML_SA_LIST_SEP "and constructible from std::string_view, (const char*, size_t) or const std::string&"	\
+	TOML_SA_LIST_END
 
 #define TOML_SA_VALUE_FUNC_MESSAGE(type_arg)																\
 	"The " type_arg " must be one of:"																		\
@@ -68,6 +74,12 @@ TOML_DISABLE_ARITHMETIC_WARNINGS;
 	TOML_SA_VALUE_MESSAGE_U8STRING_VIEW																		\
 	TOML_SA_LIST_SEP "const char*"																			\
 	TOML_SA_VALUE_MESSAGE_CONST_CHAR8																		\
+	TOML_SA_LIST_END																						\
+																											\
+	TOML_SA_LIST_NXT "A user-defined 'string-like' type (see toml::is_string_like)"							\
+	TOML_SA_LIST_BEG "with const char* data() const or const char* c_str() const"							\
+	TOML_SA_LIST_SEP "and size_t length() const"															\
+	TOML_SA_LIST_SEP "and constructible from std::string_view, (const char*, size_t) or const std::string&"	\
 	TOML_SA_LIST_END
 
 // clang-format on
@@ -83,7 +95,12 @@ TOML_IMPL_NAMESPACE_START
 		TOML_NODISCARD
 		static T make(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args&&...>)
 		{
-			if constexpr (std::is_aggregate_v<T>)
+			// user-defined string-likes (see toml::is_string_like) provide their character data
+			// via data()/c_str() + length() rather than by conversion
+			if constexpr (std::is_same_v<T, std::string> && sizeof...(Args) == 1u && (is_string_like<Args> && ...)
+				&& !std::is_constructible_v<std::string, Args&&...>)
+				return std::string{ string_like_to_view(args)... };
+			else if constexpr (std::is_aggregate_v<T>)
 				return T{ static_cast<Args&&>(args)... };
 			else
 				return T(static_cast<Args&&>(args)...);
@@ -1018,6 +1035,19 @@ TOML_NAMESPACE_START
 #endif
 			}
 
+			// char -> user-defined string-like type (see toml::is_string_like)
+			else if constexpr (string_like_is_target<T>)
+			{
+				// construction preference order mirrors string_like_target_is_nothrow
+				// (parenthesized init, matching the std::is_constructible checks)
+				if constexpr (std::is_constructible_v<T, std::string_view>)
+					return T(std::string_view{ str });
+				else if constexpr (std::is_constructible_v<T, const char*, size_t>)
+					return T(str.data(), str.length());
+				else
+					return T(str);
+			}
+
 #if TOML_HAS_CHAR8
 
 			// char -> char8_t (potentially unsafe - the feature is 'experimental'!)
@@ -1244,6 +1274,12 @@ TOML_NAMESPACE_START
 				TOML_SA_LIST_SEP "const wchar_t*"
 				#endif
 				TOML_SA_LIST_END
+
+				TOML_SA_LIST_NXT "A user-defined 'string-like' type (see toml::is_string_like)"
+				TOML_SA_LIST_BEG "with const char* data() const or const char* c_str() const"
+				TOML_SA_LIST_SEP "and size_t length() const"
+				TOML_SA_LIST_SEP "and constructible from std::string_view, (const char*, size_t) or const std::string&"
+				TOML_SA_LIST_END
 			);
 
 			// clang-format on
@@ -1257,7 +1293,7 @@ TOML_NAMESPACE_START
 						return *ref_cast<typename traits::native_type>();
 				}
 				if (auto val = this->value<value_type>())
-					return *val;
+					return *std::move(val);
 				if constexpr (std::is_pointer_v<value_type>)
 					return value_type{ default_value };
 				else

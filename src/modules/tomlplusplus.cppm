@@ -14,7 +14,8 @@ export module tomlplusplus;
  * @namespace toml
  * @brief The toml++ namespace toml:: 
  */
-export namespace toml {
+export TOML_NAMESPACE_START
+{
     /**
      * @namespace literals
      * @brief The toml++ namespace toml::literals::
@@ -80,9 +81,11 @@ export namespace toml {
     using TOML_NAMESPACE::is_node_view;
     using TOML_NAMESPACE::is_number;
     using TOML_NAMESPACE::is_string;
+    using TOML_NAMESPACE::is_string_like;
     using TOML_NAMESPACE::is_table;
     using TOML_NAMESPACE::is_time;
     using TOML_NAMESPACE::is_value;
 
 	using TOML_NAMESPACE::preserve_source_value_flags;
 }
+TOML_NAMESPACE_END;

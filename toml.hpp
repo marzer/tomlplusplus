@@ -1716,13 +1716,91 @@ TOML_IMPL_NAMESPACE_START
 	inline constexpr bool is_wide_string =
 		is_one_of<std::decay_t<T>, const wchar_t*, wchar_t*, std::wstring_view, std::wstring>;
 
-	template <typename T>
-	inline constexpr bool value_retrieval_is_nothrow = !std::is_same_v<remove_cvref<T>, std::string>
-#if TOML_HAS_CHAR8
-													&& !std::is_same_v<remove_cvref<T>, std::u8string>
-#endif
+	// user-defined 'string-like' types (see toml::is_string_like), detected via expression SFINAE as any type with:
+	//   - a const-qualified data() or c_str() member returning (something convertible to) const char*, and
+	//   - a const-qualified length() member returning (something convertible to) size_t.
 
-													&& !is_wide_string<T>;
+	template <typename T, typename = void>
+	struct has_string_like_data : std::false_type
+	{};
+	template <typename T>
+	struct has_string_like_data<
+		T,
+		std::enable_if_t<std::is_convertible_v<decltype(std::declval<const T&>().data()), const char*>>>
+		: std::true_type
+	{};
+
+	template <typename T, typename = void>
+	struct has_string_like_c_str : std::false_type
+	{};
+	template <typename T>
+	struct has_string_like_c_str<
+		T,
+		std::enable_if_t<std::is_convertible_v<decltype(std::declval<const T&>().c_str()), const char*>>>
+		: std::true_type
+	{};
+
+	template <typename T, typename = void>
+	struct has_string_like_length : std::false_type
+	{};
+	template <typename T>
+	struct has_string_like_length<
+		T,
+		std::enable_if_t<std::is_convertible_v<decltype(std::declval<const T&>().length()), size_t>>> : std::true_type
+	{};
+
+	// (std::string and std::string_view would satisfy the member checks but are first-class citizens
+	// with their own dedicated handling, so they're excluded from the user-defined detection)
+	template <typename T>
+	inline constexpr bool is_string_like =							  //
+		std::is_class_v<remove_cvref<T>>							  //
+		&& !is_one_of<remove_cvref<T>, std::string, std::string_view> //
+		&& (has_string_like_data<remove_cvref<T>>::value			  //
+			|| has_string_like_c_str<remove_cvref<T>>::value)		  //
+		&& has_string_like_length<remove_cvref<T>>::value;
+
+	// the view over a string-like's character data (preferring data() where both it and c_str() are present)
+	template <typename T>
+	TOML_NODISCARD
+	inline std::string_view string_like_to_view(const T& str)
+	{
+		static_assert(is_string_like<T>);
+
+		if constexpr (has_string_like_data<remove_cvref<T>>::value)
+			return std::string_view{ static_cast<const char*>(str.data()), static_cast<size_t>(str.length()) };
+		else
+			return std::string_view{ static_cast<const char*>(str.c_str()), static_cast<size_t>(str.length()) };
+	}
+
+	// ... usable as a target type when retrieving a TOML string value (storage is always std::string,
+	// so the type must be constructible from the stored string or a view/pointer into it)
+	template <typename T>
+	inline constexpr bool string_like_is_target = is_string_like<T>
+											   && (std::is_constructible_v<remove_cvref<T>, std::string_view>
+												   || std::is_constructible_v<remove_cvref<T>, const char*, size_t>
+												   || std::is_constructible_v<remove_cvref<T>, const std::string&>);
+
+	// ... and whether constructing that target can throw (it is built from the first of
+	// std::string_view / (const char*, size_t) / const std::string& that the type supports)
+	template <typename T>
+	inline constexpr bool string_like_target_is_nothrow =
+		(std::is_constructible_v<remove_cvref<T>, std::string_view>
+			 ? std::is_nothrow_constructible_v<remove_cvref<T>, std::string_view>
+			 : (std::is_constructible_v<remove_cvref<T>, const char*, size_t>
+					? std::is_nothrow_constructible_v<remove_cvref<T>, const char*, size_t>
+					: std::is_nothrow_constructible_v<remove_cvref<T>, const std::string&>))
+		&& (std::is_nothrow_move_constructible_v<remove_cvref<T>>
+			|| std::is_nothrow_copy_constructible_v<remove_cvref<T>>);
+
+	template <typename T>
+	inline constexpr bool value_retrieval_is_nothrow =
+		!std::is_same_v<remove_cvref<T>, std::string>
+#if TOML_HAS_CHAR8
+		&& !std::is_same_v<remove_cvref<T>, std::u8string>
+#endif
+		// user-defined string types are constructed from the stored
+		// std::string, so they can throw iff that construction can
+		&& !(string_like_is_target<T> && !string_like_target_is_nothrow<T>) && !is_wide_string<T>;
 
 	template <typename, typename>
 	struct copy_ref_;
@@ -1816,12 +1894,17 @@ TOML_IMPL_NAMESPACE_START
 	template <typename T>
 	struct value_traits;
 
+	// (defined alongside the other string traits, below)
+	template <typename T>
+	struct user_string_traits;
+
+	// note: enums cannot have member functions, so the enum and string-like cases are mutually exclusive
 	template <typename T, bool = std::is_enum_v<T>>
 	struct value_traits_base_selector
 	{
 		static_assert(!is_cvref<T>);
 
-		using type = default_value_traits;
+		using type = std::conditional_t<is_string_like<T>, user_string_traits<T>, default_value_traits>;
 	};
 	template <typename T>
 	struct value_traits_base_selector<T, true>
@@ -2050,6 +2133,24 @@ TOML_IMPL_NAMESPACE_START
 	template <size_t N>
 	struct value_traits<char[N]> : string_traits<char[N]>
 	{};
+
+	// string value_traits specializations - user-defined string-like types (see toml::is_string_like)
+	//
+	// unlike the built-in string types these are never 'native' (storage is always std::string), and the two
+	// directions are tracked independently, since a type may support only one of them:
+	//   - is_losslessly_convertible_to_native => usable as an initializer (always true - the detected
+	//     data()/c_str() + length() members provide the character data)
+	//   - can_represent_native                => usable as a retrieval target (requires a suitable constructor)
+	template <typename T>
+	struct user_string_traits
+	{
+		using native_type										  = std::string;
+		static constexpr bool is_native							  = false;
+		static constexpr bool is_losslessly_convertible_to_native = true;
+		static constexpr bool can_represent_native				  = string_like_is_target<T>;
+		static constexpr bool can_partially_represent_native	  = can_represent_native;
+		static constexpr auto type								  = node_type::string;
+	};
 
 	// string value_traits specializations - char8_t-based strings
 #if TOML_HAS_CHAR8
@@ -2321,6 +2422,9 @@ TOML_NAMESPACE_START
 
 	template <typename T>
 	inline constexpr bool is_node_view = impl::is_one_of<impl::remove_cvref<T>, node_view<node>, node_view<const node>>;
+
+	template <typename T>
+	inline constexpr bool is_string_like = impl::is_string_like<T>;
 }
 TOML_NAMESPACE_END;
 
@@ -4729,7 +4833,10 @@ TOML_NAMESPACE_START
 			else
 			{
 				const auto val = lhs.as<impl::native_type_of<T>>();
-				return val && *val == rhs;
+				if constexpr (impl::is_string_like<T>)
+					return val && *val == impl::string_like_to_view(rhs);
+				else
+					return val && *val == rhs;
 			}
 		}
 		TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&,
@@ -4904,7 +5011,13 @@ TOML_DISABLE_ARITHMETIC_WARNINGS;
 	TOML_SA_VALUE_MESSAGE_U8STRING_VIEW																		\
 	TOML_SA_LIST_SEP "const char*"																			\
 	TOML_SA_VALUE_MESSAGE_CONST_CHAR8																		\
-		TOML_SA_LIST_END
+	TOML_SA_LIST_END																						\
+																											\
+	TOML_SA_LIST_NXT "A user-defined 'string-like' type (see toml::is_string_like)"							\
+	TOML_SA_LIST_BEG "with const char* data() const or const char* c_str() const"							\
+	TOML_SA_LIST_SEP "and size_t length() const"															\
+	TOML_SA_LIST_SEP "and constructible from std::string_view, (const char*, size_t) or const std::string&"	\
+	TOML_SA_LIST_END
 
 #define TOML_SA_VALUE_FUNC_MESSAGE(type_arg)																\
 	"The " type_arg " must be one of:"																		\
@@ -4928,6 +5041,12 @@ TOML_DISABLE_ARITHMETIC_WARNINGS;
 	TOML_SA_VALUE_MESSAGE_U8STRING_VIEW																		\
 	TOML_SA_LIST_SEP "const char*"																			\
 	TOML_SA_VALUE_MESSAGE_CONST_CHAR8																		\
+	TOML_SA_LIST_END																						\
+																											\
+	TOML_SA_LIST_NXT "A user-defined 'string-like' type (see toml::is_string_like)"							\
+	TOML_SA_LIST_BEG "with const char* data() const or const char* c_str() const"							\
+	TOML_SA_LIST_SEP "and size_t length() const"															\
+	TOML_SA_LIST_SEP "and constructible from std::string_view, (const char*, size_t) or const std::string&"	\
 	TOML_SA_LIST_END
 
 // clang-format on
@@ -4940,7 +5059,12 @@ TOML_IMPL_NAMESPACE_START
 		TOML_NODISCARD
 		static T make(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args&&...>)
 		{
-			if constexpr (std::is_aggregate_v<T>)
+			// user-defined string-likes (see toml::is_string_like) provide their character data
+			// via data()/c_str() + length() rather than by conversion
+			if constexpr (std::is_same_v<T, std::string> && sizeof...(Args) == 1u && (is_string_like<Args> && ...)
+				&& !std::is_constructible_v<std::string, Args&&...>)
+				return std::string{ string_like_to_view(args)... };
+			else if constexpr (std::is_aggregate_v<T>)
 				return T{ static_cast<Args&&>(args)... };
 			else
 				return T(static_cast<Args&&>(args)...);
@@ -5694,6 +5818,19 @@ TOML_NAMESPACE_START
 #endif
 			}
 
+			// char -> user-defined string-like type (see toml::is_string_like)
+			else if constexpr (string_like_is_target<T>)
+			{
+				// construction preference order mirrors string_like_target_is_nothrow
+				// (parenthesized init, matching the std::is_constructible checks)
+				if constexpr (std::is_constructible_v<T, std::string_view>)
+					return T(std::string_view{ str });
+				else if constexpr (std::is_constructible_v<T, const char*, size_t>)
+					return T(str.data(), str.length());
+				else
+					return T(str);
+			}
+
 #if TOML_HAS_CHAR8
 
 			// char -> char8_t (potentially unsafe - the feature is 'experimental'!)
@@ -5920,6 +6057,12 @@ TOML_NAMESPACE_START
 				TOML_SA_LIST_SEP "const wchar_t*"
 				#endif
 				TOML_SA_LIST_END
+
+				TOML_SA_LIST_NXT "A user-defined 'string-like' type (see toml::is_string_like)"
+				TOML_SA_LIST_BEG "with const char* data() const or const char* c_str() const"
+				TOML_SA_LIST_SEP "and size_t length() const"
+				TOML_SA_LIST_SEP "and constructible from std::string_view, (const char*, size_t) or const std::string&"
+				TOML_SA_LIST_END
 			);
 
 			// clang-format on
@@ -5933,7 +6076,7 @@ TOML_NAMESPACE_START
 						return *ref_cast<typename traits::native_type>();
 				}
 				if (auto val = this->value<value_type>())
-					return *val;
+					return *std::move(val);
 				if constexpr (std::is_pointer_v<value_type>)
 					return value_type{ default_value };
 				else
@@ -6067,7 +6210,9 @@ TOML_IMPL_NAMESPACE_START
 		return make_node_impl(static_cast<T&&>(val.value), flags);
 	}
 
-	template <typename T, bool = (is_node<T> || is_node_view<T> || is_value<T> || can_partially_represent_native<T>)>
+	template <typename T,
+			  bool = (is_node<T> || is_node_view<T> || is_value<T> || can_partially_represent_native<T>
+					  || is_string_like<T>)>
 	struct inserted_type_of_
 	{
 		using type = std::remove_pointer_t<decltype(make_node_impl(std::declval<T>()))>;
@@ -7236,7 +7381,12 @@ TOML_NAMESPACE_START
 			for (auto& list_elem : rhs)
 			{
 				const auto elem = lhs.get_as<impl::native_type_of<element_type>>(i++);
-				if (!elem || *elem != list_elem)
+				if constexpr (impl::is_string_like<element_type>)
+				{
+					if (!elem || *elem != impl::string_like_to_view(list_elem))
+						return false;
+				}
+				else if (!elem || *elem != list_elem)
 					return false;
 			}
 

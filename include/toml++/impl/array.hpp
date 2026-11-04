@@ -1717,7 +1717,12 @@ TOML_NAMESPACE_START
 			for (auto& list_elem : rhs)
 			{
 				const auto elem = lhs.get_as<impl::native_type_of<element_type>>(i++);
-				if (!elem || *elem != list_elem)
+				if constexpr (impl::is_string_like<element_type>)
+				{
+					if (!elem || *elem != impl::string_like_to_view(list_elem))
+						return false;
+				}
+				else if (!elem || *elem != list_elem)
 					return false;
 			}
 
