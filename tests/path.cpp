@@ -151,6 +151,37 @@ TEST_CASE("path - manipulating")
 		CHECK(p0.subpath(0, 0).str() == "");
 		CHECK(p0.subpath(2, 0).str() == "");
 		CHECK(p0.subpath(2, 1).str() == "[1]");
+		CHECK(p0.subpath(100, 1).str() == "");
+		CHECK(p0.subpath(p0.size(), 1).str() == "");
+		CHECK(p0.subpath(p0.size(), 0).str() == "");
+		CHECK(p0.subpath(p0.size() + 1, 0).str() == "");
+		CHECK(p0.subpath(0, p0.size()).str() == p0.str());
+		CHECK(p0.subpath(2, 100).str() == "[1].path[2].object");
+		CHECK(p0.subpath(0, 100).str() == "a.simple[1].path[2].object");
+		CHECK(p0.subpath(0, static_cast<size_t>(-1)).str() == p0.str());
+		CHECK(p0.subpath(1, static_cast<size_t>(-1)).str() == "simple[1].path[2].object");
+		CHECK(p0.subpath(static_cast<size_t>(-1), 0).str() == "");
+		CHECK(p0.subpath(static_cast<size_t>(-1), 1).str() == "");
+		CHECK(p0.subpath(static_cast<size_t>(-1), static_cast<size_t>(-1)).str() == "");
+
+		auto sub = p0.subpath(2, 2);
+		REQUIRE(sub.size() == 2);
+		CHECK(sub[0].type() == toml::path_component_type::array_index);
+		CHECK(sub[0].index() == 1);
+		CHECK(sub[1].type() == toml::path_component_type::key);
+		CHECK(sub[1].key() == "path");
+
+		toml::path p_single("foo");
+		CHECK(p_single.subpath(0, 1).str() == "foo");
+		CHECK(p_single.subpath(0, 5).str() == "foo");
+		CHECK(p_single.subpath(1, 1).str() == "");
+		CHECK(p_single.subpath(1, 0).str() == "");
+
+		toml::path p_empty;
+		CHECK(p_empty.subpath(0, 0).str() == "");
+		CHECK(p_empty.subpath(0, 1).str() == "");
+		CHECK(p_empty.subpath(10, 5).str() == "");
+		CHECK(p_empty.subpath(static_cast<size_t>(-1), static_cast<size_t>(-1)).str() == "");
 	}
 
 	SECTION("leaf")

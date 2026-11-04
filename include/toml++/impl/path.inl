@@ -456,7 +456,11 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	path path::subpath(size_t start, size_t length) const
 	{
-		return subpath(begin() + static_cast<int>(start), begin() + static_cast<int>(start + length));
+		if (start >= components_.size() || length == 0)
+			return {};
+		const size_t remaining = components_.size() - start;
+		const size_t count	   = length < remaining ? length : remaining;
+		return subpath(begin() + static_cast<ptrdiff_t>(start), begin() + static_cast<ptrdiff_t>(start + count));
 	}
 }
 TOML_NAMESPACE_END;
