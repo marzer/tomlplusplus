@@ -330,3 +330,40 @@ strings:
 		CHECK_FORMATTER(yaml_formatter, data, expected);
 	}
 }
+
+TEST_CASE("formatters - multi-line strings")
+{
+	// strings that can't be emitted verbatim between multi-line delimiters
+	const auto data = toml::table{ { "triple_single_quotes"sv, "a\n'''\n[injected]\nb = 1\nc = '''\n"sv },
+								   { "leading_newline"sv, "\nfo'o"sv },
+								   { "leading_newline_escaped"sv, "\nfo\"o\x7F"sv } };
+
+	SECTION("toml_formatter")
+	{
+		static constexpr auto expected = R"(*****
+leading_newline = '''
+
+fo'o'''
+leading_newline_escaped = """
+
+fo\"o\u007F"""
+triple_single_quotes = """a
+'''
+[injected]
+b = 1
+c = '''
+"""
+*****)"sv;
+
+		CHECK_FORMATTER(toml_formatter, data, expected);
+	}
+
+	SECTION("round-trip")
+	{
+		parse_expected_value(FILE_LINE_ARGS,
+							 R"("a\n'''\n[injected]\nb = 1\nc = '''\n")"sv,
+							 "a\n'''\n[injected]\nb = 1\nc = '''\n"sv);
+		parse_expected_value(FILE_LINE_ARGS, R"("\nfo'o")"sv, "\nfo'o"sv);
+		parse_expected_value(FILE_LINE_ARGS, R"("\nfo\"o\u007F")"sv, "\nfo\"o\x7F"sv);
+	}
+}

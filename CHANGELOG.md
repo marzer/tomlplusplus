@@ -25,6 +25,7 @@ template:
 
 #### Fixes
 
+- fixed `toml_formatter` emitting multi-line strings that did not round-trip (`'''` inside the value, or a leading newline) (@arfa-21)
 - fixed assertion failure when parsing an incomplete date-time followed by a value terminator (#313) (@allenflux)
 - fixed `is_homogeneous()` overloads with `first_nonmatch` outparam being broken in optimized builds (#231) (@Forbinn)
 - fixed unclear error message when parsing integers that would overflow (#224) (@chrimbo)
