@@ -16982,12 +16982,17 @@ TOML_IMPL_NAMESPACE_START
 							 && multi_line_strings_allowed() //
 							 && !!(traits & formatted_string_traits::line_breaks);
 
+		// the parser trims a newline immediately following the opening delimiter of a multi-line string
+		const auto leading_newline = multi_line && str[0] == '\n';
+
 		// determine if this should be a literal string (single-quotes with no escaping)
-		const auto literal = literal_strings_allowed()											//
-						  && !(traits & formatted_string_traits::control_chars)					//
-						  && (!(traits & formatted_string_traits::single_quotes) || multi_line) //
-						  && (!(traits & formatted_string_traits::tabs) || real_tabs_allowed)	//
-						  && (!(traits & formatted_string_traits::line_breaks) || multi_line)	//
+		// (three or more consecutive single-quotes can't appear in a multi-line literal string)
+		const auto literal = literal_strings_allowed()										  //
+						  && !(traits & formatted_string_traits::control_chars)				  //
+						  && (!(traits & formatted_string_traits::single_quotes)			  //
+							  || (multi_line && str.find("'''"sv) == std::string_view::npos)) //
+						  && (!(traits & formatted_string_traits::tabs) || real_tabs_allowed) //
+						  && (!(traits & formatted_string_traits::line_breaks) || multi_line) //
 						  && (!(traits & formatted_string_traits::non_ascii) || unicode_allowed);
 
 		// literal strings (single quotes, no escape codes)
@@ -16995,6 +17000,8 @@ TOML_IMPL_NAMESPACE_START
 		{
 			const auto quot = multi_line ? R"(''')"sv : R"(')"sv;
 			print_unformatted(quot);
+			if (leading_newline)
+				print_unformatted('\n');
 			print_unformatted(str);
 			print_unformatted(quot);
 			return;
@@ -17002,6 +17009,8 @@ TOML_IMPL_NAMESPACE_START
 
 		// anything from here down is a non-literal string, so requires iteration and escaping.
 		print_unformatted(multi_line ? R"(""")"sv : R"(")"sv);
+		if (leading_newline)
+			print_unformatted('\n');
 
 		// ascii fast path
 		if (!(traits & formatted_string_traits::non_ascii))
