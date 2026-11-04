@@ -172,3 +172,70 @@ TEST_CASE("parsing - dates and times")
 	parsing_should_fail(FILE_LINE_ARGS, "val = 1987-03-16 10"sv);
 	parsing_should_fail(FILE_LINE_ARGS, "val = 1987-03-16 1"sv);
 }
+
+#if TOML_CPP >= 20
+TEST_CASE("chrono conversions - dates and times")
+{
+	using namespace std::chrono;
+
+	const auto chrono_date = year_month_day{ year{ 1987 }, month{ 3 }, day{ 16 } };
+	const auto date_value = toml::date{ chrono_date };
+	CHECK(date_value == toml::date{ 1987, 3, 16 });
+	CHECK(date_value.to_chrono() == chrono_date);
+
+	const auto chrono_time = hh_mm_ss<nanoseconds>{
+		hours{ 10 } + minutes{ 20 } + seconds{ 30 } + nanoseconds{ 40000000 }
+	};
+	const auto time_value = toml::time{ chrono_time };
+	CHECK(time_value == toml::time{ 10, 20, 30, 40000000 });
+	CHECK(time_value.to_chrono().to_duration() == chrono_time.to_duration());
+
+	const auto chrono_offset = minutes{ -570 };
+	const auto offset_value = toml::time_offset{ chrono_offset };
+	CHECK(offset_value == toml::time_offset{ -9, -30 });
+	CHECK(offset_value.to_chrono() == chrono_offset);
+
+	const auto chrono_local = local_days{ chrono_date } + chrono_time.to_duration();
+	const auto local_value = toml::date_time{ chrono_local };
+	CHECK(local_value == toml::date_time{ { 1987, 3, 16 }, { 10, 20, 30, 40000000 } });
+	CHECK(local_value.to_chrono() == chrono_local);
+
+	const auto offset_local_value = toml::date_time{ chrono_local, chrono_offset };
+	CHECK(offset_local_value == toml::date_time{
+		{ 1987, 3, 16 },
+		{ 10, 20, 30, 40000000 },
+		{ -9, -30 }
+	});
+
+	const auto parsed = toml::parse("value = 1987-03-16T10:20:30.04"sv);
+	const auto default_time = local_time<nanoseconds>{ local_days{ year_month_day{ year{ 2000 }, month{ 1 }, day{ 1 } } } };
+	CHECK(parsed["value"].value_or(default_time) == chrono_local);
+	CHECK(parsed["missing"].value_or(default_time) == default_time);
+
+	const auto expected_epoch = chrono_local.time_since_epoch();
+	const auto seconds_default = local_time<seconds>{};
+	const auto milliseconds_default = local_time<milliseconds>{};
+	const auto microseconds_default = local_time<microseconds>{};
+	const auto deciseconds_default = local_time<duration<int64_t, std::deci>>{};
+	CHECK(parsed["value"].value_or(seconds_default).time_since_epoch() == duration_cast<seconds>(expected_epoch));
+	CHECK(parsed["value"].value_or(milliseconds_default).time_since_epoch()
+		  == duration_cast<milliseconds>(expected_epoch));
+	CHECK(parsed["value"].value_or(microseconds_default).time_since_epoch()
+		  == duration_cast<microseconds>(expected_epoch));
+	CHECK(parsed["value"].value_or(deciseconds_default).time_since_epoch()
+		  == duration_cast<duration<int64_t, std::deci>>(expected_epoch));
+
+	const auto parsed_date = toml::parse("value = 1987-03-16"sv);
+	const auto default_date = year_month_day{ year{ 2000 }, month{ 1 }, day{ 1 } };
+	CHECK(parsed_date["value"].value_or(default_date) == chrono_date);
+	CHECK(parsed_date["missing"].value_or(default_date) == default_date);
+
+	const auto parsed_time = toml::parse("value = 10:20:30.04"sv);
+	const auto default_time_of_day = hh_mm_ss<milliseconds>{};
+	const auto expected_time_of_day = hh_mm_ss<milliseconds>{ hours{ 10 } + minutes{ 20 } + seconds{ 30 }
+															  + milliseconds{ 40 } };
+	CHECK(parsed_time["value"].value_or(default_time_of_day).to_duration() == expected_time_of_day.to_duration());
+	CHECK(parsed_time["missing"].value_or(default_time_of_day).to_duration()
+		  == default_time_of_day.to_duration());
+}
+#endif

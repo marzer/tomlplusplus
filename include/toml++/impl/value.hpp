@@ -1030,6 +1030,17 @@ TOML_NAMESPACE_START
 
 #endif
 		}
+#if TOML_CPP >= 20
+		else if constexpr (impl::is_chrono_local_time<T>::value)
+			return std::chrono::time_point_cast<typename T::duration>(ref_cast<date_time>()->to_chrono());
+		else if constexpr (impl::is_chrono_year_month_day<T>::value)
+			return ref_cast<date>()->to_chrono();
+		else if constexpr (impl::is_chrono_hh_mm_ss<T>::value)
+			return std::chrono::hh_mm_ss<typename impl::is_chrono_hh_mm_ss<T>::duration_type>{
+				std::chrono::duration_cast<typename impl::is_chrono_hh_mm_ss<T>::duration_type>(
+					ref_cast<time>()->to_chrono().to_duration())
+			};
+#endif
 		else
 			return static_cast<T>(*ref_cast<native_type_of<T>>());
 	}
@@ -1071,7 +1082,10 @@ TOML_NAMESPACE_START
 
 		// when asking for strings, dates, times and date_times there's no 'fuzzy' conversion
 		// semantics to be mindful of so the exact retrieval is enough.
-		if constexpr (is_natively_one_of<T, std::string, time, date, date_time>)
+		if constexpr (is_natively_one_of<T, std::string, time, date, date_time>
+					  || (TOML_CPP >= 20
+						  && (is_chrono_local_time<T>::value || is_chrono_year_month_day<T>::value
+							  || is_chrono_hh_mm_ss<T>::value)))
 		{
 			if (type() == node_type_of<T>)
 				return { this->get_value_exact<T>() };
