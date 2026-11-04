@@ -146,10 +146,10 @@ jobs:
             fail-fast: false
             matrix:
                 include:
-                    - name: "linux, cmake, gcc, debug, header-only, c++17, sanitizers"
+                    - name: "linux, cmake, gcc, debug, header-only, c++17, sanitizers, single header"
                       compiler: "g++"
                       type: "Debug"
-                      args: "-Dtomlplusplus_ASAN=ON -Dtomlplusplus_UBSAN=ON"
+                      args: "-Dtomlplusplus_ASAN=ON -Dtomlplusplus_UBSAN=ON -Dtomlplusplus_TESTS_SINGLE_HEADER=ON"
                       consumers: true
                     - name: "linux, cmake, gcc, release, shared, c++23, modules"
                       compiler: "g++"
@@ -158,12 +158,13 @@ jobs:
                       modules: true
                       consumers: true
                       check_symbols: true
-                    - name: "linux, cmake, clang, debug, header-only, c++26, libc++, single header, leak tests"
+                    - name: "linux, cmake, clang, debug, header-only, c++26, libc++, leak tests, coverage"
                       compiler: "clang++"
                       type: "Debug"
                       args: >-
                           -DCMAKE_CXX_STANDARD=26 -DCMAKE_CXX_FLAGS=-stdlib=libc++ -DCMAKE_EXE_LINKER_FLAGS=-stdlib=libc++
-                          -Dtomlplusplus_TESTS_SINGLE_HEADER=ON -Dtomlplusplus_TESTS_LEAK=ON
+                          -Dtomlplusplus_TESTS_LEAK=ON -Dtomlplusplus_COVERAGE=ON
+                      coverage: true
                     - name: "linux, cmake, clang, release, static, c++20, modules, unreleased features"
                       compiler: "clang++"
                       type: "Release"
@@ -187,11 +188,12 @@ jobs:
                   sudo apt -y update
                   sudo apt -y install --no-install-recommends ninja-build locales-all pkg-config
 
-            - name: Install libc++ and clang-scan-deps
+            - name: Install libc++, clang-scan-deps and llvm-cov
               if: matrix.compiler == 'clang++'
               run: |
                   version=$(clang++ -dumpversion | cut -d. -f1)
-                  sudo apt -y install --no-install-recommends "libc++-$version-dev" "libc++abi-$version-dev" "clang-tools-$version"
+                  sudo apt -y install --no-install-recommends "libc++-$version-dev" "libc++abi-$version-dev" "clang-tools-$version" "llvm-$version"
+                  echo "/usr/lib/llvm-$version/bin" >> "$GITHUB_PATH"
 
             - name: Install check-symbols
               if: matrix.check_symbols
@@ -219,6 +221,22 @@ jobs:
             - name: Test
               working-directory: build
               run: ctest --output-on-failure
+
+            - name: Report coverage
+              if: matrix.coverage
+              env:
+                  TOMLPLUSPLUS_COVERAGE_MIN_LINES: "81.4"
+                  TOMLPLUSPLUS_COVERAGE_MIN_FUNCTIONS: "83.7"
+                  TOMLPLUSPLUS_COVERAGE_MIN_REGIONS: "74.1"
+                  TOMLPLUSPLUS_COVERAGE_MIN_BRANCHES: "71.8"
+              run: python3 tools/coverage.py build
+
+            - name: Upload coverage report
+              if: matrix.coverage
+              uses: actions/upload-artifact@v7
+              with:
+                  name: coverage
+                  path: build/coverage/html
 
             - name: Test the installed package
               if: matrix.consumers
