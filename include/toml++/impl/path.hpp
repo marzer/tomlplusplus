@@ -45,14 +45,14 @@ TOML_NAMESPACE_START
 			return TOML_LAUNDER(reinterpret_cast<Type*>(s.bytes));
 		}
 
-		static void store_key(std::string_view key, storage_t& storage_)
+		static void store_key(std::string_view key, storage_t& storage)
 		{
-			::new (static_cast<void*>(storage_.bytes)) std::string{ key };
+			::new (static_cast<void*>(storage.bytes)) std::string{ key };
 		}
 
-		static void store_index(size_t index, storage_t& storage_) noexcept
+		static void store_index(size_t index, storage_t& storage) noexcept
 		{
-			::new (static_cast<void*>(storage_.bytes)) std::size_t{ index };
+			::new (static_cast<void*>(storage.bytes)) std::size_t{ index };
 		}
 
 		void destroy() noexcept

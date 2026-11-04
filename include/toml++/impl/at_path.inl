@@ -55,7 +55,7 @@ TOML_IMPL_NAMESPACE_START
 					const auto c = path[index_start];
 					if TOML_LIKELY(c >= '0' && c <= '9')
 						break;
-					else if (c == ' ' || c == '\t')
+					if (c == ' ' || c == '\t')
 						index_start++;
 					else
 						return false;
@@ -95,9 +95,9 @@ TOML_IMPL_NAMESPACE_START
 						pos++;
 						break;
 					}
-					else if TOML_UNLIKELY(c == '.' || c == '[')
+					if TOML_UNLIKELY(c == '.' || c == '[')
 						break;
-					else if (c == '\t' || c == ' ')
+					if (c == '\t' || c == ' ')
 						pos++;
 					else
 						return false;
@@ -107,7 +107,7 @@ TOML_IMPL_NAMESPACE_START
 				auto index_str = path.substr(index_start, index_end - index_start);
 
 				// parse the actual array index to an integer type
-				size_t index;
+				size_t index = {};
 				if (index_str.length() == 1u)
 					index = static_cast<size_t>(index_str[0] - '0');
 				else
@@ -184,8 +184,7 @@ TOML_IMPL_NAMESPACE_START
 						prev_was_array_indexer = false;
 						continue;
 					}
-					else
-						return false;
+					return false;
 				}
 
 				pos += subkey_len;
@@ -247,7 +246,7 @@ TOML_NAMESPACE_START
 			return curr != nullptr;
 		};
 
-		if (!impl::parse_path(path, &current, on_key, on_index))
+		if (!impl::parse_path(path, static_cast<void*>(&current), on_key, on_index))
 			current = nullptr;
 
 		return node_view{ current };

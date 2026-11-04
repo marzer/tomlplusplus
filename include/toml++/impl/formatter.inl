@@ -25,7 +25,7 @@ TOML_IMPL_NAMESPACE_START
 {
 	enum class TOML_CLOSED_FLAGS_ENUM formatted_string_traits : unsigned
 	{
-		none,
+		none		  = 0,
 		line_breaks	  = 1u << 0, // \n
 		tabs		  = 1u << 1, // \t
 		control_chars = 1u << 2, // also includes non-ascii vertical whitespace

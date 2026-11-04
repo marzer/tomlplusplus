@@ -251,9 +251,9 @@ TOML_NAMESPACE_START
 		TOML_CONSTRAINED_TEMPLATE((impl::all_integral<H, M>), typename H, typename M)
 		TOML_NODISCARD_CTOR
 		constexpr time_offset(H h, M m) noexcept //
-			: minutes{ static_cast<int16_t>(static_cast<impl::common_signed_type<H, M>>(h)
-												* impl::common_signed_type<H, M>{ 60 }
-											+ static_cast<impl::common_signed_type<H, M>>(m)) }
+			: minutes{ static_cast<int16_t>(
+				  (static_cast<impl::common_signed_type<H, M>>(h) * impl::common_signed_type<H, M>{ 60 })
+				  + static_cast<impl::common_signed_type<H, M>>(m)) }
 		{}
 
 		/// \brief	Equality operator.

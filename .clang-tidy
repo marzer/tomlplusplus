@@ -1,0 +1,150 @@
+Checks: >-
+    -*,
+    misc-*,
+        -misc-confusable-identifiers,
+        -misc-include-cleaner,
+        -misc-multiple-inheritance,
+        -misc-no-recursion,
+        -misc-non-private-member-variables-in-classes,
+        -misc-unconventional-assign-operator,
+    clang-diagnostic-*,
+        -clang-diagnostic-unused-command-line-argument,
+    clang-analyzer-*,
+    bugprone-*,
+        -bugprone-implicit-widening*,
+        -bugprone-macro-parentheses,
+        -bugprone-casting-through-void,
+        -bugprone-crtp-constructor-accessibility,
+        -bugprone-easily-swappable-parameters,
+    modernize-*,
+        -modernize-avoid-c-arrays,
+        -modernize-concat-nested-namespaces,
+        -modernize-macro-to-enum,
+        -modernize-make-unique,
+        -modernize-type-traits,
+        -modernize-unary-static-assert,
+        -modernize-use-constraints,
+        -modernize-use-default-member-init,
+        -modernize-use-designated-initializers,
+        -modernize-use-ranges,
+        -modernize-use-scoped-lock,
+        -modernize-use-std-numbers,
+        -modernize-use-trailing-return-type,
+        -modernize-loop-convert,
+    performance-*,
+        -performance-enum-size,
+    readability-*,
+        -readability-avoid-nested-conditional-operator,
+        -readability-braces-around-statements,
+        -readability-convert-member-functions-to-static,
+        -readability-function-cognitive-complexity,
+        -readability-function-size,
+        -readability-identifier-length,
+        -readability-implicit-bool-conversion,
+        -readability-inconsistent-ifelse-braces,
+        -readability-magic-numbers,
+        -readability-named-parameter,
+        -readability-qualified-auto,
+        -readability-redundant-member-init,
+        -readability-redundant-parentheses,
+        -readability-redundant-typename,
+        -readability-simplify-boolean-expr,
+        -readability-static-definition-in-anonymous-namespace,
+        -readability-uppercase-literal-suffix,
+        -readability-use-anyofallof,
+        -readability-use-concise-preprocessor-directives,
+    concurrency-*,
+    cppcoreguidelines-*,
+        -cppcoreguidelines-avoid-c-arrays,
+        -cppcoreguidelines-avoid-do-while,
+        -cppcoreguidelines-avoid-magic-numbers,
+        -cppcoreguidelines-c-copy-assignment-signature,
+        -cppcoreguidelines-macro-to-enum,
+        -cppcoreguidelines-macro-usage,
+        -cppcoreguidelines-misleading-capture-default-by-value,
+        -cppcoreguidelines-missing-std-forward,
+        -cppcoreguidelines-non-private-member-variables-in-classes,
+        -cppcoreguidelines-owning-memory,
+        -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+        -cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,
+        -cppcoreguidelines-pro-bounds-constant-array-index,
+        -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+        -cppcoreguidelines-pro-type-const-cast,
+        -cppcoreguidelines-pro-type-member-init,
+        -cppcoreguidelines-pro-type-reinterpret-cast,
+        -cppcoreguidelines-pro-type-static-cast-downcast,
+        -cppcoreguidelines-pro-type-union-access,
+        -cppcoreguidelines-rvalue-reference-param-not-moved,
+        -cppcoreguidelines-special-member-functions,
+        -cppcoreguidelines-use-default-member-init,
+    fuchsia-virtual-inheritance,
+    google-readability-casting,
+    google-runtime-operator,
+    portability-*,
+        -portability-avoid-pragma-once,
+        -portability-template-virtual-member-function
+
+HeaderFilterRegex: '^.*/(include/toml\+\+|src|examples|toml-test)/.*$'
+FormatStyle: "file"
+
+CheckOptions:
+    - { key: readability-identifier-naming.ClassMethodCase,             value: lower_case }
+    - { key: readability-identifier-naming.ConstexprVariableCase,       value: lower_case }
+    - { key: readability-identifier-naming.EnumCase,                    value: lower_case }
+    - { key: readability-identifier-naming.EnumConstantCase,            value: lower_case }
+    - { key: readability-identifier-naming.FunctionCase,                value: lower_case }
+    - { key: readability-identifier-naming.LocalVariableCase,           value: lower_case }
+    - { key: readability-identifier-naming.MacroDefinitionCase,         value: aNy_CasE }
+    - { key: readability-identifier-naming.MethodCase,                  value: lower_case }
+    - { key: readability-identifier-naming.NamespaceCase,               value: lower_case }
+    - { key: readability-identifier-naming.ParameterCase,               value: lower_case }
+    - { key: readability-identifier-naming.PrivateMemberCase,           value: lower_case }
+    - { key: readability-identifier-naming.PrivateMemberSuffix,         value: _ }
+    - { key: readability-identifier-naming.TemplateParameterCase,       value: CamelCase }
+    - { key: readability-identifier-naming.TypedefCase,                 value: lower_case }
+    - { key: readability-identifier-naming.VariableCase,                value: lower_case }
+
+    - key: bugprone-misplaced-widening-cast.CheckImplicitCasts
+      value: true
+
+    - key: concurrency-mt-unsafe.FunctionSet
+      value: glibc
+
+    - key: modernize-use-override.IgnoreDestructors
+      value: true
+
+    - key: cppcoreguidelines-explicit-virtual-functions.IgnoreDestructors
+      value: true
+
+    - key: bugprone-assert-side-effect.AssertMacros
+      value: >-
+        assert,
+        TOML_ASSERT,
+        TOML_ASSERT_ASSUME,
+        TOML_ASSUME
+
+    - key: bugprone-dangling-handle.HandleClasses
+      value: >-
+        ::std::basic_string_view;
+        ::std::experimental::basic_string_view;
+        ::std::span
+
+    - key: bugprone-suspicious-stringview-data-usage.StringViewTypes
+      value: >-
+        ::std::basic_string_view
+
+    - key: bugprone-unused-local-non-trivial-variable.IncludeTypes
+      value: .*
+
+    - key: bugprone-unused-local-non-trivial-variable.ExcludeTypes
+      value: >-
+        ::std::.*(guard|lock);
+        ::std::scope_.*;
+        .*_scope
+
+    - key: performance-unnecessary-value-param.AllowedTypes
+      value: iterator$
+
+    - key: readability-container-size-empty.ExcludedComparisonTypes
+      value: >-
+        ::std::array

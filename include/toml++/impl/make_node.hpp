@@ -31,7 +31,7 @@ TOML_IMPL_NAMESPACE_START
 			using native_type = native_type_of<unwrapped_type>;
 			using value_type  = value<native_type>;
 
-			value_type* out;
+			value_type* out = {};
 
 			// copy/move ctor
 			if constexpr (std::is_same_v<remove_cvref<T>, value_type>)

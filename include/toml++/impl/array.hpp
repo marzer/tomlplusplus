@@ -215,6 +215,7 @@ TOML_IMPL_NAMESPACE_START
 
 		template <typename T>
 		TOML_NODISCARD_CTOR
+		// NOLINTNEXTLINE(bugprone-forwarding-reference-overload)
 		array_init_elem(T&& val, value_flags flags = preserve_source_value_flags) //
 			: value{ make_node(static_cast<T&&>(val), flags) }
 		{}
@@ -1477,35 +1478,33 @@ TOML_NAMESPACE_START
 			const auto distance = std::distance(first, last);
 			if (distance <= 0)
 				return iterator{ elems_.begin() + (const_vector_iterator{ pos } - elems_.cbegin()) };
-			else
+
+			auto count		 = distance;
+			using deref_type = decltype(*first);
+			if constexpr (is_node_view<deref_type>)
 			{
-				auto count		 = distance;
-				using deref_type = decltype(*first);
+				for (auto it = first; it != last; it++)
+					if (!(*it))
+						count--;
+				if (!count)
+					return iterator{ elems_.begin() + (const_vector_iterator{ pos } - elems_.cbegin()) };
+			}
+			const auto start_idx = static_cast<size_t>(const_vector_iterator{ pos } - elems_.cbegin());
+			preinsertion_resize(start_idx, static_cast<size_t>(count));
+			size_t i = start_idx;
+			for (auto it = first; it != last; it++)
+			{
 				if constexpr (is_node_view<deref_type>)
 				{
-					for (auto it = first; it != last; it++)
-						if (!(*it))
-							count--;
-					if (!count)
-						return iterator{ elems_.begin() + (const_vector_iterator{ pos } - elems_.cbegin()) };
+					if (!(*it))
+						continue;
 				}
-				const auto start_idx = static_cast<size_t>(const_vector_iterator{ pos } - elems_.cbegin());
-				preinsertion_resize(start_idx, static_cast<size_t>(count));
-				size_t i = start_idx;
-				for (auto it = first; it != last; it++)
-				{
-					if constexpr (is_node_view<deref_type>)
-					{
-						if (!(*it))
-							continue;
-					}
-					if constexpr (std::is_rvalue_reference_v<deref_type>)
-						elems_[i++] = impl::make_node(std::move(*it), flags);
-					else
-						elems_[i++] = impl::make_node(*it, flags);
-				}
-				return iterator{ elems_.begin() + static_cast<ptrdiff_t>(start_idx) };
+				if constexpr (std::is_rvalue_reference_v<deref_type>)
+					elems_[i++] = impl::make_node(std::move(*it), flags);
+				else
+					elems_[i++] = impl::make_node(*it, flags);
 			}
+			return iterator{ elems_.begin() + static_cast<ptrdiff_t>(start_idx) };
 		}
 
 		/// \brief	Inserts a range of elements into the array at a specific position.

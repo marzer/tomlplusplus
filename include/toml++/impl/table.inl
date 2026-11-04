@@ -69,6 +69,7 @@ TOML_NAMESPACE_START
 #endif
 	}
 
+	// NOLINTBEGIN(bugprone-use-after-move)
 	TOML_EXTERNAL_LINKAGE
 	table::table(table && other) noexcept //
 		: node(std::move(other)),
@@ -105,6 +106,7 @@ TOML_NAMESPACE_START
 		}
 		return *this;
 	}
+	// NOLINTEND(bugprone-use-after-move)
 
 	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
@@ -298,15 +300,15 @@ TOML_NAMESPACE_START
 			if (l->first != r->first)
 				return false;
 
-			const auto lhs_type = l->second->type();
-			const node& rhs_	= *r->second;
-			const auto rhs_type = rhs_.type();
+			const auto lhs_type	 = l->second->type();
+			const node& rhs_node = *r->second;
+			const auto rhs_type	 = rhs_node.type();
 			if (lhs_type != rhs_type)
 				return false;
 
-			const bool equal =
-				l->second->visit([&](const auto& lhs_) noexcept
-								 { return lhs_ == *static_cast<std::remove_reference_t<decltype(lhs_)>*>(&rhs_); });
+			const bool equal = l->second->visit(
+				[&](const auto& lhs_value) noexcept
+				{ return lhs_value == *static_cast<std::remove_reference_t<decltype(lhs_value)>*>(&rhs_node); });
 			if (!equal)
 				return false;
 		}

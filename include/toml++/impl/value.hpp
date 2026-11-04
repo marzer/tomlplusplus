@@ -319,6 +319,7 @@ TOML_NAMESPACE_START
 #endif
 		}
 
+		// NOLINTBEGIN(bugprone-use-after-move)
 		/// \brief	Move constructor.
 		TOML_NODISCARD_CTOR
 		value(value&& other) noexcept //
@@ -364,6 +365,7 @@ TOML_NAMESPACE_START
 			}
 			return *this;
 		}
+		// NOLINTEND(bugprone-use-after-move)
 
 #if TOML_LIFETIME_HOOKS
 		~value() noexcept
@@ -1082,8 +1084,7 @@ TOML_NAMESPACE_START
 		{
 			if (type() == node_type_of<T>)
 				return { this->get_value_exact<T>() };
-			else
-				return {};
+			return {};
 		}
 	}
 
@@ -1105,8 +1106,7 @@ TOML_NAMESPACE_START
 		{
 			if (type() == node_type_of<T>)
 				return { this->get_value_exact<T>() };
-			else
-				return {};
+			return {};
 		}
 
 		// everything else requires a bit of logicking.
@@ -1173,8 +1173,7 @@ TOML_NAMESPACE_START
 						if (impl::fpclassify(val) == fp_class::ok
 							&& static_cast<double>(static_cast<int64_t>(val)) == val)
 							return node_integer_cast<T>(static_cast<int64_t>(val));
-						else
-							return {};
+						return {};
 					}
 
 					// float -> anything else

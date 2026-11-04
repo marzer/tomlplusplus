@@ -272,7 +272,7 @@ TOML_NAMESPACE_START // abi namespace
 	enum class TOML_OPEN_FLAGS_ENUM value_flags : uint16_t // being an "OPEN" flags enum is not an error
 	{
 		/// \brief None.
-		none,
+		none = 0,
 
 		/// \brief Format integer values as binary.
 		format_as_binary = 1,
@@ -297,7 +297,7 @@ TOML_NAMESPACE_START // abi namespace
 	enum class TOML_CLOSED_FLAGS_ENUM format_flags : uint64_t
 	{
 		/// \brief None.
-		none,
+		none = 0,
 
 		/// \brief Dates and times will be emitted as quoted strings.
 		quote_dates_and_times = (1ull << 0),
@@ -1188,7 +1188,7 @@ TOML_IMPL_NAMESPACE_START
 		static constexpr uint64_t exponent = 0b0111111111110000000000000000000000000000000000000000000000000000ull;
 		static constexpr uint64_t mantissa = 0b0000000000001111111111111111111111111111111111111111111111111111ull;
 
-		uint64_t val_bits;
+		uint64_t val_bits = {};
 		std::memcpy(&val_bits, &val, sizeof(val));
 		if ((val_bits & exponent) != exponent)
 			return fp_class::ok;
@@ -1214,7 +1214,7 @@ TOML_IMPL_NAMESPACE_START
 
 	template <typename T>
 	TOML_PURE_INLINE_GETTER
-	constexpr const T& min(const T& a, const T& b) noexcept //
+	constexpr T min(const T& a, const T& b) noexcept //
 	{
 		return a < b ? a : b;
 	}

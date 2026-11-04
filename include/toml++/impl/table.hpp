@@ -21,8 +21,8 @@ TOML_IMPL_NAMESPACE_START
 	{
 		using value_type = std::conditional_t<IsConst, const node, node>;
 
-		const toml::key& first;
-		value_type& second;
+		const toml::key& first; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
+		value_type& second;		// NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
 	};
 
 	template <bool IsConst>
@@ -50,8 +50,7 @@ TOML_IMPL_NAMESPACE_START
 				proxy_instantiated_ = true;
 				return p;
 			}
-			else
-				return TOML_LAUNDER(reinterpret_cast<proxy_type*>(proxy_));
+			return TOML_LAUNDER(reinterpret_cast<proxy_type*>(proxy_));
 		}
 
 	  public:
@@ -80,6 +79,7 @@ TOML_IMPL_NAMESPACE_START
 			: iter_{ other.iter_ }
 		{}
 
+		// NOLINTNEXTLINE(bugprone-unhandled-self-assignment)
 		table_iterator& operator=(const table_iterator& rhs) noexcept
 		{
 			iter_				= rhs.iter_;
@@ -1502,7 +1502,7 @@ TOML_NAMESPACE_START
 							  "ValueType argument of table::emplace_hint() must be one "
 							  "of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
 
-				map_iterator ipos = insert_with_hint(hint, toml::key{ static_cast<KeyType&&>(key) }, nullptr);
+				const auto ipos = insert_with_hint(hint, toml::key{ static_cast<KeyType&&>(key) }, nullptr);
 
 				// if second is nullptr then we successully claimed the key and inserted the empty sentinel,
 				// so now we have to construct the actual value
@@ -1613,7 +1613,7 @@ TOML_NAMESPACE_START
 			else
 			{
 				const auto key_view = std::string_view{ key };
-				map_iterator ipos	= get_lower_bound(key_view);
+				auto ipos			= get_lower_bound(key_view);
 				if (ipos == map_.end() || ipos->first != key_view)
 				{
 					ipos = insert_with_hint(const_iterator{ ipos },
@@ -1760,7 +1760,7 @@ TOML_NAMESPACE_START
 			else
 			{
 				const auto key_view = std::string_view{ key };
-				map_iterator ipos	= get_lower_bound(key_view);
+				auto ipos			= get_lower_bound(key_view);
 				if (ipos == map_.end() || ipos->first != key_view)
 				{
 					ipos = insert_with_hint(const_iterator{ ipos },
@@ -1768,11 +1768,9 @@ TOML_NAMESPACE_START
 											impl::make_node(static_cast<ValueType&&>(val), flags));
 					return { iterator{ ipos }, true };
 				}
-				else
-				{
-					(*ipos).second = impl::make_node(static_cast<ValueType&&>(val), flags);
-					return { iterator{ ipos }, false };
-				}
+
+				(*ipos).second = impl::make_node(static_cast<ValueType&&>(val), flags);
+				return { iterator{ ipos }, false };
 			}
 		}
 

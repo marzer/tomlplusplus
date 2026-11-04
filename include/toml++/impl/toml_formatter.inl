@@ -98,7 +98,7 @@ TOML_ANON_NAMESPACE_START
 			case node_type::date: [[fallthrough]];
 			case node_type::time: return 10u;
 			case node_type::date_time: return 30u;
-			case node_type::none: TOML_UNREACHABLE;
+			case node_type::none:
 			default: TOML_UNREACHABLE;
 		}
 

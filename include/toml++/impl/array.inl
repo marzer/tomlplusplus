@@ -76,6 +76,7 @@ TOML_NAMESPACE_START
 #endif
 	}
 
+	// NOLINTBEGIN(bugprone-use-after-move)
 	TOML_EXTERNAL_LINKAGE
 	array::array(array && other) noexcept //
 		: node(std::move(other)),
@@ -110,6 +111,7 @@ TOML_NAMESPACE_START
 		}
 		return *this;
 	}
+	// NOLINTEND(bugprone-use-after-move)
 
 	TOML_EXTERNAL_LINKAGE
 	void array::preinsertion_resize(size_t idx, size_t count)
@@ -304,8 +306,9 @@ TOML_NAMESPACE_START
 				continue;
 			}
 
-			impl::node_ptr arr_storage = std::move(elems_[i]);
-			const auto leaf_count	   = arr->total_leaf_count();
+			// NOLINTNEXTLINE(bugprone-unused-local-non-trivial-variable)
+			const impl::node_ptr arr_storage = std::move(elems_[i]);
+			const auto leaf_count			 = arr->total_leaf_count();
 			if (leaf_count > 1u)
 				preinsertion_resize(i + 1u, leaf_count - 1u);
 			flatten_child(std::move(*arr), i); // increments i
@@ -362,15 +365,15 @@ TOML_NAMESPACE_START
 			return false;
 		for (size_t i = 0, e = lhs.elems_.size(); i < e; i++)
 		{
-			const auto lhs_type = lhs.elems_[i]->type();
-			const node& rhs_	= *rhs.elems_[i];
-			const auto rhs_type = rhs_.type();
+			const auto lhs_type	 = lhs.elems_[i]->type();
+			const node& rhs_node = *rhs.elems_[i];
+			const auto rhs_type	 = rhs_node.type();
 			if (lhs_type != rhs_type)
 				return false;
 
-			const bool equal =
-				lhs.elems_[i]->visit([&](const auto& lhs_) noexcept
-									 { return lhs_ == *static_cast<std::remove_reference_t<decltype(lhs_)>*>(&rhs_); });
+			const bool equal = lhs.elems_[i]->visit(
+				[&](const auto& lhs_value) noexcept
+				{ return lhs_value == *static_cast<std::remove_reference_t<decltype(lhs_value)>*>(&rhs_node); });
 			if (!equal)
 				return false;
 		}

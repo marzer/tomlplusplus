@@ -591,7 +591,6 @@ TOML_NAMESPACE_START
 		/// \name Equality
 		/// @{
 
-	  public:
 		/// \brief	Returns true if the two views refer to nodes of the same type and value.
 		template <typename T>
 		TOML_PURE_GETTER

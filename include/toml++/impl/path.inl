@@ -134,8 +134,8 @@ TOML_NAMESPACE_START
 
 		if (lhs.type_ == path_component_type::array_index)
 			return lhs.index() == rhs.index();
-		else // path_component_type::key
-			return lhs.key() == rhs.key();
+		// path_component_type::key
+		return lhs.key() == rhs.key();
 	}
 
 	TOML_EXTERNAL_LINKAGE

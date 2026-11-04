@@ -8,16 +8,20 @@
 using nlohmann::json;
 using namespace std::string_view_literals;
 
-[[nodiscard]] static bool is_tt_value(const json& j) noexcept
+namespace
 {
-	return j.is_object()		 //
-		&& j.size() == 2u		 //
-		&& j.contains("type")	 //
-		&& j["type"].is_string() //
-		&& j.contains("value")	 //
-		&& j["value"].is_string();
+	[[nodiscard]] bool is_tt_value(const json& j)
+	{
+		return j.is_object()		 //
+			&& j.size() == 2u		 //
+			&& j.contains("type")	 //
+			&& j["type"].is_string() //
+			&& j.contains("value")	 //
+			&& j["value"].is_string();
+	}
 }
 
+// NOLINTBEGIN(misc-use-anonymous-namespace)
 TOML_NAMESPACE_START
 {
 	static void from_json(const json& j, value<std::string>& val)
@@ -188,6 +192,7 @@ TOML_NAMESPACE_START
 	}
 }
 TOML_NAMESPACE_END;
+// NOLINTEND(misc-use-anonymous-namespace)
 
 int main()
 {
@@ -195,7 +200,7 @@ int main()
 	{
 		const std::string str(std::istreambuf_iterator<char>{ std::cin }, std::istreambuf_iterator<char>{});
 
-		toml::table tbl = json::parse(str);
+		const toml::table tbl = json::parse(str);
 
 		std::cout << tbl << "\n";
 	}

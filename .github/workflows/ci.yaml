@@ -20,6 +20,7 @@ on:
             - "tests/sources.txt"
             - "VERSION.txt"
             - "LICENSE"
+            - ".clang-tidy"
     pull_request:
         branches-ignore:
             - "gh-pages"
@@ -39,6 +40,7 @@ on:
             - "tests/sources.txt"
             - "VERSION.txt"
             - "LICENSE"
+            - ".clang-tidy"
     workflow_dispatch:
 
 concurrency:
@@ -100,6 +102,43 @@ jobs:
             - name: Run pyright
               run: pyright
 
+    clang-tidy:
+        name: "linux, clang-tidy"
+
+        runs-on: ubuntu-latest
+
+        defaults:
+            run:
+                shell: bash
+
+        steps:
+            - name: Install base dependencies
+              run: |
+                  sudo apt -y update
+                  sudo apt -y install --no-install-recommends ninja-build clang-22 clang-tidy-22
+                  mkdir -p "$RUNNER_TEMP/bin"
+                  ln -s "$(command -v clang-tidy-22)" "$RUNNER_TEMP/bin/clang-tidy"
+                  echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+
+            - uses: actions/checkout@v7
+
+            - name: Install clang-tidier
+              run: pipx install clang-tidier
+
+            - name: Print tool versions
+              run: |
+                  clang++-22 --version
+                  clang-tidy --version
+                  clang-tidier --version
+
+            - name: Configure
+              run: >-
+                  cmake -S . -B build -G Ninja -DCMAKE_CXX_COMPILER=clang++-22 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+                  -Dtomlplusplus_BUILD_LIB=ON -DBUILD_EXAMPLES=ON -Dtomlplusplus_BUILD_TOML_TEST=ON
+
+            - name: Run clang-tidy
+              run: clang-tidier build --werror
+
     linux-cmake:
         name: ${{ matrix.name }}
 
@@ -118,6 +157,7 @@ jobs:
                       args: "-DCMAKE_CXX_STANDARD=23 -Dtomlplusplus_BUILD_LIB=ON -DBUILD_SHARED_LIBS=ON"
                       modules: true
                       consumers: true
+                      check_symbols: true
                     - name: "linux, cmake, clang, debug, header-only, c++26, libc++, single header, leak tests"
                       compiler: "clang++"
                       type: "Debug"
@@ -152,6 +192,10 @@ jobs:
               run: |
                   version=$(clang++ -dumpversion | cut -d. -f1)
                   sudo apt -y install --no-install-recommends "libc++-$version-dev" "libc++abi-$version-dev" "clang-tools-$version"
+
+            - name: Install check-symbols
+              if: matrix.check_symbols
+              run: pipx install check-symbols
 
             - uses: actions/checkout@v7
 
@@ -444,7 +488,8 @@ jobs:
               run: git status --short
 
     release:
-        needs: [generated, pyright, linux-cmake, cmake-floor, linux-meson, meson-floor, windows-cmake, windows-meson, macos-meson]
+        needs:
+            [generated, pyright, clang-tidy, linux-cmake, cmake-floor, linux-meson, meson-floor, windows-cmake, windows-meson, macos-meson]
 
         if: github.repository == 'marzer/tomlplusplus' && github.ref == 'refs/heads/master'
 

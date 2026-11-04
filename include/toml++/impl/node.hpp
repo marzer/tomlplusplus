@@ -864,7 +864,7 @@ TOML_NAMESPACE_START
 						return static_cast<Func&&>(visitor)(static_cast<Node&&>(n).template ref_cast<date_time>());
 					break;
 
-				case node_type::none: TOML_UNREACHABLE;
+				case node_type::none:
 				default: TOML_UNREACHABLE;
 			}
 

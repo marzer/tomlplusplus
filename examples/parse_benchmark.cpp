@@ -49,6 +49,7 @@ int main(int argc, char** argv)
 		try
 		{
 			const auto result = toml::parse(file_content, file_path);
+			static_cast<void>(result);
 		}
 		catch (const toml::parse_error& err)
 		{

@@ -63,3 +63,27 @@ if(check-cmake)
       COMMAND "${check-cmake}" "${PROJECT_SOURCE_DIR}"
   )
 endif()
+
+# ---- check-symbols ----
+
+if(tomlplusplus_BUILD_LIB
+   AND BUILD_SHARED_LIBS
+   AND CMAKE_SYSTEM_NAME STREQUAL "Linux"
+   AND CMAKE_BUILD_TYPE STREQUAL "Release"
+   AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
+   AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 15
+   AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 16
+   AND NOT tomlplusplus_ASAN
+   AND NOT tomlplusplus_UBSAN
+   AND NOT tomlplusplus_COVERAGE)
+  find_program(check-symbols check-symbols)
+  if(check-symbols)
+    add_test(
+        NAME check-symbols
+        COMMAND
+        "${check-symbols}" "$<TARGET_FILE:tomlplusplus_tomlplusplus>"
+        --check "${PROJECT_SOURCE_DIR}/symbols.txt"
+        --include "^toml::"
+    )
+  endif()
+endif()

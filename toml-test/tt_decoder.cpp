@@ -8,6 +8,7 @@
 using nlohmann::json;
 using namespace std::string_view_literals;
 
+// NOLINTBEGIN(misc-use-anonymous-namespace)
 TOML_NAMESPACE_START
 {
 	static void to_json(json & j, const value<std::string>& val)
@@ -77,11 +78,12 @@ TOML_NAMESPACE_START
 	static void to_json(json & j, const array& arr)
 	{
 		j = json::array();
-		for (auto& v_ : arr)
-			v_.visit([&](auto& v) { j.push_back(v); });
+		for (auto& elem : arr)
+			elem.visit([&](auto& v) { j.push_back(v); });
 	}
 }
 TOML_NAMESPACE_END;
+// NOLINTEND(misc-use-anonymous-namespace)
 
 int main()
 {
