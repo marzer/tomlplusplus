@@ -87,10 +87,15 @@ jobs:
               env:
                   GH_TOKEN: ${{ github.token }}
               run: |
-                  if [ "$GITHUB_EVENT_NAME" = push ] && [ -n "$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yaml \
-                    --branch master --event push --commit "$GITHUB_SHA" --json databaseId --jq '.[]')" ]; then
-                    echo "ci also runs on $GITHUB_SHA, and the docs deploy once it passes"
-                    exit 0
+                  if [ "$GITHUB_EVENT_NAME" = push ]; then
+                    for attempt in 1 2 3 4 5 6; do
+                      if [ -n "$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yaml --branch master --event push \
+                        --commit "$GITHUB_SHA" --json databaseId --jq '.[]')" ]; then
+                        echo "ci also runs on $GITHUB_SHA, and the docs deploy once it passes"
+                        exit 0
+                      fi
+                      [ "$attempt" = 6 ] || sleep 10
+                    done
                   fi
 
                   run_id=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yaml --branch master --status success \
