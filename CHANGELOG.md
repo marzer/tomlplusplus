@@ -23,6 +23,7 @@
 - fixed Clang 20 warning about whitespace in literal operator declarations (#263) (@eddelbuettel)
 - fixed C++26 deprecation warning about `std::is_trivial` (#270) (@nmpassthf)
 - fixed warnings from inside toml++ in code built with Clang's `-Weverything`, or with GCC's `-Wshadow` or `-Wunused-variable`
+- fixed MSVC warning C4702 (unreachable code) from the parser (#307) (@soniafergusonship)
 
 #### Additions
 

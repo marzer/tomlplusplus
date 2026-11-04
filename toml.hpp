@@ -12856,6 +12856,8 @@ TOML_PUSH_WARNINGS;
 #undef max
 #endif
 
+TOML_DISABLE_MSVC_WARNING(4702);
+
 TOML_ANON_NAMESPACE_START
 {
 	template <typename T>
@@ -15587,7 +15589,8 @@ TOML_IMPL_NAMESPACE_START
 
 				// now things that can be identified from two or more characters
 				return_if_error({});
-				TOML_ASSERT_ASSUME(char_count >= 2u);
+				if (char_count < 2u)
+					set_error_and_return_default("could not determine value type"sv);
 
 				// do some 'fuzzy matching' where there's no ambiguity, since that allows the specific
 				// typed parse functions to take over and show better diagnostics if there's an issue
