@@ -19,17 +19,13 @@ if has_exceptions
 	]
 endif
 
-example_executables = []
 foreach example : examples
-	example_executables += [[
+	executable(
 		example,
-		executable(
-			example,
-			[ example + '.cpp' ],
-			cpp_args: example_args,
-			dependencies: tomlplusplus_dep,
-			override_options: global_overrides,
-			install: not is_subproject
-		)
-	]]
+		[ example + '.cpp' ],
+		cpp_args: example_args,
+		dependencies: tomlplusplus_dep,
+		override_options: global_overrides,
+		install: not is_subproject
+	)
 endforeach

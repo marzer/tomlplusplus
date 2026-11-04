@@ -327,8 +327,15 @@ def updated_changelog(version):
 def main():
     parser = ArgumentParser(description=r'Regenerates everything derived from VERSION.txt and include/toml++.')
     parser.add_argument(r'--check', action='store_true', help=r'report anything out of date, changing nothing')
-    parser.add_argument(r'--stamp', type=Path, help=r'a file to write afterwards, for build systems to track')
+    parser.add_argument(r'--inputs', action='store_true', help=r'list the files regeneration reads, changing nothing')
     args = parser.parse_args()
+
+    if args.inputs:
+        inputs = [VERSION_FILE, Path(__file__).resolve(), ROOT / 'toml.hpp']
+        inputs += sorted(path for path in (ROOT / 'include').rglob('*') if path.is_file())
+        for path in inputs:
+            print(path.relative_to(ROOT).as_posix())
+        return 0
 
     major, minor, patch = parse_version()
     version = rf'{major}.{minor}.{patch}'
@@ -350,8 +357,6 @@ def main():
 
     for path in stale:
         write_text_file(path, outputs[path])
-    if args.stamp:
-        args.stamp.write_text('', encoding='utf-8')
     return 0
 
 

@@ -7,12 +7,12 @@ assert(build_lib) # not header-only mode
 
 # These are the arguments needed to compile and consume the library, and
 # are exposed to users with  the `compile_args` kwarg of declare_dependency()
-lib_args = cpp.get_supported_arguments('-DTOML_HEADER_ONLY=0')
+lib_args = ['-DTOML_HEADER_ONLY=0']
 if get_option('default_library') != 'static'
-	lib_args += cpp.get_supported_arguments('-DTOML_SHARED_LIB=1')
+	lib_args += '-DTOML_SHARED_LIB=1'
 endif
 if unreleased_features
-	lib_args += cpp.get_supported_arguments('-DTOML_ENABLE_UNRELEASED_FEATURES=1')
+	lib_args += '-DTOML_ENABLE_UNRELEASED_FEATURES=1'
 endif
 
 # these are the _internal_ args, just for compiling the lib

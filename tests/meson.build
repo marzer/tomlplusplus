@@ -5,9 +5,9 @@
 
 assert(build_tests)
 
-test_sources = files(import('fs').read('sources.txt').strip().split('\n'))
+test_sources = files(fs.read('sources.txt').strip().split('\n'))
 
-test_deps = [ tomlplusplus_dep, regenerate_dep ]
+test_deps = [ tomlplusplus_dep ]
 if not get_option('use_vendored_libs')
 	test_deps += dependency('catch2', version: '>=3.0.0')
 endif
@@ -19,14 +19,14 @@ endif
 test_args = []
 test_args += global_args
 if has_exceptions
-	test_args += cpp.get_supported_arguments('-DSHOULD_HAVE_EXCEPTIONS=1')
+	test_args += '-DSHOULD_HAVE_EXCEPTIONS=1'
 else
-	test_args += cpp.get_supported_arguments('-DSHOULD_HAVE_EXCEPTIONS=0')
+	test_args += '-DSHOULD_HAVE_EXCEPTIONS=0'
 endif
 if get_option('use_vendored_libs')
-	test_args += cpp.get_supported_arguments('-DUSE_VENDORED_LIBS=1')
+	test_args += '-DUSE_VENDORED_LIBS=1'
 else
-	test_args += cpp.get_supported_arguments('-DUSE_VENDORED_LIBS=0')
+	test_args += '-DUSE_VENDORED_LIBS=0'
 endif
 
 
