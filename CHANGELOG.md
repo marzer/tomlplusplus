@@ -1,26 +1,5 @@
 # Changelog
 
-<!--
-template:
-
-## vX.X.X
-
-[Released](https://github.com/marzer/tomlplusplus/releases/tag/vX.X.X) YYYY-MM-DD
-
-#### Fixes:
-
-#### Additions:
-
-#### Changes:
-
-#### Removals:
-
-#### Build system:
-
-<br><br>
-
--->
-
 ## Unreleased
 
 #### Fixes
@@ -30,10 +9,58 @@ template:
 - fixed unclear error message when parsing integers that would overflow (#224) (@chrimbo)
 - fixed CMake `install` target installing `meson.build` files (#236) (@JWCS)
 - lowered `TOML_MAX_NESTED_VALUES` default from 256 to 128 to prevent stack overflow on deeply nested arrays/inline tables in sanitizer builds (@danielbodorin)
+- fixed "unresolved symbol" error with nvc++ (#220) (@Tomcat-42)
+- fixed stack overflow when parsing deeply nested dotted keys (#242) (@tyler92)
+- fixed some malformed input hitting an assertion in the parser; it now gets a parse error (#321) (@emincan2000)
+- fixed precondition violation when parsing a table header that starts with `[[[` (#301) (@gistrec)
+- fixed redefinition error messages showing the wrong text for quoted keys (#300) (@SAY-5)
+- fixed undefined behaviour when checking some non-whitespace Unicode code points for whitespace (#295) (@94xhn)
+- fixed undefined behaviour in `toml_formatter` with fractional floating-point values (#276) (@mikael-s-persson)
+- fixed downcasts in the node hierarchy that used `reinterpret_cast` (#299) (@ShereeMorphett)
+- fixed `parse_error` not being exported from shared libraries (#316) (@ac1982)
+- fixed build error with MSYS2 (#264) (@Toni500github)
+- fixed missing `#include` in `date_time.hpp` (#298) (@dwithun-dev)
+- fixed Clang 20 warning about whitespace in literal operator declarations (#263) (@eddelbuettel)
+- fixed C++26 deprecation warning about `std::is_trivial` (#270) (@nmpassthf)
+- fixed warnings from inside toml++ in code built with Clang's `-Weverything`, or with GCC's `-Wshadow` or `-Wunused-variable`
+
+#### Additions
+
+- added `toml::get_line()` (#255, #256, #258) (@N-Dekker)
+- added `toml::format_flags::force_multiline_arrays` (#282) (@rafal-c)
+- added support for user-defined string types, which `toml::is_string_like` detects automatically (#306) (@mikomikotaishi)
+- added C++20 module support with `import tomlplusplus;` (#266, #267, #273, #303) (@mikomikotaishi, @N-Dekker, @davidstone)
+- added `TOML_MAX_DOTTED_KEYS_DEPTH` config (default `1024`) (#242) (@tyler92)
+- added `TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA` config to work around MSVC's legacy lambda processor (#247) (@N-Dekker)
+- added `TOML_DISABLE_NOEXCEPT_NOEXCEPT` config to work around an MSVC bug (on by default for VS 2022 17.13 and older) (#271) (@N-Dekker)
+- added IWYU pragmas to `toml++/toml.hpp` (#277) (@fnuecke)
+
+#### Changes
+
+- `operator<<` for `source_region` (and so for `parse_error`) also prints the end of the region when it differs from the start (#244) (@N-Dekker)
+
+#### Removals
+
+- removed the Visual Studio solution and project files; use CMake or Meson
+
+#### Build system
+
+- meson: builds are header-only by default, as the `build_lib` option always said. In v3.4.0 the deprecated `compile_library` option defaulted to `true`, so every default build compiled the library; pass `-Dbuild_lib=true` to keep doing that (#296) (@jfsimoneau)
+- meson: installs the examples when they're built in a top-level build (#233) (@Scrumplex)
+- cmake: added `tomlplusplus_INSTALL` (#240) (@DapengFeng)
+- cmake: added `tomlplusplus_BUILD_LIB` to compile the library (static or shared, per `BUILD_SHARED_LIBS`); the target is still `tomlplusplus::tomlplusplus`
+- cmake: added `tomlplusplus_UNRELEASED_FEATURES`
+- cmake: added a pkg-config file, `tomlplusplus.pc` (#274) (@enessmr)
+- cmake: added the install components `tomlplusplus_Runtime` and `tomlplusplus_Development`
+- cmake: fixed `TOMLPLUSPLUS_BUILD_MODULES` never installing the module; its target is `tomlplusplus::modules`
+- cmake: added developer options for the tests, the toml-test encoder and decoder, sanitizers and coverage; they only apply to top-level builds
+- cmake, meson: builds from a git checkout keep `toml.hpp` up to date; `-Dtomlplusplus_REGENERATE=OFF` and `-Dregenerate=false` turn this off
+- the tests use Catch2 v3, which fixes building them with libc++ in C++23 mode; `-Duse_vendored_libs=false` now needs an installed Catch2 v3 (#315) (@peppergrayxyz)
+- added OSS-Fuzz integration (#214) (@capuanob)
+
+<br><br>
 
 ## v3.4.0
-
-- fixed "unresolved symbol" error with nvc++ (#220) (@Tomcat-42)
 
 #### Fixes
 

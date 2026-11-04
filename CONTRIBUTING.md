@@ -5,10 +5,8 @@ If you wish to submit a PR, please be aware that:
 
 - The single-header `toml.hpp` at the repository root is generated, so don't change it directly; make your changes in
   the files in `include`. You can leave it out of your PR too (see [Generated files](#generated-files)).
-- Your changes should compile warning-free on at least one of:
-    - GCC 8 or higher
-    - Clang 8 or higher
-    - MSVC 19.2X (Visual Studio 2019) or higher
+- Your changes should compile warning-free with a recent GCC, Clang or MSVC. CI builds every PR with all three, and
+  with Apple Clang.
 
 If you've added a new header file that isn't going to be transitively included by one of the others, add an include
 directive to `include/toml++/toml.hpp`.
@@ -32,52 +30,82 @@ changing anything. It only needs Python.
 
 ## Building and running the tests
 
-Testing is done using [Catch2].
+Testing is done using [Catch2]. It's vendored, as is everything else the tests use, so a compiler and CMake or Meson
+are all you need.
 
-### Testing on Windows with Visual Studio
-
-Install [Visual Studio] and [Test Adapter for Catch2], then open `toml++.sln` and build the
-projects in the `tests` solution folder. Visual Studio's Test Explorer should pick these up and
-allow you to run the tests directly.
-
-If test discovery fails you can usually fix it by enabling
-`Auto Detect runsettings Files` (settings gear icon > `Configure Run Settings`).
-
-### Testing on Linux (and WSL)
+### CMake
 
 ```bash
-# install ninja, meson, locales (first time only)
-sudo apt update && sudo apt install -y locales python3 python3-pip ninja-build
-sudo pip3 install meson
-sudo locale-gen 'en_US.utf8' \
-                'ja_JP.utf8' \
-                'de_DE.utf8' \
-                'it_IT.utf8' \
-                'tr_TR.utf8' \
-                'fi_FI.utf8' \
-                'fr_FR.utf8' \
-                'zh_CN.utf8'
-
-# create the build configs (first time only)
-meson setup build-debug   --buildtype=debug   -Ddevel=true
-meson setup build-release --buildtype=release   -Ddevel=true
-
-# run the tests
-cd build-debug && ninja && ninja test               \
-    && cd ../build-release && ninja && ninja test   \
-    && cd ..
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -Dtomlplusplus_BUILD_TESTS=ON
+cmake --build build
+ctest --test-dir build --output-on-failure
 ```
+
+With Visual Studio or another multi-config generator, pass `--config Debug` to the build and `-C Debug` to `ctest`.
+
+Set the language standard with `CMAKE_CXX_STANDARD`. The other options (examples, sanitizers, the compiled library,
+unreleased TOML features and so on) are in `cmake/variables.cmake`, and `.github/workflows/ci.yaml` shows the
+combinations CI tests.
+
+### Meson
+
+```bash
+meson setup build --buildtype=debug -Ddevel=true
+meson test -C build
+```
+
+`-Ddevel=true` builds the tests, the examples and the toml-test encoder and decoder, with all warnings on. Meson 0.61
+or later works; `pipx install meson` gets the latest.
 
 > ℹ&#xFE0F; Pass `-Duse_vendored_libs=false` to Meson if you wish to use the system-installed version
 > of Catch2 (v3 or newer) rather than the vendored one.
+
+### Locales
+
+The tests run once per locale, and a run whose locale isn't installed is reported as skipped. On Debian and Ubuntu,
+`sudo apt install locales-all` installs all of them.
+
+### Coverage
+
+Coverage needs Clang, plus the `llvm-profdata` and `llvm-cov` of the same version on `PATH`:
+
+```bash
+cmake -S . -B build -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug \
+    -Dtomlplusplus_BUILD_TESTS=ON -Dtomlplusplus_COVERAGE=ON
+cmake --build build
+ctest --test-dir build
+python3 tools/coverage.py build
+```
+
+The HTML report goes in `build/coverage/html`. The report for `master` is on the
+[homepage](https://marzer.github.io/tomlplusplus/coverage/).
+
+<br>
+
+## Fuzzing
+
+[OSS-Fuzz] fuzzes toml++ continuously, and CIFuzz runs the same fuzzer on every PR. Both build
+`fuzzing/toml_fuzzer.cpp` with `fuzzing/build.sh`. OSS-Fuzz takes `build.sh` from `master`, so a change to it only takes
+effect after merge.
+
+To run the fuzzer locally with Clang and libFuzzer:
+
+```bash
+CXX=clang++ CXXFLAGS="-fsanitize=address,fuzzer-no-link" LIB_FUZZING_ENGINE=-fsanitize=fuzzer \
+    cmake -S . -B build-fuzz -DCMAKE_BUILD_TYPE=Release -DBUILD_FUZZER=ON
+cmake --build build-fuzz --target toml_fuzzer
+build-fuzz/fuzzing/toml_fuzzer
+```
+
+CMake warns that it can't install the fuzzer without `$OUT`. That only matters to OSS-Fuzz.
 
 <br>
 
 ## Testing with the [toml-test] suite
 
-As an optional extra you may wish to test against the official test TOML test suite, [toml-test]. See the
+As an optional extra you may wish to test against the official TOML test suite, [toml-test]. See the
 instructions at [toml-test/README](./toml-test/README.md). Note that the toml++ tests already consume tests from the
-offical suite via a C++ code-generation script so you are not expected to take this extra step as part of contributing
+official suite via a C++ code-generation script so you are not expected to take this extra step as part of contributing
 to the library.
 
 <br>
@@ -95,8 +123,7 @@ The practical upshot for a PR: **don't touch `VERSION.txt`**. I bump it myself w
 bumps it just invites a merge conflict or an accidental release. User-visible changes go under the Unreleased heading at
 the top of `CHANGELOG.md`.
 
-[visual studio]: https://visualstudio.microsoft.com/vs/
-[test adapter for catch2]: https://marketplace.visualstudio.com/items?itemName=JohnnyHendriks.ext01
 [reporting issues]: https://github.com/marzer/tomlplusplus/issues
 [catch2]: https://github.com/catchorg/Catch2
 [toml-test]: https://github.com/toml-lang/toml-test
+[oss-fuzz]: https://github.com/google/oss-fuzz

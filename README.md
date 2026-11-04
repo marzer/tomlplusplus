@@ -7,7 +7,6 @@
 [![Coverage](https://marzer.github.io/tomlplusplus/coverage/badge.svg)](https://marzer.github.io/tomlplusplus/coverage/)
 [![Mentioned in Awesome C++](docs/images/badge-awesome.svg)](https://github.com/fffaraz/awesome-cpp)
 [![Sponsor](docs/images/badge-sponsor.svg)](https://github.com/sponsors/marzer)
-[![Gitter](docs/images/badge-gitter.svg)](https://gitter.im/marzer/tomlplusplus)
 ====
 
 ## toml++ homepage
@@ -22,15 +21,15 @@
 
 - Header-only (optional!)
 - Module support
-- Supports the latest [TOML] release ([v1.0.0]), plus optional support for some unreleased TOML features
-- Passes all tests in the [toml-test](https://github.com/toml-lang/toml-test) suite
+- Supports [TOML] [v1.0.0], plus opt-in support for parts of [v1.1.0] and some unreleased features
+- Passes all TOML v1.0.0 tests in the [toml-test](https://github.com/toml-lang/toml-test) suite
 - Supports serializing to JSON and YAML
 - Proper UTF-8 handling (incl. BOM)
 - C++17 (plus some C++20 features where available, e.g. experimental support for [char8_t] strings)
 - Doesn't require RTTI
 - Works with or without exceptions
-- Tested on Clang (8+), GCC (8+) and MSVC (VS2019)
-- Tested on x64, x86 and ARM
+- Tested on GCC 11 and 15, Clang 21, Apple Clang 21 and MSVC 19.44 (VS 2022); other compilers are best effort
+- Tested on x64 and ARM64
 
 <br>
 
@@ -112,24 +111,14 @@ You'll find some more code examples in the `examples` directory, and plenty more
 ### 🍨&#xFE0F; Regular flavour
 
 1. Clone the repository
-2. Add `tomlplusplus/include` to your include paths, or for optional module support add `tomlplusplus/modules` as well and enable `TOMLPLUSPLUS_BUILD_MODULES`
+2. Add `tomlplusplus/include` to your include paths. For module support, also compile
+   `tomlplusplus/src/modules/tomlplusplus.cppm`, which CMake does when `TOMLPLUSPLUS_BUILD_MODULES` is on (link
+   `tomlplusplus::modules`)
 3. `#include <toml++/toml.hpp>` (or `import tomlplusplus;`)
 
 ### Conan
 
 Add `tomlplusplus/3.4.0` to your conanfile.
-
-### DDS
-
-Add `tomlpp` to your `package.json5`, e.g.:
-
-```plaintext
-depends: [
-    'tomlpp^3.4.0',
-]
-```
-
-> ℹ&#xFE0F; _[What is DDS?](https://dds.pizza/)_
 
 ### Tipi.build
 
@@ -242,16 +231,19 @@ defines `TOML_LANG_MAJOR`, `TOML_LANG_MINOR` and `TOML_LANG_PATCH`.
 
 ### **Unreleased language features:**
 
-- [#516]: Allow newlines and trailing commas in inline tables
+- [#516]: Allow newlines and trailing commas in inline tables (v1.1.0)
 - [#562]: Allow hex floating-point values
 - [#644]: Support `+` in key names
-- [#671]: Local time of day format should support `09:30` as opposed to `09:30:00`
+- [#671]: Local time of day format should support `09:30` as opposed to `09:30:00` (v1.1.0)
 - [#687]: Relax bare key restrictions to allow additional unicode characters
-- [#790]: Include an `\e` escape code sequence (shorthand for `\u001B`)
-- [#796]: Include an `\xHH` escape code sequence
+- [#790]: Include an `\e` escape code sequence (shorthand for `\u001B`) (v1.1.0)
+- [#796]: Include an `\xHH` escape code sequence (v1.1.0)
 - [#891]: Allow non-English scripts for unquoted keys
 
-> ℹ&#xFE0F; _`#define TOML_ENABLE_UNRELEASED_FEATURES 1` to enable these features (see [Configuration](#Configuration))._
+> ℹ&#xFE0F; _`#define TOML_ENABLE_UNRELEASED_FEATURES 1` to enable these features (see [Configuration](#configuration))._
+>
+> ℹ&#xFE0F; _The features marked v1.1.0 are part of TOML [v1.1.0], which toml++ does not fully support yet
+> ([#289](https://github.com/marzer/tomlplusplus/issues/289))._
 
 ### 🔹&#xFE0F; **TOML v1.0.0:**
 
@@ -321,6 +313,7 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 - **[@jfsimoneau](https://github.com/jfsimoneau)** - Fixed a meson option
 - **[@ShereeMorphett](https://github.com/ShereeMorphett)** - Fixed reinterpret_cast usage
 - **[@SAY-5](https://github.com/SAY-5)** - Fixed a parser bug
+
 <br>
 
 ## Contact
@@ -328,7 +321,6 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 For bug reports and feature requests please consider using the [issues] system here on GitHub. For anything else
 though you're welcome to reach out via other means. In order of likely response time:
 
-- Gitter: [marzer/tomlplusplus](https://gitter.im/marzer/tomlplusplus) ("Discord for repos")
 - Twitter: [marzer8789](https://twitter.com/marzer8789)
 - Email: [mark.gillard@outlook.com.au](mailto:mark.gillard@outlook.com.au)
 - Facebook: [marzer](https://www.facebook.com/marzer)
@@ -343,6 +335,7 @@ though you're welcome to reach out via other means. In order of likely response 
 [TOML master]: https://github.com/toml-lang/toml/blob/master/README.md
 [TOML issues list]: https://github.com/toml-lang/toml/issues
 [v1.0.0]: https://toml.io/en/v1.0.0
+[v1.1.0]: https://toml.io/en/v1.1.0
 [CONTRIBUTING]: ./CONTRIBUTING.md
 [LICENSE]: ./LICENSE
 [Flexible and Economical UTF-8 Decoder]: http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
