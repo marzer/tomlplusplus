@@ -15,7 +15,7 @@ show_includes   = false
 changelog       = true
 logo            = 'images/logo.svg'
 favicon         = 'images/favicon.ico'
-navbar          = [ 'namespaces', 'annotated' ]
+navbar          = [ 'namespaces', 'annotated', '<a href="coverage/">Coverage</a>' ]
 theme           = 'dark'
 extra_files     = [
     'images/badge-awesome.svg',

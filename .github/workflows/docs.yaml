@@ -21,6 +21,13 @@ on:
             - "**.md"
             - "docs/**"
             - ".github/workflows/docs.yaml"
+    workflow_run:
+        workflows:
+            - ci
+        types:
+            - completed
+        branches:
+            - master
     release:
         types:
             - released
@@ -31,7 +38,7 @@ permissions:
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
-    cancel-in-progress: true
+    cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
 jobs:
     docs-check:
@@ -61,11 +68,50 @@ jobs:
                   cd docs
                   poxy
 
+    find-coverage:
+        if: >-
+            github.event_name != 'pull_request' && (github.event_name != 'workflow_run'
+            || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'pull_request'))
+
+        runs-on: ubuntu-latest
+
+        permissions:
+            actions: read
+
+        outputs:
+            run-id: ${{ steps.find.outputs.run-id }}
+
+        steps:
+            - name: Find the coverage report of master
+              id: find
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  if [ "$GITHUB_EVENT_NAME" = push ] && [ -n "$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yaml \
+                    --branch master --event push --commit "$GITHUB_SHA" --json databaseId --jq '.[]')" ]; then
+                    echo "ci also runs on $GITHUB_SHA, and the docs deploy once it passes"
+                    exit 0
+                  fi
+
+                  run_id=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yaml --branch master --status success \
+                    --json databaseId,event \
+                    --jq 'map(select(.event == "push" or .event == "workflow_dispatch"))[0].databaseId // empty')
+                  if [ -z "$run_id" ]; then
+                    echo "::error::no passing ci run on master to take the coverage report from"
+                    exit 1
+                  fi
+
+                  echo "coverage report of $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$run_id"
+                  echo "run-id=$run_id" >> "$GITHUB_OUTPUT"
+
     docs:
-        if: github.event_name != 'pull_request'
+        needs: find-coverage
+
+        if: needs.find-coverage.outputs.run-id
 
         permissions:
             contents: read
+            actions: read
             pages: write
             id-token: write
 
@@ -110,6 +156,14 @@ jobs:
                       poxy
                       exit 1
                   fi
+
+            - name: Download the coverage report
+              uses: actions/download-artifact@v8
+              with:
+                  name: coverage
+                  path: docs/html/coverage
+                  run-id: ${{ needs.find-coverage.outputs.run-id }}
+                  github-token: ${{ github.token }}
 
             - name: Setup Pages
               uses: actions/configure-pages@v6

@@ -515,7 +515,6 @@ jobs:
 
         permissions:
             contents: write
-            actions: write
 
         defaults:
             run:
@@ -551,5 +550,3 @@ jobs:
                     --title "$tag" \
                     --generate-notes \
                     --notes "$notes"
-
-                  gh workflow run docs.yaml --repo "$GITHUB_REPOSITORY" --ref master

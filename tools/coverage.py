@@ -18,10 +18,31 @@ FLOORS = {
     r'regions': r'TOMLPLUSPLUS_COVERAGE_MIN_REGIONS',
     r'branches': r'TOMLPLUSPLUS_COVERAGE_MIN_BRANCHES',
 }
+BADGE_COLOURS = ((90, r'#4c1'), (80, r'#97ca00'), (70, r'#a4a61d'), (60, r'#dfb317'), (50, r'#fe7d37'), (0, r'#e05d44'))
 
 
 def llvm_cov(*args, **kwargs):
     return subprocess.run([r'llvm-cov', *args], check=True, **kwargs)
+
+
+def badge(percent):
+    label = r'coverage'
+    value = rf'{percent:.2f}%'
+    colour = next(colour for floor, colour in BADGE_COLOURS if percent >= floor)
+    label_width = 7 * len(label) + 10
+    value_width = 7 * len(value) + 10
+    return (
+        rf'<svg xmlns="http://www.w3.org/2000/svg" width="{label_width + value_width}" height="20" role="img"'
+        rf' aria-label="{label}: {value}"><title>{label}: {value}</title><g shape-rendering="crispEdges">'
+        rf'<rect width="{label_width}" height="20" fill="#555"/>'
+        rf'<rect x="{label_width}" width="{value_width}" height="20" fill="{colour}"/></g>'
+        r'<g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif"'
+        r' text-rendering="geometricPrecision" font-size="110">'
+        rf'<text x="{5 * label_width}" y="140" transform="scale(.1)"'
+        rf' textLength="{10 * (label_width - 10)}">{label}</text>'
+        rf'<text x="{10 * label_width + 5 * value_width}" y="140" transform="scale(.1)"'
+        rf' textLength="{10 * (value_width - 10)}">{value}</text></g></svg>'
+    )
 
 
 def main():
@@ -51,6 +72,7 @@ def main():
         llvm_cov(r'export', *common, r'-format=lcov', *sources, stdout=lcov)
     summary = llvm_cov(r'export', *common, r'-summary-only', *sources, capture_output=True, text=True).stdout
     totals = json.loads(summary)[r'data'][0][r'totals']
+    (out_dir / r'html' / r'badge.svg').write_text(badge(totals[r'lines'][r'percent']), encoding=r'utf-8')
 
     floors = {metric: float(os.environ[var]) for metric, var in FLOORS.items() if os.environ.get(var)}
     failed = [m for m, floor in floors.items() if totals[m][r'percent'] < floor]

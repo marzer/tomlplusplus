@@ -4,6 +4,7 @@
 [![TOML](docs/images/badge-TOML.svg)][v1.0.0]
 [![MIT license](docs/images/badge-license-MIT.svg)](./LICENSE)
 [![ci](https://github.com/marzer/tomlplusplus/actions/workflows/ci.yaml/badge.svg?branch=master)](https://github.com/marzer/tomlplusplus/actions/workflows/ci.yaml)
+[![Coverage](https://marzer.github.io/tomlplusplus/coverage/badge.svg)](https://marzer.github.io/tomlplusplus/coverage/)
 [![Mentioned in Awesome C++](docs/images/badge-awesome.svg)](https://github.com/fffaraz/awesome-cpp)
 [![Sponsor](docs/images/badge-sponsor.svg)](https://github.com/sponsors/marzer)
 [![Gitter](docs/images/badge-gitter.svg)](https://gitter.im/marzer/tomlplusplus)
