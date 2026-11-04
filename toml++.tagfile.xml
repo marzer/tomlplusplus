@@ -8971,6 +8971,13 @@
     </member>
     <member kind="variable">
       <type>constexpr bool</type>
+      <name>is_string_like</name>
+      <anchorfile>namespacetoml.html</anchorfile>
+      <anchor>a3b9b5d066a470a9537ea164ca082f01e</anchor>
+      <arglist/>
+    </member>
+    <member kind="variable">
+      <type>constexpr bool</type>
       <name>is_key</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>a7b8ef907d9629d139a30d874b345b195</anchor>

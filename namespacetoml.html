@@ -457,6 +457,11 @@
               bool <a class="m-doc-self" href="#aea14621807afe92a840d82c7139cde07">is_string</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Metafunction for determining if a type is, or is a reference to, a <a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a> or <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value&lt;std::<wbr/>string&gt;</a>.</dd>
+            <dt>
+              <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;</div>
+              bool <a class="m-doc" href="#a3b9b5d066a470a9537ea164ca082f01e">is_string_like</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Metafunction for determining if a type is a user-defined 'string-like' type.</dd>
             <dt id="ad11c8c8a8286d6931e40658679aa7ddb">
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;</div>
               bool <a class="m-doc-self" href="#ad11c8c8a8286d6931e40658679aa7ddb">is_table</a> <span class="m-label m-flat m-primary">constexpr</span>
@@ -1271,6 +1276,28 @@
 <span class="p">{</span>
     <span class="k">return</span> <span class="nn">toml</span><span class="o">::</span><span class="nf">parse_file</span><span class="p">(</span><span class="sa">L</span><span class="s">"foo.toml"</span><span class="p">);</span>
 <span class="p">}</span></pre>
+          </div></section>
+        </section>
+        <section>
+          <h2>Variable documentation</h2>
+          <section class="m-doc-details" id="a3b9b5d066a470a9537ea164ca082f01e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;
+              </div>
+              bool <span class="m-doc-details-prefix">toml::<wbr/></span><a class="m-doc-self" href="#a3b9b5d066a470a9537ea164ca082f01e">is_string_like</a> <span class="m-label m-primary">constexpr</span>
+            </h3>
+            <p>Metafunction for determining if a type is a user-defined 'string-like' type.</p>
+<p>User-defined string types are detected automatically and may be used anywhere the library expects a string - as an initializer for TOML string values, and as a target type for <a class="m-doc" href="classtoml_1_1node.html#a302e5bc2e4796e9b1ae60b002911a007">node::<wbr/>value()</a>, <a class="m-doc" href="classtoml_1_1node.html#ad1c332ae403fade90216726105419efc">node::<wbr/>value_or()</a> and friends:</p><pre class="m-code"><span class="n">tbl</span><span class="p">.</span><span class="nf">insert</span><span class="p">(</span><span class="s">"hostname"</span><span class="p">,</span> <span class="n">foo</span><span class="o">::</span><span class="n">String</span><span class="p">{</span> <span class="s">"localhost"</span> <span class="p">});</span>
+<span class="k">auto</span> <span class="n">hostname</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"hostname"</span><span class="p">].</span><span class="n">value</span><span class="o">&lt;</span><span class="n">foo</span><span class="o">::</span><span class="n">String</span><span class="o">&gt;</span><span class="p">();</span></pre><pre> A type is detected as string-like when it has:
+     - a const-qualified `data()` or `c_str()` member returning (something convertible to) `const char*`, and
+     - a const-qualified `length()` member returning (something convertible to) `<a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a>`.
+
+    Being detected is sufficient to use a type as an initializer; to also be usable as a
+    retrieval target it must additionally be constructible from one of `<a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a>`,
+    `(const char*, <a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a>)` or `const <a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>&amp;`. Attempting to retrieve a value as a
+    string-like type without a suitable constructor is a compile error.
+</pre><aside class="m-note m-info"><h4>Note</h4><p>TOML string values are always stored internally as <a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a>; detection governs conversions at the API boundary only, not the underlying storage, so retrieving a value as a user-defined string type makes a copy.</p></aside>
           </div></section>
         </section>
       </div>
