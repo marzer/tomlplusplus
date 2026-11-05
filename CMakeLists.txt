@@ -123,7 +123,7 @@ if(tomlplusplus_BUILD_TESTS)
   add_subdirectory(tests)
 endif()
 
-if(tomlplusplus_BUILD_TOML_TEST AND tomlplusplus_EXCEPTIONS AND NOT tomlplusplus_UNRELEASED_FEATURES)
+if(tomlplusplus_BUILD_TOML_TEST AND tomlplusplus_EXCEPTIONS)
   add_subdirectory(toml-test)
 endif()
 

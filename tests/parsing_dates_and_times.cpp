@@ -121,19 +121,19 @@ TEST_CASE("parsing - dates and times (leap seconds)")
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		"val = 12:30:60"sv,
-		"1:15: Error while parsing time: second 60 (a leap second) is only valid at minute 59, saw minute 30"sv);
+		"1:13: Error while parsing time: second 60 (a leap second) is only valid at minute 59, saw minute 30"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		"val = 1990-12-31T23:30:60"sv,
-		"1:26: Error while parsing date-time: second 60 (a leap second) is only valid at minute 59, saw minute 30"sv);
+		"1:24: Error while parsing date-time: second 60 (a leap second) is only valid at minute 59, saw minute 30"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		"val = 1990-12-31T23:30:60Z"sv,
-		"1:26: Error while parsing date-time: second 60 (a leap second) is only valid at minute 59 UTC, saw minute 30 UTC"sv);
+		"1:24: Error while parsing date-time: second 60 (a leap second) is only valid at minute 59 UTC, saw minute 30 UTC"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		"val = 1990-12-31T23:59:60+05:45"sv,
-		"1:26: Error while parsing date-time: second 60 (a leap second) is only valid at minute 59 UTC, saw minute 14 UTC"sv);
+		"1:24: Error while parsing date-time: second 60 (a leap second) is only valid at minute 59 UTC, saw minute 14 UTC"sv);
 }
 
 TEST_CASE("parsing - dates and times (excess precision is truncated)")
@@ -148,9 +148,7 @@ TEST_CASE("parsing - dates and times (excess precision is truncated)")
 
 TEST_CASE("parsing - dates and times (omitted seconds)")
 {
-// toml/issues/671 (allow omission of seconds)
-#if TOML_LANG_UNRELEASED
-
+	// toml/issues/671 (allow omission of seconds)
 	parse_expected_value(FILE_LINE_ARGS, "10:20"sv, toml::time{ 10, 20 });
 	{
 		const auto val = date_time{ { 1987, 3, 16 }, { 10, 20 } };
@@ -172,36 +170,6 @@ TEST_CASE("parsing - dates and times (omitted seconds)")
 		parse_expected_value(FILE_LINE_ARGS, "1987-03-16T10:20Z"sv, val);
 		parse_expected_value(FILE_LINE_ARGS, "1987-03-16 10:20Z"sv, val);
 	}
-
-#else
-
-	parsing_should_fail(FILE_LINE_ARGS, "val = 10:20"sv, "1:12: Error while parsing time: encountered end-of-file"sv);
-	parsing_should_fail(FILE_LINE_ARGS,
-						"val = 1987-03-16T10:20"sv,
-						"1:23: Error while parsing time: encountered end-of-file"sv);
-	parsing_should_fail(FILE_LINE_ARGS,
-						"val = 1987-03-16 10:20"sv,
-						"1:23: Error while parsing time: encountered end-of-file"sv);
-	parsing_should_fail(FILE_LINE_ARGS,
-						"val = 1987-03-16T10:20-09:30"sv,
-						"1:23: Error while parsing time: expected ':', saw '-'"sv);
-	parsing_should_fail(FILE_LINE_ARGS,
-						"val = 1987-03-16 10:20-09:30"sv,
-						"1:23: Error while parsing time: expected ':', saw '-'"sv);
-	parsing_should_fail(FILE_LINE_ARGS,
-						"val = 1987-03-16T10:20+09:30"sv,
-						"1:23: Error while parsing time: expected ':', saw '+'"sv);
-	parsing_should_fail(FILE_LINE_ARGS,
-						"val = 1987-03-16 10:20+09:30"sv,
-						"1:23: Error while parsing time: expected ':', saw '+'"sv);
-	parsing_should_fail(FILE_LINE_ARGS,
-						"val = 1987-03-16T10:20Z"sv,
-						"1:23: Error while parsing time: expected ':', saw 'Z'"sv);
-	parsing_should_fail(FILE_LINE_ARGS,
-						"val = 1987-03-16 10:20Z"sv,
-						"1:23: Error while parsing time: expected ':', saw 'Z'"sv);
-
-#endif
 }
 
 TEST_CASE("parsing - dates and times (end of input)")
@@ -255,7 +223,7 @@ TEST_CASE("parsing - dates and times (end of input)")
 						"1:21: Error while parsing time: encountered end-of-file"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = 1987-03-16 10"sv,
-						"1:7: Error while parsing value: could not determine value type"sv);
+						"1:20: Error while parsing time: encountered end-of-file"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = 1987-03-16 1"sv,
 						"1:18: Error while parsing key-value pair: expected a comment or whitespace, saw '1'"sv);
@@ -277,70 +245,86 @@ TEST_CASE("parsing - dates and times (malformed)")
 						"1:18: Error while parsing date-time: expected 2-digit hour, saw ':'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = 1987-03-16t,"sv,
-						"1:7: Error while parsing value: could not determine value type"sv);
+						"1:18: Error while parsing date-time: expected 2-digit hour, saw ','"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = 1987-3-16"sv,
 						"1:13: Error while parsing date: expected 2-digit month, saw '-'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = 1987-13-16"sv,
-						"1:14: Error while parsing date: expected month between 1 and 12 (inclusive), saw 13"sv);
+						"1:12: Error while parsing date: expected month between 1 and 12 (inclusive), saw 13"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = 1987-00-16"sv,
-						"1:14: Error while parsing date: expected month between 1 and 12 (inclusive), saw 0"sv);
+						"1:12: Error while parsing date: expected month between 1 and 12 (inclusive), saw 0"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = 1987-03-1x"sv,
 						"1:16: Error while parsing date: expected 2-digit day, saw 'x'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = 1987-02-29"sv,
-						"1:17: Error while parsing date: expected day between 1 and 28 (inclusive), saw 29"sv);
+						"1:15: Error while parsing date: expected day between 1 and 28 (inclusive), saw 29"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = 1900-02-29"sv,
-						"1:17: Error while parsing date: expected day between 1 and 28 (inclusive), saw 29"sv);
+						"1:15: Error while parsing date: expected day between 1 and 28 (inclusive), saw 29"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = 2000-02-30"sv,
-						"1:17: Error while parsing date: expected day between 1 and 29 (inclusive), saw 30"sv);
+						"1:15: Error while parsing date: expected day between 1 and 29 (inclusive), saw 30"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = 1987-04-31"sv,
-						"1:17: Error while parsing date: expected day between 1 and 30 (inclusive), saw 31"sv);
+						"1:15: Error while parsing date: expected day between 1 and 30 (inclusive), saw 31"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = 1987-03-00"sv,
-						"1:17: Error while parsing date: expected day between 1 and 31 (inclusive), saw 0"sv);
+						"1:15: Error while parsing date: expected day between 1 and 31 (inclusive), saw 0"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = 1987-03-32"sv,
-						"1:17: Error while parsing date: expected day between 1 and 31 (inclusive), saw 32"sv);
+						"1:15: Error while parsing date: expected day between 1 and 31 (inclusive), saw 32"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = 24:00:00"sv,
-						"1:9: Error while parsing time: expected hour between 0 and 23 (inclusive), saw 24"sv);
+						"1:7: Error while parsing time: expected hour between 0 and 23 (inclusive), saw 24"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = 1987-03-16T24:00:00"sv,
-						"1:20: Error while parsing time: expected hour between 0 and 23 (inclusive), saw 24"sv);
+						"1:18: Error while parsing time: expected hour between 0 and 23 (inclusive), saw 24"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = 10:2x:00"sv,
 						"1:11: Error while parsing time: expected 2-digit minute, saw 'x'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = 10:60:00"sv,
-						"1:12: Error while parsing time: expected minute between 0 and 59 (inclusive), saw 60"sv);
+						"1:10: Error while parsing time: expected minute between 0 and 59 (inclusive), saw 60"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = 10:20:3x"sv,
 						"1:14: Error while parsing time: expected 2-digit second, saw 'x'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = 10:20:61"sv,
-						"1:15: Error while parsing time: expected second between 0 and 60 (inclusive), saw 61"sv);
+						"1:13: Error while parsing time: expected second between 0 and 60 (inclusive), saw 61"sv);
 	parsing_should_fail(FILE_LINE_ARGS, "val = 10:20:30x"sv, "1:15: Error while parsing time: expected '.', saw 'x'"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "val = 10:20:30z"sv, "1:15: Error while parsing time: expected '.', saw 'z'"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"val = 10:20:30.5x"sv,
+						"1:17: Error while parsing time: expected end of value, saw 'x'"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"val = 1987-03-16x"sv,
+						"1:17: Error while parsing date: expected end of value, saw 'x'"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"val = 1987-03-16+"sv,
+						"1:17: Error while parsing date: expected end of value, saw '+'"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"val = 1987-03-16:10"sv,
+						"1:17: Error while parsing date-time: expected space, 'T' or 't', saw ':'"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"val = 1987-03-16T10:20:30Zx"sv,
+						"1:27: Error while parsing date-time: expected end of value, saw 'x'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = 10:20:30.x"sv,
 						"1:16: Error while parsing time: expected fractional digits, saw 'x'"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		"val = 1987-03-16T10:20:30+24:00"sv,
-		"1:29: Error while parsing date-time offset: expected hour between 0 and 23 (inclusive), saw 24"sv);
+		"1:27: Error while parsing date-time offset: expected hour between 0 and 23 (inclusive), saw 24"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = 1987-03-16T10:20:30+05:3x"sv,
 						"1:31: Error while parsing date-time offset: expected 2-digit minute, saw 'x'"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		"val = 1987-03-16T10:20:30+05:60"sv,
-		"1:32: Error while parsing date-time offset: expected minute between 0 and 59 (inclusive), saw 60"sv);
+		"1:30: Error while parsing date-time offset: expected minute between 0 and 59 (inclusive), saw 60"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = 1987-03-16T10:20:30+05"sv,
 						"1:29: Error while parsing date-time offset: encountered end-of-file"sv);

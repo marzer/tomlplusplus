@@ -33,6 +33,10 @@ TOML_DISABLE_WARNINGS;
 #if !TOML_INT_CHARCONV
 #include <iomanip>
 #endif
+#include <exception>
+#if defined(__GLIBCXX__)
+#include <cxxabi.h>
+#endif
 TOML_ENABLE_WARNINGS;
 #include "header_start.hpp"
 TOML_DISABLE_MSVC_WARNING(4702);
@@ -116,6 +120,10 @@ TOML_ANON_NAMESPACE_START
 		size_t prefix_begin_ = {};
 		size_t prefix_end_	 = {};
 		bool started_		 = {};
+#if TOML_COMPILER_HAS_EXCEPTIONS
+		// rethrown once the bytes read before it are decoded, so it lands where a badbit read would
+		mutable std::exception_ptr failure_;
+#endif
 
 		TOML_PURE_INLINE_GETTER
 		bool has_prefix() const noexcept
@@ -141,10 +149,17 @@ TOML_ANON_NAMESPACE_START
 			{
 				source_->read(dest, static_cast<std::streamsize>(num));
 			}
-			catch (const std::ios_base::failure&)
+#if defined(__GLIBCXX__)
+			// glibc cancels threads by unwinding with this, and aborts the process if it's swallowed
+			catch (abi::__forced_unwind&)
 			{
-				if (!reached_end())
-					throw;
+				throw;
+			}
+#endif
+			catch (...)
+			{
+				if (!failure_ && !reached_end())
+					failure_ = std::current_exception();
 			}
 #else
 			source_->read(dest, static_cast<std::streamsize>(num));
@@ -160,10 +175,16 @@ TOML_ANON_NAMESPACE_START
 			{
 				return source_->peek();
 			}
-			catch (const std::ios_base::failure&)
+#if defined(__GLIBCXX__)
+			catch (abi::__forced_unwind&)
 			{
-				if (!reached_end())
-					throw;
+				throw;
+			}
+#endif
+			catch (...)
+			{
+				if (!failure_ && !reached_end())
+					failure_ = std::current_exception();
 				return std::istream::traits_type::eof();
 			}
 #else
@@ -200,6 +221,16 @@ TOML_ANON_NAMESPACE_START
 		{
 			return started_ && !has_prefix() && (eof() || peek() == std::istream::traits_type::eof());
 		}
+
+#if TOML_COMPILER_HAS_EXCEPTIONS
+
+		void rethrow_failure() const
+		{
+			if (failure_)
+				std::rethrow_exception(failure_);
+		}
+
+#endif
 
 		TOML_NODISCARD
 		TOML_ATTR(nonnull)
@@ -339,27 +370,7 @@ TOML_ANON_NAMESPACE_START
 			size_t raw_bytes_read = {};
 
 			// read the next raw (encoded) block in from the stream
-			if constexpr (noexcept(stream_(raw_bytes, block_capacity)) || !TOML_EXCEPTIONS)
-			{
-				raw_bytes_read = stream_(raw_bytes, block_capacity);
-			}
-#if TOML_EXCEPTIONS
-			else
-			{
-				try
-				{
-					raw_bytes_read = stream_(raw_bytes, block_capacity);
-				}
-				catch (const std::exception& exc)
-				{
-					throw parse_error{ exc.what(), next_pos_, source_path_ };
-				}
-				catch (...)
-				{
-					throw parse_error{ "An unspecified error occurred", next_pos_, source_path_ };
-				}
-			}
-#endif // TOML_EXCEPTIONS
+			raw_bytes_read = stream_(raw_bytes, block_capacity);
 
 			// handle a zero-byte read
 			if TOML_UNLIKELY(!raw_bytes_read)
@@ -376,6 +387,7 @@ TOML_ANON_NAMESPACE_START
 				}
 				else
 				{
+					rethrow_stream_failure();
 					utf8_reader_error("Reading from the underlying stream failed - zero bytes read",
 									  next_pos_,
 									  source_path_);
@@ -471,6 +483,7 @@ TOML_ANON_NAMESPACE_START
 			// (down here so the next_pos_ benefits from calc_positions())
 			if TOML_UNLIKELY(stream_.error())
 			{
+				rethrow_stream_failure();
 				utf8_reader_error("An I/O error occurred while reading from the underlying stream",
 								  next_pos_,
 								  source_path_);
@@ -478,6 +491,29 @@ TOML_ANON_NAMESPACE_START
 			}
 
 			return true;
+		}
+
+		void rethrow_stream_failure() const
+		{
+			if constexpr (std::is_same_v<T, std::istream>)
+			{
+#if TOML_EXCEPTIONS
+				try
+				{
+					stream_.rethrow_failure();
+				}
+				catch (const std::exception& exc)
+				{
+					throw parse_error{ exc.what(), next_pos_, source_path_ };
+				}
+				catch (...)
+				{
+					throw parse_error{ "An unspecified error occurred", next_pos_, source_path_ };
+				}
+#elif TOML_COMPILER_HAS_EXCEPTIONS
+				stream_.rethrow_failure();
+#endif
+			}
 		}
 
 	  public:
@@ -1455,24 +1491,10 @@ TOML_IMPL_NAMESPACE_START
 						case U't': str += '\t'; break;
 						case U'"': str += '"'; break;
 						case U'\\': str += '\\'; break;
-
-#if TOML_LANG_UNRELEASED // toml/pull/790 (\e shorthand for \x1B)
 						case U'e': str += '\x1B'; break;
-#else
-						case U'e':
-							set_error_and_return_default(
-								"escape sequence '\\e' is not supported in TOML 1.0.0 and earlier"sv);
-#endif
-
-#if TOML_LANG_UNRELEASED // toml/pull/796 (\xHH unicode scalar sequences)
-						case U'x': [[fallthrough]];
-#else
-						case U'x':
-							set_error_and_return_default(
-								"escape sequence '\\x' is not supported in TOML 1.0.0 and earlier"sv);
-#endif
 
 						// unicode scalar sequences
+						case U'x': [[fallthrough]];
 						case U'u': [[fallthrough]];
 						case U'U':
 						{
@@ -1844,7 +1866,7 @@ TOML_IMPL_NAMESPACE_START
 			stop_recording();
 
 			if (cp && !is_value_terminator(*cp))
-				set_error_and_return_default("expected value-terminator, saw '"sv, to_sv(*cp), "'"sv);
+				set_error_and_return_default("expected end of value, saw '"sv, to_sv(*cp), "'"sv);
 
 			return result;
 		}
@@ -1873,7 +1895,7 @@ TOML_IMPL_NAMESPACE_START
 			stop_recording();
 
 			if (cp && !is_value_terminator(*cp))
-				set_error_and_return_default("expected value-terminator, saw '"sv, to_sv(*cp), "'"sv);
+				set_error_and_return_default("expected end of value, saw '"sv, to_sv(*cp), "'"sv);
 
 			return inf ? (negative ? -std::numeric_limits<double>::infinity() : std::numeric_limits<double>::infinity())
 					   : std::numeric_limits<double>::quiet_NaN();
@@ -2251,7 +2273,7 @@ TOML_IMPL_NAMESPACE_START
 #else // !TOML_LANG_UNRELEASED
 
 			set_error_and_return_default("hexadecimal floating-point values are not supported "
-										 "in TOML 1.0.0 and earlier"sv);
+										 "in TOML 1.1.0 and earlier"sv);
 
 #endif // !TOML_LANG_UNRELEASED
 		}
@@ -2447,11 +2469,15 @@ TOML_IMPL_NAMESPACE_START
 			advance_and_return_if_error_or_eof({});
 
 			// "MM"
+			const auto month_pos = cp->position;
 			if (!consume_digit_sequence(digits, 2u))
 				set_error_and_return_default("expected 2-digit month, saw '"sv, to_sv(cp), "'"sv);
 			const auto month = digits[1] + (digits[0] * 10u);
 			if (month == 0u || month > 12u)
-				set_error_and_return_default("expected month between 1 and 12 (inclusive), saw "sv, month);
+			{
+				set_error_at(month_pos, "expected month between 1 and 12 (inclusive), saw "sv, month);
+				return_after_error({});
+			}
 			const auto max_days_in_month = month == 2u
 											 ? (is_leap_year ? 29u : 28u)
 											 : (month == 4u || month == 6u || month == 9u || month == 11u ? 30u : 31u);
@@ -2463,17 +2489,18 @@ TOML_IMPL_NAMESPACE_START
 			advance_and_return_if_error_or_eof({});
 
 			// "DD"
+			const auto day_pos = cp->position;
 			if (!consume_digit_sequence(digits, 2u))
 				set_error_and_return_default("expected 2-digit day, saw '"sv, to_sv(cp), "'"sv);
 			const auto day = digits[1] + (digits[0] * 10u);
 			if (day == 0u || day > max_days_in_month)
-				set_error_and_return_default("expected day between 1 and "sv,
-											 max_days_in_month,
-											 " (inclusive), saw "sv,
-											 day);
+			{
+				set_error_at(day_pos, "expected day between 1 and "sv, max_days_in_month, " (inclusive), saw "sv, day);
+				return_after_error({});
+			}
 
 			if (!part_of_datetime && !is_eof() && !is_value_terminator(*cp))
-				set_error_and_return_default("expected value-terminator, saw '"sv, to_sv(*cp), "'"sv);
+				set_error_and_return_default("expected end of value, saw '"sv, to_sv(*cp), "'"sv);
 
 			return { year, month, day };
 		}
@@ -2491,11 +2518,15 @@ TOML_IMPL_NAMESPACE_START
 			uint32_t digits[max_digits];
 
 			// "HH"
+			const auto hour_pos = cp->position;
 			if (!consume_digit_sequence(digits, 2u))
 				set_error_and_return_default("expected 2-digit hour, saw '"sv, to_sv(cp), "'"sv);
 			const auto hour = digits[1] + (digits[0] * 10u);
 			if (hour > 23u)
-				set_error_and_return_default("expected hour between 0 and 23 (inclusive), saw "sv, hour);
+			{
+				set_error_at(hour_pos, "expected hour between 0 and 23 (inclusive), saw "sv, hour);
+				return_after_error({});
+			}
 			set_error_and_return_if_eof({});
 
 			// ':'
@@ -2504,34 +2535,39 @@ TOML_IMPL_NAMESPACE_START
 			advance_and_return_if_error_or_eof({});
 
 			// "MM"
+			const auto minute_pos = cp->position;
 			if (!consume_digit_sequence(digits, 2u))
 				set_error_and_return_default("expected 2-digit minute, saw '"sv, to_sv(cp), "'"sv);
 			const auto minute = digits[1] + (digits[0] * 10u);
 			if (minute > 59u)
-				set_error_and_return_default("expected minute between 0 and 59 (inclusive), saw "sv, minute);
+			{
+				set_error_at(minute_pos, "expected minute between 0 and 59 (inclusive), saw "sv, minute);
+				return_after_error({});
+			}
 			auto time = toml::time{ hour, minute };
 
-			// ':'
-			if constexpr (TOML_LANG_UNRELEASED) // toml/issues/671 (allow omission of seconds)
-			{
-				if (is_eof() || is_value_terminator(*cp) || (part_of_datetime && is_match(*cp, U'+', U'-', U'Z', U'z')))
-					return time;
-			}
-			else
-				set_error_and_return_if_eof({});
+			// ':' (early-exiting is allowed; seconds are optional)
+			if (is_eof() || is_value_terminator(*cp) || (part_of_datetime && is_match(*cp, U'+', U'-', U'Z', U'z')))
+				return time;
 			if (*cp != U':')
 				set_error_and_return_default("expected ':', saw '"sv, to_sv(*cp), "'"sv);
 			advance_and_return_if_error_or_eof({});
 
 			// "SS"
+			const auto second_pos = cp->position;
 			if (!consume_digit_sequence(digits, 2u))
 				set_error_and_return_default("expected 2-digit second, saw '"sv, to_sv(cp), "'"sv);
 			const auto second = digits[1] + (digits[0] * 10u);
 			if (second > 60u)
-				set_error_and_return_default("expected second between 0 and 60 (inclusive), saw "sv, second);
+			{
+				set_error_at(second_pos, "expected second between 0 and 60 (inclusive), saw "sv, second);
+				return_after_error({});
+			}
 			if (second == 60u && minute != 59u && !part_of_datetime)
-				set_error_and_return_default("second 60 (a leap second) is only valid at minute 59, saw minute "sv,
-											 minute);
+			{
+				set_error_at(second_pos, "second 60 (a leap second) is only valid at minute 59, saw minute "sv, minute);
+				return_after_error({});
+			}
 			time.second = static_cast<decltype(time.second)>(second);
 
 			// '.' (early-exiting is allowed; fractional is optional)
@@ -2551,7 +2587,7 @@ TOML_IMPL_NAMESPACE_START
 			while (!is_eof() && is_decimal_digit(*cp))
 				advance_and_return_if_error({});
 			if (!is_eof() && !part_of_datetime && !is_value_terminator(*cp))
-				set_error_and_return_default("expected value-terminator, saw '"sv, to_sv(*cp), "'"sv);
+				set_error_and_return_default("expected end of value, saw '"sv, to_sv(*cp), "'"sv);
 			uint32_t value = 0u;
 			uint32_t place = 1u;
 			for (auto i = digit_count; i-- > 0u;)
@@ -2589,14 +2625,14 @@ TOML_IMPL_NAMESPACE_START
 			const auto time_pos = cp->position;
 			auto time			= parse_time(true);
 			return_if_error({});
-			const source_position seconds_end{ time_pos.line, static_cast<source_index>(time_pos.column + 8u) };
+			const source_position second_pos{ time_pos.line, static_cast<source_index>(time_pos.column + 6u) };
 
 			// no offset
 			if (is_eof() || is_value_terminator(*cp))
 			{
 				if (time.second == 60u && time.minute != 59u)
 				{
-					set_error_at(seconds_end,
+					set_error_at(second_pos,
 								 "second 60 (a leap second) is only valid at minute 59, saw minute "sv,
 								 static_cast<unsigned>(time.minute));
 					return_after_error({});
@@ -2620,11 +2656,15 @@ TOML_IMPL_NAMESPACE_START
 
 				// "HH"
 				int digits[2];
+				const auto hour_pos = cp->position;
 				if (!consume_digit_sequence(digits, 2u))
 					set_error_and_return_default("expected 2-digit hour, saw '"sv, to_sv(cp), "'"sv);
 				const auto hour = digits[1] + (digits[0] * 10);
 				if (hour > 23)
-					set_error_and_return_default("expected hour between 0 and 23 (inclusive), saw "sv, hour);
+				{
+					set_error_at(hour_pos, "expected hour between 0 and 23 (inclusive), saw "sv, hour);
+					return_after_error({});
+				}
 				set_error_and_return_if_eof({});
 
 				// ':'
@@ -2633,16 +2673,20 @@ TOML_IMPL_NAMESPACE_START
 				advance_and_return_if_error_or_eof({});
 
 				// "MM"
+				const auto minute_pos = cp->position;
 				if (!consume_digit_sequence(digits, 2u))
 					set_error_and_return_default("expected 2-digit minute, saw '"sv, to_sv(cp), "'"sv);
 				const auto minute = digits[1] + (digits[0] * 10);
 				if (minute > 59)
-					set_error_and_return_default("expected minute between 0 and 59 (inclusive), saw "sv, minute);
+				{
+					set_error_at(minute_pos, "expected minute between 0 and 59 (inclusive), saw "sv, minute);
+					return_after_error({});
+				}
 				offset.minutes = static_cast<decltype(offset.minutes)>(((hour * 60) + minute) * sign);
 			}
 
 			if (!is_eof() && !is_value_terminator(*cp))
-				set_error_and_return_default("expected value-terminator, saw '"sv, to_sv(*cp), "'"sv);
+				set_error_and_return_default("expected end of value, saw '"sv, to_sv(*cp), "'"sv);
 
 			if (time.second == 60u)
 			{
@@ -2650,7 +2694,7 @@ TOML_IMPL_NAMESPACE_START
 				const int utc_minute  = ((utc_minutes % 60) + 60) % 60;
 				if (utc_minute != 59)
 				{
-					set_error_at(seconds_end,
+					set_error_at(second_pos,
 								 "second 60 (a leap second) is only valid at minute 59 UTC, saw minute "sv,
 								 utc_minute,
 								 " UTC"sv);
@@ -2933,15 +2977,27 @@ TOML_IMPL_NAMESPACE_START
 						break;
 					}
 
-					// anything else would be ambiguous.
-					set_error_and_return_default(eof_while_scanning ? "encountered end-of-file"sv
-																	: "could not determine value type"sv);
+					if (eof_while_scanning)
+						set_error_and_return_default("encountered end-of-file"sv);
+					val.reset(new value{ parse_integer<10>() });
+					break;
 				}
 
 				// now things that can be identified from two or more characters
 				return_if_error({});
 				if (char_count < 2u)
 					set_error_and_return_default("could not determine value type"sv);
+
+				if (has_any(begins_sign) && has_none(has_p) && chars[1] == U'0' && char_count > 2u)
+				{
+					const auto prefix = static_cast<char32_t>(chars[2] | 32u);
+					if (is_match(prefix, U'x', U'o', U'b'))
+						set_error_and_return_default("signs are not allowed on "sv,
+													 prefix == U'x'	  ? "hexadecimal"sv
+													 : prefix == U'o' ? "octal"sv
+																	  : "binary"sv,
+													 " integers"sv);
+				}
 
 				// do some 'fuzzy matching' where there's no ambiguity, since that allows the specific
 				// typed parse functions to take over and show better diagnostics if there's an issue
@@ -3195,7 +3251,22 @@ TOML_IMPL_NAMESPACE_START
 						val.reset(new value{ parse_date_time() });
 						break;
 
-					default: break;
+					// everything valid matched above, so this just picks the parser with the most useful error
+					default:
+						if (has_any(begins_digit) && char_count > 4u && chars[4] == U'-')
+						{
+							if (has_any(has_t | has_colon))
+								val.reset(new value{ parse_date_time() });
+							else
+								val.reset(new value{ parse_date() });
+						}
+						else if (has_any(begins_digit) && has_any(has_colon))
+							val.reset(new value{ parse_time() });
+						else if (has_any(has_dot | has_e))
+							val.reset(new value{ parse_float() });
+						else
+							val.reset(new value{ parse_integer<10>() });
+						break;
 				}
 			}
 			while (false);
@@ -3603,11 +3674,12 @@ TOML_IMPL_NAMESPACE_START
 			auto it								= tbl->lower_bound(last_segment);
 			if (it != tbl->end() && it->first == last_segment)
 			{
-				set_error("cannot redefine existing "sv,
-						  to_sv(it->second.type()),
-						  " '"sv,
-						  to_sv(recording_buffer),
-						  "'"sv);
+				set_error_at(key_buffer.starts[0],
+							 "cannot redefine existing "sv,
+							 to_sv(it->second.type()),
+							 " '"sv,
+							 to_sv(recording_buffer),
+							 "'"sv);
 				return_after_error({});
 			}
 
@@ -3849,16 +3921,8 @@ TOML_IMPL_NAMESPACE_START
 		parse_type prev = parse_type::none;
 		while (!is_error())
 		{
-			if constexpr (TOML_LANG_UNRELEASED) // toml/issues/516 (newlines/trailing commas in inline tables)
-			{
-				while (consume_leading_whitespace() || consume_line_break() || consume_comment())
-					continue;
-			}
-			else
-			{
-				while (consume_leading_whitespace())
-					continue;
-			}
+			while (consume_leading_whitespace() || consume_line_break() || consume_comment())
+				continue;
 			return_if_error({});
 			set_error_and_return_if_eof({});
 
@@ -3877,11 +3941,6 @@ TOML_IMPL_NAMESPACE_START
 			// closing '}'
 			else if (*cp == U'}')
 			{
-				if constexpr (!TOML_LANG_UNRELEASED) // toml/issues/516 (newlines/trailing commas in inline tables)
-				{
-					if (prev == parse_type::comma)
-						set_error_and_return_default("expected key-value pair, saw closing '}' (dangling comma)"sv);
-				}
 				advance_and_return_if_error({});
 				break;
 			}

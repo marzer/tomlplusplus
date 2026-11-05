@@ -63,6 +63,7 @@
 
 #### Additions
 
+- added support for TOML v1.1.0 (#289)
 - added `toml::get_line()` (#255, #256, #258) (@N-Dekker)
 - added `toml::format_flags::force_multiline_arrays` (#282) (@rafal-c)
 - added support for user-defined string types, which `toml::is_string_like` detects automatically (#306) (@mikomikotaishi)

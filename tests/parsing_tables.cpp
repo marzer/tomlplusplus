@@ -306,7 +306,7 @@ TEST_CASE("parsing - tables (dotted keys can't redefine header tables)")
 		[fruit]
 		apple.taste = { sweet = false }  # INVALID
 	)"sv,
-						"6:17: Error while parsing key-value pair: cannot redefine existing table 'apple.taste'"sv);
+						"6:3: Error while parsing key-value pair: cannot redefine existing table 'apple.taste'"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		R"(
@@ -451,7 +451,7 @@ TEST_CASE("parsing - inline tables (can't extend defined tables)")
 		type.name = "Nail"
 		type = { edible = false }  # INVALID
 	)"sv,
-						"4:10: Error while parsing key-value pair: cannot redefine existing table 'type'"sv);
+						"4:3: Error while parsing key-value pair: cannot redefine existing table 'type'"sv);
 }
 
 TEST_CASE("parsing - inline tables (newlines)")
@@ -477,44 +477,44 @@ TEST_CASE("parsing - inline tables (newlines)")
 							   CHECK(tbl["test"]["val3"] == "bar"sv);
 						   });
 
-// toml/issues/516 (newlines/trailing commas in inline tables)
-#if TOML_LANG_UNRELEASED
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   R"(
-									name = {
-										first = "Tom",
-										last = "Preston-Werner",
-									}
-								)"sv,
-							   [](table&& tbl)
-							   {
-								   REQUIRE(tbl["name"].as_table());
-								   CHECK(tbl["name"].as_table()->size() == 2u);
-								   CHECK(tbl["name"]["first"] == "Tom"sv);
-								   CHECK(tbl["name"]["last"] == "Preston-Werner"sv);
-							   });
-	}
-#else
-	{
-		// "A terminating comma (also called trailing comma) is not permitted after the last key/value pair in an inline
-		// table."
-		parsing_should_fail(
-			FILE_LINE_ARGS,
-			R"(name = { first = "Tom", last = "Preston-Werner", })"sv,
-			"1:50: Error while parsing inline table: expected key-value pair, saw closing '}' (dangling comma)"sv);
+	// toml/issues/516 (newlines/trailing commas in inline tables)
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   R"(
+								name = {
+									first = "Tom",
+									last = "Preston-Werner",
+								}
+							)"sv,
+						   [](table&& tbl)
+						   {
+							   REQUIRE(tbl["name"].as_table());
+							   CHECK(tbl["name"].as_table()->size() == 2u);
+							   CHECK(tbl["name"]["first"] == "Tom"sv);
+							   CHECK(tbl["name"]["last"] == "Preston-Werner"sv);
+						   });
+}
 
-		// "No newlines are allowed between the curly braces unless they are valid within a value."
-		parsing_should_fail(FILE_LINE_ARGS,
-							R"(
-		name = {
-			first = "Tom",
-			last = "Preston-Werner"
-		}
-		)"sv,
-							R"(2:11: Error while parsing inline table: expected key or closing '}', saw '\n')"sv);
-	}
-#endif
+TEST_CASE("parsing - inline tables (comments)")
+{
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   R"(
+								name = { # a
+									first = "Tom", # b
+									# c
+									last = "Preston-Werner" # d
+								} # e
+							)"sv,
+						   [](table&& tbl)
+						   {
+							   REQUIRE(tbl["name"].as_table());
+							   CHECK(tbl["name"].as_table()->size() == 2u);
+							   CHECK(tbl["name"]["first"] == "Tom"sv);
+							   CHECK(tbl["name"]["last"] == "Preston-Werner"sv);
+						   });
+
+	parsing_should_fail(FILE_LINE_ARGS,
+						"name = { first = \"Tom\" # a }"sv,
+						"1:29: Error while parsing inline table: encountered end-of-file"sv);
 }
 
 TEST_CASE("parsing - arrays-of-tables")

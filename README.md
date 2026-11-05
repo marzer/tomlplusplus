@@ -1,7 +1,7 @@
 [![banner](docs/images/banner.png)][homepage]
 [![Releases](https://img.shields.io/github/v/release/marzer/tomlplusplus?style=flat-square)](https://github.com/marzer/tomlplusplus/releases)
 [![C++17](docs/images/badge-C++17.svg)][cpp_compilers]
-[![TOML](docs/images/badge-TOML.svg)][v1.0.0]
+[![TOML](docs/images/badge-TOML.svg)][v1.1.0]
 [![MIT license](docs/images/badge-license-MIT.svg)](./LICENSE)
 [![ci](https://github.com/marzer/tomlplusplus/actions/workflows/ci.yaml/badge.svg?branch=master)](https://github.com/marzer/tomlplusplus/actions/workflows/ci.yaml)
 [![Coverage](https://marzer.github.io/tomlplusplus/coverage/badge.svg)](https://marzer.github.io/tomlplusplus/coverage/)
@@ -21,8 +21,8 @@
 
 - Header-only (optional!)
 - Module support
-- Supports [TOML] [v1.0.0], plus opt-in support for parts of [v1.1.0] and some unreleased features
-- Passes all TOML v1.0.0 tests in the [toml-test](https://github.com/toml-lang/toml-test) suite
+- Supports [TOML] [v1.1.0], plus opt-in support for some unreleased features
+- Passes all TOML v1.1.0 tests in the [toml-test](https://github.com/toml-lang/toml-test) suite
 - Supports serializing to JSON and YAML
 - Proper UTF-8 handling (incl. BOM)
 - C++17 (plus some C++20 features where available, e.g. experimental support for [char8_t] strings)
@@ -231,19 +231,21 @@ defines `TOML_LANG_MAJOR`, `TOML_LANG_MINOR` and `TOML_LANG_PATCH`.
 
 ### **Unreleased language features:**
 
-- [#516]: Allow newlines and trailing commas in inline tables (v1.1.0)
 - [#562]: Allow hex floating-point values
 - [#644]: Support `+` in key names
-- [#671]: Local time of day format should support `09:30` as opposed to `09:30:00` (v1.1.0)
 - [#687]: Relax bare key restrictions to allow additional unicode characters
-- [#790]: Include an `\e` escape code sequence (shorthand for `\u001B`) (v1.1.0)
-- [#796]: Include an `\xHH` escape code sequence (v1.1.0)
 - [#891]: Allow non-English scripts for unquoted keys
 
 > ℹ&#xFE0F; _`#define TOML_ENABLE_UNRELEASED_FEATURES 1` to enable these features (see [Configuration](#configuration))._
->
-> ℹ&#xFE0F; _The features marked v1.1.0 are part of TOML [v1.1.0], which toml++ does not fully support yet
-> ([#289](https://github.com/marzer/tomlplusplus/issues/289))._
+
+### 🔹&#xFE0F; **TOML v1.1.0:**
+
+All features supported, including:
+
+- [#516]: Allow newlines and trailing commas in inline tables
+- [#671]: Local time of day format should support `09:30` as opposed to `09:30:00`
+- [#790]: Include an `\e` escape code sequence (shorthand for `\u001B`)
+- [#796]: Include an `\xHH` escape code sequence
 
 ### 🔹&#xFE0F; **TOML v1.0.0:**
 
@@ -338,7 +340,6 @@ though you're welcome to reach out via other means. In order of likely response 
 [TOML]: https://toml.io/
 [TOML master]: https://github.com/toml-lang/toml/blob/master/README.md
 [TOML issues list]: https://github.com/toml-lang/toml/issues
-[v1.0.0]: https://toml.io/en/v1.0.0
 [v1.1.0]: https://toml.io/en/v1.1.0
 [CONTRIBUTING]: ./CONTRIBUTING.md
 [LICENSE]: ./LICENSE

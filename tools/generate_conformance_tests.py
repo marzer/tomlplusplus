@@ -7,7 +7,9 @@
 import json
 import math
 import re
+import subprocess
 import sys
+import tempfile
 from datetime import date, datetime, time
 from io import StringIO
 from pathlib import Path
@@ -16,9 +18,12 @@ import dateutil.parser
 import utils
 import yaml
 
+TOML_TEST = (r'https://github.com/toml-lang/toml-test.git', r'v2.2.0')
+TOML_SPEC_TESTS = (r'https://github.com/iarna/toml-spec-tests.git', r'1880b1a17849f6ad49a7a5e87d6a3ac3963172da')
+
 
 def sanitize(s):
-    s = re.sub(r'[ _:;\/-]+', '_', s, flags=re.I | re.M)
+    s = re.sub(r'[ _:;.\/-]+', '_', s, flags=re.I | re.M)
     if s in ('bool', 'float', 'int', 'double', 'auto', 'array', 'table'):
         s = s + '_'
     return s
@@ -375,11 +380,11 @@ class TomlTest:
         return rf'static constexpr auto {self.__identifier} = {make_string_literal(self.__source, escape_all=self.__bytes, escape_any=not self.__raw)}sv;'
 
 
-def load_tests(source_folder, is_valid_set, ignore_list=None):
+def load_tests(source_folder, is_valid_set, ignore_list=None, only=None):
     source_folder = source_folder.resolve()
     if not source_folder.is_dir():
         raise Exception(rf'{source_folder} was not an existing directory')
-    files = sorted(f for f in source_folder.rglob('*.toml') if f.is_file())
+    files = sorted(f for f in source_folder.rglob('*.toml') if f.is_file() and (only is None or f in only))
     strip_source_folder_len = len(str(source_folder))
     files = [(f, str(f)[strip_source_folder_len + 1 : -5].replace('\\', '-').replace('/', '-').strip()) for f in files]
     if ignore_list:
@@ -420,27 +425,17 @@ def add_condition(tests, condition, names):
             test.add_condition(condition)
 
 
-def find_tests_dir(*relative_path):
-    paths = (
-        (Path.cwd(),),
-        ('.',),
-        (utils.entry_script_dir(), '..', '..'),  # side-by-side with toml_++ repo folder
-    )
-    for p in paths:
-        try:
-            path = Path(*p, *relative_path).resolve()
-            if path.exists() and path.is_dir():
-                return path
-        except Exception:
-            pass
-    return None
+def fetch(url, ref, dest):
+    dest.mkdir(parents=True)
+    for args in (('init', '-q'), ('fetch', '-q', '--depth', '1', url, ref), ('checkout', '-q', 'FETCH_HEAD')):
+        subprocess.run(['git', '-c', 'core.autocrlf=false', '-C', str(dest), *args], check=True)
 
 
-def load_burnsushi_tests(tests):
+def load_burnsushi_tests(tests, root_dir):
 
-    root_dir = find_tests_dir('toml-test', 'tests')
-    if root_dir is None:
-        raise Exception(r'could not find burntsushi/toml-test')
+    root_dir = Path(root_dir, 'tests').resolve()
+    listed = Path(root_dir, 'files-toml-1.1.0').read_text(encoding='utf-8').split()
+    listed = {Path(root_dir, f).resolve() for f in listed}
 
     tests['valid']['burntsushi'] = load_tests(
         Path(root_dir, 'valid'),
@@ -449,51 +444,30 @@ def load_burnsushi_tests(tests):
             # broken by the json reader
             'key-alphanum',
         ),
+        listed,
     )
     add_condition(
         tests['valid']['burntsushi'],
         '!TOML_MSVC',
         (
-            'inline-table-key-dotted',  # causes MSVC to run out of heap space during compilation O_o
-        ),
-    )
-    add_condition(
-        tests['valid']['burntsushi'],
-        'TOML_LANG_UNRELEASED',
-        (
-            'string-escape-esc',  # \e in strings
-            'datetime-no-seconds',  # omitting seconds from date-times
-            'inline-table-newline',
-            'key-unicode',
-            'string-hex-escape',
+            re.compile(r'inline-table-key-dotted-.*'),  # causes MSVC to run out of heap space during compilation O_o
         ),
     )
 
-    tests['invalid']['burntsushi'] = load_tests(Path(root_dir, 'invalid'), False)
-    add_condition(
-        tests['invalid']['burntsushi'],
-        '!TOML_LANG_UNRELEASED',
+    tests['invalid']['burntsushi'] = load_tests(Path(root_dir, 'invalid'), False, only=listed)
+    add_condition(tests['invalid']['burntsushi'], '!TOML_LANG_UNRELEASED', ('key-special-character',))
+
+
+def load_iarna_tests(tests, root_dir):
+
+    tests['invalid']['iarna'] = load_tests(
+        Path(root_dir, 'errors'),
+        False,
         (
-            'datetime-no-secs',
-            re.compile(r'inline-table-linebreak-.*'),
+            # valid since toml 1.1
             'inline-table-trailing-comma',
-            'key-special-character',
-            'local-datetime-no-secs',
-            'local-time-no-secs',
-            'multi-line-inline-table',
-            'string-basic-byte-escapes',
         ),
     )
-
-
-def load_iarna_tests(tests):
-
-    root_dir = find_tests_dir('toml-spec-tests')
-    if root_dir is None:
-        raise Exception(r'could not find iarni/toml-spec-tests')
-
-    tests['invalid']['iarna'] = load_tests(Path(root_dir, 'errors'), False)
-    add_condition(tests['invalid']['iarna'], '!TOML_LANG_UNRELEASED', ('inline-table-trailing-comma',))
 
     tests['valid']['iarna'] = load_tests(
         Path(root_dir, 'values'),
@@ -624,8 +598,13 @@ def write_test_file(name, all_tests):
 
 def main():
     all_tests = {'valid': dict(), 'invalid': dict()}
-    load_burnsushi_tests(all_tests)
-    load_iarna_tests(all_tests)
+    with tempfile.TemporaryDirectory() as sources:
+        toml_test = Path(sources, 'toml-test')
+        fetch(*TOML_TEST, toml_test)
+        load_burnsushi_tests(all_tests, toml_test)
+        toml_spec_tests = Path(sources, 'toml-spec-tests')
+        fetch(*TOML_SPEC_TESTS, toml_spec_tests)
+        load_iarna_tests(all_tests, toml_spec_tests)
     for validity, sources in all_tests.items():
         for source, tests in sources.items():
             write_test_file(f'{source}/{validity}', tests)

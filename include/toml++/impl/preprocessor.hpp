@@ -1095,6 +1095,7 @@
 ///	\remark You might override this with `__declspec(dllexport)` if you were building the library
 /// 		into the public API of a DLL on Windows.
 
+// gcc leaves an inline static member of a dllexport class out of the dll unless something in the dll uses it
 #if TOML_WINDOWS && TOML_GCC && TOML_IMPLEMENTATION && !TOML_HEADER_ONLY
 #define TOML_EXPORTED_CONSTANT TOML_ATTR(used)
 #else

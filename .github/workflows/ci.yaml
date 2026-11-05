@@ -158,6 +158,7 @@ jobs:
                       modules: true
                       consumers: true
                       check_symbols: true
+                      toml_test: true
                     - name: coverage
                       compiler: "clang++"
                       type: "Debug"
@@ -221,6 +222,14 @@ jobs:
             - name: Test
               working-directory: build
               run: ctest --output-on-failure
+
+            - name: Run toml-test
+              if: matrix.toml_test
+              run: |
+                  curl -fsSL https://github.com/toml-lang/toml-test/releases/download/v2.2.0/toml-test-v2.2.0-linux-amd64.gz \
+                    | gunzip > "$RUNNER_TEMP/toml-test"
+                  chmod +x "$RUNNER_TEMP/toml-test"
+                  "$RUNNER_TEMP/toml-test" test -toml 1.1 -decoder build/toml-test/tt_decoder -encoder build/toml-test/tt_encoder
 
             - name: Build and test without exceptions, with unreleased features
               if: matrix.coverage

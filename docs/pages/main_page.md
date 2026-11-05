@@ -8,9 +8,9 @@
 
 -   Header-only (optional!)
 -   Module support
--   Supports [TOML](https://toml.io/) [v1.0.0](https://toml.io/en/v1.0.0), plus opt-in support for parts of
-    [v1.1.0](https://toml.io/en/v1.1.0) and some unreleased features
--   Passes all TOML v1.0.0 tests in the [toml-test](https://github.com/toml-lang/toml-test) suite
+-   Supports [TOML](https://toml.io/) [v1.1.0](https://toml.io/en/v1.1.0), plus opt-in support for some unreleased
+    features
+-   Passes all TOML v1.1.0 tests in the [toml-test](https://github.com/toml-lang/toml-test) suite
 -   Supports serializing to JSON and YAML
 -   Proper UTF-8 handling (incl. BOM)
 -   C++17 (plus some C++20 features where available, e.g. experimental support for char8_t strings)

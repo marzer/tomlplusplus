@@ -43,3 +43,13 @@ TEST_CASE("parsing - booleans (always lowercase)")
 						"bool = fALSE"sv,
 						"1:9: Error while parsing boolean: expected 'false', saw 'fA'"sv);
 }
+
+TEST_CASE("parsing - booleans (trailing characters)")
+{
+	parsing_should_fail(FILE_LINE_ARGS,
+						"bool = truex"sv,
+						"1:12: Error while parsing boolean: expected end of value, saw 'x'"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"bool = false1"sv,
+						"1:13: Error while parsing boolean: expected end of value, saw '1'"sv);
+}

@@ -9,25 +9,33 @@
 
 namespace
 {
-	static constexpr auto array_array				 = R"(ints = [1, 2, 3, ]
+	static constexpr auto array_array_subtables		  = R"([[arr]]
+[arr.subtab]
+val=1
+
+[[arr]]
+[arr.subtab]
+val=2)"sv;
+	static constexpr auto array_array				  = R"(ints = [1, 2, 3, ]
 floats = [1.1, 2.1, 3.1]
 strings = ["a", "b", "c"]
 dates = [
-  1987-07-05T17:45:00Z,
-  1979-05-27T07:32:00Z,
-  2006-06-01T11:00:00Z,
+	1987-07-05T17:45:00Z,
+	1979-05-27T07:32:00,
+	2006-06-01,
+	11:00:00,
 ]
 comments = [
          1,
          2, #this is ok
 ])"sv;
-	static constexpr auto array_bool				 = R"(a = [true, false])"sv;
-	static constexpr auto array_empty				 = R"(thevoid = [[[[[]]]]])"sv;
-	static constexpr auto array_hetergeneous		 = R"(mixed = [[1, 2], ["a", "b"], [1.1, 2.1]])"sv;
-	static constexpr auto array_mixed_int_array		 = R"(arrays-and-ints =  [1, ["Arrays are not integers."]])"sv;
-	static constexpr auto array_mixed_int_float		 = R"(ints-and-floats = [1, 1.1])"sv;
-	static constexpr auto array_mixed_int_string	 = R"(strings-and-ints = ["hi", 42])"sv;
-	static constexpr auto array_mixed_string_table	 = R"(contributors = [
+	static constexpr auto array_bool				  = R"(a = [true, false])"sv;
+	static constexpr auto array_empty				  = R"(thevoid = [[[[[]]]]])"sv;
+	static constexpr auto array_hetergeneous		  = R"(mixed = [[1, 2], ["a", "b"], [1.1, 2.1]])"sv;
+	static constexpr auto array_mixed_int_array		  = R"(arrays-and-ints =  [1, ["Arrays are not integers."]])"sv;
+	static constexpr auto array_mixed_int_float		  = R"(ints-and-floats = [1, 1.1])"sv;
+	static constexpr auto array_mixed_int_string	  = R"(strings-and-ints = ["hi", 42])"sv;
+	static constexpr auto array_mixed_string_table	  = R"(contributors = [
   "Foo Bar <foo@example.com>",
   { name = "Baz Qux", email = "bazqux@example.com", url = "https://example.com/bazqux" }
 ]
@@ -38,31 +46,46 @@ comments = [
 # before TOML 1.0 since arrays could only contain one type, but now it's no
 # longer.
 mixed = [{k="a"}, "b", 1])"sv;
-	static constexpr auto array_nested_double		 = R"(nest = [
+	static constexpr auto array_nested_double		  = R"(nest = [
 	[
 		["a"],
 		[1, 2, [3]]
 	]
 ])"sv;
-	static constexpr auto array_nested_inline_table	 = R"(a = [ { b = {} } ])"sv;
-	static constexpr auto array_nested				 = R"(nest = [["a"], ["b"]])"sv;
-	static constexpr auto array_nospaces			 = R"(ints = [1,2,3])"sv;
-	static constexpr auto array_string_quote_comma_2 = R"(title = [ " \", ",])"sv;
-	static constexpr auto array_string_quote_comma	 = R"(title = [
+	static constexpr auto array_nested_inline_table	  = R"(a = [ { b = {} } ])"sv;
+	static constexpr auto array_nested				  = R"(nest = [["a"], ["b"]])"sv;
+	static constexpr auto array_nospaces			  = R"(ints = [1,2,3])"sv;
+	static constexpr auto array_open_parent_table	  = R"([[parent-table.arr]]
+[[parent-table.arr]]
+[parent-table]
+not-arr = 1)"sv;
+	static constexpr auto array_string_quote_comma_01 = R"(title = [
 "Client: \"XXXX\", Job: XXXX",
 "Code: XXXX"
 ])"sv;
-	static constexpr auto array_string_with_comma_2	 = R"(title = [
+	static constexpr auto array_string_quote_comma_02 = R"(title = [ " \", ",])"sv;
+	static constexpr auto array_string_with_comma_01  = R"(title = [
+"Client: XXXX, Job: XXXX",
+"Code: XXXX"
+])"sv;
+	static constexpr auto array_string_with_comma_02  = R"(title = [
 """Client: XXXX,
 Job: XXXX""",
 "Code: XXXX"
 ])"sv;
-	static constexpr auto array_string_with_comma	 = R"(title = [
-"Client: XXXX, Job: XXXX",
-"Code: XXXX"
-])"sv;
 	static constexpr auto array_strings = R"(string_array = [ "all", 'strings', """are the same""", '''type'''])"sv;
 	static constexpr auto array_table_array_string_backslash = R"(foo = [ { bar="\"{{baz}}\""} ])"sv;
+	static constexpr auto array_trailing_comma				 = R"(arr-1 = [1,]
+
+arr-2 = [2,3,]
+
+arr-3 = [4,
+]
+
+arr-4 = [
+	5,
+	6,
+])"sv;
 
 	static constexpr auto bool_bool = R"(t = true
 f = false)"sv;
@@ -102,7 +125,12 @@ more = [ # Comment
 
 # Make sure the space between the datetime and "#" isn't lexed.
 dt = 1979-05-27T07:32:12-07:00  # c
-d = 1979-05-27 # Comment)"sv;
+d = 1979-05-27 # Comment
+
+[[aot]] # Comment
+k = 98 # Comment
+[[aot]]# Comment
+k = 99# Comment)"sv;
 	static constexpr auto comment_noeol				  = R"(# single comment without any eol characters)"sv;
 	static constexpr auto comment_tricky			  = R"([section]#attached comment
 #[notsection]
@@ -140,34 +168,50 @@ tbl1 = { "#" = '}#'}#}})"sv;
 
 #endif // UNICODE_LITERALS_OK
 
-	static constexpr auto datetime_datetime		= R"(space = 1987-07-05 17:45:00Z
+	static constexpr auto datetime_datetime				  = R"(space = 1987-07-05 17:45:00Z
+
+# ABNF is case-insensitive, both "Z" and "z" must be supported.
 lower = 1987-07-05t17:45:00z)"sv;
-	static constexpr auto datetime_local_date	= R"(bestdayever = 1987-07-05)"sv;
-	static constexpr auto datetime_local_time	= R"(besttimeever = 17:45:00
+	static constexpr auto datetime_edge					  = R"(first-offset = 0001-01-01 00:00:00Z
+first-local  = 0001-01-01 00:00:00
+first-date   = 0001-01-01
+
+last-offset = 9999-12-31 23:59:59Z
+last-local  = 9999-12-31 23:59:59
+last-date   = 9999-12-31)"sv;
+	static constexpr auto datetime_invalid_date_in_string = R"(s = '2020-01-01x')"sv;
+	static constexpr auto datetime_leap_year			  = R"(2000-datetime       = 2000-02-29 15:15:15Z
+2000-datetime-local = 2000-02-29 15:15:15
+2000-date           = 2000-02-29
+
+2024-datetime       = 2024-02-29 15:15:15Z
+2024-datetime-local = 2024-02-29 15:15:15
+2024-date           = 2024-02-29)"sv;
+	static constexpr auto datetime_local_date			  = R"(bestdayever = 1987-07-05)"sv;
+	static constexpr auto datetime_local_time			  = R"(besttimeever = 17:45:00
 milliseconds = 10:32:00.555)"sv;
-	static constexpr auto datetime_local		= R"(local = 1987-07-05T17:45:00
+	static constexpr auto datetime_local				  = R"(local = 1987-07-05T17:45:00
 milli = 1977-12-21T10:32:00.555
 space = 1987-07-05 17:45:00)"sv;
-	static constexpr auto datetime_milliseconds = R"(utc1  = 1987-07-05T17:45:56.123Z
+	static constexpr auto datetime_milliseconds			  = R"(utc1  = 1987-07-05T17:45:56.123Z
 utc2  = 1987-07-05T17:45:56.6Z
 wita1 = 1987-07-05T17:45:56.123+08:00
 wita2 = 1987-07-05T17:45:56.6+08:00)"sv;
-	static constexpr auto datetime_timezone		= R"(utc  = 1987-07-05T17:45:56Z
-pdt  = 1987-07-05T17:45:56-05:00
-nzst = 1987-07-05T17:45:56+12:00
-nzdt = 1987-07-05T17:45:56+13:00  # DST)"sv;
-
-#if TOML_LANG_UNRELEASED
-
-	static constexpr auto datetime_no_seconds = R"(# Seconds are optional in date-time and time.
+	static constexpr auto datetime_no_seconds			  = R"(# Seconds are optional in date-time and time.
 without-seconds-1 = 13:37
 without-seconds-2 = 1979-05-27 07:32Z
 without-seconds-3 = 1979-05-27 07:32-07:00
 without-seconds-4 = 1979-05-27T07:32)"sv;
+	static constexpr auto datetime_timezone				  = R"(utc  = 1987-07-05T17:45:56Z
+pdt  = 1987-07-05T17:45:56-05:00
+nzst = 1987-07-05T17:45:56+12:00
+nzdt = 1987-07-05T17:45:56+13:00  # DST)"sv;
 
-#endif // TOML_LANG_UNRELEASED
-
-	static constexpr auto empty_file = R"()"sv;
+	static constexpr auto empty_crlf	= ""sv;
+	static constexpr auto empty_lf		= R"()"sv;
+	static constexpr auto empty_nothing = R"()"sv;
+	static constexpr auto empty_space	= R"( )"sv;
+	static constexpr auto empty_tab		= R"(	)"sv;
 
 	static constexpr auto example = R"(best-day-ever = 1987-07-05T17:45:00Z
 
@@ -186,7 +230,8 @@ minustenth = -1E-1)"sv;
 	static constexpr auto float_float	 = R"(pi = 3.14
 pospi = +3.14
 negpi = -3.14
-zero-intpart = 0.123)"sv;
+zero-intpart = 0.123
+leading-zero-fractional = 0.0123)"sv;
 	static constexpr auto float_inf_and_nan =
 		R"(# We don't encode +nan and -nan back with the signs; many languages don't
 # support a sign on NaN (it doesn't really make much sense).
@@ -198,6 +243,9 @@ infinity_neg = -inf
 infinity_plus = +inf)"sv;
 	static constexpr auto float_long	   = R"(longpi = 3.141592653589793
 neglongpi = -3.141592653589793)"sv;
+	static constexpr auto float_max_int	   = R"(# Maximum and minimum safe natural numbers.
+max_float =  9_007_199_254_740_991.0
+min_float = -9_007_199_254_740_991.0)"sv;
 	static constexpr auto float_underscore = R"(before = 3_141.5927
 after = 3141.592_7
 exponent = 3e1_4)"sv;
@@ -222,22 +270,38 @@ answer = 42)"sv;
 	static constexpr auto implicit_groups			   = R"([a.b.c]
 answer = 42)"sv;
 
-	static constexpr auto inline_table_array = R"(people = [{first_name = "Bruce", last_name = "Springsteen"},
+	static constexpr auto inline_table_array_01 = R"(arr = [ {'a'= 1}, {'a'= 2} ]
+
+people = [{first_name = "Bruce", last_name = "Springsteen"},
           {first_name = "Eric", last_name = "Clapton"},
           {first_name = "Bob", last_name = "Seger"}])"sv;
-	static constexpr auto inline_table_bool	 = R"(a = {a = true, b = false})"sv;
-	static constexpr auto inline_table_empty = R"(empty1 = {}
+	static constexpr auto inline_table_array_02 =
+		R"(# "No newlines are allowed between the curly braces unless they are valid within
+# a value"
+
+a = { a = [
+]})"sv;
+	static constexpr auto inline_table_array_03 = R"(b = { a = [
+		1,
+		2,
+	], b = [
+		3,
+		4,
+	]})"sv;
+	static constexpr auto inline_table_bool		= R"(a = {a = true, b = false})"sv;
+	static constexpr auto inline_table_empty	= R"(empty1 = {}
 empty2 = { }
 empty_in_array = [ { not_empty = 1 }, {} ]
 empty_in_array2 = [{},{not_empty=1}]
 many_empty = [{},{},{}]
-nested_empty = {"empty"={}})"sv;
+nested_empty = {"empty"={}}
+with_cmt ={            }#nothing here)"sv;
 	static constexpr auto inline_table_end_in_bool =
 		R"(black = { python=">3.6", version=">=18.9b0", allow_prereleases=true })"sv;
-	static constexpr auto inline_table_inline_table = R"(name = { first = "Tom", last = "Preston-Werner" }
-point = { x = 1, y = 2 }
-simple = { a = 1 }
-str-key = { "a" = 1 }
+	static constexpr auto inline_table_inline_table = R"(name        = { first = "Tom", last = "Preston-Werner" }
+point       = { x = 1, y = 2 }
+simple      = { a = 1 }
+str-key     = { "a" = 1 }
 table-array = [{ "a" = 1 }, { "b" = 2 }])"sv;
 	static constexpr auto inline_table_multiline	= R"(tbl_multiline = { a = 1, b = """
 multiline
@@ -253,37 +317,34 @@ arr_tbl_tbl   = [ { tbl = { one = 1 } } ]
 arr_arr_tbl_empty = [ [ {} ] ]
 arr_arr_tbl_val = [ [ { one = 1 } ] ]
 arr_arr_tbls  = [ [ { one = 1 }, { two = 2 } ] ])"sv;
+	static constexpr auto inline_table_newline_comment =
+		R"(# Identical to newline.toml, but with comments that shouldn't affect the
+# results.
 
-#if !TOML_MSVC
+trailing-comma-1 = {#comment
+	# comment
+	c = 1,#comment
+	#comment
+}#comment
+trailing-comma-2 = { c = 1, }#comment
 
-	static constexpr auto inline_table_key_dotted = R"(inline = {a.b = 42}
+tbl-1 = {#comment
+	hello = "world",#comment
+	1     = 2,#comment
+	arr   = [1,#comment
+	         2,#comment
+	         3,#comment
+	        ],#comment
+	tbl = {#comment
+		 k = 1,#comment
+	}#comment
+}#comment
 
-many.dots.here.dot.dot.dot = {a.b.c = 1, a.b.d = 2}
-
-a = {   a.b  =  1   }
-b = {   "a"."b"  =  1   }
-c = {   a   .   b  =  1   }
-d = {   'a'   .   "b"  =  1   }
-e = {a.b=1}
-
-[tbl]
-a.b.c = {d.e=1}
-
-[tbl.x]
-a.b.c = {d.e=1}
-
-[[arr]]
-t = {a.b=1}
-T = {a.b=1}
-
-[[arr]]
-t = {a.b=2}
-T = {a.b=2})"sv;
-
-#endif // !TOML_MSVC
-
-#if TOML_LANG_UNRELEASED
-
+tbl-2 = {#comment
+	k = """
+	Hello
+	"""#comment
+}#comment)"sv;
 	static constexpr auto inline_table_newline = R"(# TOML 1.1 supports newlines in inline tables and trailing commas.
 
 trailing-comma-1 = {
@@ -307,15 +368,65 @@ tbl-2 = {
 	k = """
 	Hello
 	"""
-})"sv;
+}
 
-#endif // TOML_LANG_UNRELEASED
+no-newline-before-brace = {
+a = 1,
+b = 2}
 
-	static constexpr auto integer_integer	 = R"(answer = 42
+no-newline-before-brace-with-comma = {
+a = 1,
+b = 2,})"sv;
+	static constexpr auto inline_table_spaces  = R"(# https://github.com/toml-lang/toml-test/issues/146
+clap-1 = { version = "4"  , features = ["derive", "cargo"] }
+
+# Contains some literal tabs!
+clap-2 = { version = "4"	   	,	  	features = [   "derive" 	  ,  	  "cargo"   ]   , nest   =   {  	  "a"   =   'x'  , 	  'b'   = [ 1.5    ,   9.0  ]  }  })"sv;
+
+#if !TOML_MSVC
+
+	static constexpr auto inline_table_key_dotted_01 = R"(a = {   a.b  =  1   }
+b = {   "a"."b"  =  1   }
+c = {   a   .   b  =  1   }
+d = {   'a'   .   "b"  =  1   }
+e = {a.b=1})"sv;
+	static constexpr auto inline_table_key_dotted_02 = R"(many.dots.here.dot.dot.dot = {a.b.c = 1, a.b.d = 2})"sv;
+	static constexpr auto inline_table_key_dotted_03 = R"([tbl]
+a.b.c = {d.e=1}
+
+[tbl.x]
+a.b.c = {d.e=1})"sv;
+	static constexpr auto inline_table_key_dotted_04 = R"([[arr]]
+t = {a.b=1}
+T = {a.b=1}
+
+[[arr]]
+t = {a.b=2}
+T = {a.b=2})"sv;
+	static constexpr auto inline_table_key_dotted_05 = R"(arr-1 = [{a.b = 1}]
+arr-2 = ["str", {a.b = 1}]
+
+arr-3 = [{a.b = 1}, {a.b = 2}]
+arr-4 = ["str", {a.b = 1}, {a.b = 2}])"sv;
+	static constexpr auto inline_table_key_dotted_06 = R"(top.dot.dot = [
+	{dot.dot.dot = 1},
+	{dot.dot.dot = 2},
+])"sv;
+	static constexpr auto inline_table_key_dotted_07 = R"(arr = [
+	{a.b = [{c.d = 1}]}
+])"sv;
+
+#endif // !TOML_MSVC
+
+	static constexpr auto integer_float64_max = R"(# Maximum and minimum safe float64 natural numbers. Mainly here for
+# -int-as-float.
+max_int =  9_007_199_254_740_991
+min_int = -9_007_199_254_740_991)"sv;
+	static constexpr auto integer_integer	  = R"(answer = 42
 posanswer = +42
 neganswer = -42
 zero = 0)"sv;
-	static constexpr auto integer_literals	 = R"(bin1 = 0b11010110
+	static constexpr auto integer_literals	  = R"(bin1 = 0b11010110
 bin2 = 0b1_0_1
 
 oct1 = 0o01234567
@@ -326,7 +437,9 @@ hex1 = 0xDEADBEEF
 hex2 = 0xdeadbeef
 hex3 = 0xdead_beef
 hex4 = 0x00987)"sv;
-	static constexpr auto integer_long		 = R"(int64-max = 9223372036854775807
+	static constexpr auto integer_long = R"(# int64 "should" be supported, but is not mandatory. It's fine to skip this
+# test.
+int64-max     = 9223372036854775807
 int64-max-neg = -9223372036854775808)"sv;
 	static constexpr auto integer_underscore = R"(kilo = 1_000
 x = 1_1_1_1)"sv;
@@ -361,6 +474,7 @@ name = "different section!!"
 "Μ" = "greek capital letter MU"
 M = "latin letter M")"sv;
 	static constexpr auto key_escapes		 = R"("\n" = "newline"
+"\b" = "bell"
 "\u00c0" = "latin capital letter A with grave"
 "\"" = "just a quote"
 
@@ -380,16 +494,11 @@ quote = true
 
 #endif // UNICODE_LITERALS_OK
 
-	static constexpr auto key_dotted_empty	 = R"(''.x = "empty.x"
-x."" = "x.empty"
-[a]
-"".'' = "empty.empty")"sv;
-	static constexpr auto key_dotted		 = R"(# Note: this file contains literal tab characters.
-
-name.first = "Arthur"
+	static constexpr auto key_dotted_01		 = R"(name.first = "Arthur"
 "name".'last' = "Dent"
 
-many.dots.here.dot.dot.dot = 42
+many.dots.dot.dot.dot = 42)"sv;
+	static constexpr auto key_dotted_02		 = R"(# Note: this file contains literal tab characters.
 
 # Space are ignored, and key parts can be quoted.
 count.a       = 1
@@ -403,14 +512,16 @@ count . b     = 2
 count.'i'     = 9
 count 	.	 'j'	   = 10
 "count".k     = 11
-"count" . l   = 12
+"count" . l   = 12)"sv;
+	static constexpr auto key_dotted_03		 = R"(top.key = 1
 
 [tbl]
 a.b.c = 42.666
 
 [a.few.dots]
 polka.dot = "again?"
-polka.dance-with = "Dot"
+polka.dance-with = "Dot")"sv;
+	static constexpr auto key_dotted_04		 = R"(top.key = 1
 
 [[arr]]
 a.b.c=1
@@ -419,11 +530,49 @@ a.b.d=2
 [[arr]]
 a.b.c=3
 a.b.d=4)"sv;
-	static constexpr auto key_empty			 = R"("" = "blank")"sv;
+	static constexpr auto key_dotted_empty	 = R"(''.x = "empty.x"
+x."" = "x.empty"
+[a]
+"".'' = "empty.empty")"sv;
+	static constexpr auto key_empty_01		 = R"("" = "blank")"sv;
+	static constexpr auto key_empty_02		 = R"('' = "blank")"sv;
+	static constexpr auto key_empty_03		 = R"(''=0)"sv;
 	static constexpr auto key_equals_nospace = R"(answer=42)"sv;
-	static constexpr auto key_numeric_dotted = R"(1.2 = 3)"sv;
-	static constexpr auto key_numeric		 = R"(1 = 1)"sv;
-	static constexpr auto key_quoted_dots	 = R"(plain = 1
+	static constexpr auto key_like_date		= R"(# '-' is a valid character in keys: make a key that looks like a date.
+2001-02-03   = 1
+"2001-02-04" = 2
+'2001-02-05' = 3
+
+# Also include datetime and time for good measure; these need to be quoted as
+# ':' isn't a valid bare key.
+"2001-02-06T15:16:17+01:00" = 4
+"2001-02-07T15:16:17"       = 5
+"15:16:17"                  = 6
+
+# Dotted keys
+a.2001-02-08 = 7
+a.2001-02-09.2001-02-10 = 8
+2001-02-11.a.2001-02-12 = 9
+
+# Table names
+[2002-01-02]
+k = 10
+
+[2002-01-02.2024-01-03]
+k = 11
+
+[[2002-01-04]]
+k = 12)"sv;
+	static constexpr auto key_numeric_01	= R"(1     = true)"sv;
+	static constexpr auto key_numeric_02	= R"(1.2   = true)"sv;
+	static constexpr auto key_numeric_03	= R"(0123  = true)"sv;
+	static constexpr auto key_numeric_04	= R"(01.23 = true)"sv;
+	static constexpr auto key_numeric_05	= R"(23.01 = true)"sv;
+	static constexpr auto key_numeric_06	= R"(-1    = true)"sv;
+	static constexpr auto key_numeric_07	= R"(-01   = true)"sv;
+	static constexpr auto key_numeric_08	= R"(1  = 'one'
+01 = 'zero one')"sv;
+	static constexpr auto key_quoted_dots	= R"(plain = 1
 "with.dot" = 2
 
 [plain_table]
@@ -432,45 +581,213 @@ plain = 3
 
 [table.withdot]
 plain = 5
-"key.with.dots" = 6)"sv;
-	static constexpr auto key_space			 = R"(# Keep whitespace inside quotes keys at all positions.
+"key.with.dots" = 6
+"escaped\u002edot" = 7)"sv;
+	static constexpr auto key_space			= R"(# Keep whitespace inside quotes keys at all positions.
 "a b"   = 1
 " c d " = 2
+"  much 		  whitespace  	\n  \r\n  " = 3
 
 [ " tbl " ]
 "\ttab\ttab\t" = "tab")"sv;
-	static constexpr auto key_special_chars	 = R"("=~!@$^&*()_+-`1234567890[]|/?><.,;:'=" = 1)"sv;
-	static constexpr auto key_special_word	 = R"(false = false
+	static constexpr auto key_special_chars = R"("=~!@$^&*()_+-`1234567890[]|/?><.,;:'=" = 1)"sv;
+	static constexpr auto key_special_word	= R"(false = false
 true = 1
 inf = 100000000
 nan = "ceci n'est pas un nombre")"sv;
+	static constexpr auto key_start =
+		R"(# Table and keys can start with any character; there is no requirement for it to
+# start with a letter.
 
-#if TOML_LANG_UNRELEASED && UNICODE_LITERALS_OK
+[-key]
+-key = 1
 
-	static constexpr auto key_unicode = R"(# TOML 1.1 supports Unicode for bare keys.
+[_key]
+_key = 2
 
-€ = 'Euro'
-😂 = "rofl"
-a‍b = "zwj"
-ÅÅ = "U+00C5 U+0041 U+030A"
+[1key]
+1key = 3
 
-[中文]
-中文 = {中文 = "Chinese language"}
+[-]
+- = 4
 
-[[tiếng-Việt]]
-tiəŋ˧˦.viət̚˧˨ʔ = "north"
+[_]
+_ = 5
 
-[[tiếng-Việt]]
-tiəŋ˦˧˥.viək̚˨˩ʔ = "central")"sv;
+[1] 
+1 = 6
 
-#endif // TOML_LANG_UNRELEASED && UNICODE_LITERALS_OK
+[---] 
+--- = 7
+
+[___]
+___ = 8
+
+[111]
+111 = 9
+
+[inline]
+--- = {--- = 10, ___ = 11, 111 = 12})"sv;
+	static constexpr auto key_zero = R"(0=0)"sv;
+
+#if UNICODE_LITERALS_OK
+
+	static constexpr auto multibyte = R"(# Test multibyte throughout
+
+# Tèƨƭ ƒïℓè ƒôř TÓM£
+# Óñℓ¥ ƭλïƨ ôñè ƭřïèƨ ƭô è₥úℓáƭè á TÓM£ ƒïℓè ωřïƭƭèñ β¥ á úƨèř ôƒ ƭλè ƙïñδ ôƒ ƥářƨèř ωřïƭèřƨ ƥřôβáβℓ¥ λáƭè
+
+['𝐭𝐛𝐥']
+string = "𝓼𝓽𝓻𝓲𝓷𝓰 - #"          # " 𝓼𝓽𝓻𝓲𝓷𝓰
+	['𝐭𝐛𝐥'.sub]
+	'𝕒𝕣𝕣𝕒𝕪' = [ "] ", " # "]      # ] 𝓪𝓻𝓻𝓪𝔂
+	'𝕒𝕣𝕣𝕒𝕪𝟚' = [ "Tèƨƭ #11 ]ƥřôƲèδ ƭλáƭ", "Éжƥèřï₥èñƭ #9 ωáƨ á ƨúççèƨƨ" ]
+	# Ýôú δïδñ'ƭ ƭλïñƙ ïƭ'δ áƨ èáƨ¥ áƨ çλúçƙïñϱ ôúƭ ƭλè ℓáƨƭ #, δïδ ¥ôú?
+	another_test_string = "§á₥è ƭλïñϱ, βúƭ ωïƭλ á ƨƭřïñϱ #"
+	escapes = " Âñδ ωλèñ \"'ƨ ářè ïñ ƭλè ƨƭřïñϱ, áℓôñϱ ωïƭλ # \""   # "áñδ çô₥₥èñƭƨ ářè ƭλèřè ƭôô"
+	# Tλïñϱƨ ωïℓℓ ϱèƭ λářδèř
+		['𝐭𝐛𝐥'.sub."βïƭ#"]
+		"ωλáƭ?" = "Ýôú δôñ'ƭ ƭλïñƙ ƨô₥è úƨèř ωôñ'ƭ δô ƭλáƭ?"
+		multi_line_array = [
+			"]",
+			# ] Óλ ¥èƨ Ì δïδ
+			])"sv;
+
+#endif // UNICODE_LITERALS_OK
 
 	static constexpr auto newline_crlf = "os = \"DOS\"\r\n"
 										 "newline = \"crlf\""sv;
 	static constexpr auto newline_lf   = R"(os = "unix"
 newline = "lf")"sv;
 
-	static constexpr auto spec_array_0			  = R"(integers = [ 1, 2, 3 ]
+	static constexpr auto spec_1_1_0_common_0  = R"(# This is a full-line comment
+key = "value"  # This is a comment at the end of a line
+another = "# This is not a comment")"sv;
+	static constexpr auto spec_1_1_0_common_1  = R"(key = "value")"sv;
+	static constexpr auto spec_1_1_0_common_10 = R"(# RECOMMENDED
+
+apple.type = "fruit"
+apple.skin = "thin"
+apple.color = "red"
+
+orange.type = "fruit"
+orange.skin = "thick"
+orange.color = "orange")"sv;
+	static constexpr auto spec_1_1_0_common_11 = R"(3.14159 = "pi")"sv;
+	static constexpr auto spec_1_1_0_common_13 = R"(str1 = """
+Roses are red
+Violets are blue""")"sv;
+	static constexpr auto spec_1_1_0_common_14 =
+		R"(# On a Unix system, the above multi-line string will most likely be the same as:
+str2 = "Roses are red\nViolets are blue"
+
+# On a Windows system, it will most likely be equivalent to:
+str3 = "Roses are red\r\nViolets are blue")"sv;
+	static constexpr auto spec_1_1_0_common_15	 = R"(# The following strings are byte-for-byte equivalent:
+str1 = "The quick brown fox jumps over the lazy dog."
+
+str2 = """
+The quick brown \
+
+
+  fox jumps over \
+    the lazy dog."""
+
+str3 = """\
+       The quick brown \
+       fox jumps over \
+       the lazy dog.\
+       """)"sv;
+	static constexpr auto spec_1_1_0_common_16	 = R"(str4 = """Here are two quotation marks: "". Simple enough."""
+# str5 = """Here are three quotation marks: """."""  # INVALID
+str5 = """Here are three quotation marks: ""\"."""
+str6 = """Here are fifteen quotation marks: ""\"""\"""\"""\"""\"."""
+
+# "This," she said, "is just a pointless statement."
+str7 = """"This," she said, "is just a pointless statement."""")"sv;
+	static constexpr auto spec_1_1_0_common_17	 = R"(# What you see is what you get.
+winpath  = 'C:\Users\nodejs\templates'
+winpath2 = '\\ServerX\admin$\system32\'
+quoted   = 'Tom "Dubs" Preston-Werner'
+regex    = '<\i\c*\s*>')"sv;
+	static constexpr auto spec_1_1_0_common_18	 = R"(regex2 = '''I [dw]on't need \d{2} apples'''
+lines  = '''
+The first newline is
+trimmed in literal strings.
+   All other whitespace
+   is preserved.
+''')"sv;
+	static constexpr auto spec_1_1_0_common_19	 = R"(quot15 = '''Here are fifteen quotation marks: """""""""""""""'''
+
+# apos15 = '''Here are fifteen apostrophes: ''''''''''''''''''  # INVALID
+apos15 = "Here are fifteen apostrophes: '''''''''''''''"
+
+# 'That,' she said, 'is still pointless.'
+str = ''''That,' she said, 'is still pointless.'''')"sv;
+	static constexpr auto spec_1_1_0_common_20	 = R"(int1 = +99
+int2 = 42
+int3 = 0
+int4 = -17)"sv;
+	static constexpr auto spec_1_1_0_common_21	 = R"(int5 = 1_000
+int6 = 5_349_221
+int7 = 53_49_221  # Indian number system grouping
+int8 = 1_2_3_4_5  # VALID but discouraged)"sv;
+	static constexpr auto spec_1_1_0_common_22	 = R"(# hexadecimal with prefix `0x`
+hex1 = 0xDEADBEEF
+hex2 = 0xdeadbeef
+hex3 = 0xdead_beef
+
+# octal with prefix `0o`
+oct1 = 0o01234567
+oct2 = 0o755 # useful for Unix file permissions
+
+# binary with prefix `0b`
+bin1 = 0b11010110)"sv;
+	static constexpr auto spec_1_1_0_common_23	 = R"(# fractional
+flt1 = +1.0
+flt2 = 3.1415
+flt3 = -0.01
+
+# exponent
+flt4 = 5e+22
+flt5 = 1e06
+flt6 = -2E-2
+
+# both
+flt7 = 6.626e-34)"sv;
+	static constexpr auto spec_1_1_0_common_24	 = R"(flt8 = 224_617.445_991_228)"sv;
+	static constexpr auto spec_1_1_0_common_25	 = R"(# infinity
+sf1 = inf  # positive infinity
+sf2 = +inf # positive infinity
+sf3 = -inf # negative infinity
+
+# not a number
+sf4 = nan  # actual sNaN/qNaN encoding is implementation-specific
+sf5 = +nan # same as `nan`
+sf6 = -nan # valid, actual encoding is implementation-specific)"sv;
+	static constexpr auto spec_1_1_0_common_26	 = R"(bool1 = true
+bool2 = false)"sv;
+	static constexpr auto spec_1_1_0_common_27	 = R"(odt1 = 1979-05-27T07:32:00Z
+odt2 = 1979-05-27T00:32:00-07:00
+odt3 = 1979-05-27T00:32:00.5-07:00
+odt4 = 1979-05-27T00:32:00.999-07:00)"sv;
+	static constexpr auto spec_1_1_0_common_28	 = R"(odt4 = 1979-05-27 07:32:00Z)"sv;
+	static constexpr auto spec_1_1_0_common_29	 = R"(odt5 = 1979-05-27 07:32Z
+odt6 = 1979-05-27 07:32-07:00)"sv;
+	static constexpr auto spec_1_1_0_common_3	 = R"(key = "value"
+bare_key = "value"
+bare-key = "value"
+1234 = "value")"sv;
+	static constexpr auto spec_1_1_0_common_30	 = R"(ldt1 = 1979-05-27T07:32:00
+ldt2 = 1979-05-27T07:32:00.5
+ldt3 = 1979-05-27T00:32:00.999)"sv;
+	static constexpr auto spec_1_1_0_common_31	 = R"(ldt3 = 1979-05-27T07:32)"sv;
+	static constexpr auto spec_1_1_0_common_32	 = R"(ld1 = 1979-05-27)"sv;
+	static constexpr auto spec_1_1_0_common_33	 = R"(lt1 = 07:32:00
+lt2 = 00:32:00.5
+lt3 = 00:32:00.999)"sv;
+	static constexpr auto spec_1_1_0_common_34	 = R"(lt3 = 07:32)"sv;
+	static constexpr auto spec_1_1_0_common_35	 = R"(integers = [ 1, 2, 3 ]
 colors = [ "red", "yellow", "green" ]
 nested_arrays_of_ints = [ [ 1, 2 ], [3, 4, 5] ]
 nested_mixed_array = [ [ 1, 2 ], ["a", "b", "c"] ]
@@ -482,7 +799,7 @@ contributors = [
   "Foo Bar <foo@example.com>",
   { name = "Baz Qux", email = "bazqux@example.com", url = "https://example.com/bazqux" }
 ])"sv;
-	static constexpr auto spec_array_1			  = R"(integers2 = [
+	static constexpr auto spec_1_1_0_common_36	 = R"(integers2 = [
   1, 2, 3
 ]
 
@@ -490,18 +807,103 @@ integers3 = [
   1,
   2, # this is ok
 ])"sv;
-	static constexpr auto spec_array_of_tables_0  = R"([[products]]
+	static constexpr auto spec_1_1_0_common_37	 = R"([table])"sv;
+	static constexpr auto spec_1_1_0_common_38	 = R"([table-1]
+key1 = "some string"
+key2 = 123
+
+[table-2]
+key1 = "another string"
+key2 = 456)"sv;
+	static constexpr auto spec_1_1_0_common_39	 = R"([dog."tater.man"]
+type.name = "pug")"sv;
+	static constexpr auto spec_1_1_0_common_41	 = R"(# [x] you
+# [x.y] don't
+# [x.y.z] need these
+[x.y.z.w] # for this to work
+
+[x] # defining a super-table afterward is ok)"sv;
+	static constexpr auto spec_1_1_0_common_42	 = R"(# VALID BUT DISCOURAGED
+[fruit.apple]
+[animal]
+[fruit.orange])"sv;
+	static constexpr auto spec_1_1_0_common_43	 = R"(# RECOMMENDED
+[fruit.apple]
+[fruit.orange]
+[animal])"sv;
+	static constexpr auto spec_1_1_0_common_44	 = R"(# Top-level table begins.
+name = "Fido"
+breed = "pug"
+
+# Top-level table ends.
+[owner]
+name = "Regina Dogman"
+member_since = 1999-08-04)"sv;
+	static constexpr auto spec_1_1_0_common_45	 = R"(fruit.apple.color = "red"
+# Defines a table named fruit
+# Defines a table named fruit.apple
+
+fruit.apple.taste.sweet = true
+# Defines a table named fruit.apple.taste
+# fruit and fruit.apple were already created)"sv;
+	static constexpr auto spec_1_1_0_common_46	 = R"([fruit]
+apple.color = "red"
+apple.taste.sweet = true
+
+# [fruit.apple]  # INVALID
+# [fruit.apple.taste]  # INVALID
+
+[fruit.apple.texture]  # you can add sub-tables
+smooth = true)"sv;
+	static constexpr auto spec_1_1_0_common_47	 = R"(name = { first = "Tom", last = "Preston-Werner" }
+point = {x=1, y=2}
+animal = { type.name = "pug" }
+contact = {
+    personal = {
+        name = "Donald Duck",
+        email = "donald@duckburg.com",
+    },
+    work = {
+        name = "Coin cleaner",
+        email = "donald@ScroogeCorp.com",
+    },
+})"sv;
+	static constexpr auto spec_1_1_0_common_48	 = R"([name]
+first = "Tom"
+last = "Preston-Werner"
+
+[point]
+x = 1
+y = 2
+
+[animal]
+type.name = "pug"
+
+[contact.personal]
+name = "Donald Duck"
+email = "donald@duckburg.com"
+
+[contact.work]
+name = "Coin cleaner"
+email = "donald@ScroogeCorp.com")"sv;
+	static constexpr auto spec_1_1_0_common_49	 = R"([product]
+type = { name = "Nail" }
+# type.edible = false  # INVALID)"sv;
+	static constexpr auto spec_1_1_0_common_50	 = R"([product]
+type.name = "Nail"
+# type = { edible = false }  # INVALID)"sv;
+	static constexpr auto spec_1_1_0_common_51	 = R"([[product]]
 name = "Hammer"
 sku = 738594937
 
-[[products]]  # empty table within the array
+[[product]]  # empty table within the array
 
-[[products]]
+[[product]]
 name = "Nail"
 sku = 284758393
 
 color = "gray")"sv;
-	static constexpr auto spec_array_of_tables_1  = R"([[fruits]]
+	static constexpr auto spec_1_1_0_common_52	 = R"([[fruits]]
 name = "apple"
 
 [fruits.physical]  # subtable
@@ -520,87 +922,22 @@ name = "banana"
 
 [[fruits.varieties]]
 name = "plantain")"sv;
-	static constexpr auto spec_array_of_tables_2  = R"(points = [ { x = 1, y = 2, z = 3 },
+	static constexpr auto spec_1_1_0_common_53	 = R"(points = [ { x = 1, y = 2, z = 3 },
            { x = 7, y = 8, z = 9 },
            { x = 2, y = 4, z = 8 } ])"sv;
-	static constexpr auto spec_boolean_0		  = R"(bool1 = true
-bool2 = false)"sv;
-	static constexpr auto spec_comment_0		  = R"(# This is a full-line comment
-key = "value"  # This is a comment at the end of a line
-another = "# This is not a comment")"sv;
-	static constexpr auto spec_float_0			  = R"(# fractional
-flt1 = +1.0
-flt2 = 3.1415
-flt3 = -0.01
-
-# exponent
-flt4 = 5e+22
-flt5 = 1e06
-flt6 = -2E-2
-
-# both
-flt7 = 6.626e-34)"sv;
-	static constexpr auto spec_float_1			  = R"(flt8 = 224_617.445_991_228)"sv;
-	static constexpr auto spec_float_2			  = R"(# infinity
-sf1 = inf  # positive infinity
-sf2 = +inf # positive infinity
-sf3 = -inf # negative infinity
-
-# not a number
-sf4 = nan  # actual sNaN/qNaN encoding is implementation-specific
-sf5 = +nan # same as `nan`
-sf6 = -nan # valid, actual encoding is implementation-specific)"sv;
-	static constexpr auto spec_inline_table_0	  = R"(name = { first = "Tom", last = "Preston-Werner" }
-point = { x = 1, y = 2 }
-animal = { type.name = "pug" })"sv;
-	static constexpr auto spec_inline_table_1	  = R"([name]
-first = "Tom"
-last = "Preston-Werner"
-
-[point]
-x = 1
-y = 2
-
-[animal]
-type.name = "pug")"sv;
-	static constexpr auto spec_inline_table_2	  = R"([product]
-type = { name = "Nail" }
-# type.edible = false  # INVALID)"sv;
-	static constexpr auto spec_inline_table_3	  = R"([product]
-type.name = "Nail"
-# type = { edible = false }  # INVALID)"sv;
-	static constexpr auto spec_integer_0		  = R"(int1 = +99
-int2 = 42
-int3 = 0
-int4 = -17)"sv;
-	static constexpr auto spec_integer_1		  = R"(int5 = 1_000
-int6 = 5_349_221
-int7 = 53_49_221  # Indian number system grouping
-int8 = 1_2_3_4_5  # VALID but discouraged)"sv;
-	static constexpr auto spec_integer_2		  = R"(# hexadecimal with prefix `0x`
-hex1 = 0xDEADBEEF
-hex2 = 0xdeadbeef
-hex3 = 0xdead_beef
-
-# octal with prefix `0o`
-oct1 = 0o01234567
-oct2 = 0o755 # useful for Unix file permissions
-
-# binary with prefix `0b`
-bin1 = 0b11010110)"sv;
-	static constexpr auto spec_key_value_pair_0	  = R"(key = "value")"sv;
-	static constexpr auto spec_keys_0			  = R"(key = "value"
-bare_key = "value"
-bare-key = "value"
-1234 = "value")"sv;
-	static constexpr auto spec_keys_3			  = R"(name = "Orange"
+	static constexpr auto spec_1_1_0_common_6	 = R"(name = "Orange"
 physical.color = "orange"
 physical.shape = "round"
 site."google.com" = true)"sv;
-	static constexpr auto spec_keys_4			  = R"(fruit.name = "banana"     # this is best practice
-fruit. color = "yellow"    # same as fruit.color
+	static constexpr auto spec_1_1_0_common_7	 = R"(fruit.name = "banana"       # this is best practice
+fruit. color = "yellow"     # same as fruit.color
 fruit . flavor = "banana"   # same as fruit.flavor)"sv;
-	static constexpr auto spec_keys_5			  = R"(# VALID BUT DISCOURAGED
+	static constexpr auto spec_1_1_0_common_8	 = R"(# This makes the key "fruit" into a table.
+fruit.apple.smooth = true
+
+# So then you can add to the table "fruit" like so:
+fruit.orange = 2)"sv;
+	static constexpr auto spec_1_1_0_common_9	 = R"(# VALID BUT DISCOURAGED
 
 apple.type = "fruit"
 orange.type = "fruit"
@@ -610,123 +947,6 @@ orange.skin = "thick"
 
 apple.color = "red"
 orange.color = "orange")"sv;
-	static constexpr auto spec_keys_6			  = R"(# RECOMMENDED
-
-apple.type = "fruit"
-apple.skin = "thin"
-apple.color = "red"
-
-orange.type = "fruit"
-orange.skin = "thick"
-orange.color = "orange")"sv;
-	static constexpr auto spec_keys_7			  = R"(3.14159 = "pi")"sv;
-	static constexpr auto spec_local_date_0		  = R"(ld1 = 1979-05-27)"sv;
-	static constexpr auto spec_local_date_time_0  = R"(ldt1 = 1979-05-27T07:32:00
-ldt2 = 1979-05-27T00:32:00.999999)"sv;
-	static constexpr auto spec_local_time_0		  = R"(lt1 = 07:32:00
-lt2 = 00:32:00.999999)"sv;
-	static constexpr auto spec_offset_date_time_0 = R"(odt1 = 1979-05-27T07:32:00Z
-odt2 = 1979-05-27T00:32:00-07:00
-odt3 = 1979-05-27T00:32:00.999999-07:00)"sv;
-	static constexpr auto spec_offset_date_time_1 = R"(odt4 = 1979-05-27 07:32:00Z)"sv;
-	static constexpr auto spec_string_1			  = R"(str1 = """
-Roses are red
-Violets are blue""")"sv;
-	static constexpr auto spec_string_2 =
-		R"(# On a Unix system, the above multi-line string will most likely be the same as:
-str2 = "Roses are red\nViolets are blue"
-
-# On a Windows system, it will most likely be equivalent to:
-str3 = "Roses are red\r\nViolets are blue")"sv;
-	static constexpr auto spec_string_3			 = R"(# The following strings are byte-for-byte equivalent:
-str1 = "The quick brown fox jumps over the lazy dog."
-
-str2 = """
-The quick brown \
-
-
-  fox jumps over \
-    the lazy dog."""
-
-str3 = """\
-       The quick brown \
-       fox jumps over \
-       the lazy dog.\
-       """)"sv;
-	static constexpr auto spec_string_4			 = R"(str4 = """Here are two quotation marks: "". Simple enough."""
-# str5 = """Here are three quotation marks: """."""  # INVALID
-str5 = """Here are three quotation marks: ""\"."""
-str6 = """Here are fifteen quotation marks: ""\"""\"""\"""\"""\"."""
-
-# "This," she said, "is just a pointless statement."
-str7 = """"This," she said, "is just a pointless statement."""")"sv;
-	static constexpr auto spec_string_5			 = R"(# What you see is what you get.
-winpath  = 'C:\Users\nodejs\templates'
-winpath2 = '\\ServerX\admin$\system32\'
-quoted   = 'Tom "Dubs" Preston-Werner'
-regex    = '<\i\c*\s*>')"sv;
-	static constexpr auto spec_string_6			 = R"(regex2 = '''I [dw]on't need \d{2} apples'''
-lines  = '''
-The first newline is
-trimmed in raw strings.
-   All other whitespace
-   is preserved.
-''')"sv;
-	static constexpr auto spec_string_7			 = R"(quot15 = '''Here are fifteen quotation marks: """""""""""""""'''
-
-# apos15 = '''Here are fifteen apostrophes: ''''''''''''''''''  # INVALID
-apos15 = "Here are fifteen apostrophes: '''''''''''''''"
-
-# 'That,' she said, 'is still pointless.'
-str = ''''That,' she said, 'is still pointless.'''')"sv;
-	static constexpr auto spec_table_0			 = R"([table])"sv;
-	static constexpr auto spec_table_1			 = R"([table-1]
-key1 = "some string"
-key2 = 123
-
-[table-2]
-key1 = "another string"
-key2 = 456)"sv;
-	static constexpr auto spec_table_2			 = R"([dog."tater.man"]
-type.name = "pug")"sv;
-	static constexpr auto spec_table_4			 = R"(# [x] you
-# [x.y] don't
-# [x.y.z] need these
-[x.y.z.w] # for this to work
-
-[x] # defining a super-table afterward is ok)"sv;
-	static constexpr auto spec_table_5			 = R"(# VALID BUT DISCOURAGED
-[fruit.apple]
-[animal]
-[fruit.orange])"sv;
-	static constexpr auto spec_table_6			 = R"(# RECOMMENDED
-[fruit.apple]
-[fruit.orange]
-[animal])"sv;
-	static constexpr auto spec_table_7			 = R"(# Top-level table begins.
-name = "Fido"
-breed = "pug"
-
-# Top-level table ends.
-[owner]
-name = "Regina Dogman"
-member_since = 1999-08-04)"sv;
-	static constexpr auto spec_table_8			 = R"(fruit.apple.color = "red"
-# Defines a table named fruit
-# Defines a table named fruit.apple
-
-fruit.apple.taste.sweet = true
-# Defines a table named fruit.apple.taste
-# fruit and fruit.apple were already created)"sv;
-	static constexpr auto spec_table_9			 = R"([fruit]
-apple.color = "red"
-apple.taste.sweet = true
-
-# [fruit.apple]  # INVALID
-# [fruit.apple.taste]  # INVALID
-
-[fruit.apple.texture]  # you can add sub-tables
-smooth = true)"sv;
 	static constexpr auto spec_example_1_compact = R"(#Useless spaces eliminated.
 title="TOML Example"
 [owner]
@@ -786,36 +1006,65 @@ hosts = [
 
 #if UNICODE_LITERALS_OK
 
-	static constexpr auto spec_keys_1 = R"("127.0.0.1" = "value"
+	static constexpr auto spec_1_1_0_common_12 =
+		R"(str = "I'm a string. \"You can quote me\". Name\tJos\xE9\nLocation\tSF.")"sv;
+	static constexpr auto spec_1_1_0_common_4  = R"("127.0.0.1" = "value"
 "character encoding" = "value"
 "ʎǝʞ" = "value"
 'key2' = "value"
 'quoted "value"' = "value")"sv;
-	static constexpr auto spec_string_0 =
-		R"(str = "I'm a string. \"You can quote me\". Name\tJos\u00E9\nLocation\tSF.")"sv;
-	static constexpr auto spec_table_3 = R"([a.b.c]            # this is best practice
+	static constexpr auto spec_1_1_0_common_40 = R"([a.b.c]            # this is best practice
 [ d.e.f ]          # same as [d.e.f]
 [ g .  h  . i ]    # same as [g.h.i]
 [ j . "ʞ" . 'l' ]  # same as [j."ʞ".'l'])"sv;
 
 #endif // UNICODE_LITERALS_OK
 
-	static constexpr auto string_double_quote_escape = R"(test = "\"one\"")"sv;
-	static constexpr auto string_empty				 = R"(answer = "")"sv;
-	static constexpr auto string_escaped_escape		 = R"(answer = "\\x64")"sv;
-	static constexpr auto string_escapes			 = R"(backspace = "This string has a \b backspace character."
-tab = "This string has a \t tab character."
-newline = "This string has a \n new line character."
-formfeed = "This string has a \f form feed character."
-carriage = "This string has a \r carriage return character."
-quote = "This string has a \" quote character."
-backslash = "This string has a \\ backslash character."
-notunicode1 = "This string does not have a unicode \\u escape."
-notunicode2 = "This string does not have a unicode \u005Cu escape."
-notunicode3 = "This string does not have a unicode \\u0075 escape."
-notunicode4 = "This string does not have a unicode \\\u0075 escape."
-delete = "This string has a \u007F delete control code."
-unitseparator = "This string has a \u001F unit separator control code.")"sv;
+	static constexpr auto string_basic_escape_01		   = R"(# Escape "
+test = "\"one\"")"sv;
+	static constexpr auto string_basic_escape_02		   = R"(# Escape \ and then "
+test = "\\\"one")"sv;
+	static constexpr auto string_basic_escape_03		   = R"(# Escape \ four times and then "
+test = "\\\\\\\\\"one")"sv;
+	static constexpr auto string_empty					   = R"(answer = "")"sv;
+	static constexpr auto string_ends_in_whitespace_escape = "beee = \"\"\"\n"
+															 "heeee\n"
+															 "geeee\\  \n"
+															 "\n"
+															 "\n"
+															 "      \"\"\""sv;
+	static constexpr auto string_escape_esc				   = R"(esc = "\e There is no escape! \e")"sv;
+	static constexpr auto string_escaped_escape			   = R"(answer = "\\x64")"sv;
+	static constexpr auto string_escapes				   = R"(backspace     = "|\b."
+tab           = "|\t."
+newline       = "|\n."
+formfeed      = "|\f."
+carriage      = "|\r."
+quote         = "|\"."
+backslash     = "|\\."
+delete        = "|\u007F."
+unitseparator = "|\u001F."
+
+# \u is escaped, so should NOT be interperted as a \u escape.
+notunicode1   = "|\\u."
+notunicode2   = "|\u005Cu."
+notunicode3   = "|\\u0075."
+notunicode4   = "|\\\u0075.")"sv;
+	static constexpr auto string_multiline_empty =
+		"empty-1 = \"\"\"\"\"\"\n"
+		"\n"
+		"# A newline immediately following the opening delimiter will be trimmed.\n"
+		"empty-2 = \"\"\"\n"
+		"\"\"\"\n"
+		"\n"
+		"# \\ at the end of line trims newlines as well; note that last \\ is followed by\n"
+		"# two spaces, which are ignored.\n"
+		"empty-3 = \"\"\"\\\n"
+		"    \"\"\"\n"
+		"empty-4 = \"\"\"\\\n"
+		"   \\\n"
+		"   \\  \n"
+		"   \"\"\""sv;
 	static constexpr auto string_multiline_escaped_crlf =
 		"# The following line should be an unescaped backslash followed by a Windows\r\n"
 		"# newline sequence (\"\\r\\n\")\r\n"
@@ -840,66 +1089,58 @@ mismatch2 = '''aaa"""bbb'''
 
 # Three opening """, then one escaped ", then two "" (allowed), and then three
 # closing """
-escaped = """lol\"""""")"sv;
-	static constexpr auto string_multiline =
-		"# NOTE: this file includes some literal tab characters.\n"
-		"\n"
-		"multiline_empty_one = \"\"\"\"\"\"\n"
-		"\n"
-		"# A newline immediately following the opening delimiter will be trimmed.\n"
-		"multiline_empty_two = \"\"\"\n"
-		"\"\"\"\n"
-		"\n"
-		"# \\ at the end of line trims newlines as well; note that last \\ is followed by\n"
-		"# two spaces, which are ignored.\n"
-		"multiline_empty_three = \"\"\"\\\n"
-		"    \"\"\"\n"
-		"multiline_empty_four = \"\"\"\\\n"
-		"   \\\n"
-		"   \\  \n"
-		"   \"\"\"\n"
-		"\n"
-		"equivalent_one = \"The quick brown fox jumps over the lazy dog.\"\n"
-		"equivalent_two = \"\"\"\n"
-		"The quick brown \\\n"
-		"\n"
-		"\n"
-		"  fox jumps over \\\n"
-		"    the lazy dog.\"\"\"\n"
-		"\n"
-		"equivalent_three = \"\"\"\\\n"
-		"       The quick brown \\\n"
-		"       fox jumps over \\\n"
-		"       the lazy dog.\\\n"
-		"       \"\"\"\n"
-		"\n"
-		"whitespace-after-bs = \"\"\"\\\n"
-		"       The quick brown \\\n"
-		"       fox jumps over \\   \n"
-		"       the lazy dog.\\	\n"
-		"       \"\"\"\n"
-		"\n"
-		"no-space = \"\"\"a\\\n"
-		"    b\"\"\"\n"
-		"\n"
-		"# Has tab character.\n"
-		"keep-ws-before = \"\"\"a   	\\\n"
-		"   b\"\"\"\n"
-		"\n"
-		"escape-bs-1 = \"\"\"a \\\\\n"
-		"b\"\"\"\n"
-		"\n"
-		"escape-bs-2 = \"\"\"a \\\\\\\n"
-		"b\"\"\"\n"
-		"\n"
-		"escape-bs-3 = \"\"\"a \\\\\\\\\n"
-		"  b\"\"\""sv;
+escaped = """lol\""""""
+
+five-quotes = """
+Closing with five quotes
+"""""
+four-quotes = """
+Closing with four quotes
+"""")"sv;
+	static constexpr auto string_multiline	   = "# NOTE: this file includes some literal tab characters.\n"
+												 "\n"
+												 "equivalent_one = \"The quick brown fox jumps over the lazy dog.\"\n"
+												 "equivalent_two = \"\"\"\n"
+												 "The quick brown \\\n"
+												 "\n"
+												 "\n"
+												 "  fox jumps over \\\n"
+												 "    the lazy dog.\"\"\"\n"
+												 "\n"
+												 "equivalent_three = \"\"\"\\\n"
+												 "       The quick brown \\\n"
+												 "       fox jumps over \\\n"
+												 "       the lazy dog.\\\n"
+												 "       \"\"\"\n"
+												 "\n"
+												 "whitespace-after-bs = \"\"\"\\\n"
+												 "       The quick brown \\\n"
+												 "       fox jumps over \\   \n"
+												 "       the lazy dog.\\	\n"
+												 "       \"\"\"\n"
+												 "\n"
+												 "no-space = \"\"\"a\\\n"
+												 "    b\"\"\"\n"
+												 "\n"
+												 "# Has tab character.\n"
+												 "keep-ws-before = \"\"\"a   	\\\n"
+												 "   b\"\"\"\n"
+												 "\n"
+												 "escape-bs-1 = \"\"\"a \\\\\n"
+												 "b\"\"\"\n"
+												 "\n"
+												 "escape-bs-2 = \"\"\"a \\\\\\\n"
+												 "b\"\"\"\n"
+												 "\n"
+												 "escape-bs-3 = \"\"\"a \\\\\\\\\n"
+												 "  b\"\"\""sv;
 	static constexpr auto string_nl			   = R"(nl_mid = "val\nue"
 nl_end = """value\n"""
 
 lit_nl_end = '''value\n'''
 lit_nl_mid = 'val\nue'
 lit_nl_uni = 'val\ue')"sv;
+	static constexpr auto string_raw_empty	   = R"(empty = '')"sv;
 	static constexpr auto string_raw_multiline = R"(# Single ' should be allowed.
 oneline = '''This string has a ' quote character.'''
 
@@ -917,7 +1158,11 @@ in it.'''
 
 # Tab character in literal string does not need to be escaped
 multiline_with_tab = '''First line
-	 Followed by a tab''')"sv;
+	 Followed by a tab'''
+
+this-str-has-apostrophes='''' there's one already
+'' two more
+''''')"sv;
 	static constexpr auto string_raw		   = R"(backspace = 'This string has a \b backspace character.'
 tab = 'This string has a \t tab character.'
 unescaped_tab = 'This string has an 	 unescaped tab character.'
@@ -930,15 +1175,9 @@ backslash = 'This string has a \\ backslash character.')"sv;
 	static constexpr auto string_with_pound	   = R"(pound = "We see no # comments here."
 poundcomment = "But there are # some comments here." # Did I # mess you up?)"sv;
 
-#if TOML_LANG_UNRELEASED
-
-	static constexpr auto string_escape_esc = R"(esc = "\e There is no escape! \e")"sv;
-
-#endif // TOML_LANG_UNRELEASED
-
 #if UNICODE_LITERALS_OK
 
-	static constexpr auto string_escape_tricky	 = R"(end_esc = "String does not end here\" but ends here\\"
+	static constexpr auto string_escape_tricky	  = R"(end_esc = "String does not end here\" but ends here\\"
 lit_end_esc = 'String ends here\'
 
 multiline_unicode = """
@@ -953,21 +1192,7 @@ lit_multiline_not_unicode = '''
 \u007f'''
 
 lit_multiline_end = '''There is no escape\''')"sv;
-	static constexpr auto string_quoted_unicode	 = R"(
-escaped_string = "\u0000 \u0008 \u000c \U00000041 \u007f \u0080 \u00ff \ud7ff \ue000 \uffff \U00010000 \U0010ffff"
-not_escaped_string = '\u0000 \u0008 \u000c \U00000041 \u007f \u0080 \u00ff \ud7ff \ue000 \uffff \U00010000 \U0010ffff'
-
-basic_string = "~  ÿ ퟿  ￿ 𐀀 􏿿"
-literal_string = '~  ÿ ퟿  ￿ 𐀀 􏿿')"sv;
-	static constexpr auto string_unicode_escape	 = R"(answer4 = "\u03B4"
-answer8 = "\U000003B4")"sv;
-	static constexpr auto string_unicode_literal = R"(answer = "δ")"sv;
-
-#endif // UNICODE_LITERALS_OK
-
-#if TOML_LANG_UNRELEASED && UNICODE_LITERALS_OK
-
-	static constexpr auto string_hex_escape = R"(# \x for the first 255 codepoints
+	static constexpr auto string_hex_escape		  = R"(# \x for the first 255 codepoints
 
 whitespace      = "\x20 \x09 \x1b \x0d\x0a"
 bs              = "\x7f"
@@ -988,9 +1213,66 @@ literal = '\x20 \x09 \x0d\x0a'
 multiline-literal = '''
 \x20 \x09 \x0d\x0a
 ''')"sv;
+	static constexpr auto string_multibyte_escape = R"(# Test each multibyte length: 2, 3, and 4 bytes:
+# ɑ € 𐫱
 
-#endif // TOML_LANG_UNRELEASED && UNICODE_LITERALS_OK
+basic-1    = "\u0251 \u20ac \U00010AF1 \u0251\u20ac\U00010AF1"
+ml-basic-1 = """\u0251 \u20ac \U00010AF1 \u0251\u20ac\U00010AF1"""
 
+# Again, but only using \U
+basic-2    = "\U00000251 \U000020ac \U00010AF1 \U00000251\U000020ac\U00010AF1"
+ml-basic-2 = """\U00000251 \U000020ac \U00010AF1 \U00000251\U000020ac\U00010AF1""")"sv;
+	static constexpr auto string_multibyte		  = R"(# Test each multibyte length: 2, 3, and 4 bytes:
+# ɑ € 𐫱
+
+basic    = "ɑ € 𐫱 ɑ€𐫱"
+raw      = 'ɑ € 𐫱 ɑ€𐫱'
+ml-basic = """ɑ € 𐫱 ɑ€𐫱"""
+ml-raw   = '''ɑ € 𐫱 ɑ€𐫱''')"sv;
+	static constexpr auto string_quoted_unicode	  = R"(
+escaped_string = "\u0000 \u0008 \u000c \U00000041 \u007f \u0080 \u00ff \ud7ff \ue000 \uffff \U00010000 \U0010ffff"
+not_escaped_string = '\u0000 \u0008 \u000c \U00000041 \u007f \u0080 \u00ff \ud7ff \ue000 \uffff \U00010000 \U0010ffff'
+
+basic_string = "~  ÿ ퟿  ￿ 𐀀 􏿿"
+literal_string = '~  ÿ ퟿  ￿ 𐀀 􏿿')"sv;
+	static constexpr auto string_start_mb		  = R"(# Start first line with a multibyte character.
+#
+# https://github.com/marzer/tomlplusplus/issues/190
+s1 = "§"
+s2 = '§'
+s3 = """\
+§"""
+s4 = """
+§"""
+s5 = """§"""
+s6 = '''
+§'''
+s7 = '''§''')"sv;
+	static constexpr auto string_unicode_escape	  = R"(delta-1 = "\u03B4"
+delta-2 = "\U000003B4"
+a       = "\u0061"
+b       = "\u0062"
+c       = "\U00000063"
+null-1  = "\u0000"
+null-2  = "\U00000000"
+
+ml-delta-1 = """\u03B4"""
+ml-delta-2 = """\U000003B4"""
+ml-a       = """\u0061"""
+ml-b       = """\u0062"""
+ml-c       = """\U00000063"""
+ml-null-1  = """\u0000"""
+ml-null-2  = """\U00000000""")"sv;
+
+#endif // UNICODE_LITERALS_OK
+
+	static constexpr auto table_array_empty_name				  = R"(# Silly thing to do, but valid.
+
+[['']]
+a = 1
+[['']]
+a = 2)"sv;
+	static constexpr auto table_array_empty						  = R"([[a]])"sv;
 	static constexpr auto table_array_implicit_and_explicit_after = R"([[a.b]]
 x = 1
 
@@ -1050,6 +1332,17 @@ x = 2
 [a.'']
 x = 3)"sv;
 	static constexpr auto table_empty							  = R"([a])"sv;
+	static constexpr auto table_keyword_with_values				  = R"([true]
+k = 1
+
+[false]
+k = 2
+
+[inf]
+k = 3
+
+[nan]
+k = 4)"sv;
 	static constexpr auto table_keyword							  = R"([true]
 
 [false]
@@ -1080,6 +1373,15 @@ answer = 42)"sv;
 [a.'b']
 [a.'b'.c]
 answer = 42 )"sv;
+	static constexpr auto table_without_super_with_values		  = R"(# [x] you
+# [x.y] don't
+# [x.y.z] need these
+[x.y.z.w] # for this to work
+a = 1
+b = 2
+[x] # defining a super-table afterwards is ok
+c = 3
+d = 4)"sv;
 	static constexpr auto table_without_super					  = R"(# [x] you
 # [x.y] don't
 # [x.y.z] need these
@@ -1088,7 +1390,30 @@ answer = 42 )"sv;
 
 #if UNICODE_LITERALS_OK
 
-	static constexpr auto table_names = R"([a.b.c]
+	static constexpr auto table_names_with_values = R"([a.b.c]
+key = 1
+
+[a."b.c"]
+key = 2
+
+[a.'d.e']
+key = 3
+
+[a.' x ']
+key = 4
+
+[ d.e.f ]
+key = 5
+
+[ g . h . i ]
+key = 6
+
+[ j . "ʞ" . 'l' ]
+key = 7
+
+[x.1.2]
+key = 8)"sv;
+	static constexpr auto table_names			  = R"([a.b.c]
 [a."b.c"]
 [a.'d.e']
 [a.' x ']
@@ -1103,6 +1428,33 @@ answer = 42 )"sv;
 
 TEST_CASE("conformance - burntsushi/valid")
 {
+	SECTION("array-array-subtables")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   array_array_subtables,
+							   [](toml::table&& tbl) // array-array-subtables
+							   {
+								   const auto expected = toml::table{
+									   { R"(arr)"sv,
+										 toml::array{
+											 toml::table{
+												 { R"(subtab)"sv,
+												   toml::table{
+													   { R"(val)"sv, 1 },
+												   } },
+											 },
+											 toml::table{
+												 { R"(subtab)"sv,
+												   toml::table{
+													   { R"(val)"sv, 2 },
+												   } },
+											 },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
 	SECTION("array-array")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
@@ -1118,8 +1470,9 @@ TEST_CASE("conformance - burntsushi/valid")
 									   { R"(dates)"sv,
 										 toml::array{
 											 toml::date_time{ { 1987, 7, 5 }, { 17, 45 }, { 0, 0 } },
-											 toml::date_time{ { 1979, 5, 27 }, { 7, 32 }, { 0, 0 } },
-											 toml::date_time{ { 2006, 6, 1 }, { 11, 0 }, { 0, 0 } },
+											 toml::date_time{ { 1979, 5, 27 }, { 7, 32 } },
+											 toml::date{ 2006, 6, 1 },
+											 toml::time{ 11, 0 },
 										 } },
 									   { R"(floats)"sv,
 										 toml::array{
@@ -1376,27 +1729,32 @@ TEST_CASE("conformance - burntsushi/valid")
 							   });
 	}
 
-	SECTION("array-string-quote-comma-2")
+	SECTION("array-open-parent-table")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
-							   array_string_quote_comma_2,
-							   [](toml::table&& tbl) // array-string-quote-comma-2
+							   array_open_parent_table,
+							   [](toml::table&& tbl) // array-open-parent-table
 							   {
 								   const auto expected = toml::table{
-									   { R"(title)"sv,
-										 toml::array{
-											 R"( ", )"sv,
+									   { R"(parent-table)"sv,
+										 toml::table{
+											 { R"(not-arr)"sv, 1 },
+											 { R"(arr)"sv,
+											   toml::array{
+												   toml::table{},
+												   toml::table{},
+											   } },
 										 } },
 								   };
 								   REQUIRE(tbl == expected);
 							   });
 	}
 
-	SECTION("array-string-quote-comma")
+	SECTION("array-string-quote-comma-01")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
-							   array_string_quote_comma,
-							   [](toml::table&& tbl) // array-string-quote-comma
+							   array_string_quote_comma_01,
+							   [](toml::table&& tbl) // array-string-quote-comma-01
 							   {
 								   const auto expected = toml::table{
 									   { R"(title)"sv,
@@ -1409,17 +1767,32 @@ TEST_CASE("conformance - burntsushi/valid")
 							   });
 	}
 
-	SECTION("array-string-with-comma-2")
+	SECTION("array-string-quote-comma-02")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
-							   array_string_with_comma_2,
-							   [](toml::table&& tbl) // array-string-with-comma-2
+							   array_string_quote_comma_02,
+							   [](toml::table&& tbl) // array-string-quote-comma-02
 							   {
 								   const auto expected = toml::table{
 									   { R"(title)"sv,
 										 toml::array{
-											 R"(Client: XXXX,
-Job: XXXX)"sv,
+											 R"( ", )"sv,
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("array-string-with-comma-01")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   array_string_with_comma_01,
+							   [](toml::table&& tbl) // array-string-with-comma-01
+							   {
+								   const auto expected = toml::table{
+									   { R"(title)"sv,
+										 toml::array{
+											 R"(Client: XXXX, Job: XXXX)"sv,
 											 R"(Code: XXXX)"sv,
 										 } },
 								   };
@@ -1427,16 +1800,17 @@ Job: XXXX)"sv,
 							   });
 	}
 
-	SECTION("array-string-with-comma")
+	SECTION("array-string-with-comma-02")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
-							   array_string_with_comma,
-							   [](toml::table&& tbl) // array-string-with-comma
+							   array_string_with_comma_02,
+							   [](toml::table&& tbl) // array-string-with-comma-02
 							   {
 								   const auto expected = toml::table{
 									   { R"(title)"sv,
 										 toml::array{
-											 R"(Client: XXXX, Job: XXXX)"sv,
+											 R"(Client: XXXX,
+Job: XXXX)"sv,
 											 R"(Code: XXXX)"sv,
 										 } },
 								   };
@@ -1475,6 +1849,36 @@ Job: XXXX)"sv,
 											 toml::table{
 												 { R"(bar)"sv, R"("{{baz}}")"sv },
 											 },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("array-trailing-comma")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   array_trailing_comma,
+							   [](toml::table&& tbl) // array-trailing-comma
+							   {
+								   const auto expected = toml::table{
+									   { R"(arr-1)"sv,
+										 toml::array{
+											 1,
+										 } },
+									   { R"(arr-3)"sv,
+										 toml::array{
+											 4,
+										 } },
+									   { R"(arr-2)"sv,
+										 toml::array{
+											 2,
+											 3,
+										 } },
+									   { R"(arr-4)"sv,
+										 toml::array{
+											 5,
+											 6,
 										 } },
 								   };
 								   REQUIRE(tbl == expected);
@@ -1545,6 +1949,15 @@ Job: XXXX)"sv,
 			[](toml::table&& tbl) // comment-everywhere
 			{
 				const auto expected = toml::table{
+					{ R"(aot)"sv,
+					  toml::array{
+						  toml::table{
+							  { R"(k)"sv, 98 },
+						  },
+						  toml::table{
+							  { R"(k)"sv, 99 },
+						  },
+					  } },
 					{ R"(group)"sv,
 					  toml::table{
 						  { R"(answer)"sv, 42 },
@@ -1582,6 +1995,18 @@ Job: XXXX)"sv,
 									   { R"(hash#tag)"sv,
 										 toml::table{
 											 { R"(#!)"sv, R"(hash bang)"sv },
+											 { R"(arr5)"sv,
+											   toml::array{
+												   toml::inserter{ toml::array{
+													   toml::inserter{ toml::array{
+														   toml::inserter{ toml::array{
+															   toml::inserter{ toml::array{
+																   R"(#)"sv,
+															   } },
+														   } },
+													   } },
+												   } },
+											   } },
 											 { R"(arr3)"sv,
 											   toml::array{
 												   R"(#)"sv,
@@ -1594,18 +2019,6 @@ Job: XXXX)"sv,
 												   2,
 												   3,
 												   4,
-											   } },
-											 { R"(arr5)"sv,
-											   toml::array{
-												   toml::inserter{ toml::array{
-													   toml::inserter{ toml::array{
-														   toml::inserter{ toml::array{
-															   toml::inserter{ toml::array{
-																   R"(#)"sv,
-															   } },
-														   } },
-													   } },
-												   } },
 											   } },
 											 { R"(tbl1)"sv,
 											   toml::table{
@@ -1658,6 +2071,57 @@ Job: XXXX)"sv,
 								   };
 								   REQUIRE(tbl == expected);
 							   });
+	}
+
+	SECTION("datetime-edge")
+	{
+		parsing_should_succeed(
+			FILE_LINE_ARGS,
+			datetime_edge,
+			[](toml::table&& tbl) // datetime-edge
+			{
+				const auto expected = toml::table{
+					{ R"(first-date)"sv, toml::date{ 1, 1, 1 } },
+					{ R"(first-local)"sv, toml::date_time{ { 1, 1, 1 }, { 0, 0 } } },
+					{ R"(first-offset)"sv, toml::date_time{ { 1, 1, 1 }, { 0, 0 }, { 0, 0 } } },
+					{ R"(last-date)"sv, toml::date{ 9999, 12, 31 } },
+					{ R"(last-local)"sv, toml::date_time{ { 9999, 12, 31 }, { 23, 59, 59 } } },
+					{ R"(last-offset)"sv, toml::date_time{ { 9999, 12, 31 }, { 23, 59, 59 }, { 0, 0 } } },
+				};
+				REQUIRE(tbl == expected);
+			});
+	}
+
+	SECTION("datetime-invalid-date-in-string")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   datetime_invalid_date_in_string,
+							   [](toml::table&& tbl) // datetime-invalid-date-in-string
+							   {
+								   const auto expected = toml::table{
+									   { R"(s)"sv, R"(2020-01-01x)"sv },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("datetime-leap-year")
+	{
+		parsing_should_succeed(
+			FILE_LINE_ARGS,
+			datetime_leap_year,
+			[](toml::table&& tbl) // datetime-leap-year
+			{
+				const auto expected = toml::table{
+					{ R"(2000-date)"sv, toml::date{ 2000, 2, 29 } },
+					{ R"(2000-datetime)"sv, toml::date_time{ { 2000, 2, 29 }, { 15, 15, 15 }, { 0, 0 } } },
+					{ R"(2000-datetime-local)"sv, toml::date_time{ { 2000, 2, 29 }, { 15, 15, 15 } } },
+					{ R"(2024-date)"sv, toml::date{ 2024, 2, 29 } },
+					{ R"(2024-datetime)"sv, toml::date_time{ { 2024, 2, 29 }, { 15, 15, 15 }, { 0, 0 } } },
+					{ R"(2024-datetime-local)"sv, toml::date_time{ { 2024, 2, 29 }, { 15, 15, 15 } } },
+				};
+				REQUIRE(tbl == expected);
+			});
 	}
 
 	SECTION("datetime-local-date")
@@ -1719,24 +2183,6 @@ Job: XXXX)"sv,
 			});
 	}
 
-	SECTION("datetime-timezone")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   datetime_timezone,
-							   [](toml::table&& tbl) // datetime-timezone
-							   {
-								   const auto expected = toml::table{
-									   { R"(nzdt)"sv, toml::date_time{ { 1987, 7, 5 }, { 17, 45, 56 }, { 13, 0 } } },
-									   { R"(nzst)"sv, toml::date_time{ { 1987, 7, 5 }, { 17, 45, 56 }, { 12, 0 } } },
-									   { R"(pdt)"sv, toml::date_time{ { 1987, 7, 5 }, { 17, 45, 56 }, { -5, 0 } } },
-									   { R"(utc)"sv, toml::date_time{ { 1987, 7, 5 }, { 17, 45, 56 }, { 0, 0 } } },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-#if TOML_LANG_UNRELEASED
-
 	SECTION("datetime-no-seconds")
 	{
 		parsing_should_succeed(
@@ -1754,13 +2200,71 @@ Job: XXXX)"sv,
 			});
 	}
 
-#endif // TOML_LANG_UNRELEASED
-
-	SECTION("empty-file")
+	SECTION("datetime-timezone")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
-							   empty_file,
-							   [](toml::table&& tbl) // empty-file
+							   datetime_timezone,
+							   [](toml::table&& tbl) // datetime-timezone
+							   {
+								   const auto expected = toml::table{
+									   { R"(nzdt)"sv, toml::date_time{ { 1987, 7, 5 }, { 17, 45, 56 }, { 13, 0 } } },
+									   { R"(nzst)"sv, toml::date_time{ { 1987, 7, 5 }, { 17, 45, 56 }, { 12, 0 } } },
+									   { R"(pdt)"sv, toml::date_time{ { 1987, 7, 5 }, { 17, 45, 56 }, { -5, 0 } } },
+									   { R"(utc)"sv, toml::date_time{ { 1987, 7, 5 }, { 17, 45, 56 }, { 0, 0 } } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("empty-crlf")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   empty_crlf,
+							   [](toml::table&& tbl) // empty-crlf
+							   {
+								   const auto expected = toml::table{};
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("empty-lf")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   empty_lf,
+							   [](toml::table&& tbl) // empty-lf
+							   {
+								   const auto expected = toml::table{};
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("empty-nothing")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   empty_nothing,
+							   [](toml::table&& tbl) // empty-nothing
+							   {
+								   const auto expected = toml::table{};
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("empty-space")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   empty_space,
+							   [](toml::table&& tbl) // empty-space
+							   {
+								   const auto expected = toml::table{};
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("empty-tab")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   empty_tab,
+							   [](toml::table&& tbl) // empty-tab
 							   {
 								   const auto expected = toml::table{};
 								   REQUIRE(tbl == expected);
@@ -1818,6 +2322,7 @@ Job: XXXX)"sv,
 									   { R"(pi)"sv, 3.14 },
 									   { R"(pospi)"sv, 3.14 },
 									   { R"(zero-intpart)"sv, 0.123 },
+									   { R"(leading-zero-fractional)"sv, 0.0123 },
 								   };
 								   REQUIRE(tbl == expected);
 							   });
@@ -1850,6 +2355,20 @@ Job: XXXX)"sv,
 								   const auto expected = toml::table{
 									   { R"(longpi)"sv, 3.141592653589793 },
 									   { R"(neglongpi)"sv, -3.141592653589793 },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("float-max-int")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   float_max_int,
+							   [](toml::table&& tbl) // float-max-int
+							   {
+								   const auto expected = toml::table{
+									   { R"(max_float)"sv, 9007199254740991.0 },
+									   { R"(min_float)"sv, -9007199254740991.0 },
 								   };
 								   REQUIRE(tbl == expected);
 							   });
@@ -1898,6 +2417,7 @@ Job: XXXX)"sv,
 								   const auto expected = toml::table{
 									   { R"(a)"sv,
 										 toml::table{
+											 { R"(better)"sv, 43 },
 											 { R"(b)"sv,
 											   toml::table{
 												   { R"(c)"sv,
@@ -1905,7 +2425,6 @@ Job: XXXX)"sv,
 														 { R"(answer)"sv, 42 },
 													 } },
 											   } },
-											 { R"(better)"sv, 43 },
 										 } },
 								   };
 								   REQUIRE(tbl == expected);
@@ -1921,6 +2440,7 @@ Job: XXXX)"sv,
 								   const auto expected = toml::table{
 									   { R"(a)"sv,
 										 toml::table{
+											 { R"(better)"sv, 43 },
 											 { R"(b)"sv,
 											   toml::table{
 												   { R"(c)"sv,
@@ -1928,7 +2448,6 @@ Job: XXXX)"sv,
 														 { R"(answer)"sv, 42 },
 													 } },
 											   } },
-											 { R"(better)"sv, 43 },
 										 } },
 								   };
 								   REQUIRE(tbl == expected);
@@ -1957,13 +2476,22 @@ Job: XXXX)"sv,
 							   });
 	}
 
-	SECTION("inline-table-array")
+	SECTION("inline-table-array-01")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
-							   inline_table_array,
-							   [](toml::table&& tbl) // inline-table-array
+							   inline_table_array_01,
+							   [](toml::table&& tbl) // inline-table-array-01
 							   {
 								   const auto expected = toml::table{
+									   { R"(arr)"sv,
+										 toml::array{
+											 toml::table{
+												 { R"(a)"sv, 1 },
+											 },
+											 toml::table{
+												 { R"(a)"sv, 2 },
+											 },
+										 } },
 									   { R"(people)"sv,
 										 toml::array{
 											 toml::table{
@@ -1978,6 +2506,47 @@ Job: XXXX)"sv,
 												 { R"(first_name)"sv, R"(Bob)"sv },
 												 { R"(last_name)"sv, R"(Seger)"sv },
 											 },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("inline-table-array-02")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   inline_table_array_02,
+							   [](toml::table&& tbl) // inline-table-array-02
+							   {
+								   const auto expected = toml::table{
+									   { R"(a)"sv,
+										 toml::table{
+											 { R"(a)"sv, toml::array{} },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("inline-table-array-03")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   inline_table_array_03,
+							   [](toml::table&& tbl) // inline-table-array-03
+							   {
+								   const auto expected = toml::table{
+									   { R"(b)"sv,
+										 toml::table{
+											 { R"(a)"sv,
+											   toml::array{
+												   1,
+												   2,
+											   } },
+											 { R"(b)"sv,
+											   toml::array{
+												   3,
+												   4,
+											   } },
 										 } },
 								   };
 								   REQUIRE(tbl == expected);
@@ -2010,6 +2579,7 @@ Job: XXXX)"sv,
 								   const auto expected = toml::table{
 									   { R"(empty1)"sv, toml::table{} },
 									   { R"(empty2)"sv, toml::table{} },
+									   { R"(with_cmt)"sv, toml::table{} },
 									   { R"(empty_in_array)"sv,
 										 toml::array{
 											 toml::table{
@@ -2183,13 +2753,142 @@ another line)"sv },
 							   });
 	}
 
-#if !TOML_MSVC
-
-	SECTION("inline-table-key-dotted")
+	SECTION("inline-table-newline-comment")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
-							   inline_table_key_dotted,
-							   [](toml::table&& tbl) // inline-table-key-dotted
+							   inline_table_newline_comment,
+							   [](toml::table&& tbl) // inline-table-newline-comment
+							   {
+								   const auto expected = toml::table{
+									   { R"(tbl-1)"sv,
+										 toml::table{
+											 { R"(1)"sv, 2 },
+											 { R"(hello)"sv, R"(world)"sv },
+											 { R"(arr)"sv,
+											   toml::array{
+												   1,
+												   2,
+												   3,
+											   } },
+											 { R"(tbl)"sv,
+											   toml::table{
+												   { R"(k)"sv, 1 },
+											   } },
+										 } },
+									   { R"(tbl-2)"sv,
+										 toml::table{
+											 { R"(k)"sv, R"(	Hello
+	)"sv },
+										 } },
+									   { R"(trailing-comma-1)"sv,
+										 toml::table{
+											 { R"(c)"sv, 1 },
+										 } },
+									   { R"(trailing-comma-2)"sv,
+										 toml::table{
+											 { R"(c)"sv, 1 },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("inline-table-newline")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   inline_table_newline,
+							   [](toml::table&& tbl) // inline-table-newline
+							   {
+								   const auto expected = toml::table{
+									   { R"(no-newline-before-brace)"sv,
+										 toml::table{
+											 { R"(a)"sv, 1 },
+											 { R"(b)"sv, 2 },
+										 } },
+									   { R"(no-newline-before-brace-with-comma)"sv,
+										 toml::table{
+											 { R"(a)"sv, 1 },
+											 { R"(b)"sv, 2 },
+										 } },
+									   { R"(tbl-1)"sv,
+										 toml::table{
+											 { R"(1)"sv, 2 },
+											 { R"(hello)"sv, R"(world)"sv },
+											 { R"(arr)"sv,
+											   toml::array{
+												   1,
+												   2,
+												   3,
+											   } },
+											 { R"(tbl)"sv,
+											   toml::table{
+												   { R"(k)"sv, 1 },
+											   } },
+										 } },
+									   { R"(tbl-2)"sv,
+										 toml::table{
+											 { R"(k)"sv, R"(	Hello
+	)"sv },
+										 } },
+									   { R"(trailing-comma-1)"sv,
+										 toml::table{
+											 { R"(c)"sv, 1 },
+										 } },
+									   { R"(trailing-comma-2)"sv,
+										 toml::table{
+											 { R"(c)"sv, 1 },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("inline-table-spaces")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   inline_table_spaces,
+							   [](toml::table&& tbl) // inline-table-spaces
+							   {
+								   const auto expected = toml::table{
+									   { R"(clap-1)"sv,
+										 toml::table{
+											 { R"(version)"sv, R"(4)"sv },
+											 { R"(features)"sv,
+											   toml::array{
+												   R"(derive)"sv,
+												   R"(cargo)"sv,
+											   } },
+										 } },
+									   { R"(clap-2)"sv,
+										 toml::table{
+											 { R"(version)"sv, R"(4)"sv },
+											 { R"(features)"sv,
+											   toml::array{
+												   R"(derive)"sv,
+												   R"(cargo)"sv,
+											   } },
+											 { R"(nest)"sv,
+											   toml::table{
+												   { R"(a)"sv, R"(x)"sv },
+												   { R"(b)"sv,
+													 toml::array{
+														 1.5,
+														 9.0,
+													 } },
+											   } },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+#if !TOML_MSVC
+
+	SECTION("inline-table-key-dotted-01")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   inline_table_key_dotted_01,
+							   [](toml::table&& tbl) // inline-table-key-dotted-01
 							   {
 								   const auto expected = toml::table{
 									   { R"(a)"sv,
@@ -2198,41 +2897,6 @@ another line)"sv },
 											   toml::table{
 												   { R"(b)"sv, 1 },
 											   } },
-										 } },
-									   { R"(arr)"sv,
-										 toml::array{
-											 toml::table{
-												 { R"(T)"sv,
-												   toml::table{
-													   { R"(a)"sv,
-														 toml::table{
-															 { R"(b)"sv, 1 },
-														 } },
-												   } },
-												 { R"(t)"sv,
-												   toml::table{
-													   { R"(a)"sv,
-														 toml::table{
-															 { R"(b)"sv, 1 },
-														 } },
-												   } },
-											 },
-											 toml::table{
-												 { R"(T)"sv,
-												   toml::table{
-													   { R"(a)"sv,
-														 toml::table{
-															 { R"(b)"sv, 2 },
-														 } },
-												   } },
-												 { R"(t)"sv,
-												   toml::table{
-													   { R"(a)"sv,
-														 toml::table{
-															 { R"(b)"sv, 2 },
-														 } },
-												   } },
-											 },
 										 } },
 									   { R"(b)"sv,
 										 toml::table{
@@ -2262,13 +2926,18 @@ another line)"sv },
 												   { R"(b)"sv, 1 },
 											   } },
 										 } },
-									   { R"(inline)"sv,
-										 toml::table{
-											 { R"(a)"sv,
-											   toml::table{
-												   { R"(b)"sv, 42 },
-											   } },
-										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("inline-table-key-dotted-02")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   inline_table_key_dotted_02,
+							   [](toml::table&& tbl) // inline-table-key-dotted-02
+							   {
+								   const auto expected = toml::table{
 									   { R"(many)"sv,
 										 toml::table{
 											 { R"(dots)"sv,
@@ -2295,6 +2964,18 @@ another line)"sv },
 													 } },
 											   } },
 										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("inline-table-key-dotted-03")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   inline_table_key_dotted_03,
+							   [](toml::table&& tbl) // inline-table-key-dotted-03
+							   {
+								   const auto expected = toml::table{
 									   { R"(tbl)"sv,
 										 toml::table{
 											 { R"(a)"sv,
@@ -2332,51 +3013,198 @@ another line)"sv },
 							   });
 	}
 
-#endif // !TOML_MSVC
-
-#if TOML_LANG_UNRELEASED
-
-	SECTION("inline-table-newline")
+	SECTION("inline-table-key-dotted-04")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
-							   inline_table_newline,
-							   [](toml::table&& tbl) // inline-table-newline
+							   inline_table_key_dotted_04,
+							   [](toml::table&& tbl) // inline-table-key-dotted-04
 							   {
 								   const auto expected = toml::table{
-									   { R"(tbl-1)"sv,
-										 toml::table{
-											 { R"(1)"sv, 2 },
-											 { R"(arr)"sv,
-											   toml::array{
-												   1,
-												   2,
-												   3,
-											   } },
-											 { R"(hello)"sv, R"(world)"sv },
-											 { R"(tbl)"sv,
-											   toml::table{
-												   { R"(k)"sv, 1 },
-											   } },
-										 } },
-									   { R"(tbl-2)"sv,
-										 toml::table{
-											 { R"(k)"sv, R"(	Hello
-	)"sv },
-										 } },
-									   { R"(trailing-comma-1)"sv,
-										 toml::table{
-											 { R"(c)"sv, 1 },
-										 } },
-									   { R"(trailing-comma-2)"sv,
-										 toml::table{
-											 { R"(c)"sv, 1 },
+									   { R"(arr)"sv,
+										 toml::array{
+											 toml::table{
+												 { R"(T)"sv,
+												   toml::table{
+													   { R"(a)"sv,
+														 toml::table{
+															 { R"(b)"sv, 1 },
+														 } },
+												   } },
+												 { R"(t)"sv,
+												   toml::table{
+													   { R"(a)"sv,
+														 toml::table{
+															 { R"(b)"sv, 1 },
+														 } },
+												   } },
+											 },
+											 toml::table{
+												 { R"(T)"sv,
+												   toml::table{
+													   { R"(a)"sv,
+														 toml::table{
+															 { R"(b)"sv, 2 },
+														 } },
+												   } },
+												 { R"(t)"sv,
+												   toml::table{
+													   { R"(a)"sv,
+														 toml::table{
+															 { R"(b)"sv, 2 },
+														 } },
+												   } },
+											 },
 										 } },
 								   };
 								   REQUIRE(tbl == expected);
 							   });
 	}
 
-#endif // TOML_LANG_UNRELEASED
+	SECTION("inline-table-key-dotted-05")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   inline_table_key_dotted_05,
+							   [](toml::table&& tbl) // inline-table-key-dotted-05
+							   {
+								   const auto expected = toml::table{
+									   { R"(arr-1)"sv,
+										 toml::array{
+											 toml::table{
+												 { R"(a)"sv,
+												   toml::table{
+													   { R"(b)"sv, 1 },
+												   } },
+											 },
+										 } },
+									   { R"(arr-2)"sv,
+										 toml::array{
+											 R"(str)"sv,
+											 toml::table{
+												 { R"(a)"sv,
+												   toml::table{
+													   { R"(b)"sv, 1 },
+												   } },
+											 },
+										 } },
+									   { R"(arr-3)"sv,
+										 toml::array{
+											 toml::table{
+												 { R"(a)"sv,
+												   toml::table{
+													   { R"(b)"sv, 1 },
+												   } },
+											 },
+											 toml::table{
+												 { R"(a)"sv,
+												   toml::table{
+													   { R"(b)"sv, 2 },
+												   } },
+											 },
+										 } },
+									   { R"(arr-4)"sv,
+										 toml::array{
+											 R"(str)"sv,
+											 toml::table{
+												 { R"(a)"sv,
+												   toml::table{
+													   { R"(b)"sv, 1 },
+												   } },
+											 },
+											 toml::table{
+												 { R"(a)"sv,
+												   toml::table{
+													   { R"(b)"sv, 2 },
+												   } },
+											 },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("inline-table-key-dotted-06")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   inline_table_key_dotted_06,
+							   [](toml::table&& tbl) // inline-table-key-dotted-06
+							   {
+								   const auto expected = toml::table{
+									   { R"(top)"sv,
+										 toml::table{
+											 { R"(dot)"sv,
+											   toml::table{
+												   { R"(dot)"sv,
+													 toml::array{
+														 toml::table{
+															 { R"(dot)"sv,
+															   toml::table{
+																   { R"(dot)"sv,
+																	 toml::table{
+																		 { R"(dot)"sv, 1 },
+																	 } },
+															   } },
+														 },
+														 toml::table{
+															 { R"(dot)"sv,
+															   toml::table{
+																   { R"(dot)"sv,
+																	 toml::table{
+																		 { R"(dot)"sv, 2 },
+																	 } },
+															   } },
+														 },
+													 } },
+											   } },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("inline-table-key-dotted-07")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   inline_table_key_dotted_07,
+							   [](toml::table&& tbl) // inline-table-key-dotted-07
+							   {
+								   const auto expected = toml::table{
+									   { R"(arr)"sv,
+										 toml::array{
+											 toml::table{
+												 { R"(a)"sv,
+												   toml::table{
+													   { R"(b)"sv,
+														 toml::array{
+															 toml::table{
+																 { R"(c)"sv,
+																   toml::table{
+																	   { R"(d)"sv, 1 },
+																   } },
+															 },
+														 } },
+												   } },
+											 },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+#endif // !TOML_MSVC
+
+	SECTION("integer-float64-max")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   integer_float64_max,
+							   [](toml::table&& tbl) // integer-float64-max
+							   {
+								   const auto expected = toml::table{
+									   { R"(max_int)"sv, 9007199254740991 },
+									   { R"(min_int)"sv, -9007199254740991 },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
 
 	SECTION("integer-integer")
 	{
@@ -2462,6 +3290,7 @@ another line)"sv },
 							   [](toml::table&& tbl) // key-case-sensitive
 							   {
 								   const auto expected = toml::table{
+									   { R"(sectioN)"sv, R"(NN)"sv },
 									   { R"(Section)"sv,
 										 toml::table{
 											 { R"(M)"sv, R"(latin letter M)"sv },
@@ -2469,7 +3298,6 @@ another line)"sv },
 											 { R"(Μ)"sv, R"(greek capital letter MU)"sv },
 											 { R"(μ)"sv, R"(greek small letter mu)"sv },
 										 } },
-									   { R"(sectioN)"sv, R"(NN)"sv },
 									   { R"(section)"sv,
 										 toml::table{
 											 { R"(NAME)"sv, R"(upper)"sv },
@@ -2488,10 +3316,13 @@ another line)"sv },
 							   [](toml::table&& tbl) // key-escapes
 							   {
 								   const auto expected = toml::table{
+									   { "\x08"sv, R"(bell)"sv },
 									   { R"(
 )"sv,
 										 R"(newline)"sv },
 									   { R"(")"sv, R"(just a quote)"sv },
+									   { "backsp\x08\x08"sv, toml::table{} },
+									   { R"(À)"sv, R"(latin capital letter A with grave)"sv },
 									   { R"("quoted")"sv,
 										 toml::table{
 											 { R"(quote)"sv, true },
@@ -2500,8 +3331,6 @@ another line)"sv },
 										 toml::table{
 											 { R"(À)"sv, toml::table{} },
 										 } },
-									   { "backsp\x08\x08"sv, toml::table{} },
-									   { R"(À)"sv, R"(latin capital letter A with grave)"sv },
 								   };
 								   REQUIRE(tbl == expected);
 							   });
@@ -2515,16 +3344,152 @@ another line)"sv },
 							   {
 								   const auto expected = toml::table{
 									   { "\x00"sv, R"(null)"sv },
-									   { R"(\u0000)"sv, R"(different key)"sv },
 									   { "\x08 \f A \x7F  ÿ ퟿  ￿ 𐀀 􏿿"sv, R"(escaped key)"sv },
-									   { R"(~  ÿ ퟿  ￿ 𐀀 􏿿)"sv, R"(basic key)"sv },
+									   { R"(\u0000)"sv, R"(different key)"sv },
 									   { R"(l ~  ÿ ퟿  ￿ 𐀀 􏿿)"sv, R"(literal key)"sv },
+									   { R"(~  ÿ ퟿  ￿ 𐀀 􏿿)"sv, R"(basic key)"sv },
 								   };
 								   REQUIRE(tbl == expected);
 							   });
 	}
 
 #endif // UNICODE_LITERALS_OK
+
+	SECTION("key-dotted-01")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   key_dotted_01,
+							   [](toml::table&& tbl) // key-dotted-01
+							   {
+								   const auto expected = toml::table{
+									   { R"(many)"sv,
+										 toml::table{
+											 { R"(dots)"sv,
+											   toml::table{
+												   { R"(dot)"sv,
+													 toml::table{
+														 { R"(dot)"sv,
+														   toml::table{
+															   { R"(dot)"sv, 42 },
+														   } },
+													 } },
+											   } },
+										 } },
+									   { R"(name)"sv,
+										 toml::table{
+											 { R"(first)"sv, R"(Arthur)"sv },
+											 { R"(last)"sv, R"(Dent)"sv },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("key-dotted-02")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   key_dotted_02,
+							   [](toml::table&& tbl) // key-dotted-02
+							   {
+								   const auto expected = toml::table{
+									   { R"(count)"sv,
+										 toml::table{
+											 { R"(a)"sv, 1 },
+											 { R"(b)"sv, 2 },
+											 { R"(c)"sv, 3 },
+											 { R"(d)"sv, 4 },
+											 { R"(e)"sv, 5 },
+											 { R"(f)"sv, 6 },
+											 { R"(g)"sv, 7 },
+											 { R"(h)"sv, 8 },
+											 { R"(i)"sv, 9 },
+											 { R"(j)"sv, 10 },
+											 { R"(k)"sv, 11 },
+											 { R"(l)"sv, 12 },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("key-dotted-03")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   key_dotted_03,
+							   [](toml::table&& tbl) // key-dotted-03
+							   {
+								   const auto expected = toml::table{
+									   { R"(a)"sv,
+										 toml::table{
+											 { R"(few)"sv,
+											   toml::table{
+												   { R"(dots)"sv,
+													 toml::table{
+														 { R"(polka)"sv,
+														   toml::table{
+															   { R"(dance-with)"sv, R"(Dot)"sv },
+															   { R"(dot)"sv, R"(again?)"sv },
+														   } },
+													 } },
+											   } },
+										 } },
+									   { R"(tbl)"sv,
+										 toml::table{
+											 { R"(a)"sv,
+											   toml::table{
+												   { R"(b)"sv,
+													 toml::table{
+														 { R"(c)"sv, 42.666 },
+													 } },
+											   } },
+										 } },
+									   { R"(top)"sv,
+										 toml::table{
+											 { R"(key)"sv, 1 },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("key-dotted-04")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   key_dotted_04,
+							   [](toml::table&& tbl) // key-dotted-04
+							   {
+								   const auto expected = toml::table{
+									   { R"(arr)"sv,
+										 toml::array{
+											 toml::table{
+												 { R"(a)"sv,
+												   toml::table{
+													   { R"(b)"sv,
+														 toml::table{
+															 { R"(c)"sv, 1 },
+															 { R"(d)"sv, 2 },
+														 } },
+												   } },
+											 },
+											 toml::table{
+												 { R"(a)"sv,
+												   toml::table{
+													   { R"(b)"sv,
+														 toml::table{
+															 { R"(c)"sv, 3 },
+															 { R"(d)"sv, 4 },
+														 } },
+												   } },
+											 },
+										 } },
+									   { R"(top)"sv,
+										 toml::table{
+											 { R"(key)"sv, 1 },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
 
 	SECTION("key-dotted-empty")
 	{
@@ -2553,109 +3518,40 @@ another line)"sv },
 							   });
 	}
 
-	SECTION("key-dotted")
+	SECTION("key-empty-01")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
-							   key_dotted,
-							   [](toml::table&& tbl) // key-dotted
+							   key_empty_01,
+							   [](toml::table&& tbl) // key-empty-01
 							   {
 								   const auto expected = toml::table{
-									   { R"(a)"sv,
-										 toml::table{
-											 { R"(few)"sv,
-											   toml::table{
-												   { R"(dots)"sv,
-													 toml::table{
-														 { R"(polka)"sv,
-														   toml::table{
-															   { R"(dance-with)"sv, R"(Dot)"sv },
-															   { R"(dot)"sv, R"(again?)"sv },
-														   } },
-													 } },
-											   } },
-										 } },
-									   { R"(arr)"sv,
-										 toml::array{
-											 toml::table{
-												 { R"(a)"sv,
-												   toml::table{
-													   { R"(b)"sv,
-														 toml::table{
-															 { R"(c)"sv, 1 },
-															 { R"(d)"sv, 2 },
-														 } },
-												   } },
-											 },
-											 toml::table{
-												 { R"(a)"sv,
-												   toml::table{
-													   { R"(b)"sv,
-														 toml::table{
-															 { R"(c)"sv, 3 },
-															 { R"(d)"sv, 4 },
-														 } },
-												   } },
-											 },
-										 } },
-									   { R"(count)"sv,
-										 toml::table{
-											 { R"(a)"sv, 1 },
-											 { R"(b)"sv, 2 },
-											 { R"(c)"sv, 3 },
-											 { R"(d)"sv, 4 },
-											 { R"(e)"sv, 5 },
-											 { R"(f)"sv, 6 },
-											 { R"(g)"sv, 7 },
-											 { R"(h)"sv, 8 },
-											 { R"(i)"sv, 9 },
-											 { R"(j)"sv, 10 },
-											 { R"(k)"sv, 11 },
-											 { R"(l)"sv, 12 },
-										 } },
-									   { R"(many)"sv,
-										 toml::table{
-											 { R"(dots)"sv,
-											   toml::table{
-												   { R"(here)"sv,
-													 toml::table{
-														 { R"(dot)"sv,
-														   toml::table{
-															   { R"(dot)"sv,
-																 toml::table{
-																	 { R"(dot)"sv, 42 },
-																 } },
-														   } },
-													 } },
-											   } },
-										 } },
-									   { R"(name)"sv,
-										 toml::table{
-											 { R"(first)"sv, R"(Arthur)"sv },
-											 { R"(last)"sv, R"(Dent)"sv },
-										 } },
-									   { R"(tbl)"sv,
-										 toml::table{
-											 { R"(a)"sv,
-											   toml::table{
-												   { R"(b)"sv,
-													 toml::table{
-														 { R"(c)"sv, 42.666 },
-													 } },
-											   } },
-										 } },
+									   { ""sv, R"(blank)"sv },
 								   };
 								   REQUIRE(tbl == expected);
 							   });
 	}
 
-	SECTION("key-empty")
+	SECTION("key-empty-02")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
-							   key_empty,
-							   [](toml::table&& tbl) // key-empty
+							   key_empty_02,
+							   [](toml::table&& tbl) // key-empty-02
 							   {
 								   const auto expected = toml::table{
 									   { ""sv, R"(blank)"sv },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("key-empty-03")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   key_empty_03,
+							   [](toml::table&& tbl) // key-empty-03
+							   {
+								   const auto expected = toml::table{
+									   { ""sv, 0 },
 								   };
 								   REQUIRE(tbl == expected);
 							   });
@@ -2674,30 +3570,162 @@ another line)"sv },
 							   });
 	}
 
-	SECTION("key-numeric-dotted")
+	SECTION("key-like-date")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
-							   key_numeric_dotted,
-							   [](toml::table&& tbl) // key-numeric-dotted
+							   key_like_date,
+							   [](toml::table&& tbl) // key-like-date
 							   {
 								   const auto expected = toml::table{
-									   { R"(1)"sv,
+									   { R"(15:16:17)"sv, 6 },
+									   { R"(2001-02-03)"sv, 1 },
+									   { R"(2001-02-04)"sv, 2 },
+									   { R"(2001-02-05)"sv, 3 },
+									   { R"(2001-02-06T15:16:17+01:00)"sv, 4 },
+									   { R"(2001-02-07T15:16:17)"sv, 5 },
+									   { R"(2002-01-04)"sv,
+										 toml::array{
+											 toml::table{
+												 { R"(k)"sv, 12 },
+											 },
+										 } },
+									   { R"(2001-02-11)"sv,
 										 toml::table{
-											 { R"(2)"sv, 3 },
+											 { R"(a)"sv,
+											   toml::table{
+												   { R"(2001-02-12)"sv, 9 },
+											   } },
+										 } },
+									   { R"(2002-01-02)"sv,
+										 toml::table{
+											 { R"(k)"sv, 10 },
+											 { R"(2024-01-03)"sv,
+											   toml::table{
+												   { R"(k)"sv, 11 },
+											   } },
+										 } },
+									   { R"(a)"sv,
+										 toml::table{
+											 { R"(2001-02-08)"sv, 7 },
+											 { R"(2001-02-09)"sv,
+											   toml::table{
+												   { R"(2001-02-10)"sv, 8 },
+											   } },
 										 } },
 								   };
 								   REQUIRE(tbl == expected);
 							   });
 	}
 
-	SECTION("key-numeric")
+	SECTION("key-numeric-01")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
-							   key_numeric,
-							   [](toml::table&& tbl) // key-numeric
+							   key_numeric_01,
+							   [](toml::table&& tbl) // key-numeric-01
 							   {
 								   const auto expected = toml::table{
-									   { R"(1)"sv, 1 },
+									   { R"(1)"sv, true },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("key-numeric-02")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   key_numeric_02,
+							   [](toml::table&& tbl) // key-numeric-02
+							   {
+								   const auto expected = toml::table{
+									   { R"(1)"sv,
+										 toml::table{
+											 { R"(2)"sv, true },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("key-numeric-03")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   key_numeric_03,
+							   [](toml::table&& tbl) // key-numeric-03
+							   {
+								   const auto expected = toml::table{
+									   { R"(0123)"sv, true },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("key-numeric-04")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   key_numeric_04,
+							   [](toml::table&& tbl) // key-numeric-04
+							   {
+								   const auto expected = toml::table{
+									   { R"(01)"sv,
+										 toml::table{
+											 { R"(23)"sv, true },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("key-numeric-05")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   key_numeric_05,
+							   [](toml::table&& tbl) // key-numeric-05
+							   {
+								   const auto expected = toml::table{
+									   { R"(23)"sv,
+										 toml::table{
+											 { R"(01)"sv, true },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("key-numeric-06")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   key_numeric_06,
+							   [](toml::table&& tbl) // key-numeric-06
+							   {
+								   const auto expected = toml::table{
+									   { R"(-1)"sv, true },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("key-numeric-07")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   key_numeric_07,
+							   [](toml::table&& tbl) // key-numeric-07
+							   {
+								   const auto expected = toml::table{
+									   { R"(-01)"sv, true },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("key-numeric-08")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   key_numeric_08,
+							   [](toml::table&& tbl) // key-numeric-08
+							   {
+								   const auto expected = toml::table{
+									   { R"(01)"sv, R"(zero one)"sv },
+									   { R"(1)"sv, R"(one)"sv },
 								   };
 								   REQUIRE(tbl == expected);
 							   });
@@ -2711,6 +3739,7 @@ another line)"sv },
 							   {
 								   const auto expected = toml::table{
 									   { R"(plain)"sv, 1 },
+									   { R"(with.dot)"sv, 2 },
 									   { R"(plain_table)"sv,
 										 toml::table{
 											 { R"(plain)"sv, 3 },
@@ -2720,11 +3749,11 @@ another line)"sv },
 										 toml::table{
 											 { R"(withdot)"sv,
 											   toml::table{
+												   { R"(escaped.dot)"sv, 7 },
 												   { R"(key.with.dots)"sv, 6 },
 												   { R"(plain)"sv, 5 },
 											   } },
 										 } },
-									   { R"(with.dot)"sv, 2 },
 								   };
 								   REQUIRE(tbl == expected);
 							   });
@@ -2737,12 +3766,16 @@ another line)"sv },
 							   [](toml::table&& tbl) // key-space
 							   {
 								   const auto expected = toml::table{
+									   { "  much 		  whitespace  	\n"
+										 "  \r\n"
+										 "  "sv,
+										 3 },
 									   { R"( c d )"sv, 2 },
+									   { R"(a b)"sv, 1 },
 									   { R"( tbl )"sv,
 										 toml::table{
 											 { R"(	tab	tab	)"sv, R"(tab)"sv },
 										 } },
-									   { R"(a b)"sv, 1 },
 								   };
 								   REQUIRE(tbl == expected);
 							   });
@@ -2777,47 +3810,119 @@ another line)"sv },
 							   });
 	}
 
-#if TOML_LANG_UNRELEASED && UNICODE_LITERALS_OK
-
-	SECTION("key-unicode")
+	SECTION("key-start")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
-							   key_unicode,
-							   [](toml::table&& tbl) // key-unicode
+							   key_start,
+							   [](toml::table&& tbl) // key-start
 							   {
 								   const auto expected = toml::table{
-									   { R"(a‍b)"sv, R"(zwj)"sv },
-									   { R"(tiếng-Việt)"sv,
-										 toml::array{
-											 toml::table{
-												 { R"(tiəŋ˧˦)"sv,
-												   toml::table{
-													   { R"(viət̚˧˨ʔ)"sv, R"(north)"sv },
-												   } },
-											 },
-											 toml::table{
-												 { R"(tiəŋ˦˧˥)"sv,
-												   toml::table{
-													   { R"(viək̚˨˩ʔ)"sv, R"(central)"sv },
-												   } },
-											 },
-										 } },
-									   { R"(ÅÅ)"sv, R"(U+00C5 U+0041 U+030A)"sv },
-									   { R"(€)"sv, R"(Euro)"sv },
-									   { R"(中文)"sv,
+									   { R"(-)"sv,
 										 toml::table{
-											 { R"(中文)"sv,
+											 { R"(-)"sv, 4 },
+										 } },
+									   { R"(---)"sv,
+										 toml::table{
+											 { R"(---)"sv, 7 },
+										 } },
+									   { R"(-key)"sv,
+										 toml::table{
+											 { R"(-key)"sv, 1 },
+										 } },
+									   { R"(1)"sv,
+										 toml::table{
+											 { R"(1)"sv, 6 },
+										 } },
+									   { R"(111)"sv,
+										 toml::table{
+											 { R"(111)"sv, 9 },
+										 } },
+									   { R"(1key)"sv,
+										 toml::table{
+											 { R"(1key)"sv, 3 },
+										 } },
+									   { R"(_)"sv,
+										 toml::table{
+											 { R"(_)"sv, 5 },
+										 } },
+									   { R"(___)"sv,
+										 toml::table{
+											 { R"(___)"sv, 8 },
+										 } },
+									   { R"(_key)"sv,
+										 toml::table{
+											 { R"(_key)"sv, 2 },
+										 } },
+									   { R"(inline)"sv,
+										 toml::table{
+											 { R"(---)"sv,
 											   toml::table{
-												   { R"(中文)"sv, R"(Chinese language)"sv },
+												   { R"(---)"sv, 10 },
+												   { R"(111)"sv, 12 },
+												   { R"(___)"sv, 11 },
 											   } },
 										 } },
-									   { R"(😂)"sv, R"(rofl)"sv },
 								   };
 								   REQUIRE(tbl == expected);
 							   });
 	}
 
-#endif // TOML_LANG_UNRELEASED && UNICODE_LITERALS_OK
+	SECTION("key-zero")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   key_zero,
+							   [](toml::table&& tbl) // key-zero
+							   {
+								   const auto expected = toml::table{
+									   { R"(0)"sv, 0 },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+#if UNICODE_LITERALS_OK
+
+	SECTION("multibyte")
+	{
+		parsing_should_succeed(
+			FILE_LINE_ARGS,
+			multibyte,
+			[](toml::table&& tbl) // multibyte
+			{
+				const auto expected = toml::table{
+					{ R"(𝐭𝐛𝐥)"sv,
+					  toml::table{
+						  { R"(string)"sv, R"(𝓼𝓽𝓻𝓲𝓷𝓰 - #)"sv },
+						  { R"(sub)"sv,
+							toml::table{
+								{ R"(another_test_string)"sv, R"(§á₥è ƭλïñϱ, βúƭ ωïƭλ á ƨƭřïñϱ #)"sv },
+								{ R"(escapes)"sv, R"( Âñδ ωλèñ "'ƨ ářè ïñ ƭλè ƨƭřïñϱ, áℓôñϱ ωïƭλ # ")"sv },
+								{ R"(βïƭ#)"sv,
+								  toml::table{
+									  { R"(multi_line_array)"sv,
+										toml::array{
+											R"(])"sv,
+										} },
+									  { R"(ωλáƭ?)"sv, R"(Ýôú δôñ'ƭ ƭλïñƙ ƨô₥è úƨèř ωôñ'ƭ δô ƭλáƭ?)"sv },
+								  } },
+								{ R"(𝕒𝕣𝕣𝕒𝕪)"sv,
+								  toml::array{
+									  R"(] )"sv,
+									  R"( # )"sv,
+								  } },
+								{ R"(𝕒𝕣𝕣𝕒𝕪𝟚)"sv,
+								  toml::array{
+									  R"(Tèƨƭ #11 ]ƥřôƲèδ ƭλáƭ)"sv,
+									  R"(Éжƥèřï₥èñƭ #9 ωáƨ á ƨúççèƨƨ)"sv,
+								  } },
+							} },
+					  } },
+				};
+				REQUIRE(tbl == expected);
+			});
+	}
+
+#endif // UNICODE_LITERALS_OK
 
 	SECTION("newline-crlf")
 	{
@@ -2847,11 +3952,425 @@ another line)"sv },
 							   });
 	}
 
-	SECTION("spec-array-0")
+	SECTION("spec-1.1.0-common-0")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_array_0,
-							   [](toml::table&& tbl) // spec-array-0
+							   spec_1_1_0_common_0,
+							   [](toml::table&& tbl) // spec-1.1.0-common-0
+							   {
+								   const auto expected = toml::table{
+									   { R"(another)"sv, R"(# This is not a comment)"sv },
+									   { R"(key)"sv, R"(value)"sv },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-1")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_1,
+							   [](toml::table&& tbl) // spec-1.1.0-common-1
+							   {
+								   const auto expected = toml::table{
+									   { R"(key)"sv, R"(value)"sv },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-10")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_10,
+							   [](toml::table&& tbl) // spec-1.1.0-common-10
+							   {
+								   const auto expected = toml::table{
+									   { R"(apple)"sv,
+										 toml::table{
+											 { R"(color)"sv, R"(red)"sv },
+											 { R"(skin)"sv, R"(thin)"sv },
+											 { R"(type)"sv, R"(fruit)"sv },
+										 } },
+									   { R"(orange)"sv,
+										 toml::table{
+											 { R"(color)"sv, R"(orange)"sv },
+											 { R"(skin)"sv, R"(thick)"sv },
+											 { R"(type)"sv, R"(fruit)"sv },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-11")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_11,
+							   [](toml::table&& tbl) // spec-1.1.0-common-11
+							   {
+								   const auto expected = toml::table{
+									   { R"(3)"sv,
+										 toml::table{
+											 { R"(14159)"sv, R"(pi)"sv },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-13")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_13,
+							   [](toml::table&& tbl) // spec-1.1.0-common-13
+							   {
+								   const auto expected = toml::table{
+									   { R"(str1)"sv, R"(Roses are red
+Violets are blue)"sv },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-14")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_14,
+							   [](toml::table&& tbl) // spec-1.1.0-common-14
+							   {
+								   const auto expected = toml::table{
+									   { R"(str2)"sv, R"(Roses are red
+Violets are blue)"sv },
+									   { R"(str3)"sv,
+										 "Roses are red\r\n"
+										 "Violets are blue"sv },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-15")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_15,
+							   [](toml::table&& tbl) // spec-1.1.0-common-15
+							   {
+								   const auto expected = toml::table{
+									   { R"(str1)"sv, R"(The quick brown fox jumps over the lazy dog.)"sv },
+									   { R"(str2)"sv, R"(The quick brown fox jumps over the lazy dog.)"sv },
+									   { R"(str3)"sv, R"(The quick brown fox jumps over the lazy dog.)"sv },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-16")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_16,
+							   [](toml::table&& tbl) // spec-1.1.0-common-16
+							   {
+								   const auto expected = toml::table{
+									   { R"(str4)"sv, R"(Here are two quotation marks: "". Simple enough.)"sv },
+									   { R"(str5)"sv, R"(Here are three quotation marks: """.)"sv },
+									   { R"(str6)"sv, R"(Here are fifteen quotation marks: """"""""""""""".)"sv },
+									   { R"(str7)"sv, R"("This," she said, "is just a pointless statement.")"sv },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-17")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_17,
+							   [](toml::table&& tbl) // spec-1.1.0-common-17
+							   {
+								   const auto expected = toml::table{
+									   { R"(quoted)"sv, R"(Tom "Dubs" Preston-Werner)"sv },
+									   { R"(regex)"sv, R"(<\i\c*\s*>)"sv },
+									   { R"(winpath)"sv, R"(C:\Users\nodejs\templates)"sv },
+									   { R"(winpath2)"sv, R"(\\ServerX\admin$\system32\)"sv },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-18")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_18,
+							   [](toml::table&& tbl) // spec-1.1.0-common-18
+							   {
+								   const auto expected = toml::table{
+									   { R"(lines)"sv, R"(The first newline is
+trimmed in literal strings.
+   All other whitespace
+   is preserved.
+)"sv },
+									   { R"(regex2)"sv, R"(I [dw]on't need \d{2} apples)"sv },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-19")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_19,
+							   [](toml::table&& tbl) // spec-1.1.0-common-19
+							   {
+								   const auto expected = toml::table{
+									   { R"(apos15)"sv, R"(Here are fifteen apostrophes: ''''''''''''''')"sv },
+									   { R"(quot15)"sv, R"(Here are fifteen quotation marks: """"""""""""""")"sv },
+									   { R"(str)"sv, R"('That,' she said, 'is still pointless.')"sv },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-20")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_20,
+							   [](toml::table&& tbl) // spec-1.1.0-common-20
+							   {
+								   const auto expected = toml::table{
+									   { R"(int1)"sv, 99 },
+									   { R"(int2)"sv, 42 },
+									   { R"(int3)"sv, 0 },
+									   { R"(int4)"sv, -17 },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-21")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_21,
+							   [](toml::table&& tbl) // spec-1.1.0-common-21
+							   {
+								   const auto expected = toml::table{
+									   { R"(int5)"sv, 1000 },
+									   { R"(int6)"sv, 5349221 },
+									   { R"(int7)"sv, 5349221 },
+									   { R"(int8)"sv, 12345 },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-22")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_22,
+							   [](toml::table&& tbl) // spec-1.1.0-common-22
+							   {
+								   const auto expected = toml::table{
+									   { R"(bin1)"sv, 214 },		{ R"(hex1)"sv, 3735928559 },
+									   { R"(hex2)"sv, 3735928559 }, { R"(hex3)"sv, 3735928559 },
+									   { R"(oct1)"sv, 342391 },		{ R"(oct2)"sv, 493 },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-23")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_23,
+							   [](toml::table&& tbl) // spec-1.1.0-common-23
+							   {
+								   const auto expected = toml::table{
+									   { R"(flt1)"sv, 1.0 },	   { R"(flt2)"sv, 3.1415 },	   { R"(flt3)"sv, -0.01 },
+									   { R"(flt4)"sv, 5e+22 },	   { R"(flt5)"sv, 1000000.0 }, { R"(flt6)"sv, -0.02 },
+									   { R"(flt7)"sv, 6.626e-34 },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-24")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_24,
+							   [](toml::table&& tbl) // spec-1.1.0-common-24
+							   {
+								   const auto expected = toml::table{
+									   { R"(flt8)"sv, 224617.445991228 },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-25")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_25,
+							   [](toml::table&& tbl) // spec-1.1.0-common-25
+							   {
+								   const auto expected = toml::table{
+									   { R"(sf1)"sv, std::numeric_limits<double>::infinity() },
+									   { R"(sf2)"sv, std::numeric_limits<double>::infinity() },
+									   { R"(sf3)"sv, -std::numeric_limits<double>::infinity() },
+									   { R"(sf4)"sv, std::numeric_limits<double>::quiet_NaN() },
+									   { R"(sf5)"sv, std::numeric_limits<double>::quiet_NaN() },
+									   { R"(sf6)"sv, std::numeric_limits<double>::quiet_NaN() },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-26")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_26,
+							   [](toml::table&& tbl) // spec-1.1.0-common-26
+							   {
+								   const auto expected = toml::table{
+									   { R"(bool1)"sv, true },
+									   { R"(bool2)"sv, false },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-27")
+	{
+		parsing_should_succeed(
+			FILE_LINE_ARGS,
+			spec_1_1_0_common_27,
+			[](toml::table&& tbl) // spec-1.1.0-common-27
+			{
+				const auto expected = toml::table{
+					{ R"(odt1)"sv, toml::date_time{ { 1979, 5, 27 }, { 7, 32 }, { 0, 0 } } },
+					{ R"(odt2)"sv, toml::date_time{ { 1979, 5, 27 }, { 0, 32 }, { -7, 0 } } },
+					{ R"(odt3)"sv, toml::date_time{ { 1979, 5, 27 }, { 0, 32, 0, 500000000 }, { -7, 0 } } },
+					{ R"(odt4)"sv, toml::date_time{ { 1979, 5, 27 }, { 0, 32, 0, 999000000 }, { -7, 0 } } },
+				};
+				REQUIRE(tbl == expected);
+			});
+	}
+
+	SECTION("spec-1.1.0-common-28")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_28,
+							   [](toml::table&& tbl) // spec-1.1.0-common-28
+							   {
+								   const auto expected = toml::table{
+									   { R"(odt4)"sv, toml::date_time{ { 1979, 5, 27 }, { 7, 32 }, { 0, 0 } } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-29")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_29,
+							   [](toml::table&& tbl) // spec-1.1.0-common-29
+							   {
+								   const auto expected = toml::table{
+									   { R"(odt5)"sv, toml::date_time{ { 1979, 5, 27 }, { 7, 32 }, { 0, 0 } } },
+									   { R"(odt6)"sv, toml::date_time{ { 1979, 5, 27 }, { 7, 32 }, { -7, 0 } } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-3")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_3,
+							   [](toml::table&& tbl) // spec-1.1.0-common-3
+							   {
+								   const auto expected = toml::table{
+									   { R"(1234)"sv, R"(value)"sv },
+									   { R"(bare-key)"sv, R"(value)"sv },
+									   { R"(bare_key)"sv, R"(value)"sv },
+									   { R"(key)"sv, R"(value)"sv },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-30")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_30,
+							   [](toml::table&& tbl) // spec-1.1.0-common-30
+							   {
+								   const auto expected = toml::table{
+									   { R"(ldt1)"sv, toml::date_time{ { 1979, 5, 27 }, { 7, 32 } } },
+									   { R"(ldt2)"sv, toml::date_time{ { 1979, 5, 27 }, { 7, 32, 0, 500000000 } } },
+									   { R"(ldt3)"sv, toml::date_time{ { 1979, 5, 27 }, { 0, 32, 0, 999000000 } } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-31")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_31,
+							   [](toml::table&& tbl) // spec-1.1.0-common-31
+							   {
+								   const auto expected = toml::table{
+									   { R"(ldt3)"sv, toml::date_time{ { 1979, 5, 27 }, { 7, 32 } } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-32")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_32,
+							   [](toml::table&& tbl) // spec-1.1.0-common-32
+							   {
+								   const auto expected = toml::table{
+									   { R"(ld1)"sv, toml::date{ 1979, 5, 27 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-33")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_33,
+							   [](toml::table&& tbl) // spec-1.1.0-common-33
+							   {
+								   const auto expected = toml::table{
+									   { R"(lt1)"sv, toml::time{ 7, 32 } },
+									   { R"(lt2)"sv, toml::time{ 0, 32, 0, 500000000 } },
+									   { R"(lt3)"sv, toml::time{ 0, 32, 0, 999000000 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-34")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_34,
+							   [](toml::table&& tbl) // spec-1.1.0-common-34
+							   {
+								   const auto expected = toml::table{
+									   { R"(lt3)"sv, toml::time{ 7, 32 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-35")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_35,
+							   [](toml::table&& tbl) // spec-1.1.0-common-35
 							   {
 								   const auto expected = toml::table{
 									   { R"(colors)"sv,
@@ -2920,11 +4439,11 @@ another line)"sv },
 							   });
 	}
 
-	SECTION("spec-array-1")
+	SECTION("spec-1.1.0-common-36")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_array_1,
-							   [](toml::table&& tbl) // spec-array-1
+							   spec_1_1_0_common_36,
+							   [](toml::table&& tbl) // spec-1.1.0-common-36
 							   {
 								   const auto expected = toml::table{
 									   { R"(integers2)"sv,
@@ -2943,14 +4462,320 @@ another line)"sv },
 							   });
 	}
 
-	SECTION("spec-array-of-tables-0")
+	SECTION("spec-1.1.0-common-37")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_array_of_tables_0,
-							   [](toml::table&& tbl) // spec-array-of-tables-0
+							   spec_1_1_0_common_37,
+							   [](toml::table&& tbl) // spec-1.1.0-common-37
 							   {
 								   const auto expected = toml::table{
-									   { R"(products)"sv,
+									   { R"(table)"sv, toml::table{} },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-38")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_38,
+							   [](toml::table&& tbl) // spec-1.1.0-common-38
+							   {
+								   const auto expected = toml::table{
+									   { R"(table-1)"sv,
+										 toml::table{
+											 { R"(key1)"sv, R"(some string)"sv },
+											 { R"(key2)"sv, 123 },
+										 } },
+									   { R"(table-2)"sv,
+										 toml::table{
+											 { R"(key1)"sv, R"(another string)"sv },
+											 { R"(key2)"sv, 456 },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-39")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_39,
+							   [](toml::table&& tbl) // spec-1.1.0-common-39
+							   {
+								   const auto expected = toml::table{
+									   { R"(dog)"sv,
+										 toml::table{
+											 { R"(tater.man)"sv,
+											   toml::table{
+												   { R"(type)"sv,
+													 toml::table{
+														 { R"(name)"sv, R"(pug)"sv },
+													 } },
+											   } },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-41")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_41,
+							   [](toml::table&& tbl) // spec-1.1.0-common-41
+							   {
+								   const auto expected = toml::table{
+									   { R"(x)"sv,
+										 toml::table{
+											 { R"(y)"sv,
+											   toml::table{
+												   { R"(z)"sv,
+													 toml::table{
+														 { R"(w)"sv, toml::table{} },
+													 } },
+											   } },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-42")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_42,
+							   [](toml::table&& tbl) // spec-1.1.0-common-42
+							   {
+								   const auto expected = toml::table{
+									   { R"(animal)"sv, toml::table{} },
+									   { R"(fruit)"sv,
+										 toml::table{
+											 { R"(apple)"sv, toml::table{} },
+											 { R"(orange)"sv, toml::table{} },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-43")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_43,
+							   [](toml::table&& tbl) // spec-1.1.0-common-43
+							   {
+								   const auto expected = toml::table{
+									   { R"(animal)"sv, toml::table{} },
+									   { R"(fruit)"sv,
+										 toml::table{
+											 { R"(apple)"sv, toml::table{} },
+											 { R"(orange)"sv, toml::table{} },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-44")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_44,
+							   [](toml::table&& tbl) // spec-1.1.0-common-44
+							   {
+								   const auto expected = toml::table{
+									   { R"(breed)"sv, R"(pug)"sv },
+									   { R"(name)"sv, R"(Fido)"sv },
+									   { R"(owner)"sv,
+										 toml::table{
+											 { R"(member_since)"sv, toml::date{ 1999, 8, 4 } },
+											 { R"(name)"sv, R"(Regina Dogman)"sv },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-45")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_45,
+							   [](toml::table&& tbl) // spec-1.1.0-common-45
+							   {
+								   const auto expected = toml::table{
+									   { R"(fruit)"sv,
+										 toml::table{
+											 { R"(apple)"sv,
+											   toml::table{
+												   { R"(color)"sv, R"(red)"sv },
+												   { R"(taste)"sv,
+													 toml::table{
+														 { R"(sweet)"sv, true },
+													 } },
+											   } },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-46")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_46,
+							   [](toml::table&& tbl) // spec-1.1.0-common-46
+							   {
+								   const auto expected = toml::table{
+									   { R"(fruit)"sv,
+										 toml::table{
+											 { R"(apple)"sv,
+											   toml::table{
+												   { R"(color)"sv, R"(red)"sv },
+												   { R"(taste)"sv,
+													 toml::table{
+														 { R"(sweet)"sv, true },
+													 } },
+												   { R"(texture)"sv,
+													 toml::table{
+														 { R"(smooth)"sv, true },
+													 } },
+											   } },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-47")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_47,
+							   [](toml::table&& tbl) // spec-1.1.0-common-47
+							   {
+								   const auto expected = toml::table{
+									   { R"(animal)"sv,
+										 toml::table{
+											 { R"(type)"sv,
+											   toml::table{
+												   { R"(name)"sv, R"(pug)"sv },
+											   } },
+										 } },
+									   { R"(contact)"sv,
+										 toml::table{
+											 { R"(personal)"sv,
+											   toml::table{
+												   { R"(email)"sv, R"(donald@duckburg.com)"sv },
+												   { R"(name)"sv, R"(Donald Duck)"sv },
+											   } },
+											 { R"(work)"sv,
+											   toml::table{
+												   { R"(email)"sv, R"(donald@ScroogeCorp.com)"sv },
+												   { R"(name)"sv, R"(Coin cleaner)"sv },
+											   } },
+										 } },
+									   { R"(name)"sv,
+										 toml::table{
+											 { R"(first)"sv, R"(Tom)"sv },
+											 { R"(last)"sv, R"(Preston-Werner)"sv },
+										 } },
+									   { R"(point)"sv,
+										 toml::table{
+											 { R"(x)"sv, 1 },
+											 { R"(y)"sv, 2 },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-48")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_48,
+							   [](toml::table&& tbl) // spec-1.1.0-common-48
+							   {
+								   const auto expected = toml::table{
+									   { R"(animal)"sv,
+										 toml::table{
+											 { R"(type)"sv,
+											   toml::table{
+												   { R"(name)"sv, R"(pug)"sv },
+											   } },
+										 } },
+									   { R"(contact)"sv,
+										 toml::table{
+											 { R"(personal)"sv,
+											   toml::table{
+												   { R"(email)"sv, R"(donald@duckburg.com)"sv },
+												   { R"(name)"sv, R"(Donald Duck)"sv },
+											   } },
+											 { R"(work)"sv,
+											   toml::table{
+												   { R"(email)"sv, R"(donald@ScroogeCorp.com)"sv },
+												   { R"(name)"sv, R"(Coin cleaner)"sv },
+											   } },
+										 } },
+									   { R"(name)"sv,
+										 toml::table{
+											 { R"(first)"sv, R"(Tom)"sv },
+											 { R"(last)"sv, R"(Preston-Werner)"sv },
+										 } },
+									   { R"(point)"sv,
+										 toml::table{
+											 { R"(x)"sv, 1 },
+											 { R"(y)"sv, 2 },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-49")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_49,
+							   [](toml::table&& tbl) // spec-1.1.0-common-49
+							   {
+								   const auto expected = toml::table{
+									   { R"(product)"sv,
+										 toml::table{
+											 { R"(type)"sv,
+											   toml::table{
+												   { R"(name)"sv, R"(Nail)"sv },
+											   } },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-50")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_50,
+							   [](toml::table&& tbl) // spec-1.1.0-common-50
+							   {
+								   const auto expected = toml::table{
+									   { R"(product)"sv,
+										 toml::table{
+											 { R"(type)"sv,
+											   toml::table{
+												   { R"(name)"sv, R"(Nail)"sv },
+											   } },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-51")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_51,
+							   [](toml::table&& tbl) // spec-1.1.0-common-51
+							   {
+								   const auto expected = toml::table{
+									   { R"(product)"sv,
 										 toml::array{
 											 toml::table{
 												 { R"(name)"sv, R"(Hammer)"sv },
@@ -2968,11 +4793,11 @@ another line)"sv },
 							   });
 	}
 
-	SECTION("spec-array-of-tables-1")
+	SECTION("spec-1.1.0-common-52")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_array_of_tables_1,
-							   [](toml::table&& tbl) // spec-array-of-tables-1
+							   spec_1_1_0_common_52,
+							   [](toml::table&& tbl) // spec-1.1.0-common-52
 							   {
 								   const auto expected = toml::table{
 									   { R"(fruits)"sv,
@@ -3009,11 +4834,11 @@ another line)"sv },
 							   });
 	}
 
-	SECTION("spec-array-of-tables-2")
+	SECTION("spec-1.1.0-common-53")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_array_of_tables_2,
-							   [](toml::table&& tbl) // spec-array-of-tables-2
+							   spec_1_1_0_common_53,
+							   [](toml::table&& tbl) // spec-1.1.0-common-53
 							   {
 								   const auto expected = toml::table{
 									   { R"(points)"sv,
@@ -3039,257 +4864,11 @@ another line)"sv },
 							   });
 	}
 
-	SECTION("spec-boolean-0")
+	SECTION("spec-1.1.0-common-6")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_boolean_0,
-							   [](toml::table&& tbl) // spec-boolean-0
-							   {
-								   const auto expected = toml::table{
-									   { R"(bool1)"sv, true },
-									   { R"(bool2)"sv, false },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-comment-0")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_comment_0,
-							   [](toml::table&& tbl) // spec-comment-0
-							   {
-								   const auto expected = toml::table{
-									   { R"(another)"sv, R"(# This is not a comment)"sv },
-									   { R"(key)"sv, R"(value)"sv },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-float-0")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_float_0,
-							   [](toml::table&& tbl) // spec-float-0
-							   {
-								   const auto expected = toml::table{
-									   { R"(flt1)"sv, 1.0 },	   { R"(flt2)"sv, 3.1415 },	   { R"(flt3)"sv, -0.01 },
-									   { R"(flt4)"sv, 5e+22 },	   { R"(flt5)"sv, 1000000.0 }, { R"(flt6)"sv, -0.02 },
-									   { R"(flt7)"sv, 6.626e-34 },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-float-1")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_float_1,
-							   [](toml::table&& tbl) // spec-float-1
-							   {
-								   const auto expected = toml::table{
-									   { R"(flt8)"sv, 224617.445991228 },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-float-2")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_float_2,
-							   [](toml::table&& tbl) // spec-float-2
-							   {
-								   const auto expected = toml::table{
-									   { R"(sf1)"sv, std::numeric_limits<double>::infinity() },
-									   { R"(sf2)"sv, std::numeric_limits<double>::infinity() },
-									   { R"(sf3)"sv, -std::numeric_limits<double>::infinity() },
-									   { R"(sf4)"sv, std::numeric_limits<double>::quiet_NaN() },
-									   { R"(sf5)"sv, std::numeric_limits<double>::quiet_NaN() },
-									   { R"(sf6)"sv, std::numeric_limits<double>::quiet_NaN() },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-inline-table-0")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_inline_table_0,
-							   [](toml::table&& tbl) // spec-inline-table-0
-							   {
-								   const auto expected = toml::table{
-									   { R"(animal)"sv,
-										 toml::table{
-											 { R"(type)"sv,
-											   toml::table{
-												   { R"(name)"sv, R"(pug)"sv },
-											   } },
-										 } },
-									   { R"(name)"sv,
-										 toml::table{
-											 { R"(first)"sv, R"(Tom)"sv },
-											 { R"(last)"sv, R"(Preston-Werner)"sv },
-										 } },
-									   { R"(point)"sv,
-										 toml::table{
-											 { R"(x)"sv, 1 },
-											 { R"(y)"sv, 2 },
-										 } },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-inline-table-1")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_inline_table_1,
-							   [](toml::table&& tbl) // spec-inline-table-1
-							   {
-								   const auto expected = toml::table{
-									   { R"(animal)"sv,
-										 toml::table{
-											 { R"(type)"sv,
-											   toml::table{
-												   { R"(name)"sv, R"(pug)"sv },
-											   } },
-										 } },
-									   { R"(name)"sv,
-										 toml::table{
-											 { R"(first)"sv, R"(Tom)"sv },
-											 { R"(last)"sv, R"(Preston-Werner)"sv },
-										 } },
-									   { R"(point)"sv,
-										 toml::table{
-											 { R"(x)"sv, 1 },
-											 { R"(y)"sv, 2 },
-										 } },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-inline-table-2")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_inline_table_2,
-							   [](toml::table&& tbl) // spec-inline-table-2
-							   {
-								   const auto expected = toml::table{
-									   { R"(product)"sv,
-										 toml::table{
-											 { R"(type)"sv,
-											   toml::table{
-												   { R"(name)"sv, R"(Nail)"sv },
-											   } },
-										 } },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-inline-table-3")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_inline_table_3,
-							   [](toml::table&& tbl) // spec-inline-table-3
-							   {
-								   const auto expected = toml::table{
-									   { R"(product)"sv,
-										 toml::table{
-											 { R"(type)"sv,
-											   toml::table{
-												   { R"(name)"sv, R"(Nail)"sv },
-											   } },
-										 } },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-integer-0")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_integer_0,
-							   [](toml::table&& tbl) // spec-integer-0
-							   {
-								   const auto expected = toml::table{
-									   { R"(int1)"sv, 99 },
-									   { R"(int2)"sv, 42 },
-									   { R"(int3)"sv, 0 },
-									   { R"(int4)"sv, -17 },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-integer-1")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_integer_1,
-							   [](toml::table&& tbl) // spec-integer-1
-							   {
-								   const auto expected = toml::table{
-									   { R"(int5)"sv, 1000 },
-									   { R"(int6)"sv, 5349221 },
-									   { R"(int7)"sv, 5349221 },
-									   { R"(int8)"sv, 12345 },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-integer-2")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_integer_2,
-							   [](toml::table&& tbl) // spec-integer-2
-							   {
-								   const auto expected = toml::table{
-									   { R"(bin1)"sv, 214 },		{ R"(hex1)"sv, 3735928559 },
-									   { R"(hex2)"sv, 3735928559 }, { R"(hex3)"sv, 3735928559 },
-									   { R"(oct1)"sv, 342391 },		{ R"(oct2)"sv, 493 },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-key-value-pair-0")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_key_value_pair_0,
-							   [](toml::table&& tbl) // spec-key-value-pair-0
-							   {
-								   const auto expected = toml::table{
-									   { R"(key)"sv, R"(value)"sv },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-keys-0")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_keys_0,
-							   [](toml::table&& tbl) // spec-keys-0
-							   {
-								   const auto expected = toml::table{
-									   { R"(1234)"sv, R"(value)"sv },
-									   { R"(bare-key)"sv, R"(value)"sv },
-									   { R"(bare_key)"sv, R"(value)"sv },
-									   { R"(key)"sv, R"(value)"sv },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-keys-3")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_keys_3,
-							   [](toml::table&& tbl) // spec-keys-3
+							   spec_1_1_0_common_6,
+							   [](toml::table&& tbl) // spec-1.1.0-common-6
 							   {
 								   const auto expected = toml::table{
 									   { R"(name)"sv, R"(Orange)"sv },
@@ -3307,11 +4886,11 @@ another line)"sv },
 							   });
 	}
 
-	SECTION("spec-keys-4")
+	SECTION("spec-1.1.0-common-7")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_keys_4,
-							   [](toml::table&& tbl) // spec-keys-4
+							   spec_1_1_0_common_7,
+							   [](toml::table&& tbl) // spec-1.1.0-common-7
 							   {
 								   const auto expected = toml::table{
 									   { R"(fruit)"sv,
@@ -3325,11 +4904,31 @@ another line)"sv },
 							   });
 	}
 
-	SECTION("spec-keys-5")
+	SECTION("spec-1.1.0-common-8")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_keys_5,
-							   [](toml::table&& tbl) // spec-keys-5
+							   spec_1_1_0_common_8,
+							   [](toml::table&& tbl) // spec-1.1.0-common-8
+							   {
+								   const auto expected = toml::table{
+									   { R"(fruit)"sv,
+										 toml::table{
+											 { R"(orange)"sv, 2 },
+											 { R"(apple)"sv,
+											   toml::table{
+												   { R"(smooth)"sv, true },
+											   } },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-9")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_9,
+							   [](toml::table&& tbl) // spec-1.1.0-common-9
 							   {
 								   const auto expected = toml::table{
 									   { R"(apple)"sv,
@@ -3343,411 +4942,6 @@ another line)"sv },
 											 { R"(color)"sv, R"(orange)"sv },
 											 { R"(skin)"sv, R"(thick)"sv },
 											 { R"(type)"sv, R"(fruit)"sv },
-										 } },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-keys-6")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_keys_6,
-							   [](toml::table&& tbl) // spec-keys-6
-							   {
-								   const auto expected = toml::table{
-									   { R"(apple)"sv,
-										 toml::table{
-											 { R"(color)"sv, R"(red)"sv },
-											 { R"(skin)"sv, R"(thin)"sv },
-											 { R"(type)"sv, R"(fruit)"sv },
-										 } },
-									   { R"(orange)"sv,
-										 toml::table{
-											 { R"(color)"sv, R"(orange)"sv },
-											 { R"(skin)"sv, R"(thick)"sv },
-											 { R"(type)"sv, R"(fruit)"sv },
-										 } },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-keys-7")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_keys_7,
-							   [](toml::table&& tbl) // spec-keys-7
-							   {
-								   const auto expected = toml::table{
-									   { R"(3)"sv,
-										 toml::table{
-											 { R"(14159)"sv, R"(pi)"sv },
-										 } },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-local-date-0")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_local_date_0,
-							   [](toml::table&& tbl) // spec-local-date-0
-							   {
-								   const auto expected = toml::table{
-									   { R"(ld1)"sv, toml::date{ 1979, 5, 27 } },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-local-date-time-0")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_local_date_time_0,
-							   [](toml::table&& tbl) // spec-local-date-time-0
-							   {
-								   const auto expected = toml::table{
-									   { R"(ldt1)"sv, toml::date_time{ { 1979, 5, 27 }, { 7, 32 } } },
-									   { R"(ldt2)"sv, toml::date_time{ { 1979, 5, 27 }, { 0, 32, 0, 999999000 } } },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-local-time-0")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_local_time_0,
-							   [](toml::table&& tbl) // spec-local-time-0
-							   {
-								   const auto expected = toml::table{
-									   { R"(lt1)"sv, toml::time{ 7, 32 } },
-									   { R"(lt2)"sv, toml::time{ 0, 32, 0, 999999000 } },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-offset-date-time-0")
-	{
-		parsing_should_succeed(
-			FILE_LINE_ARGS,
-			spec_offset_date_time_0,
-			[](toml::table&& tbl) // spec-offset-date-time-0
-			{
-				const auto expected = toml::table{
-					{ R"(odt1)"sv, toml::date_time{ { 1979, 5, 27 }, { 7, 32 }, { 0, 0 } } },
-					{ R"(odt2)"sv, toml::date_time{ { 1979, 5, 27 }, { 0, 32 }, { -7, 0 } } },
-					{ R"(odt3)"sv, toml::date_time{ { 1979, 5, 27 }, { 0, 32, 0, 999999000 }, { -7, 0 } } },
-				};
-				REQUIRE(tbl == expected);
-			});
-	}
-
-	SECTION("spec-offset-date-time-1")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_offset_date_time_1,
-							   [](toml::table&& tbl) // spec-offset-date-time-1
-							   {
-								   const auto expected = toml::table{
-									   { R"(odt4)"sv, toml::date_time{ { 1979, 5, 27 }, { 7, 32 }, { 0, 0 } } },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-string-1")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_string_1,
-							   [](toml::table&& tbl) // spec-string-1
-							   {
-								   const auto expected = toml::table{
-									   { R"(str1)"sv, R"(Roses are red
-Violets are blue)"sv },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-string-2")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_string_2,
-							   [](toml::table&& tbl) // spec-string-2
-							   {
-								   const auto expected = toml::table{
-									   { R"(str2)"sv, R"(Roses are red
-Violets are blue)"sv },
-									   { R"(str3)"sv,
-										 "Roses are red\r\n"
-										 "Violets are blue"sv },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-string-3")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_string_3,
-							   [](toml::table&& tbl) // spec-string-3
-							   {
-								   const auto expected = toml::table{
-									   { R"(str1)"sv, R"(The quick brown fox jumps over the lazy dog.)"sv },
-									   { R"(str2)"sv, R"(The quick brown fox jumps over the lazy dog.)"sv },
-									   { R"(str3)"sv, R"(The quick brown fox jumps over the lazy dog.)"sv },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-string-4")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_string_4,
-							   [](toml::table&& tbl) // spec-string-4
-							   {
-								   const auto expected = toml::table{
-									   { R"(str4)"sv, R"(Here are two quotation marks: "". Simple enough.)"sv },
-									   { R"(str5)"sv, R"(Here are three quotation marks: """.)"sv },
-									   { R"(str6)"sv, R"(Here are fifteen quotation marks: """"""""""""""".)"sv },
-									   { R"(str7)"sv, R"("This," she said, "is just a pointless statement.")"sv },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-string-5")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_string_5,
-							   [](toml::table&& tbl) // spec-string-5
-							   {
-								   const auto expected = toml::table{
-									   { R"(quoted)"sv, R"(Tom "Dubs" Preston-Werner)"sv },
-									   { R"(regex)"sv, R"(<\i\c*\s*>)"sv },
-									   { R"(winpath)"sv, R"(C:\Users\nodejs\templates)"sv },
-									   { R"(winpath2)"sv, R"(\\ServerX\admin$\system32\)"sv },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-string-6")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_string_6,
-							   [](toml::table&& tbl) // spec-string-6
-							   {
-								   const auto expected = toml::table{
-									   { R"(lines)"sv, R"(The first newline is
-trimmed in raw strings.
-   All other whitespace
-   is preserved.
-)"sv },
-									   { R"(regex2)"sv, R"(I [dw]on't need \d{2} apples)"sv },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-string-7")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_string_7,
-							   [](toml::table&& tbl) // spec-string-7
-							   {
-								   const auto expected = toml::table{
-									   { R"(apos15)"sv, R"(Here are fifteen apostrophes: ''''''''''''''')"sv },
-									   { R"(quot15)"sv, R"(Here are fifteen quotation marks: """"""""""""""")"sv },
-									   { R"(str)"sv, R"('That,' she said, 'is still pointless.')"sv },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-table-0")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_table_0,
-							   [](toml::table&& tbl) // spec-table-0
-							   {
-								   const auto expected = toml::table{
-									   { R"(table)"sv, toml::table{} },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-table-1")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_table_1,
-							   [](toml::table&& tbl) // spec-table-1
-							   {
-								   const auto expected = toml::table{
-									   { R"(table-1)"sv,
-										 toml::table{
-											 { R"(key1)"sv, R"(some string)"sv },
-											 { R"(key2)"sv, 123 },
-										 } },
-									   { R"(table-2)"sv,
-										 toml::table{
-											 { R"(key1)"sv, R"(another string)"sv },
-											 { R"(key2)"sv, 456 },
-										 } },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-table-2")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_table_2,
-							   [](toml::table&& tbl) // spec-table-2
-							   {
-								   const auto expected = toml::table{
-									   { R"(dog)"sv,
-										 toml::table{
-											 { R"(tater.man)"sv,
-											   toml::table{
-												   { R"(type)"sv,
-													 toml::table{
-														 { R"(name)"sv, R"(pug)"sv },
-													 } },
-											   } },
-										 } },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-table-4")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_table_4,
-							   [](toml::table&& tbl) // spec-table-4
-							   {
-								   const auto expected = toml::table{
-									   { R"(x)"sv,
-										 toml::table{
-											 { R"(y)"sv,
-											   toml::table{
-												   { R"(z)"sv,
-													 toml::table{
-														 { R"(w)"sv, toml::table{} },
-													 } },
-											   } },
-										 } },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-table-5")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_table_5,
-							   [](toml::table&& tbl) // spec-table-5
-							   {
-								   const auto expected = toml::table{
-									   { R"(animal)"sv, toml::table{} },
-									   { R"(fruit)"sv,
-										 toml::table{
-											 { R"(apple)"sv, toml::table{} },
-											 { R"(orange)"sv, toml::table{} },
-										 } },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-table-6")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_table_6,
-							   [](toml::table&& tbl) // spec-table-6
-							   {
-								   const auto expected = toml::table{
-									   { R"(animal)"sv, toml::table{} },
-									   { R"(fruit)"sv,
-										 toml::table{
-											 { R"(apple)"sv, toml::table{} },
-											 { R"(orange)"sv, toml::table{} },
-										 } },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-table-7")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_table_7,
-							   [](toml::table&& tbl) // spec-table-7
-							   {
-								   const auto expected = toml::table{
-									   { R"(breed)"sv, R"(pug)"sv },
-									   { R"(name)"sv, R"(Fido)"sv },
-									   { R"(owner)"sv,
-										 toml::table{
-											 { R"(member_since)"sv, toml::date{ 1999, 8, 4 } },
-											 { R"(name)"sv, R"(Regina Dogman)"sv },
-										 } },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-table-8")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_table_8,
-							   [](toml::table&& tbl) // spec-table-8
-							   {
-								   const auto expected = toml::table{
-									   { R"(fruit)"sv,
-										 toml::table{
-											 { R"(apple)"sv,
-											   toml::table{
-												   { R"(color)"sv, R"(red)"sv },
-												   { R"(taste)"sv,
-													 toml::table{
-														 { R"(sweet)"sv, true },
-													 } },
-											   } },
-										 } },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-table-9")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_table_9,
-							   [](toml::table&& tbl) // spec-table-9
-							   {
-								   const auto expected = toml::table{
-									   { R"(fruit)"sv,
-										 toml::table{
-											 { R"(apple)"sv,
-											   toml::table{
-												   { R"(color)"sv, R"(red)"sv },
-												   { R"(taste)"sv,
-													 toml::table{
-														 { R"(sweet)"sv, true },
-													 } },
-												   { R"(texture)"sv,
-													 toml::table{
-														 { R"(smooth)"sv, true },
-													 } },
-											   } },
 										 } },
 								   };
 								   REQUIRE(tbl == expected);
@@ -3761,6 +4955,7 @@ trimmed in raw strings.
 							   [](toml::table&& tbl) // spec-example-1-compact
 							   {
 								   const auto expected = toml::table{
+									   { R"(title)"sv, R"(TOML Example)"sv },
 									   { R"(clients)"sv,
 										 toml::table{
 											 { R"(data)"sv,
@@ -3784,13 +4979,13 @@ trimmed in raw strings.
 										 toml::table{
 											 { R"(connection_max)"sv, 5000 },
 											 { R"(enabled)"sv, true },
+											 { R"(server)"sv, R"(192.168.1.1)"sv },
 											 { R"(ports)"sv,
 											   toml::array{
 												   8001,
 												   8001,
 												   8002,
 											   } },
-											 { R"(server)"sv, R"(192.168.1.1)"sv },
 										 } },
 									   { R"(owner)"sv,
 										 toml::table{
@@ -3810,7 +5005,6 @@ trimmed in raw strings.
 												   { R"(ip)"sv, R"(10.0.0.2)"sv },
 											   } },
 										 } },
-									   { R"(title)"sv, R"(TOML Example)"sv },
 								   };
 								   REQUIRE(tbl == expected);
 							   });
@@ -3823,6 +5017,7 @@ trimmed in raw strings.
 							   [](toml::table&& tbl) // spec-example-1
 							   {
 								   const auto expected = toml::table{
+									   { R"(title)"sv, R"(TOML Example)"sv },
 									   { R"(clients)"sv,
 										 toml::table{
 											 { R"(data)"sv,
@@ -3846,13 +5041,13 @@ trimmed in raw strings.
 										 toml::table{
 											 { R"(connection_max)"sv, 5000 },
 											 { R"(enabled)"sv, true },
+											 { R"(server)"sv, R"(192.168.1.1)"sv },
 											 { R"(ports)"sv,
 											   toml::array{
 												   8001,
 												   8001,
 												   8002,
 											   } },
-											 { R"(server)"sv, R"(192.168.1.1)"sv },
 										 } },
 									   { R"(owner)"sv,
 										 toml::table{
@@ -3872,7 +5067,6 @@ trimmed in raw strings.
 												   { R"(ip)"sv, R"(10.0.0.2)"sv },
 											   } },
 										 } },
-									   { R"(title)"sv, R"(TOML Example)"sv },
 								   };
 								   REQUIRE(tbl == expected);
 							   });
@@ -3880,11 +5074,25 @@ trimmed in raw strings.
 
 #if UNICODE_LITERALS_OK
 
-	SECTION("spec-keys-1")
+	SECTION("spec-1.1.0-common-12")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_keys_1,
-							   [](toml::table&& tbl) // spec-keys-1
+							   spec_1_1_0_common_12,
+							   [](toml::table&& tbl) // spec-1.1.0-common-12
+							   {
+								   const auto expected = toml::table{
+									   { R"(str)"sv, R"(I'm a string. "You can quote me". Name	José
+Location	SF.)"sv },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("spec-1.1.0-common-4")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   spec_1_1_0_common_4,
+							   [](toml::table&& tbl) // spec-1.1.0-common-4
 							   {
 								   const auto expected = toml::table{
 									   { R"(127.0.0.1)"sv, R"(value)"sv }, { R"(character encoding)"sv, R"(value)"sv },
@@ -3895,25 +5103,11 @@ trimmed in raw strings.
 							   });
 	}
 
-	SECTION("spec-string-0")
+	SECTION("spec-1.1.0-common-40")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_string_0,
-							   [](toml::table&& tbl) // spec-string-0
-							   {
-								   const auto expected = toml::table{
-									   { R"(str)"sv, R"(I'm a string. "You can quote me". Name	José
-Location	SF.)"sv },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("spec-table-3")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   spec_table_3,
-							   [](toml::table&& tbl) // spec-table-3
+							   spec_1_1_0_common_40,
+							   [](toml::table&& tbl) // spec-1.1.0-common-40
 							   {
 								   const auto expected = toml::table{
 									   { R"(a)"sv,
@@ -3951,14 +5145,40 @@ Location	SF.)"sv },
 
 #endif // UNICODE_LITERALS_OK
 
-	SECTION("string-double-quote-escape")
+	SECTION("string-basic-escape-01")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
-							   string_double_quote_escape,
-							   [](toml::table&& tbl) // string-double-quote-escape
+							   string_basic_escape_01,
+							   [](toml::table&& tbl) // string-basic-escape-01
 							   {
 								   const auto expected = toml::table{
 									   { R"(test)"sv, R"("one")"sv },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("string-basic-escape-02")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   string_basic_escape_02,
+							   [](toml::table&& tbl) // string-basic-escape-02
+							   {
+								   const auto expected = toml::table{
+									   { R"(test)"sv, R"(\"one)"sv },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("string-basic-escape-03")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   string_basic_escape_03,
+							   [](toml::table&& tbl) // string-basic-escape-03
+							   {
+								   const auto expected = toml::table{
+									   { R"(test)"sv, R"(\\\\"one)"sv },
 								   };
 								   REQUIRE(tbl == expected);
 							   });
@@ -3972,6 +5192,33 @@ Location	SF.)"sv },
 							   {
 								   const auto expected = toml::table{
 									   { R"(answer)"sv, ""sv },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("string-ends-in-whitespace-escape")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   string_ends_in_whitespace_escape,
+							   [](toml::table&& tbl) // string-ends-in-whitespace-escape
+							   {
+								   const auto expected = toml::table{
+									   { R"(beee)"sv, R"(heeee
+geeee)"sv },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("string-escape-esc")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   string_escape_esc,
+							   [](toml::table&& tbl) // string-escape-esc
+							   {
+								   const auto expected = toml::table{
+									   { R"(esc)"sv, "\x1B There is no escape! \x1B"sv },
 								   };
 								   REQUIRE(tbl == expected);
 							   });
@@ -3992,29 +5239,44 @@ Location	SF.)"sv },
 
 	SECTION("string-escapes")
 	{
-		parsing_should_succeed(
-			FILE_LINE_ARGS,
-			string_escapes,
-			[](toml::table&& tbl) // string-escapes
-			{
-				const auto expected = toml::table{
-					{ R"(backslash)"sv, R"(This string has a \ backslash character.)"sv },
-					{ R"(backspace)"sv, "This string has a \x08 backspace character."sv },
-					{ R"(carriage)"sv, "This string has a \r carriage return character."sv },
-					{ R"(delete)"sv, "This string has a \x7F delete control code."sv },
-					{ R"(formfeed)"sv, "This string has a \f form feed character."sv },
-					{ R"(newline)"sv, R"(This string has a 
- new line character.)"sv },
-					{ R"(notunicode1)"sv, R"(This string does not have a unicode \u escape.)"sv },
-					{ R"(notunicode2)"sv, R"(This string does not have a unicode \u escape.)"sv },
-					{ R"(notunicode3)"sv, R"(This string does not have a unicode \u0075 escape.)"sv },
-					{ R"(notunicode4)"sv, R"(This string does not have a unicode \u escape.)"sv },
-					{ R"(quote)"sv, R"(This string has a " quote character.)"sv },
-					{ R"(tab)"sv, R"(This string has a 	 tab character.)"sv },
-					{ R"(unitseparator)"sv, "This string has a \x1F unit separator control code."sv },
-				};
-				REQUIRE(tbl == expected);
-			});
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   string_escapes,
+							   [](toml::table&& tbl) // string-escapes
+							   {
+								   const auto expected = toml::table{
+									   { R"(backslash)"sv, R"(|\.)"sv },
+									   { R"(backspace)"sv, "|\x08."sv },
+									   { R"(carriage)"sv, "|\r."sv },
+									   { R"(delete)"sv, "|\x7F."sv },
+									   { R"(formfeed)"sv, "|\f."sv },
+									   { R"(newline)"sv, R"(|
+.)"sv },
+									   { R"(notunicode1)"sv, R"(|\u.)"sv },
+									   { R"(notunicode2)"sv, R"(|\u.)"sv },
+									   { R"(notunicode3)"sv, R"(|\u0075.)"sv },
+									   { R"(notunicode4)"sv, R"(|\u.)"sv },
+									   { R"(quote)"sv, R"(|".)"sv },
+									   { R"(tab)"sv, R"(|	.)"sv },
+									   { R"(unitseparator)"sv, "|\x1F."sv },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("string-multiline-empty")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   string_multiline_empty,
+							   [](toml::table&& tbl) // string-multiline-empty
+							   {
+								   const auto expected = toml::table{
+									   { R"(empty-1)"sv, ""sv },
+									   { R"(empty-2)"sv, ""sv },
+									   { R"(empty-3)"sv, ""sv },
+									   { R"(empty-4)"sv, ""sv },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
 	}
 
 	SECTION("string-multiline-escaped-crlf")
@@ -4038,6 +5300,10 @@ Location	SF.)"sv },
 							   {
 								   const auto expected = toml::table{
 									   { R"(escaped)"sv, R"(lol""")"sv },
+									   { R"(five-quotes)"sv, R"(Closing with five quotes
+"")"sv },
+									   { R"(four-quotes)"sv, R"(Closing with four quotes
+")"sv },
 									   { R"(lit_one)"sv, R"('one quote')"sv },
 									   { R"(lit_one_space)"sv, R"( 'one quote' )"sv },
 									   { R"(lit_two)"sv, R"(''two quotes'')"sv },
@@ -4070,10 +5336,6 @@ b)"sv },
 					{ R"(escape-bs-3)"sv, R"(a \\
   b)"sv },
 					{ R"(keep-ws-before)"sv, R"(a   	b)"sv },
-					{ R"(multiline_empty_four)"sv, ""sv },
-					{ R"(multiline_empty_one)"sv, ""sv },
-					{ R"(multiline_empty_three)"sv, ""sv },
-					{ R"(multiline_empty_two)"sv, ""sv },
 					{ R"(no-space)"sv, R"(ab)"sv },
 					{ R"(whitespace-after-bs)"sv, R"(The quick brown fox jumps over the lazy dog.)"sv },
 				};
@@ -4100,6 +5362,19 @@ ue)"sv },
 							   });
 	}
 
+	SECTION("string-raw-empty")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   string_raw_empty,
+							   [](toml::table&& tbl) // string-raw-empty
+							   {
+								   const auto expected = toml::table{
+									   { R"(empty)"sv, ""sv },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
 	SECTION("string-raw-multiline")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
@@ -4116,6 +5391,9 @@ in it.)"sv },
 									   { R"(multiline_with_tab)"sv, R"(First line
 	 Followed by a tab)"sv },
 									   { R"(oneline)"sv, R"(This string has a ' quote character.)"sv },
+									   { R"(this-str-has-apostrophes)"sv, R"(' there's one already
+'' two more
+'')"sv },
 								   };
 								   REQUIRE(tbl == expected);
 							   });
@@ -4168,23 +5446,6 @@ in it.)"sv },
 							   });
 	}
 
-#if TOML_LANG_UNRELEASED
-
-	SECTION("string-escape-esc")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   string_escape_esc,
-							   [](toml::table&& tbl) // string-escape-esc
-							   {
-								   const auto expected = toml::table{
-									   { R"(esc)"sv, "\x1B There is no escape! \x1B"sv },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-#endif // TOML_LANG_UNRELEASED
-
 #if UNICODE_LITERALS_OK
 
 	SECTION("string-escape-tricky")
@@ -4205,55 +5466,6 @@ in it.)"sv },
 								   REQUIRE(tbl == expected);
 							   });
 	}
-
-	SECTION("string-quoted-unicode")
-	{
-		parsing_should_succeed(
-			FILE_LINE_ARGS,
-			string_quoted_unicode,
-			[](toml::table&& tbl) // string-quoted-unicode
-			{
-				const auto expected = toml::table{
-					{ R"(escaped_string)"sv, "\x00 \x08 \f A \x7F  ÿ ퟿  ￿ 𐀀 􏿿"sv },
-					{ R"(not_escaped_string)"sv,
-					  R"(\u0000 \u0008 \u000c \U00000041 \u007f \u0080 \u00ff \ud7ff \ue000 \uffff \U00010000 \U0010ffff)"sv },
-					{ R"(basic_string)"sv, R"(~  ÿ ퟿  ￿ 𐀀 􏿿)"sv },
-					{ R"(literal_string)"sv, R"(~  ÿ ퟿  ￿ 𐀀 􏿿)"sv },
-				};
-				REQUIRE(tbl == expected);
-			});
-	}
-
-	SECTION("string-unicode-escape")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   string_unicode_escape,
-							   [](toml::table&& tbl) // string-unicode-escape
-							   {
-								   const auto expected = toml::table{
-									   { R"(answer4)"sv, R"(δ)"sv },
-									   { R"(answer8)"sv, R"(δ)"sv },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("string-unicode-literal")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   string_unicode_literal,
-							   [](toml::table&& tbl) // string-unicode-literal
-							   {
-								   const auto expected = toml::table{
-									   { R"(answer)"sv, R"(δ)"sv },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-#endif // UNICODE_LITERALS_OK
-
-#if TOML_LANG_UNRELEASED && UNICODE_LITERALS_OK
 
 	SECTION("string-hex-escape")
 	{
@@ -4287,7 +5499,127 @@ in it.)"sv },
 							   });
 	}
 
-#endif // TOML_LANG_UNRELEASED && UNICODE_LITERALS_OK
+	SECTION("string-multibyte-escape")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   string_multibyte_escape,
+							   [](toml::table&& tbl) // string-multibyte-escape
+							   {
+								   const auto expected = toml::table{
+									   { R"(basic-1)"sv, R"(ɑ € 𐫱 ɑ€𐫱)"sv },
+									   { R"(ml-basic-1)"sv, R"(ɑ € 𐫱 ɑ€𐫱)"sv },
+									   { R"(basic-2)"sv, R"(ɑ € 𐫱 ɑ€𐫱)"sv },
+									   { R"(ml-basic-2)"sv, R"(ɑ € 𐫱 ɑ€𐫱)"sv },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("string-multibyte")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   string_multibyte,
+							   [](toml::table&& tbl) // string-multibyte
+							   {
+								   const auto expected = toml::table{
+									   { R"(basic)"sv, R"(ɑ € 𐫱 ɑ€𐫱)"sv },
+									   { R"(ml-basic)"sv, R"(ɑ € 𐫱 ɑ€𐫱)"sv },
+									   { R"(ml-raw)"sv, R"(ɑ € 𐫱 ɑ€𐫱)"sv },
+									   { R"(raw)"sv, R"(ɑ € 𐫱 ɑ€𐫱)"sv },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("string-quoted-unicode")
+	{
+		parsing_should_succeed(
+			FILE_LINE_ARGS,
+			string_quoted_unicode,
+			[](toml::table&& tbl) // string-quoted-unicode
+			{
+				const auto expected = toml::table{
+					{ R"(basic_string)"sv, R"(~  ÿ ퟿  ￿ 𐀀 􏿿)"sv },
+					{ R"(escaped_string)"sv, "\x00 \x08 \f A \x7F  ÿ ퟿  ￿ 𐀀 􏿿"sv },
+					{ R"(literal_string)"sv, R"(~  ÿ ퟿  ￿ 𐀀 􏿿)"sv },
+					{ R"(not_escaped_string)"sv,
+					  R"(\u0000 \u0008 \u000c \U00000041 \u007f \u0080 \u00ff \ud7ff \ue000 \uffff \U00010000 \U0010ffff)"sv },
+				};
+				REQUIRE(tbl == expected);
+			});
+	}
+
+	SECTION("string-start-mb")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   string_start_mb,
+							   [](toml::table&& tbl) // string-start-mb
+							   {
+								   const auto expected = toml::table{
+									   { R"(s1)"sv, R"(§)"sv }, { R"(s2)"sv, R"(§)"sv }, { R"(s3)"sv, R"(§)"sv },
+									   { R"(s4)"sv, R"(§)"sv }, { R"(s5)"sv, R"(§)"sv }, { R"(s6)"sv, R"(§)"sv },
+									   { R"(s7)"sv, R"(§)"sv },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("string-unicode-escape")
+	{
+		parsing_should_succeed(
+			FILE_LINE_ARGS,
+			string_unicode_escape,
+			[](toml::table&& tbl) // string-unicode-escape
+			{
+				const auto expected = toml::table{
+					{ R"(a)"sv, R"(a)"sv },			 { R"(b)"sv, R"(b)"sv },		 { R"(c)"sv, R"(c)"sv },
+					{ R"(delta-1)"sv, R"(δ)"sv },	 { R"(delta-2)"sv, R"(δ)"sv },	 { R"(ml-a)"sv, R"(a)"sv },
+					{ R"(ml-b)"sv, R"(b)"sv },		 { R"(ml-c)"sv, R"(c)"sv },		 { R"(ml-delta-1)"sv, R"(δ)"sv },
+					{ R"(ml-delta-2)"sv, R"(δ)"sv }, { R"(ml-null-1)"sv, "\x00"sv }, { R"(ml-null-2)"sv, "\x00"sv },
+					{ R"(null-1)"sv, "\x00"sv },	 { R"(null-2)"sv, "\x00"sv },
+				};
+				REQUIRE(tbl == expected);
+			});
+	}
+
+#endif // UNICODE_LITERALS_OK
+
+	SECTION("table-array-empty-name")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   table_array_empty_name,
+							   [](toml::table&& tbl) // table-array-empty-name
+							   {
+								   const auto expected = toml::table{
+									   { ""sv,
+										 toml::array{
+											 toml::table{
+												 { R"(a)"sv, 1 },
+											 },
+											 toml::table{
+												 { R"(a)"sv, 2 },
+											 },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("table-array-empty")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   table_array_empty,
+							   [](toml::table&& tbl) // table-array-empty
+							   {
+								   const auto expected = toml::table{
+									   { R"(a)"sv,
+										 toml::array{
+											 toml::table{},
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
 
 	SECTION("table-array-implicit-and-explicit-after")
 	{
@@ -4483,11 +5815,11 @@ in it.)"sv },
 								   const auto expected = toml::table{
 									   { ""sv,
 										 toml::table{
+											 { R"(x)"sv, 1 },
 											 { R"(a)"sv,
 											   toml::table{
 												   { R"(x)"sv, 2 },
 											   } },
-											 { R"(x)"sv, 1 },
 										 } },
 									   { R"(a)"sv,
 										 toml::table{
@@ -4509,6 +5841,34 @@ in it.)"sv },
 							   {
 								   const auto expected = toml::table{
 									   { R"(a)"sv, toml::table{} },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("table-keyword-with-values")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   table_keyword_with_values,
+							   [](toml::table&& tbl) // table-keyword-with-values
+							   {
+								   const auto expected = toml::table{
+									   { R"(false)"sv,
+										 toml::table{
+											 { R"(k)"sv, 2 },
+										 } },
+									   { R"(inf)"sv,
+										 toml::table{
+											 { R"(k)"sv, 3 },
+										 } },
+									   { R"(nan)"sv,
+										 toml::table{
+											 { R"(k)"sv, 4 },
+										 } },
+									   { R"(true)"sv,
+										 toml::table{
+											 { R"(k)"sv, 1 },
+										 } },
 								   };
 								   REQUIRE(tbl == expected);
 							   });
@@ -4568,6 +5928,7 @@ in it.)"sv },
 								   const auto expected = toml::table{
 									   { R"(a)"sv,
 										 toml::table{
+											 { R"(key)"sv, 1 },
 											 { R"(extend)"sv,
 											   toml::table{
 												   { R"(key)"sv, 2 },
@@ -4576,7 +5937,6 @@ in it.)"sv },
 														 { R"(key)"sv, 3 },
 													 } },
 											   } },
-											 { R"(key)"sv, 1 },
 										 } },
 								   };
 								   REQUIRE(tbl == expected);
@@ -4656,6 +6016,34 @@ in it.)"sv },
 							   });
 	}
 
+	SECTION("table-without-super-with-values")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   table_without_super_with_values,
+							   [](toml::table&& tbl) // table-without-super-with-values
+							   {
+								   const auto expected = toml::table{
+									   { R"(x)"sv,
+										 toml::table{
+											 { R"(c)"sv, 3 },
+											 { R"(d)"sv, 4 },
+											 { R"(y)"sv,
+											   toml::table{
+												   { R"(z)"sv,
+													 toml::table{
+														 { R"(w)"sv,
+														   toml::table{
+															   { R"(a)"sv, 1 },
+															   { R"(b)"sv, 2 },
+														   } },
+													 } },
+											   } },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
 	SECTION("table-without-super")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
@@ -4680,6 +6068,80 @@ in it.)"sv },
 
 #if UNICODE_LITERALS_OK
 
+	SECTION("table-names-with-values")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   table_names_with_values,
+							   [](toml::table&& tbl) // table-names-with-values
+							   {
+								   const auto expected = toml::table{
+									   { R"(a)"sv,
+										 toml::table{
+											 { R"( x )"sv,
+											   toml::table{
+												   { R"(key)"sv, 4 },
+											   } },
+											 { R"(b)"sv,
+											   toml::table{
+												   { R"(c)"sv,
+													 toml::table{
+														 { R"(key)"sv, 1 },
+													 } },
+											   } },
+											 { R"(b.c)"sv,
+											   toml::table{
+												   { R"(key)"sv, 2 },
+											   } },
+											 { R"(d.e)"sv,
+											   toml::table{
+												   { R"(key)"sv, 3 },
+											   } },
+										 } },
+									   { R"(d)"sv,
+										 toml::table{
+											 { R"(e)"sv,
+											   toml::table{
+												   { R"(f)"sv,
+													 toml::table{
+														 { R"(key)"sv, 5 },
+													 } },
+											   } },
+										 } },
+									   { R"(g)"sv,
+										 toml::table{
+											 { R"(h)"sv,
+											   toml::table{
+												   { R"(i)"sv,
+													 toml::table{
+														 { R"(key)"sv, 6 },
+													 } },
+											   } },
+										 } },
+									   { R"(j)"sv,
+										 toml::table{
+											 { R"(ʞ)"sv,
+											   toml::table{
+												   { R"(l)"sv,
+													 toml::table{
+														 { R"(key)"sv, 7 },
+													 } },
+											   } },
+										 } },
+									   { R"(x)"sv,
+										 toml::table{
+											 { R"(1)"sv,
+											   toml::table{
+												   { R"(2)"sv,
+													 toml::table{
+														 { R"(key)"sv, 8 },
+													 } },
+											   } },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
 	SECTION("table-names")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
@@ -4690,12 +6152,12 @@ in it.)"sv },
 									   { R"(a)"sv,
 										 toml::table{
 											 { R"( x )"sv, toml::table{} },
+											 { R"(b.c)"sv, toml::table{} },
+											 { R"(d.e)"sv, toml::table{} },
 											 { R"(b)"sv,
 											   toml::table{
 												   { R"(c)"sv, toml::table{} },
 											   } },
-											 { R"(b.c)"sv, toml::table{} },
-											 { R"(d.e)"sv, toml::table{} },
 										 } },
 									   { R"(d)"sv,
 										 toml::table{

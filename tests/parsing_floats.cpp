@@ -266,75 +266,75 @@ TEST_CASE("parsing - floats (hexadecimal)")
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		" val =     0x10p1"sv,
-		"1:12: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.0.0 and earlier"sv);
+		"1:12: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.1.0 and earlier"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		" val =    0x10p-1"sv,
-		"1:11: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.0.0 and earlier"sv);
+		"1:11: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.1.0 and earlier"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		" val =    0x10p+1"sv,
-		"1:11: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.0.0 and earlier"sv);
+		"1:11: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.1.0 and earlier"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		" val =    -0x10p1"sv,
-		"1:11: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.0.0 and earlier"sv);
+		"1:11: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.1.0 and earlier"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		" val =   -0x10p-1"sv,
-		"1:10: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.0.0 and earlier"sv);
+		"1:10: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.1.0 and earlier"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		" val =    +0x10p1"sv,
-		"1:11: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.0.0 and earlier"sv);
+		"1:11: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.1.0 and earlier"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		" val =   +0x10p+1"sv,
-		"1:10: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.0.0 and earlier"sv);
+		"1:10: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.1.0 and earlier"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		" val =   -0x10p+1"sv,
-		"1:10: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.0.0 and earlier"sv);
+		"1:10: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.1.0 and earlier"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		" val =   +0x10p-1"sv,
-		"1:10: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.0.0 and earlier"sv);
+		"1:10: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.1.0 and earlier"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		" val =   0x10.1p1"sv,
-		"1:10: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.0.0 and earlier"sv);
+		"1:10: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.1.0 and earlier"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		" val =  0x10.1p-1"sv,
-		"1:9: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.0.0 and earlier"sv);
+		"1:9: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.1.0 and earlier"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		" val =  0x10.1p+1"sv,
-		"1:9: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.0.0 and earlier"sv);
+		"1:9: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.1.0 and earlier"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		" val =  -0x10.1p1"sv,
-		"1:9: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.0.0 and earlier"sv);
+		"1:9: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.1.0 and earlier"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		" val = -0x10.1p-1"sv,
-		"1:8: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.0.0 and earlier"sv);
+		"1:8: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.1.0 and earlier"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		" val =  +0x10.1p1"sv,
-		"1:9: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.0.0 and earlier"sv);
+		"1:9: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.1.0 and earlier"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		" val = +0x10.1p+1"sv,
-		"1:8: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.0.0 and earlier"sv);
+		"1:8: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.1.0 and earlier"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		" val = -0x10.1p+1"sv,
-		"1:8: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.0.0 and earlier"sv);
+		"1:8: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.1.0 and earlier"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		" val = +0x10.1p-1"sv,
-		"1:8: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.0.0 and earlier"sv);
+		"1:8: Error while parsing hexadecimal floating-point: hexadecimal floating-point values are not supported in TOML 1.1.0 and earlier"sv);
 #endif
 }
 
@@ -394,13 +394,13 @@ TEST_CASE("parsing - inf and nan (malformed)")
 						"1:12: Error while parsing floating-point: expected 'nan', saw '-N'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						" val =   nan.1 "sv,
-						"1:13: Error while parsing floating-point: expected value-terminator, saw '.'"sv);
+						"1:13: Error while parsing floating-point: expected end of value, saw '.'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						" val =   nan,1 "sv,
 						"1:13: Error while parsing key-value pair: expected a comment or whitespace, saw ','"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						" val =    nan. "sv,
-						"1:14: Error while parsing floating-point: expected value-terminator, saw '.'"sv);
+						"1:14: Error while parsing floating-point: expected end of value, saw '.'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						" val =    nan, "sv,
 						"1:14: Error while parsing key-value pair: expected a comment or whitespace, saw ','"sv);
@@ -425,13 +425,13 @@ TEST_CASE("parsing - inf and nan (malformed)")
 						"1:12: Error while parsing floating-point: expected 'inf', saw '-I'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						" val =   inf.1 "sv,
-						"1:13: Error while parsing floating-point: expected value-terminator, saw '.'"sv);
+						"1:13: Error while parsing floating-point: expected end of value, saw '.'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						" val =   inf,1 "sv,
 						"1:13: Error while parsing key-value pair: expected a comment or whitespace, saw ','"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						" val =    inf. "sv,
-						"1:14: Error while parsing floating-point: expected value-terminator, saw '.'"sv);
+						"1:14: Error while parsing floating-point: expected end of value, saw '.'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						" val =    inf, "sv,
 						"1:14: Error while parsing key-value pair: expected a comment or whitespace, saw ','"sv);
@@ -463,6 +463,12 @@ TEST_CASE("parsing - floats (malformed)")
 	parsing_should_fail(FILE_LINE_ARGS,
 						"flt = 1.5x"sv,
 						"1:10: Error while parsing floating-point: expected decimal digit, saw 'x'"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"flt = -12.5z"sv,
+						"1:12: Error while parsing floating-point: expected decimal digit, saw 'z'"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"flt = 12.5tons"sv,
+						"1:11: Error while parsing floating-point: expected decimal digit, saw 't'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"flt = 1e+x"sv,
 						"1:10: Error while parsing floating-point: expected decimal digit, saw 'x'"sv);

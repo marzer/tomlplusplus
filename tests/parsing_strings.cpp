@@ -164,28 +164,13 @@ TEST_CASE("parsing - strings (values)")
 
 TEST_CASE("parsing - strings (escape sequences)")
 {
-// toml/pull/796 (\xHH unicode scalars)
-#if TOML_LANG_UNRELEASED
+	// toml/pull/796 (\xHH unicode scalars)
 	parse_expected_value(FILE_LINE_ARGS,
 						 R"("\x00\x10\x20\x30\x40\x50\x60\x70\x80\x90\x11\xFF\xEE")"sv,
 						 "\u0000\u0010\u0020\u0030\u0040\u0050\u0060\u0070\u0080\u0090\u0011\u00FF\u00EE"sv);
-#else
-	parsing_should_fail(
-		FILE_LINE_ARGS,
-		R"(str = "\x00\x10\x20\x30\x40\x50\x60\x70\x80\x90\x11\xFF\xEE")"sv,
-		R"(1:9: Error while parsing string: escape sequence '\x' is not supported in TOML 1.0.0 and earlier)"sv);
-#endif
 
 	// toml/pull/790
-#if TOML_LANG_UNRELEASED
 	parse_expected_value(FILE_LINE_ARGS, R"("\e[31mfoo\e[0m")"sv, "\x1B[31mfoo\x1B[0m"sv);
-
-#else
-	parsing_should_fail(
-		FILE_LINE_ARGS,
-		R"(str = "\e[31mfoo\e[0m")"sv,
-		R"(1:9: Error while parsing string: escape sequence '\e' is not supported in TOML 1.0.0 and earlier)"sv);
-#endif
 
 	// check 8-digit \U scalars with insufficient digits
 	parsing_should_fail(FILE_LINE_ARGS,
@@ -222,11 +207,9 @@ TEST_CASE("parsing - strings (escape sequences)")
 						R"(1:11: Error while parsing unicode scalar sequence: expected hex digit, saw '"')"sv);
 
 	// check 2-digit \x scalars with insufficient digits
-#if TOML_LANG_UNRELEASED
 	parsing_should_fail(FILE_LINE_ARGS,
 						R"(str = "\x1")"sv,
 						R"(1:11: Error while parsing unicode scalar sequence: expected hex digit, saw '"')"sv);
-#endif
 }
 
 TEST_CASE("parsing - strings (quotes next to multi-line delimiters)")

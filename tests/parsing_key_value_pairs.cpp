@@ -61,7 +61,7 @@ TEST_CASE("parsing - key-value pairs")
 		name = "Tom"
 		name = "Pradyun"
 	)"sv,
-						"4:10: Error while parsing key-value pair: cannot redefine existing string 'name'"sv);
+						"4:3: Error while parsing key-value pair: cannot redefine existing string 'name'"sv);
 }
 
 TEST_CASE("parsing - key-value pairs (dotted)")
@@ -194,7 +194,7 @@ TEST_CASE("parsing - key-value pairs (string keys)")
 		a     = 2
 		a = 3
 	)"sv,
-						"3:7: Error while parsing key-value pair: cannot redefine existing integer 'a'"sv);
+						"3:3: Error while parsing key-value pair: cannot redefine existing integer 'a'"sv);
 
 	// only surrounding whitespace is stripped, fail: illegal key name or syntax error
 	parsing_should_fail(FILE_LINE_ARGS,
@@ -209,7 +209,7 @@ TEST_CASE("parsing - key-value pairs (string keys)")
 		"a b" = 3
 		'a b' = 3
 	)"sv,
-						"3:11: Error while parsing key-value pair: cannot redefine existing integer ''a b''"sv);
+						"3:3: Error while parsing key-value pair: cannot redefine existing integer ''a b''"sv);
 
 	// whitespace is allowed when quoted, but not collapsed, success
 	parsing_should_succeed(FILE_LINE_ARGS, R"(
@@ -223,7 +223,7 @@ TEST_CASE("parsing - key-value pairs (string keys)")
 		"a " = 2
 		'a ' = 3
 	)"sv,
-						"3:10: Error while parsing key-value pair: cannot redefine existing integer ''a ''"sv);
+						"3:3: Error while parsing key-value pair: cannot redefine existing integer ''a ''"sv);
 
 	// whitespace relevant, and not collapsed, success
 	parsing_should_succeed(FILE_LINE_ARGS, R"(
@@ -299,13 +299,13 @@ TEST_CASE("parsing - key-value pairs (string keys, quoting)")
 		a = 2
 		'a' = 2
 	)"sv,
-						"3:9: Error while parsing key-value pair: cannot redefine existing integer ''a''"sv);
+						"3:3: Error while parsing key-value pair: cannot redefine existing integer ''a''"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						R"(
 		'a' = 2
 		"a" = 2
 	)"sv,
-						R"(3:9: Error while parsing key-value pair: cannot redefine existing integer '"a"')"sv);
+						R"(3:3: Error while parsing key-value pair: cannot redefine existing integer '"a"')"sv);
 }
 
 TEST_CASE("parsing - key-value pairs (string keys, case, quotes and escapes)")
@@ -356,7 +356,7 @@ TEST_CASE("parsing - key-value pairs (string keys, case, quotes and escapes)")
 		"a'b" = 2
 		"a\u0027b" = 4
 	)"sv,
-						R"(3:16: Error while parsing key-value pair: cannot redefine existing integer '"a\u0027b"')"sv);
+						R"(3:3: Error while parsing key-value pair: cannot redefine existing integer '"a\u0027b"')"sv);
 
 	// literal strings, escapes are not escaped, success, since keys are valid and not equal
 	parsing_should_succeed(FILE_LINE_ARGS, R"(
@@ -372,7 +372,7 @@ TEST_CASE("parsing - key-value pairs (string keys, case, quotes and escapes)")
 		a = 1
 		"\u0061" = 2
 	)"sv,
-						R"(3:14: Error while parsing key-value pair: cannot redefine existing integer '"\u0061"')"sv);
+						R"(3:3: Error while parsing key-value pair: cannot redefine existing integer '"\u0061"')"sv);
 
 	// escaping requires quotes, syntax error
 	parsing_should_fail(
@@ -391,7 +391,7 @@ TEST_CASE("parsing - key-value pairs (string keys, empty)")
 		"" = 2
 		'' = 3
 	)"sv,
-						"3:8: Error while parsing key-value pair: cannot redefine existing integer ''''"sv);
+						"3:3: Error while parsing key-value pair: cannot redefine existing integer ''''"sv);
 }
 
 TEST_CASE("parsing - key-value pairs (string keys, numerals)")
@@ -404,7 +404,7 @@ TEST_CASE("parsing - key-value pairs (string keys, numerals)")
 		1234 = 5
 		"1234" = 5
 	)"sv,
-						R"(3:12: Error while parsing key-value pair: cannot redefine existing integer '"1234"')"sv);
+						R"(3:3: Error while parsing key-value pair: cannot redefine existing integer '"1234"')"sv);
 
 	// bare keys can be numerals, but are interpreted as strings, fail duplicate key
 	parsing_should_succeed(FILE_LINE_ARGS, R"(1234 = 5)"sv);
@@ -414,7 +414,7 @@ TEST_CASE("parsing - key-value pairs (string keys, numerals)")
 		1234 = 5
 		'1234' = 5
 	)"sv,
-						"3:12: Error while parsing key-value pair: cannot redefine existing integer ''1234''"sv);
+						"3:3: Error while parsing key-value pair: cannot redefine existing integer ''1234''"sv);
 
 	// bare keys can be numerals, but are interpreted as strings, valid, different keys
 	parsing_should_succeed(FILE_LINE_ARGS, R"(
@@ -448,7 +448,7 @@ TEST_CASE("parsing - key-value pairs (string keys, numerals)")
 		12e3 = 4
 		"12e3" = 5
 	)"sv,
-						R"(3:12: Error while parsing key-value pair: cannot redefine existing integer '"12e3"')"sv);
+						R"(3:3: Error while parsing key-value pair: cannot redefine existing integer '"12e3"')"sv);
 
 	// bare keys can be numerals, but are interpreted as strings, fail duplicate dotted keys
 	parsing_should_succeed(FILE_LINE_ARGS, R"(1.2e3 = 4)"sv);
@@ -458,7 +458,7 @@ TEST_CASE("parsing - key-value pairs (string keys, numerals)")
 		1.2e3 = 4
 		1."2e3" = 5
 	)"sv,
-						R"(3:13: Error while parsing key-value pair: cannot redefine existing integer '1."2e3"')"sv);
+						R"(3:3: Error while parsing key-value pair: cannot redefine existing integer '1."2e3"')"sv);
 
 	// bare keys can be numerals, but are interpreted as strings, fail duplicate dotted keys
 	parsing_should_succeed(FILE_LINE_ARGS, R"(1.2e3 = 4)"sv);
@@ -468,7 +468,7 @@ TEST_CASE("parsing - key-value pairs (string keys, numerals)")
 		1.2e3 = 4
 		"1".2e3 = 5
 	)"sv,
-						R"(3:13: Error while parsing key-value pair: cannot redefine existing integer '"1".2e3')"sv);
+						R"(3:3: Error while parsing key-value pair: cannot redefine existing integer '"1".2e3')"sv);
 }
 
 TEST_CASE("parsing - key-value pairs (non-ASCII whitespace)")

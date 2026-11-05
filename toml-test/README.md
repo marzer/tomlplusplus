@@ -12,8 +12,10 @@
 Install the `toml-test` runner, either from a release binary or with Go, as the [toml-test] README describes:
 
 ```bash
-go install github.com/toml-lang/toml-test/v2/cmd/toml-test@latest
+go install github.com/toml-lang/toml-test/v2/cmd/toml-test@v2.2.0
 ```
+
+CI runs the same version against the TOML 1.1 tests, which is what `-toml 1.1` below selects.
 
 <br>
 
@@ -24,7 +26,7 @@ go install github.com/toml-lang/toml-test/v2/cmd/toml-test@latest
 ```bash
 cmake -S . -B build-tt -DCMAKE_BUILD_TYPE=Release -Dtomlplusplus_BUILD_TOML_TEST=ON
 cmake --build build-tt
-toml-test test -decoder=build-tt/toml-test/tt_decoder -encoder=build-tt/toml-test/tt_encoder
+toml-test test -toml 1.1 -decoder=build-tt/toml-test/tt_decoder -encoder=build-tt/toml-test/tt_encoder
 ```
 
 With Visual Studio or another multi-config generator, build with `--config Release`; the executables are then in
@@ -35,12 +37,13 @@ With Visual Studio or another multi-config generator, build with `--config Relea
 ```bash
 meson setup build-tt --buildtype=release -Dbuild_tt=true
 meson compile -C build-tt
-toml-test test -decoder=build-tt/toml-test/tt_decoder -encoder=build-tt/toml-test/tt_encoder
+toml-test test -toml 1.1 -decoder=build-tt/toml-test/tt_decoder -encoder=build-tt/toml-test/tt_encoder
 ```
 
 > ℹ&#xFE0F; Pass `-Dtomlplusplus_USE_VENDORED_LIBS=OFF` to CMake or `-Duse_vendored_libs=false` to Meson if you wish to
 > use the system-installed version of nlohmann/json rather than the vendored one.
 >
-> ℹ&#xFE0F; The encoder and decoder aren't built when unreleased TOML features are enabled.
+> ℹ&#xFE0F; With unreleased TOML features enabled, the encoder writes keys such as `€` without quotes, which TOML 1.1
+> doesn't allow, so toml-test reports failures.
 
 [toml-test]: https://github.com/toml-lang/toml-test

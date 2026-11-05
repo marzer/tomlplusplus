@@ -42,7 +42,7 @@ unreleased_features = get_option('unreleased_features')
 
 build_tests = (get_option('build_tests') or is_devel) and not is_subproject
 build_examples = (get_option('build_examples') or is_devel) and not is_subproject
-build_tt = (get_option('build_tt') or is_devel) and not is_subproject and has_exceptions and not unreleased_features
+build_tt = (get_option('build_tt') or is_devel) and not is_subproject and has_exceptions
 build_lib = get_option('build_lib') or get_option('compile_library') or build_tests or build_examples or build_tt
 
 #-----------------------------------------------------------------------------------------------------------------------

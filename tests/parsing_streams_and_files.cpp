@@ -175,7 +175,7 @@ TEST_CASE("parsing - streams that fail while reading")
 		const auto err = parse_failure([&]() { return toml::parse(stream, "pipe.toml"sv); });
 		REQUIRE(err);
 		CHECK(err->description() == "the pipe broke"sv);
-		CHECK(err->source().begin == source_position{ 1, 1 });
+		CHECK(err->source().begin == source_position{ 1, 4 });
 		REQUIRE(err->source().path);
 		CHECK(*err->source().path == "pipe.toml"sv);
 	}
@@ -188,7 +188,7 @@ TEST_CASE("parsing - streams that fail while reading")
 		const auto err = parse_failure([&]() { return toml::parse(stream); });
 		REQUIRE(err);
 		CHECK(err->description() == "An unspecified error occurred"sv);
-		CHECK(err->source().begin == source_position{ 1, 1 });
+		CHECK(err->source().begin == source_position{ 1, 4 });
 	}
 
 	SECTION("the stream fails on its first read")
@@ -222,6 +222,26 @@ TEST_CASE("parsing - streams that fail while reading")
 		CHECK(err->source().begin == source_position{ 1, 1 });
 		REQUIRE(err->source().path);
 		CHECK(*err->source().path == "pipe.toml"sv);
+	}
+
+	SECTION("the stream fails right after a whole block")
+	{
+		const auto doc = "#" + std::string(40u, 'x');
+
+		unseekable_buf buf{ doc, 32u };
+		std::istream stream{ &buf };
+		const auto err = parse_failure([&]() { return toml::parse(stream); });
+		REQUIRE(err);
+		CHECK(err->description() == "An I/O error occurred while reading from the underlying stream"sv);
+		CHECK(err->source().begin == source_position{ 1, 33 });
+
+		unseekable_buf rethrowing_buf{ doc, 32u };
+		std::istream rethrowing_stream{ &rethrowing_buf };
+		rethrowing_stream.exceptions(std::ios::badbit);
+		const auto rethrown = parse_failure([&]() { return toml::parse(rethrowing_stream); });
+		REQUIRE(rethrown);
+		CHECK(rethrown->description() == "the pipe broke"sv);
+		CHECK(rethrown->source().begin == source_position{ 1, 33 });
 	}
 }
 
