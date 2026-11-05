@@ -1084,12 +1084,8 @@ TOML_NAMESPACE_START
 #endif
 		}
 #if TOML_CPP >= 20
-		else if constexpr (impl::is_chrono_local_time<T>::value)
-			return *ref_cast<date_time>()->template to_chrono<typename T::duration>();
-		else if constexpr (impl::is_chrono_year_month_day<T>::value)
+		else if constexpr (std::is_same_v<T, std::chrono::year_month_day>)
 			return ref_cast<date>()->to_chrono();
-		else if constexpr (impl::is_chrono_hh_mm_ss<T>::value)
-			return *ref_cast<time>()->template to_chrono<typename impl::is_chrono_hh_mm_ss<T>::duration_type>();
 #endif
 		else
 			return static_cast<T>(*ref_cast<native_type_of<T>>());
@@ -1115,7 +1111,12 @@ TOML_NAMESPACE_START
 			{
 #if TOML_CPP >= 20
 				if constexpr (is_chrono_local_time<T>::value)
-					return ref_cast<date_time>()->template to_chrono<typename T::duration>();
+				{
+					const auto& dt = *ref_cast<date_time>();
+					if (dt.offset)
+						return {};
+					return dt.template to_chrono<typename T::duration>();
+				}
 				else if constexpr (is_chrono_hh_mm_ss<T>::value)
 					return ref_cast<time>()->template to_chrono<typename is_chrono_hh_mm_ss<T>::duration_type>();
 				else
@@ -1140,11 +1141,7 @@ TOML_NAMESPACE_START
 
 		// when asking for strings, dates, times and date_times there's no 'fuzzy' conversion
 		// semantics to be mindful of so the exact retrieval is enough.
-		if constexpr (is_natively_one_of<T, std::string, time, date, date_time>
-					  || (TOML_CPP >= 20
-						  && (is_chrono_local_time<T>::value || is_chrono_year_month_day<T>::value
-							  || is_chrono_hh_mm_ss<T>::value)
-						  && can_represent_native<T>))
+		if constexpr (is_natively_one_of<T, std::string, time, date, date_time>)
 		{
 			if (type() == node_type_of<T>)
 			{
@@ -1163,20 +1160,6 @@ TOML_NAMESPACE_START
 		// everything else requires a bit of logicking.
 		else
 		{
-#if TOML_CPP >= 20
-			if constexpr (TOML_CPP >= 20 && (is_chrono_local_time<T>::value || is_chrono_hh_mm_ss<T>::value))
-			{
-				if (type() == node_type_of<T>)
-				{
-					if constexpr (is_chrono_local_time<T>::value)
-						return ref_cast<date_time>()->template to_chrono<typename T::duration>();
-					else
-						return ref_cast<time>()->template to_chrono<typename is_chrono_hh_mm_ss<T>::duration_type>();
-				}
-				return {};
-			}
-#endif
-
 			switch (type())
 			{
 				// int -> *

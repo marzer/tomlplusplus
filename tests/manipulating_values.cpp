@@ -818,3 +818,122 @@ TEST_CASE("string-like types - retrieval works when copying can throw")
 	CHECK(!integer.value_exact<potentially_throwing_copy_string>());
 	CHECK(integer.value_or(potentially_throwing_copy_string{ "y"sv }).text == "y"sv);
 }
+
+#if TOML_CPP >= 20
+
+namespace
+{
+	template <typename T>
+	constexpr bool comparable_with_nodes = requires(const node_view<const node>& v, const T& t) { v == t; };
+}
+
+TEST_CASE("chrono types - retrieval")
+{
+	using namespace std::chrono;
+
+	const auto time_of_day = hours{ 10 } + minutes{ 20 } + milliseconds{ 30040 };
+	const auto local	   = local_days{ year{ 1987 } / 3 / 16 } + time_of_day;
+	const table tbl{ { "dt", date_time{ local } },
+					 { "odt", date_time{ local, minutes{ -570 } } },
+					 { "d", date{ 1987, 3, 16 } },
+					 { "t", toml::time{ 10, 20, 30, 40000000 } } };
+
+	SECTION("local_time")
+	{
+		CHECK(tbl["dt"].value<local_time<nanoseconds>>() == local);
+		CHECK(tbl["dt"].value<local_time<seconds>>() == time_point_cast<seconds>(local));
+		CHECK(tbl["dt"].value_exact<local_time<nanoseconds>>() == local);
+		CHECK(tbl["dt"].value_or(local_time<seconds>{}) == time_point_cast<seconds>(local));
+		CHECK(tbl["d"].value_or(local_time<seconds>{}) == local_time<seconds>{});
+		CHECK(tbl["missing"].value_or(local_time<seconds>{}) == local_time<seconds>{});
+	}
+
+	SECTION("local_time from an offset date-time")
+	{
+		CHECK(tbl["odt"].value<local_time<nanoseconds>>() == local);
+		CHECK(!tbl["odt"].value_exact<local_time<nanoseconds>>());
+	}
+
+	SECTION("year_month_day")
+	{
+		CHECK(tbl["d"].value<year_month_day>() == year{ 1987 } / 3 / 16);
+		CHECK(tbl["d"].value_exact<year_month_day>() == year{ 1987 } / 3 / 16);
+		CHECK(!tbl["dt"].value<year_month_day>());
+	}
+
+	SECTION("hh_mm_ss")
+	{
+		CHECK(tbl["t"].value_or(hh_mm_ss<milliseconds>{}).to_duration() == time_of_day);
+		CHECK(tbl["t"].value_or(hh_mm_ss<seconds>{}).to_duration() == seconds{ 37230 });
+		CHECK(tbl["dt"].value_or(hh_mm_ss<seconds>{}).to_duration() == seconds{});
+
+		const auto exact = tbl["t"].value_exact<hh_mm_ss<nanoseconds>>();
+		REQUIRE(exact);
+		CHECK(exact->to_duration() == time_of_day);
+	}
+
+	SECTION("out of range for the duration")
+	{
+		const table limits{ { "dt", date_time{ date{ 2038, 1, 19 }, toml::time{ 3, 14, 8 } } },
+							{ "t", toml::time{ 0, 2, 8 } } };
+		CHECK(!limits["dt"].value<local_time<duration<int32_t>>>());
+		CHECK(limits["dt"].value_or(local_time<duration<int32_t>>{}) == local_time<duration<int32_t>>{});
+		CHECK(!limits["t"].value<hh_mm_ss<duration<int8_t>>>());
+		CHECK(limits["t"].value_or(hh_mm_ss<duration<int8_t>>{}).to_duration() == seconds{});
+	}
+}
+
+TEST_CASE("chrono types - lossless conversion implies insertion and equality comparison")
+{
+	using namespace std::chrono;
+
+	const auto local = local_days{ year{ 1987 } / 3 / 16 } + hours{ 10 } + minutes{ 20 } + seconds{ 30 };
+	const auto ymd	 = year{ 1987 } / 3 / 16;
+	const auto hms	 = hh_mm_ss{ hours{ 10 } + minutes{ 20 } + milliseconds{ 30500 } };
+
+	static_assert(std::is_same_v<inserted_type_of<decltype(local)>, value<date_time>>);
+	static_assert(std::is_same_v<inserted_type_of<decltype(ymd)>, value<date>>);
+	static_assert(std::is_same_v<inserted_type_of<decltype(hms)>, value<toml::time>>);
+
+	table tbl;
+	tbl.insert("dt", local);
+	tbl.insert_or_assign("d", ymd);
+	tbl.emplace("t", hms);
+	CHECK(tbl["dt"] == date_time{ date{ 1987, 3, 16 }, toml::time{ 10, 20, 30 } });
+	CHECK(tbl["d"] == date{ 1987, 3, 16 });
+	CHECK(tbl["t"] == toml::time{ 10, 20, 30, 500000000 });
+
+	CHECK(tbl["dt"] == local);
+	CHECK(tbl["dt"] != local + seconds{ 1 });
+	CHECK(tbl["d"] == ymd);
+	CHECK(tbl["t"] == hms);
+
+	array arr;
+	arr.push_back(local);
+	arr.emplace_back(ymd);
+	CHECK(arr == array{ date_time{ date{ 1987, 3, 16 }, toml::time{ 10, 20, 30 } }, date{ 1987, 3, 16 } });
+	CHECK(array{ local } == std::vector{ local });
+}
+
+TEST_CASE("chrono types - conversion is lossless only for integral durations that convert exactly")
+{
+	using namespace std::chrono;
+	using picoseconds		= duration<int64_t, std::pico>;
+	using float_nanoseconds = duration<double, std::nano>;
+
+	static_assert(comparable_with_nodes<local_time<seconds>>);
+	static_assert(comparable_with_nodes<local_time<nanoseconds>>);
+	static_assert(!comparable_with_nodes<local_time<picoseconds>>);
+	static_assert(!comparable_with_nodes<local_time<float_nanoseconds>>);
+	static_assert(comparable_with_nodes<hh_mm_ss<milliseconds>>);
+	static_assert(!comparable_with_nodes<hh_mm_ss<picoseconds>>);
+
+	static_assert(impl::can_represent_native<local_time<nanoseconds>>);
+	static_assert(impl::can_represent_native<local_time<picoseconds>>);
+	static_assert(!impl::can_represent_native<local_time<microseconds>>);
+	static_assert(!impl::can_represent_native<local_time<float_nanoseconds>>);
+	static_assert(impl::can_represent_native<hh_mm_ss<nanoseconds>>);
+	static_assert(!impl::can_represent_native<hh_mm_ss<seconds>>);
+}
+
+#endif

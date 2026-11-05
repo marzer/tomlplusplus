@@ -367,3 +367,120 @@ TEST_CASE("date-times - stream output")
 
 	CHECK(streamed(val) == expected);
 }
+
+#if TOML_CPP >= 20
+
+TEST_CASE("dates - std::chrono conversion")
+{
+	using namespace std::chrono;
+
+	static_assert(date{ year{ 1987 } / 3 / 16 } == date{ 1987, 3, 16 });
+	static_assert(date{ year{ 1987 }, month{ 3 }, day{ 16 } } == date{ 1987, 3, 16 });
+	static_assert(date{ 1987, 3, 16 }.to_chrono() == year{ 1987 } / 3 / 16);
+}
+
+TEST_CASE("times - std::chrono conversion")
+{
+	using namespace std::chrono;
+
+	SECTION("from hh_mm_ss")
+	{
+		static_assert(toml::time{ hh_mm_ss{ hours{ 10 } + minutes{ 20 } + seconds{ 30 } + nanoseconds{ 40 } } }
+					  == toml::time{ 10, 20, 30, 40 });
+		static_assert(toml::time{ hh_mm_ss{ hours{ 10 } + minutes{ 20 } + milliseconds{ 30040 } } }
+					  == toml::time{ 10, 20, 30, 40000000 });
+		static_assert(toml::time{ hh_mm_ss{ hours{ 10 } + minutes{ 20 } } } == toml::time{ 10, 20 });
+	}
+
+	SECTION("to hh_mm_ss")
+	{
+		const toml::time t{ 10, 20, 30, 40999999 };
+		REQUIRE(t.to_chrono());
+		CHECK(t.to_chrono()->to_duration() == hours{ 10 } + minutes{ 20 } + seconds{ 30 } + nanoseconds{ 40999999 });
+		REQUIRE(t.to_chrono<milliseconds>());
+		CHECK(t.to_chrono<milliseconds>()->to_duration() == hours{ 10 } + minutes{ 20 } + milliseconds{ 30040 });
+	}
+
+	SECTION("out of range for the duration")
+	{
+		using narrow_seconds = duration<int8_t>;
+		REQUIRE(toml::time{ 0, 2, 7 }.to_chrono<narrow_seconds>());
+		CHECK(toml::time{ 0, 2, 7 }.to_chrono<narrow_seconds>()->to_duration() == seconds{ 127 });
+		CHECK(!toml::time{ 0, 2, 8 }.to_chrono<narrow_seconds>());
+	}
+}
+
+TEST_CASE("time offsets - std::chrono conversion")
+{
+	using namespace std::chrono;
+
+	static_assert(time_offset{ minutes{ -570 } } == time_offset{ -9, -30 });
+	static_assert(time_offset{ hours{ -9 }, minutes{ -30 } } == time_offset{ -9, -30 });
+	static_assert(time_offset{ hours{ -2 }, minutes{ 30 } } == time_offset{ -2, 30 });
+	static_assert(time_offset{ -9, -30 }.to_chrono() == minutes{ -570 });
+}
+
+TEST_CASE("date-times - std::chrono conversion")
+{
+	using namespace std::chrono;
+
+	constexpr auto ymd	 = year{ 1987 } / 3 / 16;
+	constexpr auto local = local_days{ ymd } + hours{ 10 } + minutes{ 20 } + seconds{ 30 } + nanoseconds{ 40 };
+	constexpr date d{ 1987, 3, 16 };
+	constexpr toml::time t{ 10, 20, 30, 40 };
+
+	SECTION("from local_time")
+	{
+		static_assert(date_time{ local } == date_time{ d, t });
+		static_assert(date_time{ time_point_cast<seconds>(local) } == date_time{ d, toml::time{ 10, 20, 30 } });
+		static_assert(date_time{ local, minutes{ -570 } } == date_time{ d, t, time_offset{ -9, -30 } });
+	}
+
+	SECTION("from year_month_day and hh_mm_ss")
+	{
+		constexpr auto hms = hh_mm_ss{ hours{ 10 } + minutes{ 20 } + seconds{ 30 } + nanoseconds{ 40 } };
+		static_assert(date_time{ ymd, hms } == date_time{ d, t });
+		static_assert(date_time{ ymd, hms, minutes{ 90 } } == date_time{ d, t, time_offset{ 1, 30 } });
+		static_assert(date_time{ ymd } == date_time{ d });
+	}
+
+	SECTION("to local_time")
+	{
+		CHECK(date_time{ d, t }.to_chrono() == local);
+		CHECK(date_time{ d, t }.to_chrono<seconds>() == time_point_cast<seconds>(local));
+		CHECK(date_time{ d, toml::time{ 10, 20, 30, 999999999 } }.to_chrono<seconds>()
+			  == local_days{ ymd } + hours{ 10 } + minutes{ 20 } + seconds{ 30 });
+	}
+
+	SECTION("to local_time ignores the offset")
+	{
+		CHECK(date_time{ d, t, time_offset{ -9, -30 } }.to_chrono() == local);
+	}
+
+	SECTION("before the epoch")
+	{
+		const auto before = local_days{ year{ 1969 } / 12 / 31 } + hours{ 23 } + minutes{ 59 } + seconds{ 59 }
+						  + nanoseconds{ 999999999 };
+		const date_time expected{ date{ 1969, 12, 31 }, toml::time{ 23, 59, 59, 999999999 } };
+		CHECK(date_time{ before } == expected);
+		CHECK(expected.to_chrono() == before);
+		CHECK(expected.to_chrono<seconds>()
+			  == local_days{ year{ 1969 } / 12 / 31 } + hours{ 23 } + minutes{ 59 } + seconds{ 59 });
+	}
+
+	SECTION("out of range for the duration")
+	{
+		CHECK(date_time{ date{ 1600, 1, 1 } }.to_chrono<seconds>());
+		CHECK(!date_time{ date{ 1600, 1, 1 } }.to_chrono());
+
+		using narrow_seconds = duration<int32_t>;
+		CHECK(date_time{ date{ 2038, 1, 19 }, toml::time{ 3, 14, 7 } }.to_chrono<narrow_seconds>());
+		CHECK(!date_time{ date{ 2038, 1, 19 }, toml::time{ 3, 14, 8 } }.to_chrono<narrow_seconds>());
+
+		using unsigned_seconds = duration<uint32_t>;
+		CHECK(date_time{ date{ 1970, 1, 1 } }.to_chrono<unsigned_seconds>());
+		CHECK(!date_time{ date{ 1969, 12, 31 }, toml::time{ 23, 59, 59 } }.to_chrono<unsigned_seconds>());
+	}
+}
+
+#endif

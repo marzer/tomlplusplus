@@ -63,6 +63,7 @@
 - added `toml::get_line()` (#255, #256, #258) (@N-Dekker)
 - added `toml::format_flags::force_multiline_arrays` (#282) (@rafal-c)
 - added support for user-defined string types, which `toml::is_string_like` detects automatically (#306) (@mikomikotaishi)
+- added support for C++20 `std::chrono` types (#291, #322) (@mikomikotaishi)
 - added C++20 module support with `import tomlplusplus;` (#266, #267, #273, #303) (@mikomikotaishi, @N-Dekker, @davidstone)
 - added `TOML_MAX_DOTTED_KEYS_DEPTH` config (default `1024`) (#242) (@tyler92)
 - added `TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA` config to work around MSVC's legacy lambda processor (on by default for MSVC before C++20) (#247) (@N-Dekker)
