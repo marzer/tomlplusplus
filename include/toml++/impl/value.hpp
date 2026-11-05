@@ -1085,14 +1085,11 @@ TOML_NAMESPACE_START
 		}
 #if TOML_CPP >= 20
 		else if constexpr (impl::is_chrono_local_time<T>::value)
-			return std::chrono::time_point_cast<typename T::duration>(ref_cast<date_time>()->to_chrono());
+			return *ref_cast<date_time>()->template to_chrono<typename T::duration>();
 		else if constexpr (impl::is_chrono_year_month_day<T>::value)
 			return ref_cast<date>()->to_chrono();
 		else if constexpr (impl::is_chrono_hh_mm_ss<T>::value)
-			return std::chrono::hh_mm_ss<typename impl::is_chrono_hh_mm_ss<T>::duration_type>{
-				std::chrono::duration_cast<typename impl::is_chrono_hh_mm_ss<T>::duration_type>(
-					ref_cast<time>()->to_chrono().to_duration())
-			};
+			return *ref_cast<time>()->template to_chrono<typename impl::is_chrono_hh_mm_ss<T>::duration_type>();
 #endif
 		else
 			return static_cast<T>(*ref_cast<native_type_of<T>>());
@@ -1115,7 +1112,16 @@ TOML_NAMESPACE_START
 		if constexpr ((is_native<T> || can_represent_native<T>) && !is_cvref<T>)
 		{
 			if (type() == node_type_of<T>)
-				return { this->get_value_exact<T>() };
+			{
+#if TOML_CPP >= 20
+				if constexpr (is_chrono_local_time<T>::value)
+					return ref_cast<date_time>()->template to_chrono<typename T::duration>();
+				else if constexpr (is_chrono_hh_mm_ss<T>::value)
+					return ref_cast<time>()->template to_chrono<typename is_chrono_hh_mm_ss<T>::duration_type>();
+				else
+#endif
+					return { this->get_value_exact<T>() };
+			}
 			return {};
 		}
 	}
@@ -1137,16 +1143,40 @@ TOML_NAMESPACE_START
 		if constexpr (is_natively_one_of<T, std::string, time, date, date_time>
 					  || (TOML_CPP >= 20
 						  && (is_chrono_local_time<T>::value || is_chrono_year_month_day<T>::value
-							  || is_chrono_hh_mm_ss<T>::value)))
+							  || is_chrono_hh_mm_ss<T>::value)
+						  && can_represent_native<T>))
 		{
 			if (type() == node_type_of<T>)
-				return { this->get_value_exact<T>() };
+			{
+#if TOML_CPP >= 20
+				if constexpr (is_chrono_local_time<T>::value)
+					return ref_cast<date_time>()->template to_chrono<typename T::duration>();
+				else if constexpr (is_chrono_hh_mm_ss<T>::value)
+					return ref_cast<time>()->template to_chrono<typename is_chrono_hh_mm_ss<T>::duration_type>();
+				else
+#endif
+					return { this->get_value_exact<T>() };
+			}
 			return {};
 		}
 
 		// everything else requires a bit of logicking.
 		else
 		{
+#if TOML_CPP >= 20
+			if constexpr (TOML_CPP >= 20 && (is_chrono_local_time<T>::value || is_chrono_hh_mm_ss<T>::value))
+			{
+				if (type() == node_type_of<T>)
+				{
+					if constexpr (is_chrono_local_time<T>::value)
+						return ref_cast<date_time>()->template to_chrono<typename T::duration>();
+					else
+						return ref_cast<time>()->template to_chrono<typename is_chrono_hh_mm_ss<T>::duration_type>();
+				}
+				return {};
+			}
+#endif
+
 			switch (type())
 			{
 				// int -> *

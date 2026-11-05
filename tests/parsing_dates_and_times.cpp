@@ -363,7 +363,11 @@ TEST_CASE("chrono conversions - dates and times")
 		hh_mm_ss<nanoseconds>{ hours{ 10 } + minutes{ 20 } + seconds{ 30 } + nanoseconds{ 40000000 } };
 	const auto time_value = toml::time{ chrono_time };
 	CHECK(time_value == toml::time{ 10, 20, 30, 40000000 });
-	CHECK(time_value.to_chrono().to_duration() == chrono_time.to_duration());
+	CHECK(time_value.to_chrono()->to_duration() == chrono_time.to_duration());
+	const auto chrono_millisecond_time =
+		hh_mm_ss<milliseconds>{ hours{ 10 } + minutes{ 20 } + seconds{ 30 } + milliseconds{ 40 } };
+	CHECK(toml::time{ chrono_millisecond_time } == time_value);
+	CHECK(time_value.to_chrono<milliseconds>()->to_duration() == chrono_millisecond_time.to_duration());
 
 	const auto chrono_offset = minutes{ -570 };
 	const auto offset_value	 = toml::time_offset{ chrono_offset };
@@ -373,7 +377,10 @@ TEST_CASE("chrono conversions - dates and times")
 	const auto chrono_local = local_days{ chrono_date } + chrono_time.to_duration();
 	const auto local_value	= toml::date_time{ chrono_local };
 	CHECK(local_value == toml::date_time{ { 1987, 3, 16 }, { 10, 20, 30, 40000000 } });
-	CHECK(local_value.to_chrono() == chrono_local);
+	CHECK(local_value.to_chrono().value() == chrono_local);
+	const auto seconds_local = time_point_cast<seconds>(chrono_local);
+	CHECK(toml::date_time{ seconds_local } == toml::date_time{ { 1987, 3, 16 }, { 10, 20, 30 } });
+	CHECK(local_value.to_chrono<seconds>()->time_since_epoch() == seconds_local.time_since_epoch());
 
 	const auto offset_local_value = toml::date_time{ chrono_local, chrono_offset };
 	CHECK(offset_local_value == toml::date_time{ { 1987, 3, 16 }, { 10, 20, 30, 40000000 }, { -9, -30 } });
@@ -408,5 +415,22 @@ TEST_CASE("chrono conversions - dates and times")
 		hh_mm_ss<milliseconds>{ hours{ 10 } + minutes{ 20 } + seconds{ 30 } + milliseconds{ 40 } };
 	CHECK(parsed_time["value"].value_or(default_time_of_day).to_duration() == expected_time_of_day.to_duration());
 	CHECK(parsed_time["missing"].value_or(default_time_of_day).to_duration() == default_time_of_day.to_duration());
+
+	const auto old_date_time = toml::parse("value = 1600-01-01T00:00:00"sv);
+	CHECK(old_date_time["value"].value<local_time<seconds>>());
+	CHECK(!old_date_time["value"].value<local_time<nanoseconds>>());
+
+	using narrow_seconds   = duration<int32_t>;
+	const auto future_date = toml::parse("value = 2040-01-01"sv);
+	CHECK(!future_date["value"].value<local_time<narrow_seconds>>());
+	CHECK(future_date["value"].value_or(local_time<narrow_seconds>{}) == local_time<narrow_seconds>{});
+
+	using narrow_time	 = duration<int8_t>;
+	const auto long_time = toml::parse("value = 00:03:00"sv);
+	CHECK(!long_time["value"].value<hh_mm_ss<narrow_time>>());
+	CHECK(long_time["value"].value_or(hh_mm_ss<narrow_time>{}).to_duration() == narrow_time{});
+
+	CHECK(parsed["value"].value_exact<local_time<nanoseconds>>());
+	CHECK(parsed_time["value"].value_exact<hh_mm_ss<nanoseconds>>());
 }
 #endif

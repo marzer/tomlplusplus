@@ -1732,9 +1732,9 @@ TOML_NAMESPACE_START // abi namespace
 
 	enum class TOML_OPEN_FLAGS_ENUM value_flags : uint16_t // being an "OPEN" flags enum is not an error
 	{
-		none				  = 0,
-		format_as_binary	  = 1,
-		format_as_octal		  = 2,
+		none = 0,
+		format_as_binary = 1,
+		format_as_octal = 2,
 		format_as_hexadecimal = 3,
 	};
 	TOML_MAKE_FLAGS(value_flags);
@@ -1744,22 +1744,22 @@ TOML_NAMESPACE_START // abi namespace
 
 	enum class TOML_CLOSED_FLAGS_ENUM format_flags : uint64_t
 	{
-		none					   = 0,
-		quote_dates_and_times	   = (1ull << 0),
-		quote_infinities_and_nans  = (1ull << 1),
-		allow_literal_strings	   = (1ull << 2),
-		allow_multi_line_strings   = (1ull << 3),
+		none = 0,
+		quote_dates_and_times = (1ull << 0),
+		quote_infinities_and_nans = (1ull << 1),
+		allow_literal_strings = (1ull << 2),
+		allow_multi_line_strings = (1ull << 3),
 		allow_real_tabs_in_strings = (1ull << 4),
-		allow_unicode_strings	   = (1ull << 5),
-		allow_binary_integers	   = (1ull << 6),
-		allow_octal_integers	   = (1ull << 7),
+		allow_unicode_strings = (1ull << 5),
+		allow_binary_integers = (1ull << 6),
+		allow_octal_integers = (1ull << 7),
 		allow_hexadecimal_integers = (1ull << 8),
-		indent_sub_tables		   = (1ull << 9),
-		indent_array_elements	   = (1ull << 10),
-		indentation				   = indent_sub_tables | indent_array_elements,
-		relaxed_float_precision	   = (1ull << 11),
-		terse_key_value_pairs	   = (1ull << 12),
-		force_multiline_arrays	   = (1ull << 13),
+		indent_sub_tables = (1ull << 9),
+		indent_array_elements = (1ull << 10),
+		indentation = indent_sub_tables | indent_array_elements,
+		relaxed_float_precision = (1ull << 11),
+		terse_key_value_pairs = (1ull << 12),
+		force_multiline_arrays = (1ull << 13),
 	};
 	TOML_MAKE_FLAGS(format_flags);
 
@@ -2377,10 +2377,15 @@ TOML_IMPL_NAMESPACE_START
 
 #if TOML_CPP >= 20
 	template <typename Duration>
+	inline constexpr bool chrono_duration_preserves_nanoseconds =
+		std::ratio_less_equal<typename Duration::period, std::nano>::value
+		&& std::ratio_divide<std::nano, typename Duration::period>::den == 1;
+
+	template <typename Duration>
 	struct value_traits<std::chrono::local_time<Duration>> : native_value_traits<date_time, node_type::date_time>
 	{
 		static constexpr bool is_native						 = false;
-		static constexpr bool can_represent_native			 = true;
+		static constexpr bool can_represent_native			 = chrono_duration_preserves_nanoseconds<Duration>;
 		static constexpr bool can_partially_represent_native = true;
 	};
 
@@ -2396,7 +2401,7 @@ TOML_IMPL_NAMESPACE_START
 	struct value_traits<std::chrono::hh_mm_ss<Duration>> : native_value_traits<time, node_type::time>
 	{
 		static constexpr bool is_native						 = false;
-		static constexpr bool can_represent_native			 = true;
+		static constexpr bool can_represent_native			 = chrono_duration_preserves_nanoseconds<Duration>;
 		static constexpr bool can_partially_represent_native = true;
 	};
 #endif
@@ -2855,6 +2860,7 @@ TOML_NAMESPACE_START
 		}
 
 	  private:
+
 		TOML_PURE_GETTER
 		static constexpr uint64_t pack(const source_position& pos) noexcept
 		{
@@ -2862,6 +2868,7 @@ TOML_NAMESPACE_START
 		}
 
 	  public:
+
 		TOML_PURE_GETTER
 		friend constexpr bool operator<(const source_position& lhs, const source_position& rhs) noexcept
 		{
@@ -3004,6 +3011,49 @@ TOML_PUSH_WARNINGS;
 #if TOML_CPP >= 20
 TOML_IMPL_NAMESPACE_START
 {
+	template <typename ToDuration, typename FromDuration>
+	TOML_NODISCARD
+	constexpr optional<ToDuration> duration_cast_checked(FromDuration value) noexcept
+	{
+		using to_rep				  = typename ToDuration::rep;
+		const long double seconds	  = static_cast<long double>(value.count())
+									  * static_cast<long double>(FromDuration::period::num)
+									  / static_cast<long double>(FromDuration::period::den);
+		const long double min_seconds = static_cast<long double>((std::numeric_limits<to_rep>::lowest)())
+									  * static_cast<long double>(ToDuration::period::num)
+									  / static_cast<long double>(ToDuration::period::den);
+		const long double max_seconds = static_cast<long double>((std::numeric_limits<to_rep>::max)())
+									  * static_cast<long double>(ToDuration::period::num)
+									  / static_cast<long double>(ToDuration::period::den);
+		if (seconds < min_seconds || seconds > max_seconds)
+			return {};
+		return std::chrono::duration_cast<ToDuration>(value);
+	}
+
+	template <typename Duration>
+	TOML_NODISCARD
+	constexpr optional<Duration> duration_add_checked(Duration lhs, Duration rhs) noexcept
+	{
+		using rep = typename Duration::rep;
+		if constexpr (std::is_integral_v<rep>)
+		{
+			if constexpr (std::is_signed_v<rep>)
+			{
+				if ((rhs.count() > 0 && lhs.count() > (std::numeric_limits<rep>::max)() - rhs.count())
+					|| (rhs.count() < 0 && lhs.count() < (std::numeric_limits<rep>::lowest)() - rhs.count()))
+					return {};
+			}
+			else if (lhs.count() > (std::numeric_limits<rep>::max)() - rhs.count())
+				return {};
+		}
+		else if (static_cast<long double>(lhs.count()) + static_cast<long double>(rhs.count())
+					 > static_cast<long double>((std::numeric_limits<rep>::max)())
+				 || static_cast<long double>(lhs.count()) + static_cast<long double>(rhs.count())
+						< static_cast<long double>((std::numeric_limits<rep>::lowest)()))
+			return {};
+		return Duration{ lhs.count() + rhs.count() };
+	}
+
 	TOML_NODISCARD
 	constexpr std::chrono::year_month_day extract_date(std::chrono::local_time<std::chrono::nanoseconds> dt)
 	{
@@ -3073,6 +3123,7 @@ TOML_NAMESPACE_START
 		}
 
 	  private:
+
 		TOML_PURE_GETTER
 		static constexpr uint32_t pack(const date& d) noexcept
 		{
@@ -3081,6 +3132,7 @@ TOML_NAMESPACE_START
 		}
 
 	  public:
+
 		TOML_PURE_GETTER
 		friend constexpr bool operator<(const date& lhs, const date& rhs) noexcept
 		{
@@ -3151,12 +3203,14 @@ TOML_NAMESPACE_START
 
 #if TOML_CPP >= 20
 
+		template <typename Duration>
 		TOML_NODISCARD_CTOR
-		constexpr time(std::chrono::hh_mm_ss<std::chrono::nanoseconds> value) noexcept
+		constexpr time(std::chrono::hh_mm_ss<Duration> value) noexcept
 			: hour{ static_cast<uint8_t>(value.hours().count()) },
 			  minute{ static_cast<uint8_t>(value.minutes().count()) },
 			  second{ static_cast<uint8_t>(value.seconds().count()) },
-			  nanosecond{ static_cast<uint32_t>(value.subseconds().count()) }
+			  nanosecond{ static_cast<uint32_t>(
+				  std::chrono::duration_cast<std::chrono::nanoseconds>(value.subseconds()).count()) }
 		{}
 #endif
 
@@ -3176,6 +3230,7 @@ TOML_NAMESPACE_START
 		}
 
 	  private:
+
 		TOML_PURE_GETTER
 		static constexpr uint64_t pack(const time& t) noexcept
 		{
@@ -3184,6 +3239,7 @@ TOML_NAMESPACE_START
 		}
 
 	  public:
+
 		TOML_PURE_GETTER
 		friend constexpr bool operator<(const time& lhs, const time& rhs) noexcept
 		{
@@ -3210,14 +3266,17 @@ TOML_NAMESPACE_START
 
 #if TOML_CPP >= 20
 
+		template <typename Duration = std::chrono::nanoseconds>
 		TOML_PURE_GETTER
-		std::chrono::hh_mm_ss<std::chrono::nanoseconds> to_chrono() const noexcept
+		optional<std::chrono::hh_mm_ss<Duration>> to_chrono() const noexcept
 		{
-			return std::chrono::hh_mm_ss<std::chrono::nanoseconds>{
-				std::chrono::hours{ static_cast<int>(hour) } + std::chrono::minutes{ static_cast<int>(minute) }
-				+ std::chrono::seconds{ static_cast<int>(second) }
-				+ std::chrono::nanoseconds{ static_cast<int>(nanosecond) }
-			};
+			const auto duration = std::chrono::hours{ static_cast<int>(hour) }
+								+ std::chrono::minutes{ static_cast<int>(minute) }
+								+ std::chrono::seconds{ static_cast<int>(second) }
+								+ std::chrono::nanoseconds{ static_cast<int>(nanosecond) };
+			if (auto value = impl::duration_cast_checked<Duration>(duration))
+				return std::chrono::hh_mm_ss<Duration>{ *value };
+			return {};
 		}
 #endif
 
@@ -3350,8 +3409,9 @@ TOML_NAMESPACE_START
 
 #if TOML_CPP >= 20
 
+		template <typename Duration>
 		TOML_NODISCARD_CTOR
-		constexpr date_time(std::chrono::year_month_day d, std::chrono::hh_mm_ss<std::chrono::nanoseconds> t) noexcept
+		constexpr date_time(std::chrono::year_month_day d, std::chrono::hh_mm_ss<Duration> t) noexcept
 			: date_time(toml::date(d), toml::time(t))
 		{}
 
@@ -3359,21 +3419,27 @@ TOML_NAMESPACE_START
 		constexpr date_time(std::chrono::year_month_day d) noexcept : date_time(toml::date(d))
 		{}
 
+		template <typename Duration>
 		TOML_NODISCARD_CTOR
 		constexpr date_time(std::chrono::year_month_day d,
-							std::chrono::hh_mm_ss<std::chrono::nanoseconds> t,
+							std::chrono::hh_mm_ss<Duration> t,
 							std::chrono::minutes off) noexcept
 			: date_time(toml::date(d), toml::time(t), toml::time_offset(off))
 		{}
 
+		template <typename Duration>
 		TOML_NODISCARD_CTOR
-		constexpr date_time(std::chrono::local_time<std::chrono::nanoseconds> dt) noexcept
-			: date_time(impl::extract_date(dt), impl::extract_time(dt))
+		constexpr date_time(std::chrono::local_time<Duration> dt) noexcept
+			: date_time(std::chrono::year_month_day{ std::chrono::floor<std::chrono::days>(dt) },
+						std::chrono::hh_mm_ss<Duration>{ dt - std::chrono::floor<std::chrono::days>(dt) })
 		{}
 
+		template <typename Duration>
 		TOML_NODISCARD_CTOR
-		constexpr date_time(std::chrono::local_time<std::chrono::nanoseconds> dt, std::chrono::minutes off) noexcept
-			: date_time(impl::extract_date(dt), impl::extract_time(dt), off)
+		constexpr date_time(std::chrono::local_time<Duration> dt, std::chrono::minutes off) noexcept
+			: date_time(std::chrono::year_month_day{ std::chrono::floor<std::chrono::days>(dt) },
+						std::chrono::hh_mm_ss<Duration>{ dt - std::chrono::floor<std::chrono::days>(dt) },
+						off)
 		{}
 #endif
 
@@ -3431,11 +3497,23 @@ TOML_NAMESPACE_START
 
 #if TOML_CPP >= 20
 
+		template <typename Duration = std::chrono::nanoseconds>
 		TOML_PURE_GETTER
-		std::chrono::local_time<std::chrono::nanoseconds> to_chrono() const noexcept
+		optional<std::chrono::local_time<Duration>> to_chrono() const noexcept
 		{
-			return std::chrono::local_time<std::chrono::nanoseconds>(std::chrono::local_days(date.to_chrono())
-																	 + time.to_chrono().to_duration());
+			const auto days			 = std::chrono::local_days{ date.to_chrono() }.time_since_epoch();
+			const auto time_value	 = std::chrono::hours{ static_cast<int>(time.hour) }
+									 + std::chrono::minutes{ static_cast<int>(time.minute) }
+									 + std::chrono::seconds{ static_cast<int>(time.second) }
+									 + std::chrono::nanoseconds{ static_cast<int>(time.nanosecond) };
+			const auto day_duration	 = impl::duration_cast_checked<Duration>(days);
+			const auto time_duration = impl::duration_cast_checked<Duration>(time_value);
+			if (!day_duration || !time_duration)
+				return {};
+			const auto total = impl::duration_add_checked(*day_duration, *time_duration);
+			if (!total)
+				return {};
+			return std::chrono::local_time<Duration>{ *total };
 		}
 #endif
 
@@ -3588,6 +3666,7 @@ TOML_NAMESPACE_START
 		}
 
 	  public:
+
 		TOML_NODISCARD_CTOR
 		TOML_EXPORTED_MEMBER_FUNCTION
 		path_component();
@@ -3688,6 +3767,7 @@ TOML_NAMESPACE_START
 	class TOML_EXPORTED_CLASS path
 	{
 	  private:
+
 		std::vector<path_component> components_;
 
 		TOML_EXPORTED_MEMBER_FUNCTION
@@ -3698,6 +3778,7 @@ TOML_NAMESPACE_START
 		static bool TOML_CALLCONV equal(const path&, const path&) noexcept;
 
 	  public:
+
 		TOML_NODISCARD_CTOR
 		path() noexcept = default;
 
@@ -4134,6 +4215,7 @@ TOML_NAMESPACE_START
 	class TOML_ABSTRACT_INTERFACE TOML_EXPORTED_CLASS node
 	{
 	  private:
+
 		friend class TOML_PARSER_TYPENAME;
 		source_region source_{};
 
@@ -4499,6 +4581,7 @@ TOML_NAMESPACE_START
 		}
 
 	  private:
+
 		template <typename Func, typename Node, typename T>
 		static constexpr bool can_visit = std::is_invocable_v<Func, ref_cast_type<T, Node>>;
 
@@ -4648,6 +4731,7 @@ TOML_NAMESPACE_START
 		}
 
 	  public:
+
 		template <typename Func>
 		decltype(auto) visit(Func&& visitor) & noexcept(visit_is_nothrow<Func&&, node&>)
 		{
@@ -4766,6 +4850,7 @@ TOML_NAMESPACE_START
 					  "A toml::node_view<> must wrap toml::node or const toml::node.");
 
 	  public:
+
 		using viewed_type = ViewedType;
 
 	  private:
@@ -4775,6 +4860,7 @@ TOML_NAMESPACE_START
 		mutable viewed_type* node_ = nullptr;
 
 	  public:
+
 		TOML_NODISCARD_CTOR
 		node_view() noexcept = default;
 
@@ -5047,10 +5133,12 @@ TOML_NAMESPACE_START
 		}
 
 	  private:
+
 		template <typename Func>
 		static constexpr bool visit_is_nothrow = noexcept(std::declval<viewed_type*>()->visit(std::declval<Func>()));
 
 	  public:
+
 		template <typename Func>
 		decltype(auto) visit(Func&& visitor) const noexcept(visit_is_nothrow<Func&&>)
 		{
@@ -5486,6 +5574,7 @@ TOML_NAMESPACE_START
 					  "A toml::value<> must model one of the native TOML value types:" TOML_SA_NATIVE_VALUE_TYPE_LIST);
 
 	  private:
+
 		friend class TOML_PARSER_TYPENAME;
 
 		template <typename T, typename U>
@@ -5502,6 +5591,7 @@ TOML_NAMESPACE_START
 		value_flags flags_ = value_flags::none;
 
 	  public:
+
 		using value_type = ValueType;
 
 		using value_arg = POXY_IMPLEMENTATION_DETAIL(
@@ -6154,14 +6244,11 @@ TOML_NAMESPACE_START
 		}
 #if TOML_CPP >= 20
 		else if constexpr (impl::is_chrono_local_time<T>::value)
-			return std::chrono::time_point_cast<typename T::duration>(ref_cast<date_time>()->to_chrono());
+			return *ref_cast<date_time>()->template to_chrono<typename T::duration>();
 		else if constexpr (impl::is_chrono_year_month_day<T>::value)
 			return ref_cast<date>()->to_chrono();
 		else if constexpr (impl::is_chrono_hh_mm_ss<T>::value)
-			return std::chrono::hh_mm_ss<typename impl::is_chrono_hh_mm_ss<T>::duration_type>{
-				std::chrono::duration_cast<typename impl::is_chrono_hh_mm_ss<T>::duration_type>(
-					ref_cast<time>()->to_chrono().to_duration())
-			};
+			return *ref_cast<time>()->template to_chrono<typename impl::is_chrono_hh_mm_ss<T>::duration_type>();
 #endif
 		else
 			return static_cast<T>(*ref_cast<native_type_of<T>>());
@@ -6184,7 +6271,16 @@ TOML_NAMESPACE_START
 		if constexpr ((is_native<T> || can_represent_native<T>) && !is_cvref<T>)
 		{
 			if (type() == node_type_of<T>)
-				return { this->get_value_exact<T>() };
+			{
+#if TOML_CPP >= 20
+				if constexpr (is_chrono_local_time<T>::value)
+					return ref_cast<date_time>()->template to_chrono<typename T::duration>();
+				else if constexpr (is_chrono_hh_mm_ss<T>::value)
+					return ref_cast<time>()->template to_chrono<typename is_chrono_hh_mm_ss<T>::duration_type>();
+				else
+#endif
+					return { this->get_value_exact<T>() };
+			}
 			return {};
 		}
 	}
@@ -6206,16 +6302,40 @@ TOML_NAMESPACE_START
 		if constexpr (is_natively_one_of<T, std::string, time, date, date_time>
 					  || (TOML_CPP >= 20
 						  && (is_chrono_local_time<T>::value || is_chrono_year_month_day<T>::value
-							  || is_chrono_hh_mm_ss<T>::value)))
+							  || is_chrono_hh_mm_ss<T>::value)
+						  && can_represent_native<T>))
 		{
 			if (type() == node_type_of<T>)
-				return { this->get_value_exact<T>() };
+			{
+#if TOML_CPP >= 20
+				if constexpr (is_chrono_local_time<T>::value)
+					return ref_cast<date_time>()->template to_chrono<typename T::duration>();
+				else if constexpr (is_chrono_hh_mm_ss<T>::value)
+					return ref_cast<time>()->template to_chrono<typename is_chrono_hh_mm_ss<T>::duration_type>();
+				else
+#endif
+					return { this->get_value_exact<T>() };
+			}
 			return {};
 		}
 
 		// everything else requires a bit of logicking.
 		else
 		{
+#if TOML_CPP >= 20
+			if constexpr (TOML_CPP >= 20 && (is_chrono_local_time<T>::value || is_chrono_hh_mm_ss<T>::value))
+			{
+				if (type() == node_type_of<T>)
+				{
+					if constexpr (is_chrono_local_time<T>::value)
+						return ref_cast<date_time>()->template to_chrono<typename T::duration>();
+					else
+						return ref_cast<time>()->template to_chrono<typename is_chrono_hh_mm_ss<T>::duration_type>();
+				}
+				return {};
+			}
+#endif
+
 			switch (type())
 			{
 				// int -> *
@@ -6832,6 +6952,7 @@ TOML_NAMESPACE_START
 	class TOML_EXPORTED_CLASS array : public node
 	{
 	  private:
+
 		using vector_type			= std::vector<impl::node_ptr>;
 		using vector_iterator		= typename vector_type::iterator;
 		using const_vector_iterator = typename vector_type::const_iterator;
@@ -7236,6 +7357,7 @@ TOML_NAMESPACE_START
 		}
 
 	  private:
+
 		template <typename T, typename Array>
 		using for_each_elem_ref = impl::copy_cvref<impl::wrap_node<impl::remove_cvref<impl::unwrap_node<T>>>, Array>;
 
@@ -7411,6 +7533,7 @@ TOML_NAMESPACE_START
 		}
 
 	  public:
+
 		template <typename Func>
 		array& for_each(Func&& visitor) & //
 			noexcept(for_each_is_nothrow<Func&&, array&>::value)
@@ -7668,6 +7791,7 @@ TOML_NAMESPACE_START
 		}
 
 	  private:
+
 		TOML_NODISCARD
 		TOML_EXPORTED_STATIC_FUNCTION
 		static bool TOML_CALLCONV equal(const array&, const array&) noexcept;
@@ -7702,6 +7826,7 @@ TOML_NAMESPACE_START
 		}
 
 	  public:
+
 		TOML_NODISCARD
 		friend bool operator==(const array& lhs, const array& rhs) noexcept
 		{
@@ -7774,6 +7899,7 @@ TOML_NAMESPACE_START
 		source_region source_{};
 
 	  public:
+
 		TOML_NODISCARD_CTOR
 		key() noexcept = default;
 
@@ -8205,6 +8331,7 @@ TOML_NAMESPACE_START
 	class TOML_EXPORTED_CLASS table : public node
 	{
 	  private:
+
 		using map_type			 = std::map<toml::key, impl::node_ptr, std::less<>>;
 		using map_pair			 = std::pair<const toml::key, impl::node_ptr>;
 		using map_iterator		 = typename map_type::iterator;
@@ -8218,6 +8345,7 @@ TOML_NAMESPACE_START
 		table(const impl::table_init_pair*, const impl::table_init_pair*);
 
 	  public:
+
 		TOML_NODISCARD_CTOR
 		TOML_EXPORTED_MEMBER_FUNCTION
 		table() noexcept;
@@ -8597,6 +8725,7 @@ TOML_NAMESPACE_START
 		}
 
 	  private:
+
 		template <typename T, typename Table>
 		using for_each_value_ref = impl::copy_cvref<impl::wrap_node<impl::remove_cvref<impl::unwrap_node<T>>>, Table>;
 
@@ -8747,6 +8876,7 @@ TOML_NAMESPACE_START
 		}
 
 	  public:
+
 		template <typename Func>
 		table& for_each(Func&& visitor) & //
 			noexcept(for_each_is_nothrow<Func&&, table&>::value)
@@ -8792,11 +8922,13 @@ TOML_NAMESPACE_START
 		}
 
 	  private:
+
 		TOML_PURE_GETTER
 		TOML_EXPORTED_MEMBER_FUNCTION
 		map_iterator get_lower_bound(std::string_view) noexcept;
 
 	  public:
+
 		TOML_PURE_GETTER
 		iterator lower_bound(std::string_view key) noexcept
 		{
@@ -8871,6 +9003,7 @@ TOML_NAMESPACE_START
 #endif // TOML_ENABLE_WINDOWS_COMPAT
 
 	  private:
+
 		TOML_EXPORTED_MEMBER_FUNCTION
 		map_iterator erase(const_map_iterator) noexcept;
 
@@ -8878,6 +9011,7 @@ TOML_NAMESPACE_START
 		map_iterator erase(const_map_iterator, const_map_iterator) noexcept;
 
 	  public:
+
 		iterator erase(iterator pos) noexcept
 		{
 			return iterator{ erase(const_map_iterator{ pos }) };
@@ -8920,10 +9054,12 @@ TOML_NAMESPACE_START
 		void clear() noexcept;
 
 	  private:
+
 		TOML_EXPORTED_MEMBER_FUNCTION
 		map_iterator insert_with_hint(const_iterator, key&&, impl::node_ptr&&);
 
 	  public:
+
 		TOML_CONSTRAINED_TEMPLATE((is_key_or_convertible<KeyType&&> || impl::is_wide_string<KeyType>),
 								  typename ValueType = void,
 								  typename KeyType,
@@ -9166,11 +9302,13 @@ TOML_NAMESPACE_START
 #endif // TOML_ENABLE_WINDOWS_COMPAT
 
 	  private:
+
 		TOML_PURE_GETTER
 		TOML_EXPORTED_STATIC_FUNCTION
 		static bool TOML_CALLCONV equal(const table&, const table&) noexcept;
 
 	  public:
+
 		TOML_NODISCARD
 		friend bool operator==(const table& lhs, const table& rhs) noexcept
 		{
@@ -9526,20 +9664,20 @@ TOML_IMPL_NAMESPACE_START
 		char32_t codepoint{};
 
 		static constexpr uint8_t state_table[]{
-			0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,
-			0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,
-			0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,
-			0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,
-			0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	1,	1,
-			1,	1,	1,	1,	1,	1,	1,	1,	1,	1,	1,	1,	1,	1,	9,	9,	9,	9,	9,	9,	9,	9,	9,	9,	9,	9,
-			9,	9,	9,	9,	7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	7,
-			7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	8,	8,	2,	2,	2,	2,	2,	2,	2,	2,	2,	2,	2,	2,	2,	2,
-			2,	2,	2,	2,	2,	2,	2,	2,	2,	2,	2,	2,	2,	2,	2,	2,	10, 3,	3,	3,	3,	3,	3,	3,	3,	3,
-			3,	3,	3,	4,	3,	3,	11, 6,	6,	6,	5,	8,	8,	8,	8,	8,	8,	8,	8,	8,	8,	8,	0,	12, 24, 36,
-			60, 96, 84, 12, 12, 12, 48, 72, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 0,	12, 12, 12, 12,
-			12, 0,	12, 0,	12, 12, 12, 24, 12, 12, 12, 12, 12, 24, 12, 24, 12, 12, 12, 12, 12, 12, 12, 12, 12, 24,
-			12, 12, 12, 12, 12, 24, 12, 12, 12, 12, 12, 12, 12, 24, 12, 12, 12, 12, 12, 12, 12, 12, 12, 36, 12, 36,
-			12, 12, 12, 36, 12, 12, 12, 12, 12, 36, 12, 36, 12, 12, 12, 36, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12
+			0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,
+			0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,
+			0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,
+			0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,
+			0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	1,	1,	1,	1,	1,	1,	1,
+			1,	1,	1,	1,	1,	1,	1,	1,	1,	9,	9,	9,	9,	9,	9,	9,	9,	9,	9,	9,	9,	9,	9,	9,	9,	7,	7,
+			7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	7,	7,
+			7,	7,	7,	8,	8,	2,	2,	2,	2,	2,	2,	2,	2,	2,	2,	2,	2,	2,	2,	2,	2,	2,	2,	2,	2,	2,	2,
+			2,	2,	2,	2,	2,	2,	2,	2,	10, 3,	3,	3,	3,	3,	3,	3,	3,	3,	3,	3,	3,	4,	3,	3,	11, 6,	6,
+			6,	5,	8,	8,	8,	8,	8,	8,	8,	8,	8,	8,	8,
+			0,	12, 24, 36, 60, 96, 84, 12, 12, 12, 48, 72, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 0,	12,
+			12, 12, 12, 12, 0,	12, 0,	12, 12, 12, 24, 12, 12, 12, 12, 12, 24, 12, 24, 12, 12, 12, 12, 12, 12, 12, 12,
+			12, 24, 12, 12, 12, 12, 12, 24, 12, 12, 12, 12, 12, 12, 12, 24, 12, 12, 12, 12, 12, 12, 12, 12, 12, 36, 12,
+			36, 12, 12, 12, 36, 12, 12, 12, 12, 12, 36, 12, 36, 12, 12, 12, 36, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12
 		};
 
 		TOML_PURE_INLINE_GETTER
@@ -9786,6 +9924,7 @@ TOML_NAMESPACE_START
 		}
 
 	  public:
+
 		TOML_NODISCARD_CTOR
 		parse_result() noexcept //
 			: err_{ true }
@@ -10473,6 +10612,7 @@ TOML_NAMESPACE_START
 	class TOML_EXPORTED_CLASS toml_formatter : impl::formatter
 	{
 	  private:
+
 		using base = impl::formatter;
 		std::vector<const key*> key_path_;
 		bool pending_table_separator_ = false;
@@ -10504,6 +10644,7 @@ TOML_NAMESPACE_START
 																 "false"sv };
 
 	  public:
+
 		static constexpr format_flags default_flags = constants.mandatory_flags				   //
 													| format_flags::allow_literal_strings	   //
 													| format_flags::allow_multi_line_strings   //
@@ -10577,6 +10718,7 @@ TOML_NAMESPACE_START
 	class TOML_EXPORTED_CLASS json_formatter : impl::formatter
 	{
 	  private:
+
 		using base = impl::formatter;
 
 		TOML_EXPORTED_MEMBER_FUNCTION
@@ -10601,6 +10743,7 @@ TOML_NAMESPACE_START
 		};
 
 	  public:
+
 		static constexpr format_flags default_flags = constants.mandatory_flags				  //
 													| format_flags::quote_infinities_and_nans //
 													| format_flags::allow_unicode_strings	  //
@@ -10667,6 +10810,7 @@ TOML_NAMESPACE_START
 	class TOML_EXPORTED_CLASS yaml_formatter : impl::formatter
 	{
 	  private:
+
 		using base = impl::formatter;
 
 		TOML_EXPORTED_MEMBER_FUNCTION
@@ -10694,6 +10838,7 @@ TOML_NAMESPACE_START
 		};
 
 	  public:
+
 		static constexpr format_flags default_flags = constants.mandatory_flags			  //
 													| format_flags::allow_literal_strings //
 													| format_flags::allow_unicode_strings //
@@ -15835,9 +15980,9 @@ TOML_IMPL_NAMESPACE_START
 					begins_sign	 = 1 << 12,
 					begins_digit = 1 << 13,
 					begins_zero	 = 1 << 14,
-					signs_msk	 = has_plus | has_minus,
-					bdigit_msk	 = has_digits | begins_digit,
-					bzero_msk	 = bdigit_msk | begins_zero,
+					signs_msk  = has_plus | has_minus,
+					bdigit_msk = has_digits | begins_digit,
+					bzero_msk  = bdigit_msk | begins_zero,
 				};
 				value_traits traits	 = has_nothing;
 				const auto has_any	 = [&](auto t) noexcept { return (traits & t) != has_nothing; };

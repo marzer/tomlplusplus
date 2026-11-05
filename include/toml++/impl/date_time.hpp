@@ -14,6 +14,49 @@
 #if TOML_CPP >= 20
 TOML_IMPL_NAMESPACE_START
 {
+	template <typename ToDuration, typename FromDuration>
+	TOML_NODISCARD
+	constexpr optional<ToDuration> duration_cast_checked(FromDuration value) noexcept
+	{
+		using to_rep				  = typename ToDuration::rep;
+		const long double seconds	  = static_cast<long double>(value.count())
+									  * static_cast<long double>(FromDuration::period::num)
+									  / static_cast<long double>(FromDuration::period::den);
+		const long double min_seconds = static_cast<long double>((std::numeric_limits<to_rep>::lowest)())
+									  * static_cast<long double>(ToDuration::period::num)
+									  / static_cast<long double>(ToDuration::period::den);
+		const long double max_seconds = static_cast<long double>((std::numeric_limits<to_rep>::max)())
+									  * static_cast<long double>(ToDuration::period::num)
+									  / static_cast<long double>(ToDuration::period::den);
+		if (seconds < min_seconds || seconds > max_seconds)
+			return {};
+		return std::chrono::duration_cast<ToDuration>(value);
+	}
+
+	template <typename Duration>
+	TOML_NODISCARD
+	constexpr optional<Duration> duration_add_checked(Duration lhs, Duration rhs) noexcept
+	{
+		using rep = typename Duration::rep;
+		if constexpr (std::is_integral_v<rep>)
+		{
+			if constexpr (std::is_signed_v<rep>)
+			{
+				if ((rhs.count() > 0 && lhs.count() > (std::numeric_limits<rep>::max)() - rhs.count())
+					|| (rhs.count() < 0 && lhs.count() < (std::numeric_limits<rep>::lowest)() - rhs.count()))
+					return {};
+			}
+			else if (lhs.count() > (std::numeric_limits<rep>::max)() - rhs.count())
+				return {};
+		}
+		else if (static_cast<long double>(lhs.count()) + static_cast<long double>(rhs.count())
+					 > static_cast<long double>((std::numeric_limits<rep>::max)())
+				 || static_cast<long double>(lhs.count()) + static_cast<long double>(rhs.count())
+						< static_cast<long double>((std::numeric_limits<rep>::lowest)()))
+			return {};
+		return Duration{ lhs.count() + rhs.count() };
+	}
+
 	TOML_NODISCARD
 	constexpr std::chrono::year_month_day extract_date(std::chrono::local_time<std::chrono::nanoseconds> dt)
 	{
@@ -271,14 +314,17 @@ TOML_NAMESPACE_START
 
 #if TOML_CPP >= 20
 		/// \brief  Conversion method to its corresponding hh_mm_ss value.
+		template <typename Duration = std::chrono::nanoseconds>
 		TOML_PURE_GETTER
-		std::chrono::hh_mm_ss<std::chrono::nanoseconds> to_chrono() const noexcept
+		optional<std::chrono::hh_mm_ss<Duration>> to_chrono() const noexcept
 		{
-			return std::chrono::hh_mm_ss<std::chrono::nanoseconds>{
-				std::chrono::hours{ static_cast<int>(hour) } + std::chrono::minutes{ static_cast<int>(minute) }
-				+ std::chrono::seconds{ static_cast<int>(second) }
-				+ std::chrono::nanoseconds{ static_cast<int>(nanosecond) }
-			};
+			const auto duration = std::chrono::hours{ static_cast<int>(hour) }
+								+ std::chrono::minutes{ static_cast<int>(minute) }
+								+ std::chrono::seconds{ static_cast<int>(second) }
+								+ std::chrono::nanoseconds{ static_cast<int>(nanosecond) };
+			if (auto value = impl::duration_cast_checked<Duration>(duration))
+				return std::chrono::hh_mm_ss<Duration>{ *value };
+			return {};
 		}
 #endif
 
@@ -498,8 +544,9 @@ TOML_NAMESPACE_START
 		///
 		/// \param 	d  	The date component.
 		/// \param 	t	The time component.
+		template <typename Duration>
 		TOML_NODISCARD_CTOR
-		constexpr date_time(std::chrono::year_month_day d, std::chrono::hh_mm_ss<std::chrono::nanoseconds> t) noexcept
+		constexpr date_time(std::chrono::year_month_day d, std::chrono::hh_mm_ss<Duration> t) noexcept
 			: date_time(toml::date(d), toml::time(t))
 		{}
 
@@ -515,9 +562,10 @@ TOML_NAMESPACE_START
 		/// \param 	d  	The date component.
 		/// \param 	t	The time component.
 		/// \param 	off	The timezone offset.
+		template <typename Duration>
 		TOML_NODISCARD_CTOR
 		constexpr date_time(std::chrono::year_month_day d,
-							std::chrono::hh_mm_ss<std::chrono::nanoseconds> t,
+							std::chrono::hh_mm_ss<Duration> t,
 							std::chrono::minutes off) noexcept
 			: date_time(toml::date(d), toml::time(t), toml::time_offset(off))
 		{}
@@ -525,18 +573,23 @@ TOML_NAMESPACE_START
 		/// \brief Constructs a date_time from a local_time value.
 		///
 		/// \param 	dt  	The local_time component.
+		template <typename Duration>
 		TOML_NODISCARD_CTOR
-		constexpr date_time(std::chrono::local_time<std::chrono::nanoseconds> dt) noexcept
-			: date_time(impl::extract_date(dt), impl::extract_time(dt))
+		constexpr date_time(std::chrono::local_time<Duration> dt) noexcept
+			: date_time(std::chrono::year_month_day{ std::chrono::floor<std::chrono::days>(dt) },
+						std::chrono::hh_mm_ss<Duration>{ dt - std::chrono::floor<std::chrono::days>(dt) })
 		{}
 
 		/// \brief Constructs a date_time from a local_time value.
 		///
 		/// \param 	dt  	The local_time component.
 		/// \param 	off	The timezone offset.
+		template <typename Duration>
 		TOML_NODISCARD_CTOR
-		constexpr date_time(std::chrono::local_time<std::chrono::nanoseconds> dt, std::chrono::minutes off) noexcept
-			: date_time(impl::extract_date(dt), impl::extract_time(dt), off)
+		constexpr date_time(std::chrono::local_time<Duration> dt, std::chrono::minutes off) noexcept
+			: date_time(std::chrono::year_month_day{ std::chrono::floor<std::chrono::days>(dt) },
+						std::chrono::hh_mm_ss<Duration>{ dt - std::chrono::floor<std::chrono::days>(dt) },
+						off)
 		{}
 #endif
 
@@ -601,11 +654,23 @@ TOML_NAMESPACE_START
 
 #if TOML_CPP >= 20
 		/// \brief  Conversion method to its corresponding local_time value.
+		template <typename Duration = std::chrono::nanoseconds>
 		TOML_PURE_GETTER
-		std::chrono::local_time<std::chrono::nanoseconds> to_chrono() const noexcept
+		optional<std::chrono::local_time<Duration>> to_chrono() const noexcept
 		{
-			return std::chrono::local_time<std::chrono::nanoseconds>(std::chrono::local_days(date.to_chrono())
-																	 + time.to_chrono().to_duration());
+			const auto days			 = std::chrono::local_days{ date.to_chrono() }.time_since_epoch();
+			const auto time_value	 = std::chrono::hours{ static_cast<int>(time.hour) }
+									 + std::chrono::minutes{ static_cast<int>(time.minute) }
+									 + std::chrono::seconds{ static_cast<int>(time.second) }
+									 + std::chrono::nanoseconds{ static_cast<int>(time.nanosecond) };
+			const auto day_duration	 = impl::duration_cast_checked<Duration>(days);
+			const auto time_duration = impl::duration_cast_checked<Duration>(time_value);
+			if (!day_duration || !time_duration)
+				return {};
+			const auto total = impl::duration_add_checked(*day_duration, *time_duration);
+			if (!total)
+				return {};
+			return std::chrono::local_time<Duration>{ *total };
 		}
 #endif
 

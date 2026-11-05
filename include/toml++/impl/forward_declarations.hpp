@@ -985,10 +985,15 @@ TOML_IMPL_NAMESPACE_START
 
 #if TOML_CPP >= 20
 	template <typename Duration>
+	inline constexpr bool chrono_duration_preserves_nanoseconds =
+		std::ratio_less_equal<typename Duration::period, std::nano>::value
+		&& std::ratio_divide<std::nano, typename Duration::period>::den == 1;
+
+	template <typename Duration>
 	struct value_traits<std::chrono::local_time<Duration>> : native_value_traits<date_time, node_type::date_time>
 	{
 		static constexpr bool is_native						 = false;
-		static constexpr bool can_represent_native			 = true;
+		static constexpr bool can_represent_native			 = chrono_duration_preserves_nanoseconds<Duration>;
 		static constexpr bool can_partially_represent_native = true;
 	};
 
@@ -1004,7 +1009,7 @@ TOML_IMPL_NAMESPACE_START
 	struct value_traits<std::chrono::hh_mm_ss<Duration>> : native_value_traits<time, node_type::time>
 	{
 		static constexpr bool is_native						 = false;
-		static constexpr bool can_represent_native			 = true;
+		static constexpr bool can_represent_native			 = chrono_duration_preserves_nanoseconds<Duration>;
 		static constexpr bool can_partially_represent_native = true;
 	};
 #endif
