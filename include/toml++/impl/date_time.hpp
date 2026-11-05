@@ -200,12 +200,14 @@ TOML_NAMESPACE_START
 
 #if TOML_CPP >= 20
 		/// \brief Constructs a time from a hh_mm_ss value.
+		template <typename Duration>
 		TOML_NODISCARD_CTOR
-		constexpr time(std::chrono::hh_mm_ss<std::chrono::nanoseconds> value) noexcept
+		constexpr time(std::chrono::hh_mm_ss<Duration> value) noexcept
 			: hour{ static_cast<uint8_t>(value.hours().count()) },
 			  minute{ static_cast<uint8_t>(value.minutes().count()) },
 			  second{ static_cast<uint8_t>(value.seconds().count()) },
-			  nanosecond{ static_cast<uint32_t>(value.subseconds().count()) }
+			  nanosecond{ static_cast<uint32_t>(
+				  std::chrono::duration_cast<std::chrono::nanoseconds>(value.subseconds()).count()) }
 		{}
 #endif
 
