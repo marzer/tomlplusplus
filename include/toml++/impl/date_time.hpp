@@ -5,9 +5,7 @@
 #pragma once
 
 #include "forward_declarations.hpp"
-#include "preprocessor.hpp"
 #include "print_to_stream.hpp"
-#include "std_chrono.hpp"
 #include "std_optional.hpp"
 #include "header_start.hpp"
 
@@ -117,7 +115,7 @@ TOML_NAMESPACE_START
 		/// \brief Constructs a date from year/month/day values.
 		TOML_NODISCARD_CTOR
 		constexpr date(std::chrono::year y, std::chrono::month m, std::chrono::day d) noexcept
-			: date(std::chrono::year_month_day(y, m, d))
+			: date{ std::chrono::year_month_day{ y, m, d } }
 		{}
 #endif
 
@@ -397,8 +395,11 @@ TOML_NAMESPACE_START
 			: time_offset(0, static_cast<int16_t>((h + m).count()))
 		{}
 
+		/// \brief Constructs a time_offset from a minutes value.
+		///
+		/// \param 	m	The total minutes.
 		TOML_NODISCARD_CTOR
-		constexpr time_offset(std::chrono::minutes value) noexcept : minutes{ static_cast<int16_t>(value.count()) }
+		constexpr time_offset(std::chrono::minutes m) noexcept : minutes{ static_cast<int16_t>(m.count()) }
 		{}
 #endif
 
@@ -547,7 +548,7 @@ TOML_NAMESPACE_START
 		template <typename Duration>
 		TOML_NODISCARD_CTOR
 		constexpr date_time(std::chrono::year_month_day d, std::chrono::hh_mm_ss<Duration> t) noexcept
-			: date_time(toml::date(d), toml::time(t))
+			: date_time{ toml::date{ d }, toml::time{ t } }
 		{}
 
 		/// \brief Constructs a date_time from a year_month_day value.
@@ -567,7 +568,7 @@ TOML_NAMESPACE_START
 		constexpr date_time(std::chrono::year_month_day d,
 							std::chrono::hh_mm_ss<Duration> t,
 							std::chrono::minutes off) noexcept
-			: date_time(toml::date(d), toml::time(t), toml::time_offset(off))
+			: date_time{ toml::date{ d }, toml::time{ t }, toml::time_offset{ off } }
 		{}
 
 		/// \brief Constructs a date_time from a local_time value.

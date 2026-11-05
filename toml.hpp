@@ -3104,7 +3104,7 @@ TOML_NAMESPACE_START
 
 		TOML_NODISCARD_CTOR
 		constexpr date(std::chrono::year y, std::chrono::month m, std::chrono::day d) noexcept
-			: date(std::chrono::year_month_day(y, m, d))
+			: date{ std::chrono::year_month_day{ y, m, d } }
 		{}
 #endif
 
@@ -3310,7 +3310,7 @@ TOML_NAMESPACE_START
 		{}
 
 		TOML_NODISCARD_CTOR
-		constexpr time_offset(std::chrono::minutes value) noexcept : minutes{ static_cast<int16_t>(value.count()) }
+		constexpr time_offset(std::chrono::minutes m) noexcept : minutes{ static_cast<int16_t>(m.count()) }
 		{}
 #endif
 
@@ -3412,7 +3412,7 @@ TOML_NAMESPACE_START
 		template <typename Duration>
 		TOML_NODISCARD_CTOR
 		constexpr date_time(std::chrono::year_month_day d, std::chrono::hh_mm_ss<Duration> t) noexcept
-			: date_time(toml::date(d), toml::time(t))
+			: date_time{ toml::date{ d }, toml::time{ t } }
 		{}
 
 		TOML_NODISCARD_CTOR
@@ -3424,7 +3424,7 @@ TOML_NAMESPACE_START
 		constexpr date_time(std::chrono::year_month_day d,
 							std::chrono::hh_mm_ss<Duration> t,
 							std::chrono::minutes off) noexcept
-			: date_time(toml::date(d), toml::time(t), toml::time_offset(off))
+			: date_time{ toml::date{ d }, toml::time{ t }, toml::time_offset{ off } }
 		{}
 
 		template <typename Duration>
