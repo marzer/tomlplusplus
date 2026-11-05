@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
+#include "std_chrono.hpp"
 #include "std_string.hpp"
 #include "std_new.hpp"
 TOML_DISABLE_WARNINGS;
@@ -624,6 +625,34 @@ TOML_IMPL_NAMESPACE_START
 	struct value_traits<T&&> : value_traits<T>
 	{};
 
+	template <typename T>
+	struct is_chrono_local_time : std::false_type
+	{};
+
+	template <typename T>
+	struct is_chrono_year_month_day : std::false_type
+	{};
+
+	template <typename T>
+	struct is_chrono_hh_mm_ss : std::false_type
+	{};
+
+#if TOML_CPP >= 20
+	template <typename Duration>
+	struct is_chrono_local_time<std::chrono::local_time<Duration>> : std::true_type
+	{};
+
+	template <>
+	struct is_chrono_year_month_day<std::chrono::year_month_day> : std::true_type
+	{};
+
+	template <typename Duration>
+	struct is_chrono_hh_mm_ss<std::chrono::hh_mm_ss<Duration>> : std::true_type
+	{
+		using duration_type = Duration;
+	};
+#endif
+
 	// integer value_traits specializations - standard types
 	template <typename T>
 	struct integer_limits
@@ -953,6 +982,37 @@ TOML_IMPL_NAMESPACE_START
 	template <>
 	struct value_traits<date_time> : native_value_traits<date_time, node_type::date_time>
 	{};
+
+#if TOML_CPP >= 20
+	template <typename Duration>
+	inline constexpr bool chrono_duration_preserves_nanoseconds =
+		std::ratio_less_equal<typename Duration::period, std::nano>::value
+		&& std::ratio_divide<std::nano, typename Duration::period>::den == 1;
+
+	template <typename Duration>
+	struct value_traits<std::chrono::local_time<Duration>> : native_value_traits<date_time, node_type::date_time>
+	{
+		static constexpr bool is_native						 = false;
+		static constexpr bool can_represent_native			 = chrono_duration_preserves_nanoseconds<Duration>;
+		static constexpr bool can_partially_represent_native = true;
+	};
+
+	template <>
+	struct value_traits<std::chrono::year_month_day> : native_value_traits<date, node_type::date>
+	{
+		static constexpr bool is_native						 = false;
+		static constexpr bool can_represent_native			 = true;
+		static constexpr bool can_partially_represent_native = true;
+	};
+
+	template <typename Duration>
+	struct value_traits<std::chrono::hh_mm_ss<Duration>> : native_value_traits<time, node_type::time>
+	{
+		static constexpr bool is_native						 = false;
+		static constexpr bool can_represent_native			 = chrono_duration_preserves_nanoseconds<Duration>;
+		static constexpr bool can_partially_represent_native = true;
+	};
+#endif
 
 	// native value category queries
 	template <typename T>

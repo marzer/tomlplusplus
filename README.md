@@ -278,8 +278,8 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 
 - **[@a-is](https://github.com/a-is)** - Fixed a bug
 - **[@ac1982](https://github.com/ac1982)** - Fixed shared-library parse error visibility
-- **[@aouxwoux](https://github.com/aouxwoux)** - Fixed out-of-bounds read in path::subpath
-- **[@beastle9end](https://github.com/beastle9end)** - Made Windows.h include bypass
+- **[@aouxwoux](https://github.com/aouxwoux)** - Fixed out-of-bounds read in `path::subpath`
+- **[@beastle9end](https://github.com/beastle9end)** - Made `<Windows.h>` include bypass
 - **[@bjadamson](https://github.com/bjadamson)** - Reported some bugs and helped design a new feature
 - **[@bobfang1992](https://github.com/bobfang1992)** - Reported a bug and created a [wrapper in python](https://github.com/bobfang1992/pytomlpp)
 - **[@capuanob](https://github.com/capuanob)** - Integrated this project into OSSFuzz
@@ -291,7 +291,7 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 - **[@kcsaul](https://github.com/kcsaul)** - Fixed a bug
 - **[@KevDi](https://github.com/KevDi)** - Reported a bug
 - **[@levicki](https://github.com/levicki)** - Helped design some new features
-- **[@mikomikotaishi](https://github.com/mikomikotaishi)** - Added support for C++20 modules and custom strings
+- **[@mikomikotaishi](https://github.com/mikomikotaishi)** - Added support for C++20 modules, `std::chrono`, and custom strings
 - **[@moorereason](https://github.com/moorereason)** - Reported a whole bunch of bugs
 - **[@mosra](https://github.com/mosra)** - Created the awesome [m.css] used to generate the API docs
 - **[@N-Dekker](https://github.com/N-Dekker)** - Added a workaround for the legacy lambda processor of MSVC 2019/2022, added `get_line`
@@ -307,15 +307,15 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 - **[@sneves](https://github.com/sneves)** - Helped fix a number of parser bugs
 - **[@sobczyk](https://github.com/sobczyk)** - Reported some bugs
 - **[@std-any-emplace](https://github.com/std-any-emplace)** - Reported some bugs
-- **[@Tachi107](https://github.com/Tachi107)** - Made some tweaks to meson.build, added compile_library build option
+- **[@Tachi107](https://github.com/Tachi107)** - Made some tweaks to `meson.build`, added `compile_library` build option
 - **[@theakman2](https://github.com/theakman2)** - Reported a bug
 - **[@traversaro](https://github.com/traversaro)** - Added vcpkg support and reported a bunch of bugs
 - **[@tyler92](https://github.com/tyler92)** - Fixed stack overflow that occurred during fuzzing tests
-- **[@whiterabbit963](https://github.com/whiterabbit963)** - Fixed a bug with value_or conversions
+- **[@whiterabbit963](https://github.com/whiterabbit963)** - Fixed a bug with `value_or` conversions
 - **[@ximion](https://github.com/ximion)** - Added support for installation with meson
 - **[@rafal-c](https://github.com/rafal-c)** - Added a formatting flag
 - **[@jfsimoneau](https://github.com/jfsimoneau)** - Fixed a meson option
-- **[@ShereeMorphett](https://github.com/ShereeMorphett)** - Fixed reinterpret_cast usage
+- **[@ShereeMorphett](https://github.com/ShereeMorphett)** - Fixed `reinterpret_cast` usage
 - **[@SAY-5](https://github.com/SAY-5)** - Fixed a parser bug
 
 <br>
