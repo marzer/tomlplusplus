@@ -1,1 +1,0 @@
-#define TEST_CASE(...)					void func()

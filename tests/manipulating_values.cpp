@@ -7,7 +7,7 @@
 
 #ifdef _WIN32
 TOML_DISABLE_WARNINGS;
-#include <Windows.h>
+#include <windows.h>
 TOML_ENABLE_WARNINGS;
 #endif
 
@@ -173,6 +173,11 @@ TEST_CASE("values - construction")
 	check_value(one<unsigned long long>, type_tag<int64_t>{});
 	check_value(true, type_tag<bool>{});
 	check_value(false, type_tag<bool>{});
+	check_value(one<float>, type_tag<double>{});
+	check_value(one<double>, type_tag<double>{});
+	check_value(date{ 2024, 1, 2 }, type_tag<date>{});
+	check_value(toml::time{ 3, 4, 5 }, type_tag<toml::time>{});
+	check_value(date_time{ date{ 2024, 1, 2 }, toml::time{ 3, 4, 5 } }, type_tag<date_time>{});
 	check_value("kek", type_tag<std::string>{});
 	check_value("kek"s, type_tag<std::string>{});
 	check_value("kek"sv, type_tag<std::string>{});
@@ -720,71 +725,15 @@ namespace string_like_types
 
 		array arr;
 		arr.emplace_back<std::string>(str);
+		arr.push_back(T{ text });
 		CHECK(*arr.get_as<std::string>(0) == text);
+		CHECK(*arr.get_as<std::string>(1) == text);
 
 		table tbl;
 		tbl.emplace<std::string>("k", str);
+		tbl.insert("inserted", T{ text });
 		CHECK(tbl["k"] == text);
-	}
-
-	template <typename T>
-	void check_equality_when_losslessly_convertible()
-	{
-		if constexpr (impl::is_losslessly_convertible_to_native<T>)
-		{
-			table tbl{ { "k", "x"sv } };
-			CHECK(tbl["k"] == T{ "x" });
-			CHECK(tbl["k"] != T{ "y" });
-			CHECK(tbl["missing"] != T{ "x" });
-
-			array arr{ "x"sv };
-			CHECK(arr == std::vector<T>{ T{ "x" } });
-			CHECK(arr != std::vector<T>{ T{ "y" } });
-		}
-	}
-
-	template <typename T>
-	void check_insertion_when_losslessly_convertible()
-	{
-		if constexpr (impl::is_losslessly_convertible_to_native<T>)
-		{
-			static_assert(std::is_same_v<inserted_type_of<T>, value<std::string>>);
-
-			table tbl;
-			tbl.insert("a", T{ "x" });
-			tbl.insert_or_assign("b", T{ "x" });
-			tbl.emplace("c", T{ "x" });
-			CHECK(tbl["a"] == "x"sv);
-			CHECK(tbl["b"] == "x"sv);
-			CHECK(tbl["c"] == "x"sv);
-
-			array arr;
-			arr.push_back(T{ "x" });
-			arr.emplace_back(T{ "x" });
-			CHECK(arr == array{ "x"sv, "x"sv });
-		}
-	}
-
-	template <typename T>
-	void check_value_or_when_native_is_representable()
-	{
-		if constexpr (impl::can_represent_native<T>)
-		{
-			table tbl{ { "k", "x"sv } };
-			CHECK(tbl["k"].value_or(T{ "y" }).text == "x"sv);
-			CHECK(tbl["missing"].value_or(T{ "y" }).text == "y"sv);
-		}
-	}
-
-	template <typename T>
-	void check_retrieval_is_not_noexcept_when_native_is_representable()
-	{
-		if constexpr (impl::can_represent_native<T>)
-		{
-			static_assert(!noexcept(std::declval<const node&>().value<T>()));
-			static_assert(!noexcept(std::declval<const node&>().value_exact<T>()));
-			static_assert(!noexcept(std::declval<const node&>().value_or(std::declval<T>())));
-		}
+		CHECK(tbl["inserted"] == text);
 	}
 }
 
@@ -814,20 +763,58 @@ TEST_CASE("string-like types - construction moves from types derived from std::s
 
 TEST_CASE("string-like types - lossless conversion implies equality comparison")
 {
-	check_equality_when_losslessly_convertible<retrievable_string>();
+	table tbl{ { "k", "x"sv } };
+	CHECK(tbl["k"] == retrievable_string{ "x" });
+	CHECK(tbl["k"] != retrievable_string{ "y" });
+	CHECK(tbl["missing"] != retrievable_string{ "x" });
+
+	array arr{ "x"sv };
+	CHECK(arr == std::vector<retrievable_string>{ retrievable_string{ "x" } });
+	CHECK(arr != std::vector<retrievable_string>{ retrievable_string{ "y" } });
 }
 
 TEST_CASE("string-like types - lossless conversion implies insertion")
 {
-	check_insertion_when_losslessly_convertible<initialiser_only_string>();
+	static_assert(std::is_same_v<inserted_type_of<initialiser_only_string>, value<std::string>>);
+
+	table tbl;
+	tbl.insert("a", initialiser_only_string{ "x" });
+	tbl.insert_or_assign("b", initialiser_only_string{ "x" });
+	tbl.emplace("c", initialiser_only_string{ "x" });
+	CHECK(tbl["a"] == "x"sv);
+	CHECK(tbl["b"] == "x"sv);
+	CHECK(tbl["c"] == "x"sv);
+
+	array arr;
+	arr.push_back(initialiser_only_string{ "x" });
+	arr.emplace_back(initialiser_only_string{ "x" });
+	CHECK(arr == array{ "x"sv, "x"sv });
 }
 
 TEST_CASE("string-like types - value_or() supports move-only retrieval targets")
 {
-	check_value_or_when_native_is_representable<move_only_string>();
+	table tbl{ { "k", "x"sv } };
+	CHECK(tbl["k"].value_or(move_only_string{ "y" }).text == "x"sv);
+	CHECK(tbl["missing"].value_or(move_only_string{ "y" }).text == "y"sv);
 }
 
 TEST_CASE("string-like types - retrieval is not noexcept when copying can throw")
 {
-	check_retrieval_is_not_noexcept_when_native_is_representable<potentially_throwing_copy_string>();
+	static_assert(!noexcept(std::declval<const node&>().value<potentially_throwing_copy_string>()));
+	static_assert(!noexcept(std::declval<const node&>().value_exact<potentially_throwing_copy_string>()));
+	static_assert(!noexcept(std::declval<const node&>().value_or(std::declval<potentially_throwing_copy_string>())));
+}
+
+TEST_CASE("string-like types - retrieval works when copying can throw")
+{
+	table tbl{ { "k", "x"sv }, { "i", 1 } };
+	const node& str		= *tbl.get("k");
+	const node& integer = *tbl.get("i");
+
+	CHECK(str.value<potentially_throwing_copy_string>()->text == "x"sv);
+	CHECK(str.value_exact<potentially_throwing_copy_string>()->text == "x"sv);
+	CHECK(str.value_or(potentially_throwing_copy_string{ "y"sv }).text == "x"sv);
+	CHECK(!integer.value<potentially_throwing_copy_string>());
+	CHECK(!integer.value_exact<potentially_throwing_copy_string>());
+	CHECK(integer.value_or(potentially_throwing_copy_string{ "y"sv }).text == "y"sv);
 }

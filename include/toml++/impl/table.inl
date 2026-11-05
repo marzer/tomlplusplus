@@ -40,12 +40,12 @@ TOML_NAMESPACE_START
 		TOML_TABLE_CREATED;
 #endif
 
+		if TOML_UNLIKELY(b == e)
+			return;
+
 		TOML_ASSERT_ASSUME(b);
 		TOML_ASSERT_ASSUME(e);
 		TOML_ASSERT_ASSUME(b <= e);
-
-		if TOML_UNLIKELY(b == e)
-			return;
 
 		for (; b != e; b++)
 		{
@@ -69,6 +69,7 @@ TOML_NAMESPACE_START
 #endif
 	}
 
+	// NOLINTBEGIN(bugprone-use-after-move)
 	TOML_EXTERNAL_LINKAGE
 	table::table(table && other) noexcept //
 		: node(std::move(other)),
@@ -85,11 +86,12 @@ TOML_NAMESPACE_START
 	{
 		if (&rhs != this)
 		{
-			node::operator=(rhs);
-			map_.clear();
+			map_type copy;
 			for (auto&& [k, v] : rhs.map_)
-				map_.emplace_hint(map_.end(), k, impl::make_node(*v));
+				copy.emplace_hint(copy.end(), k, impl::make_node(*v));
+			node::operator=(rhs);
 			inline_ = rhs.inline_;
+			map_.swap(copy);
 		}
 		return *this;
 	}
@@ -100,11 +102,13 @@ TOML_NAMESPACE_START
 		if (&rhs != this)
 		{
 			node::operator=(std::move(rhs));
-			map_	= std::move(rhs.map_);
-			inline_ = rhs.inline_;
+			inline_			= rhs.inline_;
+			map_type stolen = std::move(rhs.map_);
+			map_.swap(stolen);
 		}
 		return *this;
 	}
+	// NOLINTEND(bugprone-use-after-move)
 
 	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
@@ -237,7 +241,7 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	table& table::prune(bool recursive)& noexcept
+	table& table::prune(bool recursive) & noexcept
 	{
 		if (map_.empty())
 			return *this;
@@ -298,15 +302,15 @@ TOML_NAMESPACE_START
 			if (l->first != r->first)
 				return false;
 
-			const auto lhs_type = l->second->type();
-			const node& rhs_	= *r->second;
-			const auto rhs_type = rhs_.type();
+			const auto lhs_type	 = l->second->type();
+			const node& rhs_node = *r->second;
+			const auto rhs_type	 = rhs_node.type();
 			if (lhs_type != rhs_type)
 				return false;
 
 			const bool equal = l->second->visit(
-				[&](const auto& lhs_) noexcept
-				{ return lhs_ == *static_cast<std::remove_reference_t<decltype(lhs_)>*>(&rhs_); });
+				[&](const auto& lhs_value) noexcept
+				{ return lhs_value == *static_cast<std::remove_reference_t<decltype(lhs_value)>*>(&rhs_node); });
 			if (!equal)
 				return false;
 		}

@@ -32,7 +32,7 @@ TOML_NAMESPACE_START
 	path_component::path_component() //
 		: type_{ path_component_type::key }
 	{
-		store_key("", value_storage_);
+		store_key(std::string_view{}, value_storage_);
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -83,13 +83,14 @@ TOML_NAMESPACE_START
 	{
 		if (type_ != rhs.type_)
 		{
-			destroy();
-
-			type_ = rhs.type_;
-			if (type_ == path_component_type::array_index)
+			if (rhs.type_ == path_component_type::array_index)
+			{
+				destroy();
 				store_index(rhs.index(), value_storage_);
+			}
 			else
 				store_key(rhs.key(), value_storage_);
+			type_ = rhs.type_;
 		}
 		else
 		{
@@ -134,8 +135,8 @@ TOML_NAMESPACE_START
 
 		if (lhs.type_ == path_component_type::array_index)
 			return lhs.index() == rhs.index();
-		else // path_component_type::key
-			return lhs.key() == rhs.key();
+		// path_component_type::key
+		return lhs.key() == rhs.key();
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -157,8 +158,8 @@ TOML_NAMESPACE_START
 			key_ref() = new_key;
 		else
 		{
-			type_ = path_component_type::key;
 			store_key(new_key, value_storage_);
+			type_ = path_component_type::key;
 		}
 
 		return *this;
@@ -173,8 +174,8 @@ TOML_NAMESPACE_START
 			key_ref() = impl::narrow(new_key);
 		else
 		{
-			type_ = path_component_type::key;
 			store_key(impl::narrow(new_key), value_storage_);
+			type_ = path_component_type::key;
 		}
 
 		return *this;
@@ -456,7 +457,11 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	path path::subpath(size_t start, size_t length) const
 	{
-		return subpath(begin() + static_cast<int>(start), begin() + static_cast<int>(start + length));
+		if (start >= components_.size() || length == 0)
+			return {};
+		const size_t remaining = components_.size() - start;
+		const size_t count	   = length < remaining ? length : remaining;
+		return subpath(begin() + static_cast<ptrdiff_t>(start), begin() + static_cast<ptrdiff_t>(start + count));
 	}
 }
 TOML_NAMESPACE_END;

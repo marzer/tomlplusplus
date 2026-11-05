@@ -7,46 +7,40 @@
 
 <br>
 
-## Prequisites
+## Prerequisites
 
-For this document to make sense, you will need to:
-
-1. Follow the installation instructions from the [toml-test] README to compile the `toml-test` runner
-2. Add `toml-test` as an alias or have it on the system PATH
-3. **Linux only:** Install `ninja` and `meson`:
+Install the `toml-test` runner, either from a release binary or with Go, as the [toml-test] README describes:
 
 ```bash
-sudo apt update && sudo apt install -y python3 python3-pip ninja-build
-sudo pip3 install meson
+go install github.com/toml-lang/toml-test/v2/cmd/toml-test@latest
 ```
 
 <br>
 
 ## Building and Testing the Encoder and Decoder
 
-### Windows with Visual Studio
-
-Open `toml++.sln` and build the two projects in the `toml-test` solution folder. They'll be compiled in some target-specific subfolder under `/bin` in the repo root. Then run `toml-test` against them:
+### CMake
 
 ```bash
-toml-test ./bin/win64_vc143_Release_Application/tt_decoder.exe
-toml-test ./bin/win64_vc143_Release_Application/tt_encoder.exe --encoder
+cmake -S . -B build-tt -DCMAKE_BUILD_TYPE=Release -Dtomlplusplus_BUILD_TOML_TEST=ON
+cmake --build build-tt
+toml-test test -decoder=build-tt/toml-test/tt_decoder -encoder=build-tt/toml-test/tt_encoder
 ```
 
-### Linux (and WSL)
+With Visual Studio or another multi-config generator, build with `--config Release`; the executables are then in
+`build-tt/toml-test/Release`.
+
+### Meson
 
 ```bash
-# create the meson build target folder (first time only)
-meson build_tt --buildtype=release -Dbuild_tt=true -Dgenerate_cmake_config=false
-
-# build and run
-cd build_tt
-ninja && toml-test ./toml-test/tt_decoder && toml-test ./toml-test/tt_encoder --encoder
+meson setup build-tt --buildtype=release -Dbuild_tt=true
+meson compile -C build-tt
+toml-test test -decoder=build-tt/toml-test/tt_decoder -encoder=build-tt/toml-test/tt_encoder
 ```
 
-> ℹ&#xFE0F; Pass `-Duse_vendored_libs=false` to meson if you wish to use the system-installed version
-> of nlohmann/json rather than the vendored one.
+> ℹ&#xFE0F; Pass `-Dtomlplusplus_USE_VENDORED_LIBS=OFF` to CMake or `-Duse_vendored_libs=false` to Meson if you wish to
+> use the system-installed version of nlohmann/json rather than the vendored one.
+>
+> ℹ&#xFE0F; The encoder and decoder aren't built when unreleased TOML features are enabled.
 
 [toml-test]: https://github.com/toml-lang/toml-test
-[contributing]: ./../CONTRIBUTING.md
-[meson]: https://mesonbuild.com/

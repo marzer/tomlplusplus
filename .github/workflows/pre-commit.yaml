@@ -1,0 +1,32 @@
+name: pre-commit
+
+on:
+    push:
+        branches-ignore:
+            - "gh-pages"
+    pull_request:
+        branches-ignore:
+            - "gh-pages"
+    workflow_dispatch:
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+permissions:
+    contents: read
+
+jobs:
+    pre-commit:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v7
+
+            - uses: actions/setup-python@v7
+              with:
+                  python-version: "3.13"
+
+            - uses: pre-commit/action@v3.0.1
+              env:
+                  SKIP: regenerate

@@ -13,9 +13,9 @@ endif
 tt_args = []
 tt_args += global_args
 if get_option('use_vendored_libs')
-	tt_args += cpp.get_supported_arguments('-DUSE_VENDORED_LIBS=1')
+	tt_args += '-DUSE_VENDORED_LIBS=1'
 else
-	tt_args += cpp.get_supported_arguments('-DUSE_VENDORED_LIBS=0')
+	tt_args += '-DUSE_VENDORED_LIBS=0'
 endif
 
 executable(

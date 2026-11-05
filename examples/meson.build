@@ -7,25 +7,25 @@ example_args = []
 example_args += global_args
 
 examples = [
-	'simple_parser',
-	'toml_to_json_transcoder',
 	'toml_generator',
 	'error_printer',
 	'parse_benchmark',
-	'toml_merger',
 ]
+if has_exceptions
+	examples += [
+		'simple_parser',
+		'toml_to_json_transcoder',
+		'toml_merger',
+	]
+endif
 
-example_executables = []
 foreach example : examples
-	example_executables += [[
+	executable(
 		example,
-		executable(
-			example,
-			[ example + '.cpp' ],
-			cpp_args: example_args,
-			dependencies: tomlplusplus_dep,
-			override_options: global_overrides,
-			install: not is_subproject
-		)
-	]]
+		[ example + '.cpp' ],
+		cpp_args: example_args,
+		dependencies: tomlplusplus_dep,
+		override_options: global_overrides,
+		install: not is_subproject
+	)
 endforeach

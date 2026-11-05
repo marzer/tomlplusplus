@@ -42,7 +42,7 @@ TOML_NAMESPACE_START
 			print_newline(true);
 			print_indent();
 
-			print_string(k.str(), false);
+			print_string(k.str(), false, false, true, impl::string_dialect::json);
 			if (terse_kvps())
 				print_unformatted(":"sv);
 			else
@@ -54,6 +54,13 @@ TOML_NAMESPACE_START
 			{
 				case node_type::table: print(*static_cast<const table*>(&v)); break;
 				case node_type::array: print(*static_cast<const array*>(&v)); break;
+				case node_type::string:
+					print_string(static_cast<const value<std::string>*>(&v)->get(),
+								 false,
+								 false,
+								 true,
+								 impl::string_dialect::json);
+					break;
 				default: print_value(v, type);
 			}
 		}
@@ -91,6 +98,13 @@ TOML_NAMESPACE_START
 			{
 				case node_type::table: print(*static_cast<const table*>(&v)); break;
 				case node_type::array: print(*static_cast<const array*>(&v)); break;
+				case node_type::string:
+					print_string(static_cast<const value<std::string>*>(&v)->get(),
+								 false,
+								 false,
+								 true,
+								 impl::string_dialect::json);
+					break;
 				default: print_value(v, type);
 			}
 		}
@@ -111,6 +125,13 @@ TOML_NAMESPACE_START
 		{
 			case node_type::table: print(*static_cast<const table*>(&source())); break;
 			case node_type::array: print(*static_cast<const array*>(&source())); break;
+			case node_type::string:
+				print_string(static_cast<const value<std::string>*>(&source())->get(),
+							 false,
+							 false,
+							 true,
+							 impl::string_dialect::json);
+				break;
 			default: print_value(source(), source_type);
 		}
 	}

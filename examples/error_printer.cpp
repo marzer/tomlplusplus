@@ -111,7 +111,7 @@ namespace
 
 	void print_string(std::string_view str)
 	{
-		for (char c : str)
+		for (const char c : str)
 		{
 			if (std::optional<std::string_view> escape_sequence = (c == '\\') ? "\\\\"sv
 																: (c == '\a') ? "\\a"sv
@@ -193,8 +193,6 @@ int main()
 		// error messages
 		else
 		{
-			toml::parse_result result;
-
 			if (str == "PATHOLOGICALLY_NESTED"sv)
 			{
 				std::string s(1000u, '[');

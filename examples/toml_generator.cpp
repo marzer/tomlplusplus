@@ -53,13 +53,13 @@ namespace
 
 		[[nodiscard]] static bool boolean() noexcept
 		{
-			return std::rand() % 2 == 0;
+			return std::rand() % 2 == 0; // NOLINT(misc-predictable-rand)
 		}
 
 		template <typename T>
 		[[nodiscard]] static T integer(T excl_max) noexcept
 		{
-			return static_cast<T>(static_cast<T>(std::rand()) % excl_max);
+			return static_cast<T>(static_cast<T>(std::rand()) % excl_max); // NOLINT(misc-predictable-rand)
 		}
 
 		template <typename T>
@@ -264,7 +264,7 @@ int main(int argc, char** argv)
 		else
 		{
 			std::istringstream ss{ std::string(arg) };
-			int num;
+			int num = {};
 			if ((ss >> num))
 				budget += num;
 			else

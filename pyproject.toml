@@ -1,0 +1,22 @@
+[tool.ruff]
+line-length = 120
+target-version = 'py39'
+
+[tool.ruff.format]
+quote-style = 'preserve'
+skip-magic-trailing-comma = true
+
+[tool.ruff.lint]
+select = ['F', 'E4', 'E7', 'E9', 'W', 'I', 'UP', 'B']
+ignore = ['F541', 'E731', 'E741', 'B007', 'B023']
+
+[tool.ruff.lint.isort]
+split-on-trailing-comma = false
+
+[tool.pyright]
+include = ['tools']
+exclude = ['**/__pycache__']
+pythonVersion = '3.9'
+typeCheckingMode = 'standard'
+reportMissingModuleSource = false
+reportMissingTypeStubs = false

@@ -5,7 +5,11 @@
 
 #pragma once
 #include "settings.hpp"
+#if USE_SINGLE_HEADER
+#include "../toml.hpp"
+#else
 #include <toml++/toml.hpp>
+#endif
 
 #if TOML_COMPILER_HAS_EXCEPTIONS ^ SHOULD_HAVE_EXCEPTIONS
 #error TOML_COMPILER_HAS_EXCEPTIONS was not deduced correctly
@@ -53,18 +57,7 @@ constexpr size_t operator""_sz(unsigned long long n) noexcept
 #define FILE_LINE_ARGS trim_file_path(std::string_view{ __FILE__ }), __LINE__
 #define BOM_PREFIX	   "\xEF\xBB\xBF"
 
-#if TOML_EXCEPTIONS
-#define FORCE_FAIL(...) FAIL(__VA_ARGS__)
-#else
-#define FORCE_FAIL(...)                                                                                                \
-	do                                                                                                                 \
-	{                                                                                                                  \
-		FAIL(__VA_ARGS__);                                                                                             \
-		std::exit(-1);                                                                                                 \
-		TOML_UNREACHABLE;                                                                                              \
-	}                                                                                                                  \
-	while (false)
-#endif
+#define FORCE_FAIL(...) FAIL_CHECK(__VA_ARGS__)
 
 #define CHECK_SYMMETRIC_RELOP(lhs, op, rhs, result)                                                                    \
 	CHECK(((lhs)op(rhs)) == (result));                                                                                 \
@@ -130,8 +123,9 @@ bool parsing_should_succeed(std::string_view test_file,
 bool parsing_should_fail(std::string_view test_file,
 						 uint32_t test_line,
 						 std::string_view toml_str,
-						 source_index expected_failure_line	  = static_cast<source_index>(-1),
-						 source_index expected_failure_column = static_cast<source_index>(-1));
+						 std::string_view expected_error);
+
+bool parsing_should_fail(std::string_view test_file, uint32_t test_line, std::string_view toml_str);
 
 TOML_PURE_GETTER
 constexpr std::string_view trim_file_path(std::string_view sv) noexcept
@@ -149,7 +143,7 @@ inline bool parse_expected_value(std::string_view test_file,
 								 const T& expected)
 {
 	INFO("["sv << test_file << ", line "sv << test_line << "] "sv
-			   << "parse_expected_value(\""sv << value_str << "\")"sv)
+			   << "parse_expected_value(\""sv << value_str << "\")"sv);
 
 	std::string val;
 	static constexpr auto key = "val = "sv;
@@ -203,7 +197,7 @@ inline bool parse_expected_value(std::string_view test_file,
 	value<value_type> val_parsed;
 	{
 		INFO("["sv << test_file << ", line "sv << test_line << "] "sv
-				   << "parse_expected_value: Checking initial parse"sv)
+				   << "parse_expected_value: Checking initial parse"sv);
 
 		bool stolen_value = false; // parsing_should_succeed invokes the functor more than once
 		const auto result = parsing_should_succeed(
@@ -329,7 +323,7 @@ inline bool parse_expected_value(std::string_view test_file,
 	// check round-tripping
 	{
 		INFO("["sv << test_file << ", line "sv << test_line << "] "sv
-				   << "parse_expected_value: Checking round-trip"sv)
+				   << "parse_expected_value: Checking round-trip"sv);
 		{
 			std::string str;
 			{
@@ -359,7 +353,7 @@ inline bool parse_expected_value(std::string_view test_file,
 										   }
 									   });
 
-			if (!parse_ok || value_ok)
+			if (!parse_ok || !value_ok)
 				return false;
 		}
 	}
@@ -375,10 +369,6 @@ extern template bool parse_expected_value(std::string_view, uint32_t, std::strin
 extern template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const float&);
 extern template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const double&);
 extern template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const std::string_view&);
-namespace std
-{
-	extern template class unique_ptr<const Catch::IExceptionTranslator>;
-}
 namespace Catch
 {
 	extern template struct StringMaker<node_view<node>>;

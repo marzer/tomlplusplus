@@ -8,16 +8,16 @@
 
 -   Header-only (optional!)
 -   Module support
--   Supports the latest [TOML](https://toml.io/) release ([v1.0.0](https://toml.io/en/v1.0.0)), plus
-    optional support for some unreleased TOML features
--   Passes all tests in the [toml-test](https://github.com/BurntSushi/toml-test) suite
+-   Supports [TOML](https://toml.io/) [v1.0.0](https://toml.io/en/v1.0.0), plus opt-in support for parts of
+    [v1.1.0](https://toml.io/en/v1.1.0) and some unreleased features
+-   Passes all TOML v1.0.0 tests in the [toml-test](https://github.com/toml-lang/toml-test) suite
 -   Supports serializing to JSON and YAML
 -   Proper UTF-8 handling (incl. BOM)
 -   C++17 (plus some C++20 features where available, e.g. experimental support for char8_t strings)
 -   Doesn't require RTTI
 -   Works with or without exceptions
--   Tested on Clang (8+), GCC (8+) and MSVC (VS2019)
--   Tested on x64, x86 and ARM
+-   Tested on GCC 11 and 15, Clang 21, Apple Clang 21 and MSVC 19.44 (VS 2022); other compilers are best effort
+-   Tested on x64 and ARM64
 
 <!-- --------------------------------------------------------------------------------------------------------------- -->
 
@@ -463,7 +463,9 @@ and [emoji sundae] Regular. The API is the same for both.
 
 <h3>[emoji sundae] Regular flavour</h3>
 1. Clone \github{marzer/tomlplusplus, the repository} from GitHub
-2. Add `tomlplusplus/include` to your include paths, or for optional module support add `tomlplusplus/modules` as well and enable `TOMLPLUSPLUS_BUILD_MODULES`
+2. Add `tomlplusplus/include` to your include paths. For module support, also compile
+   `tomlplusplus/src/modules/tomlplusplus.cppm`, which CMake does when `TOMLPLUSPLUS_BUILD_MODULES` is on (link
+   `tomlplusplus::modules`)
 3. `#include <toml++/toml.hpp>` (or `import tomlplusplus;`)
 
 <!-- --------------------------------------------------------------------------------------------------------------- -->
@@ -471,18 +473,6 @@ and [emoji sundae] Regular. The API is the same for both.
 @subsection mainpage-adding-lib-conan Conan
 
 Add `tomlplusplus/3.4.0` to your conanfile.
-
-<!-- --------------------------------------------------------------------------------------------------------------- -->
-
-@subsection mainpage-adding-lib-dds DDS
-Add `tomlpp` to your `package.json5`, e.g.:
-@json
-depends: [
-    'tomlpp^3.4.0',
-]
-@endjson
-
-@see [What is DDS?](https://dds.pizza/)
 
 <!-- --------------------------------------------------------------------------------------------------------------- -->
 
@@ -618,5 +608,4 @@ For bug reports and feature requests please use the \github{marzer/tomlplusplus/
 system. For anything else you're welcome to reach out via other means. In order of likely response speed:
 
 -   Twitter: [marzer8789](https://twitter.com/marzer8789)
--   Gitter: [marzer/tomlplusplus](https://gitter.im/marzer/tomlplusplus) ("Discord for repos")
 -   Email: [mark.gillard@outlook.com.au](mailto:mark.gillard@outlook.com.au)

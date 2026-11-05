@@ -43,16 +43,16 @@ TOML_NAMESPACE_START
 	///
 	/// tbl["products"][0]["keywords"].as_array()->push_back("heavy");
 	/// std::cout << tbl["products"][0]["keywords"] << "\n";
-	/// std::cout << "has product[2]: "sv << !!tbl["products"][2] << "\n";
+	/// std::cout << "has product[2]: "sv << std::boolalpha << !!tbl["products"][2] << "\n";
 	/// std::cout << "product[2]: "sv << tbl["products"][2] << "\n";
 	/// \ecpp
 	///
 	/// \out
-	/// "my hardware store"
-	/// "Hammer"
-	/// [ "hammer", "construction", "build" ]
-	/// "build"
-	/// [ "hammer", "construction", "build", "heavy" ]
+	/// 'my hardware store'
+	/// 'Hammer'
+	/// [ 'hammer', 'construction', 'build' ]
+	/// 'build'
+	/// [ 'hammer', 'construction', 'build', 'heavy' ]
 	/// has product[2]: false
 	/// product[2]:
 	/// \eout
@@ -240,7 +240,7 @@ TOML_NAMESPACE_START
 		///
 		/// \out
 		/// array was not homogeneous!
-		///	first non-match was a floating-point at line 1, column 18
+		///	first non-match was a floating-point at line 1, column 18 to line 1, column 21
 		/// \eout
 		///
 		/// \param	ntype	A TOML node type. <br>
@@ -269,10 +269,11 @@ TOML_NAMESPACE_START
 		///
 		/// \detail \cpp
 		/// auto cfg = toml::parse("arr = [ 1, 2, 3 ]");
-		/// std::cout << "homogenous: "sv << cfg["arr"].is_homogeneous(toml::node_type::none) << "\n";
-		/// std::cout << "all floats: "sv << cfg["arr"].is_homogeneous(toml::node_type::floating_point) << "\n";
-		/// std::cout << "all arrays: "sv << cfg["arr"].is_homogeneous(toml::node_type::array) << "\n";
-		/// std::cout << "all ints:   "sv << cfg["arr"].is_homogeneous(toml::node_type::integer) << "\n";
+		/// std::cout << std::boolalpha;
+		/// std::cout << "homogeneous: "sv << cfg["arr"].is_homogeneous(toml::node_type::none) << "\n";
+		/// std::cout << "all floats:  "sv << cfg["arr"].is_homogeneous(toml::node_type::floating_point) << "\n";
+		/// std::cout << "all arrays:  "sv << cfg["arr"].is_homogeneous(toml::node_type::array) << "\n";
+		/// std::cout << "all ints:    "sv << cfg["arr"].is_homogeneous(toml::node_type::integer) << "\n";
 		/// \ecpp
 		///
 		/// \out
@@ -300,17 +301,18 @@ TOML_NAMESPACE_START
 		///
 		/// \detail \cpp
 		/// auto cfg = toml::parse("arr = [ 1, 2, 3 ]");
-		/// std::cout << "homogenous:   "sv << cfg["arr"].is_homogeneous() << "\n";
+		/// std::cout << std::boolalpha;
+		/// std::cout << "homogeneous:  "sv << cfg["arr"].is_homogeneous() << "\n";
 		/// std::cout << "all doubles:  "sv << cfg["arr"].is_homogeneous<double>() << "\n";
 		/// std::cout << "all arrays:   "sv << cfg["arr"].is_homogeneous<toml::array>() << "\n";
 		/// std::cout << "all integers: "sv << cfg["arr"].is_homogeneous<int64_t>() << "\n";
 		/// \ecpp
 		///
 		/// \out
-		/// homogeneous: true
-		/// all floats:  false
-		/// all arrays:  false
-		/// all ints:    true
+		/// homogeneous:  true
+		/// all doubles:  false
+		/// all arrays:   false
+		/// all integers: true
 		/// \eout
 		///
 		/// \tparam	ElemType	A TOML node or value type. <br>
@@ -591,13 +593,12 @@ TOML_NAMESPACE_START
 		/// \name Equality
 		/// @{
 
-	  public:
 		/// \brief	Returns true if the two views refer to nodes of the same type and value.
 		template <typename T>
 		TOML_PURE_GETTER
 		friend bool operator==(const node_view& lhs, const node_view<T>& rhs) noexcept
 		{
-			return impl::node_deep_equality(lhs.node_, rhs.node_);
+			return impl::node_deep_equality(lhs.node_, rhs.node());
 		}
 
 		/// \brief	Returns true if the two views do not refer to nodes of the same type and value.
@@ -662,7 +663,10 @@ TOML_NAMESPACE_START
 			else
 			{
 				const auto val = lhs.as<impl::native_type_of<T>>();
-				return val && *val == rhs;
+				if constexpr (impl::is_string_like<T>)
+					return val && *val == impl::string_like_to_view(rhs);
+				else
+					return val && *val == rhs;
 			}
 		}
 		TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&,

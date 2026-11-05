@@ -32,12 +32,14 @@
 extern "C" __declspec(dllimport) int __stdcall SetConsoleOutputCP(unsigned int);
 #pragma comment(lib, "Kernel32.lib")
 #else
-#include <Windows.h>
+#include <windows.h>
 #endif
 #endif
 
+// NOLINTNEXTLINE(misc-anonymous-namespace-in-header)
 namespace
 {
+	// NOLINTNEXTLINE(bugprone-throwing-static-initialization,cppcoreguidelines-interfaces-global-init)
 	static const auto initialize_environment_automagically = []() noexcept
 	{
 #ifdef _WIN32
@@ -47,7 +49,7 @@ namespace
 		std::ios_base::sync_with_stdio(false);
 		std::cout << std::boolalpha;
 
-		srand(static_cast<unsigned int>(time(nullptr)));
+		srand(static_cast<unsigned int>(time(nullptr))); // NOLINT(bugprone-random-generator-seed)
 
 		return true;
 	}();

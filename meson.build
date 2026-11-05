@@ -7,7 +7,7 @@ project(
 	'tomlplusplus',
 	'cpp',
 	license: 'MIT',
-	version: '3.4.0',
+	version: files('VERSION.txt')[0],
 	meson_version: '>=0.61.0',
 	default_options: [
 		# https://mesonbuild.com/Builtin-options.html
@@ -15,7 +15,6 @@ project(
 		'buildtype=release',
 		'default_library=shared',
 		# base options
-		'b_lto=false',
 		'b_ndebug=if-release',
 		# compiler options
 		'cpp_std=c++17'
@@ -26,28 +25,18 @@ project(
 # global vars + imports
 #-----------------------------------------------------------------------------------------------------------------------
 
-compiler = meson.get_compiler('cpp')
-message('target cpu_family: @0@'.format(host_machine.cpu_family()))
-message('target cpu: @0@'.format(host_machine.cpu()))
-message('target system: @0@'.format(host_machine.system()))
-message('target endian: @0@'.format(host_machine.endian()))
+fs = import('fs')
 
 is_devel = get_option('devel')
 is_debug = get_option('debug')
 is_release = not is_debug
 is_pedantic = get_option('pedantic') or is_devel
 is_permissive = get_option('permissive')
-is_windows = host_machine.system() == 'windows'
-is_x64 = host_machine.cpu_family() == 'x86_64'
 is_subproject = meson.is_subproject()
 
 cpp = meson.get_compiler('cpp')
 is_gcc = cpp.get_id() == 'gcc'
 is_clang = cpp.get_id() == 'clang'
-is_msvc = cpp.get_id() == 'msvc'
-is_icc_cl = cpp.get_id() == 'intel-cl'
-is_icc = is_icc_cl or cpp.get_id() == 'intel'
-is_lld = cpp.get_linker_id() == 'ld.lld'
 has_exceptions = get_option('cpp_eh') != 'none'
 unreleased_features = get_option('unreleased_features')
 
@@ -84,54 +73,52 @@ global_args = cpp.get_supported_arguments(
 	'/Zc:preprocessor'
 )
 if has_exceptions
-	global_args += cpp.get_supported_arguments('/Zc:throwingNew', '-D_HAS_EXCEPTIONS=1')
+	global_args += cpp.get_supported_arguments('/Zc:throwingNew')
+	global_args += '-D_HAS_EXCEPTIONS=1'
 else
-	global_args += cpp.get_supported_arguments('-D_HAS_EXCEPTIONS=0')
+	global_args += '-D_HAS_EXCEPTIONS=0'
 endif
 if is_permissive
-	global_args += cpp.get_supported_arguments('/permissive', '-DTOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA=1')
+	global_args += cpp.get_supported_arguments('/permissive')
 else
 	global_args += cpp.get_supported_arguments('/permissive-')
 endif
 if is_pedantic
-	global_args += cpp.get_supported_arguments(
-		# clang
-		'-Weverything',
-		# gcc
-		'-Wcast-align',
-		'-Wcast-qual',
-		'-Wctor-dtor-privacy',
-		'-Wdisabled-optimization',
-		'-Wfloat-equal',
-		'-Wimport',
-		'-Winit-self',
-		'-Wlogical-op',
-		'-Wmissing-declarations',
-		'-Wmissing-field-initializers',
-		'-Wmissing-format-attribute',
-		'-Wmissing-include-dirs',
-		'-Wmissing-noreturn',
-		'-Wold-style-cast',
-		'-Woverloaded-virtual',
-		'-Wpacked',
-		'-Wpointer-arith',
-		'-Wredundant-decls',
-		'-Wshadow',
-		'-Wsign-conversion',
-		'-Wsign-promo',
-		'-Wstack-protector',
-		'-Wstrict-null-sentinel',
-		'-Wswitch-default',
-		'-Wswitch-enum',
-		'-Wundef',
-		'-Wunreachable-code',
-		'-Wunused',
-		'-Wunused-parameter',
-		'-Wuseless-cast',
-		'-Wvariadic-macros',
-		'-Wwrite-strings',
-		'-Wmissing-noreturn'
-	)
+	global_args += cpp.get_supported_arguments('-Weverything')
+	if is_gcc
+		global_args += cpp.get_supported_arguments(
+			'-Wcast-align',
+			'-Wcast-qual',
+			'-Wctor-dtor-privacy',
+			'-Wdisabled-optimization',
+			'-Wimport',
+			'-Winit-self',
+			'-Wlogical-op',
+			'-Wmissing-declarations',
+			'-Wmissing-field-initializers',
+			'-Wmissing-format-attribute',
+			'-Wmissing-include-dirs',
+			'-Wmissing-noreturn',
+			'-Wold-style-cast',
+			'-Woverloaded-virtual',
+			'-Wpacked',
+			'-Wpointer-arith',
+			'-Wredundant-decls',
+			'-Wshadow',
+			'-Wsign-conversion',
+			'-Wsign-promo',
+			'-Wstack-protector',
+			'-Wstrict-null-sentinel',
+			'-Wswitch-default',
+			'-Wundef',
+			'-Wunreachable-code',
+			'-Wunused',
+			'-Wunused-parameter',
+			'-Wuseless-cast',
+			'-Wvariadic-macros',
+			'-Wwrite-strings'
+		)
+	endif
 endif
 # unnecessary pedantry:
 global_args += cpp.get_supported_arguments(
@@ -145,31 +132,14 @@ global_args += cpp.get_supported_arguments(
 	'-Wno-float-equal',
 	'-Wno-c2y-extensions',
 	'-Wno-unsafe-buffer-usage',
-	'-Wno-unsafe-buffer-usage-in-libc-call',
-	'-Wno-nrvo'
+	'-Wno-nrvo',
+	'-Wno-poison-system-directories'
 )
 if is_clang
 	global_args += cpp.get_supported_arguments('-Wno-switch-default')
 endif
 if get_option('time_trace')
 	global_args += cpp.get_supported_arguments('-ftime-trace')
-endif
-
-#-----------------------------------------------------------------------------------------------------------------------
-# global_link_args
-#
-# these are the linker arguments common to everything in the projectwhen compiling shared libraries and executables.
-# *** they are not forwarded to dependents when using this as a submodule. ***
-#-----------------------------------------------------------------------------------------------------------------------
-
-global_link_args = []
-
-if is_release
-	global_link_args += cpp.get_supported_link_arguments(
-		# msvc
-		'/OPT:REF,ICF=3',
-		'/INCREMENTAL:NO',
-	)
 endif
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -188,11 +158,23 @@ if is_pedantic
 endif
 
 #-----------------------------------------------------------------------------------------------------------------------
-# subdirectories + files
+# generated files
 #-----------------------------------------------------------------------------------------------------------------------
 
-public_headers = []
-internal_headers = []
+regenerate = get_option('regenerate') and not is_subproject and fs.exists('.git')
+
+if regenerate
+	python = import('python').find_installation()
+	regenerate_script = files('tools/regenerate.py')
+	run_command(python, regenerate_script, check: true)
+	foreach input : run_command(python, regenerate_script, '--inputs', check: true).stdout().split()
+		fs.read(input)
+	endforeach
+endif
+
+#-----------------------------------------------------------------------------------------------------------------------
+# subdirectories + files
+#-----------------------------------------------------------------------------------------------------------------------
 
 # Empty dependency that will be filled either in src/ or include/
 tomlplusplus_dep = dependency('', required: false)
@@ -217,3 +199,16 @@ endif
 
 # Allow subproject usage
 meson.override_dependency(meson.project_name(), tomlplusplus_dep)
+
+summary(
+	{
+		'Library': build_lib ? get_option('default_library') : 'header-only',
+		'Tests': build_tests,
+		'Examples': build_examples,
+		'toml-test': build_tt,
+		'Pedantic': is_pedantic,
+		'Unreleased features': unreleased_features,
+		'Regenerate': regenerate,
+	},
+	bool_yn: true
+)

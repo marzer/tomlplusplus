@@ -15,12 +15,11 @@ show_includes   = false
 changelog       = true
 logo            = 'images/logo.svg'
 favicon         = 'images/favicon.ico'
-navbar          = [ 'namespaces', 'annotated' ]
+navbar          = [ 'namespaces', 'annotated', '<a href="coverage/">Coverage</a>' ]
 theme           = 'dark'
 extra_files     = [
     'images/badge-awesome.svg',
     'images/badge-TOML.svg',
-    'images/badge-gitter.svg',
 ]
 
 
@@ -71,10 +70,6 @@ macros          = [ 'TOML_[A-Z0-9_]+?', 'print_value' ]
     'badge-awesome.svg',
     'https://github.com/fffaraz/awesome-cpp'
 ]
-'3. Gitter'        = [
-    'badge-gitter.svg',
-    'https://gitter.im/marzer/tomlplusplus'
- ]
 
 
 

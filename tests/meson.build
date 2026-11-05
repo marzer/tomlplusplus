@@ -5,41 +5,11 @@
 
 assert(build_tests)
 
-test_sources = files(
-	'at_path.cpp',
-	'conformance_burntsushi_invalid.cpp',
-	'conformance_burntsushi_valid.cpp',
-	'conformance_iarna_invalid.cpp',
-	'conformance_iarna_valid.cpp',
-	'formatters.cpp',
-	'for_each.cpp',
-	'impl_toml.cpp',
-	'main.cpp',
-	'manipulating_arrays.cpp',
-	'manipulating_parse_result.cpp',
-	'manipulating_tables.cpp',
-	'manipulating_values.cpp',
-	'parsing_arrays.cpp',
-	'parsing_booleans.cpp',
-	'parsing_comments.cpp',
-	'parsing_dates_and_times.cpp',
-	'parsing_floats.cpp',
-	'parsing_integers.cpp',
-	'parsing_key_value_pairs.cpp',
-	'parsing_spec_example.cpp',
-	'parsing_strings.cpp',
-	'parsing_tables.cpp',
-	'path.cpp',
-	'tests.cpp',
-	'user_feedback.cpp',
-	'using_iterators.cpp',
-	'visit.cpp',
-	'windows_compat.cpp'
-)
+test_sources = files(fs.read('sources.txt').strip().split('\n'))
 
 test_deps = [ tomlplusplus_dep ]
 if not get_option('use_vendored_libs')
-	test_deps += dependency('catch2')
+	test_deps += dependency('catch2', version: '>=3.0.0')
 endif
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -49,14 +19,14 @@ endif
 test_args = []
 test_args += global_args
 if has_exceptions
-	test_args += cpp.get_supported_arguments('-DSHOULD_HAVE_EXCEPTIONS=1')
+	test_args += '-DSHOULD_HAVE_EXCEPTIONS=1'
 else
-	test_args += cpp.get_supported_arguments('-DSHOULD_HAVE_EXCEPTIONS=0')
+	test_args += '-DSHOULD_HAVE_EXCEPTIONS=0'
 endif
 if get_option('use_vendored_libs')
-	test_args += cpp.get_supported_arguments('-DUSE_VENDORED_LIBS=1')
+	test_args += '-DUSE_VENDORED_LIBS=1'
 else
-	test_args += cpp.get_supported_arguments('-DUSE_VENDORED_LIBS=0')
+	test_args += '-DUSE_VENDORED_LIBS=0'
 endif
 
 

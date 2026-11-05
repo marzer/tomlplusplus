@@ -21,7 +21,7 @@ TOML_NAMESPACE_START
 	/// )"_toml;
 	///
 	/// for (auto&& [k, v] : tbl)
-	/// 	std::cout << "key '"sv << k << "' defined at "sv << k.source() << "\n";
+	/// 	std::cout << "key '"sv << k << "' defined at "sv << k.source().begin << "\n";
 	/// \ecpp
 	/// \out
 	/// key 'a' defined at line 2, column 5
@@ -32,7 +32,7 @@ TOML_NAMESPACE_START
 	{
 	  private:
 		std::string key_;
-		source_region source_;
+		source_region source_{};
 
 	  public:
 		/// \brief	Default constructor.

@@ -4,13 +4,12 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
+#include <toml++/toml.hpp>
+
 #ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Weverything"
+#pragma clang system_header
 #elif defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wall"
-#pragma GCC diagnostic ignored "-Wextra"
+#pragma GCC system_header
 #elif defined(_MSC_VER)
 #pragma warning(push, 0)
 #endif
@@ -32,12 +31,6 @@
 #include <iostream>
 #include <sstream>
 
-#ifdef __clang__
-#pragma clang diagnostic pop
-#elif defined(__GNUC__)
-#pragma GCC diagnostic pop
-#elif defined(_MSC_VER)
+#if defined(_MSC_VER) && !defined(__clang__)
 #pragma warning(pop)
 #endif
-
-#include <toml++/toml.hpp>

@@ -25,14 +25,8 @@ if not build_lib # header-only mode
 	# cmake
 	if get_option('generate_cmake_config') and not is_subproject and not is_devel
 		cmake = import('cmake')
-		# Can't use until Meson 0.62.0, see https://github.com/mesonbuild/meson/pull/9916
-		# and https://github.com/marzer/tomlplusplus/issues/140
-		#cmake.write_basic_package_version_file(
-		#	name: meson.project_name(),
-		#	version: meson.project_version(),
-		#	install_dir: get_option('datadir')/'cmake'/meson.project_name(),
-		#	arch_independent: true
-		#)
+		# Can't use cmake.write_basic_package_version_file() until Meson 0.62.0,
+		# see https://github.com/mesonbuild/meson/pull/9916 and https://github.com/marzer/tomlplusplus/issues/140
 		# In the meantime, install a pre-generated Package Version file
 		configure_file(
 			configuration: {'version': meson.project_version()},

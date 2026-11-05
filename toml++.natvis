@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?> 
+<?xml version="1.0" encoding="utf-8"?>
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
 
 	<Type Name="toml::v3::date">
@@ -134,7 +134,7 @@
 	<Type Name="toml::v3::ex::parse_error">
 		<DisplayString>line {source_.begin.line}: {_Data._What,s8b}</DisplayString>
 	</Type>
-	
+
 	<Type Name="toml::v3::noex::parse_result">
 		<DisplayString Condition="!err_">{*reinterpret_cast&lt;toml::v3::table*&gt;(&amp;storage_.bytes)}</DisplayString>
 		<DisplayString Condition="err_">{*reinterpret_cast&lt;toml::v3::noex::parse_error*&gt;(&amp;storage_.bytes)}</DisplayString>

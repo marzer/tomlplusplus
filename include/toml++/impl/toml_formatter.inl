@@ -68,21 +68,24 @@ TOML_ANON_NAMESPACE_START
 
 			case node_type::integer:
 			{
-				auto val = (*static_cast<const value<int64_t>*>(&node)).get();
+				const auto val = (*static_cast<const value<int64_t>*>(&node)).get();
 				if (!val)
 					return 1u;
-				size_t weight = {};
+				size_t weight  = {};
+				auto magnitude = static_cast<uint64_t>(val);
 				if (val < 0)
 				{
 					weight += 1u;
-					val *= -1;
+					magnitude = 0u - magnitude;
 				}
-				return weight + static_cast<size_t>(log10(static_cast<double>(val))) + 1u;
+				return weight + static_cast<size_t>(log10(static_cast<double>(magnitude))) + 1u;
 			}
 
 			case node_type::floating_point:
 			{
 				auto val = (*static_cast<const value<double>*>(&node)).get();
+				if (const auto cls = impl::fpclassify(val); cls != impl::fp_class::ok)
+					return cls == impl::fp_class::neg_inf ? 4u : 3u;
 				if (val == 0.0)
 					return 3u;		// "0.0"
 				size_t weight = 2u; // ".0"
@@ -98,7 +101,7 @@ TOML_ANON_NAMESPACE_START
 			case node_type::date: [[fallthrough]];
 			case node_type::time: return 10u;
 			case node_type::date_time: return 30u;
-			case node_type::none: TOML_UNREACHABLE;
+			case node_type::none:
 			default: TOML_UNREACHABLE;
 		}
 
@@ -180,10 +183,10 @@ TOML_NAMESPACE_START
 
 		const auto original_indent = indent();
 		const auto multiline	   = force_multiline_arrays()
-							|| TOML_ANON_NAMESPACE::toml_formatter_forces_multiline(
-								   arr,
-								   120u,
-								   indent_columns() * static_cast<size_t>(original_indent < 0 ? 0 : original_indent));
+								  || TOML_ANON_NAMESPACE::toml_formatter_forces_multiline(
+										 arr,
+										 120u,
+										 indent_columns() * static_cast<size_t>(original_indent < 0 ? 0 : original_indent));
 
 		print_unformatted("["sv);
 

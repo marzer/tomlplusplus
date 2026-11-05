@@ -10,7 +10,6 @@ AlignEscapedNewlines: Right
 AlignOperands:   AlignAfterOperator
 AlignTrailingComments: true
 AllowAllArgumentsOnNextLine: false
-AllowAllConstructorInitializersOnNextLine: false
 AllowAllParametersOfDeclarationOnNextLine: false
 AllowShortEnumsOnASingleLine: false
 AllowShortBlocksOnASingleLine: Never
@@ -20,9 +19,7 @@ AllowShortLambdasOnASingleLine: All
 AllowShortIfStatementsOnASingleLine: Never
 AllowShortLoopsOnASingleLine: false
 AlwaysBreakAfterDefinitionReturnType: None
-AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: false
-AlwaysBreakTemplateDeclarations: Yes
 AttributeMacros:
   - TOML_ABSTRACT_INTERFACE
   - TOML_CALLCONV
@@ -36,7 +33,7 @@ AttributeMacros:
   - TOML_TRIVIAL_ABI
   - TOML_UNLIKELY_CASE
 BinPackArguments: false
-BinPackParameters: false
+BinPackParameters: OnePerLine
 BraceWrapping:
   AfterCaseLabel:  true
   AfterClass:      true
@@ -56,24 +53,22 @@ BraceWrapping:
   SplitEmptyFunction: false
   SplitEmptyRecord: false
   SplitEmptyNamespace: true
-BreakBeforeBinaryOperators: NonAssignment
-BreakBeforeConceptDeclarations: true
-BreakBeforeBraces: Custom
-BreakBeforeInheritanceComma: false
-BreakInheritanceList: BeforeColon
-BreakBeforeTernaryOperators: true
-BreakConstructorInitializersBeforeComma: false
-BreakConstructorInitializers: BeforeColon
 BreakAfterJavaFieldAnnotations: false
+BreakAfterReturnType: None
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeBraces: Custom
+BreakBeforeConceptDeclarations: Always
+BreakBeforeTernaryOperators: true
+BreakConstructorInitializers: BeforeColon
+BreakInheritanceList: BeforeColon
 BreakStringLiterals: true
+BreakTemplateDeclarations: Yes
 ColumnLimit:     120
 CommentPragmas:  '^([/*!#]|\s*(===|---|clang-format))'
 CompactNamespaces: false
-ConstructorInitializerAllOnOneLineOrOnePerLine: true
 ConstructorInitializerIndentWidth: 4
 ContinuationIndentWidth: 4
 Cpp11BracedListStyle: false
-DeriveLineEnding: false
 DerivePointerAlignment: false
 DisableFormat:   false
 EmptyLineBeforeAccessModifier: LogicalBlock
@@ -106,13 +101,17 @@ IndentCaseBlocks: false
 IndentGotoLabels: true
 IndentPPDirectives: None
 IndentExternBlock: Indent
-IndentRequires:  false
+IndentRequiresClause: false
 IndentWidth:     4
 IndentWrappedFunctionNames: false
 InsertTrailingCommas: None
 JavaScriptQuotes: Leave
 JavaScriptWrapImports: true
-KeepEmptyLinesAtTheStartOfBlocks: false
+KeepEmptyLines:
+  AtEndOfFile:     false
+  AtStartOfBlock:  false
+  AtStartOfFile:   true
+LineEnding:      LF
 MacroBlockBegin: ''
 MacroBlockEnd:   ''
 MaxEmptyLinesToKeep: 1
@@ -122,6 +121,7 @@ ObjCBlockIndentWidth: 2
 ObjCBreakBeforeNestedBlockParam: true
 ObjCSpaceAfterProperty: false
 ObjCSpaceBeforeProtocolList: true
+PackConstructorInitializers: CurrentLine
 PenaltyBreakAssignment: 2
 PenaltyBreakBeforeFirstCallParameter: 19
 PenaltyBreakComment: 1
@@ -132,10 +132,11 @@ PenaltyExcessCharacter: 1000000
 PenaltyReturnTypeOnItsOwnLine: 1000000
 PenaltyIndentedWhitespace: 0
 PointerAlignment: Left
-ReflowComments:  true
-SortIncludes:    false
+ReflowComments:  Always
+SortIncludes:
+  Enabled:         false
 SortJavaStaticImport: Before
-SortUsingDeclarations: false
+SortUsingDeclarations: Never
 SpaceAfterCStyleCast: false
 SpaceAfterLogicalNot: false
 SpaceAfterTemplateKeyword: true
@@ -147,14 +148,11 @@ SpaceBeforeInheritanceColon: true
 SpaceBeforeParens: ControlStatements
 SpaceAroundPointerQualifiers: Default
 SpaceBeforeRangeBasedForLoopColon: true
-SpaceInEmptyBlock: false
-SpaceInEmptyParentheses: false
+SpaceInEmptyBraces: Never
 SpacesBeforeTrailingComments: 1
-SpacesInAngles:  false
-SpacesInConditionalStatement: false
+SpacesInAngles:  Never
 SpacesInContainerLiterals: true
-SpacesInCStyleCastParentheses: false
-SpacesInParentheses: false
+SpacesInParens:  Never
 SpacesInSquareBrackets: false
 SpaceBeforeSquareBrackets: false
 BitFieldColonSpacing: Both
@@ -171,11 +169,9 @@ StatementMacros:
   - TOML_EXPORTED_MEMBER_FUNCTION
   - TOML_EXPORTED_FREE_FUNCTION
   - TOML_EXPORTED_STATIC_FUNCTION
-  - TOML_EXTERN
   - TOML_EXTERNAL_LINKAGE
   - TOML_INTERNAL_LINKAGE
   - TOML_LIKELY_CASE
-  - TOML_MEMBER_ATTR
   - TOML_NEVER_INLINE
   - TOML_NODISCARD
   - TOML_NODISCARD_CTOR
@@ -190,15 +186,12 @@ StatementMacros:
   - TOML_PURE_INLINE_GETTER
   - TOML_RETURNS_BY_THROWING
 TabWidth:        4
-TypenameMacros:
-UseCRLF:         false
 UseTab:          Always
 WhitespaceSensitiveMacros:
   - STRINGIZE
   - PP_STRINGIZE
   - BOOST_PP_STRINGIZE
   - TOML_ATTR
-  - TOML_CONCAT
   - TOML_HAS_INCLUDE
   - TOML_LIKELY
   - TOML_MAKE_STRING
@@ -211,4 +204,3 @@ WhitespaceSensitiveMacros:
   - TOML_PRAGMA_ICC
   - TOML_UNLIKELY
 ...
-

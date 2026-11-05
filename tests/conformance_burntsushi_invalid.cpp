@@ -360,8 +360,6 @@ d = 2007-00-01T00:00:00)"sv;
 with-milli = 1987-07-5T17:45:00.12)"sv;
 	static constexpr auto local_datetime_no_leads = R"(# Month "7" instead of "07"; the leading zero is required.
 no-leads = 1987-7-05T17:45:00)"sv;
-	static constexpr auto local_datetime_no_secs  = R"(# No seconds in time.
-no-secs = 1987-07-05T17:45)"sv;
 	static constexpr auto local_datetime_no_t	  = R"(# No "t" or "T" between the date and time.
 no-t = 1987-07-0517:45:00)"sv;
 	static constexpr auto local_datetime_second_over =
@@ -374,8 +372,6 @@ d = 2023-10-01T1:32:00Z)"sv;
 d = 24:00:00)"sv;
 	static constexpr auto local_time_minute_over	   = R"(# time-minute     = 2DIGIT  ; 00-59
 d = 00:60:00)"sv;
-	static constexpr auto local_time_no_secs		   = R"(# No seconds in time.
-no-secs = 17:45)"sv;
 	static constexpr auto local_time_second_over =
 		R"(# time-second     = 2DIGIT  ; 00-58, 00-59, 00-60 based on leap second
 #                           ; rules
@@ -384,6 +380,15 @@ d = 00:00:61)"sv;
 d = 01:32:0)"sv;
 	static constexpr auto local_time_time_no_leads	 = R"(# Leading 0 is always required.
 d = 1:32:00)"sv;
+
+#if !TOML_LANG_UNRELEASED
+
+	static constexpr auto local_datetime_no_secs = R"(# No seconds in time.
+no-secs = 1987-07-05T17:45)"sv;
+	static constexpr auto local_time_no_secs	 = R"(# No seconds in time.
+no-secs = 17:45)"sv;
+
+#endif // !TOML_LANG_UNRELEASED
 
 	static constexpr auto spec_inline_table_2_0 = R"([product]
 type = { name = "Nail" }
@@ -1603,11 +1608,6 @@ TEST_CASE("conformance - burntsushi/invalid")
 		parsing_should_fail(FILE_LINE_ARGS, local_datetime_no_leads); // local-datetime-no-leads
 	}
 
-	SECTION("local-datetime-no-secs")
-	{
-		parsing_should_fail(FILE_LINE_ARGS, local_datetime_no_secs); // local-datetime-no-secs
-	}
-
 	SECTION("local-datetime-no-t")
 	{
 		parsing_should_fail(FILE_LINE_ARGS, local_datetime_no_t); // local-datetime-no-t
@@ -1633,11 +1633,6 @@ TEST_CASE("conformance - burntsushi/invalid")
 		parsing_should_fail(FILE_LINE_ARGS, local_time_minute_over); // local-time-minute-over
 	}
 
-	SECTION("local-time-no-secs")
-	{
-		parsing_should_fail(FILE_LINE_ARGS, local_time_no_secs); // local-time-no-secs
-	}
-
 	SECTION("local-time-second-over")
 	{
 		parsing_should_fail(FILE_LINE_ARGS, local_time_second_over); // local-time-second-over
@@ -1652,6 +1647,20 @@ TEST_CASE("conformance - burntsushi/invalid")
 	{
 		parsing_should_fail(FILE_LINE_ARGS, local_time_time_no_leads); // local-time-time-no-leads
 	}
+
+#if !TOML_LANG_UNRELEASED
+
+	SECTION("local-datetime-no-secs")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, local_datetime_no_secs); // local-datetime-no-secs
+	}
+
+	SECTION("local-time-no-secs")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, local_time_no_secs); // local-time-no-secs
+	}
+
+#endif // !TOML_LANG_UNRELEASED
 
 	SECTION("spec-inline-table-2-0")
 	{

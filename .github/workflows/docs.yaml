@@ -1,0 +1,183 @@
+name: docs
+
+on:
+    push:
+        branches:
+            - master
+        paths:
+            - "**.h"
+            - "**.hpp"
+            - "**.dox"
+            - "**.md"
+            - "docs/**"
+            - ".github/workflows/docs.yaml"
+    pull_request:
+        branches:
+            - master
+        paths:
+            - "**.h"
+            - "**.hpp"
+            - "**.dox"
+            - "**.md"
+            - "docs/**"
+            - ".github/workflows/docs.yaml"
+    workflow_run:
+        workflows:
+            - ci
+        types:
+            - completed
+        branches:
+            - master
+    release:
+        types:
+            - released
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+
+jobs:
+    docs-check:
+        if: github.event_name == 'pull_request'
+
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v7
+
+            - name: Install Doxygen
+              uses: ssciwr/doxygen-install@v2
+              with:
+                  version: "1.14.0"
+
+            - name: Install dependencies
+              run: |
+                  sudo rm -f /var/lib/man-db/auto-update || true
+                  sudo apt -y update
+                  sudo apt -y install --no-install-recommends python3 python3-pip
+                  sudo -H pip3 install --upgrade poxy --break-system-packages
+                  poxy --version
+                  doxygen --version
+
+            - name: Generate HTML documentation
+              run: |
+                  cd docs
+                  poxy
+
+    find-coverage:
+        if: >-
+            github.event_name != 'pull_request' && (github.event_name != 'workflow_run'
+            || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'pull_request'))
+
+        runs-on: ubuntu-latest
+
+        permissions:
+            actions: read
+
+        outputs:
+            run-id: ${{ steps.find.outputs.run-id }}
+
+        steps:
+            - name: Find the coverage report of master
+              id: find
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  if [ "$GITHUB_EVENT_NAME" = push ]; then
+                    for attempt in 1 2 3 4 5 6; do
+                      if [ -n "$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yaml --branch master --event push \
+                        --commit "$GITHUB_SHA" --json databaseId --jq '.[]')" ]; then
+                        echo "ci also runs on $GITHUB_SHA, and the docs deploy once it passes"
+                        exit 0
+                      fi
+                      [ "$attempt" = 6 ] || sleep 10
+                    done
+                  fi
+
+                  run_id=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yaml --branch master --status success \
+                    --json databaseId,event \
+                    --jq 'map(select(.event == "push" or .event == "workflow_dispatch"))[0].databaseId // empty')
+                  if [ -z "$run_id" ]; then
+                    echo "::error::no passing ci run on master to take the coverage report from"
+                    exit 1
+                  fi
+
+                  echo "coverage report of $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$run_id"
+                  echo "run-id=$run_id" >> "$GITHUB_OUTPUT"
+
+    docs:
+        needs: find-coverage
+
+        if: needs.find-coverage.outputs.run-id
+
+        permissions:
+            contents: read
+            actions: read
+            pages: write
+            id-token: write
+
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v7
+              with:
+                  fetch-depth: 0
+                  fetch-tags: true
+
+            - name: Install Doxygen
+              uses: ssciwr/doxygen-install@v2
+              with:
+                  version: "1.14.0"
+
+            - name: Install dependencies
+              run: |
+                  sudo rm -f /var/lib/man-db/auto-update || true
+                  sudo apt -y update
+                  sudo apt -y install --no-install-recommends python3 python3-pip
+                  sudo -H pip3 install --upgrade poxy --break-system-packages
+                  poxy --version
+                  poxy --where
+                  doxygen --version
+
+            - name: Generate HTML documentation
+              run: |
+                  git fetch origin master:refs/remotes/origin/master --tags --force
+                  git remote set-head origin -a
+                  git checkout master
+                  git pull --force
+                  cd docs
+                  poxy --git-tags --min-version v2.4.0
+
+                  if [ ! -f 'html/toml++.tagfile.xml' ]; then
+                      echo '::error::documentation generation failed for master'
+                      poxy
+                      exit 1
+                  fi
+
+            - name: Download the coverage report
+              uses: actions/download-artifact@v8
+              with:
+                  name: coverage
+                  path: docs/html/coverage
+                  run-id: ${{ needs.find-coverage.outputs.run-id }}
+                  github-token: ${{ github.token }}
+
+            - name: Setup Pages
+              uses: actions/configure-pages@v6
+
+            - name: Upload
+              uses: actions/upload-pages-artifact@v5
+              with:
+                  path: "./docs/html"
+
+            - name: Deploy
+              id: deployment
+              uses: actions/deploy-pages@v5

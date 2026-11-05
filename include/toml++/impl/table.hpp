@@ -21,8 +21,8 @@ TOML_IMPL_NAMESPACE_START
 	{
 		using value_type = std::conditional_t<IsConst, const node, node>;
 
-		const toml::key& first;
-		value_type& second;
+		const toml::key& first; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
+		value_type& second;		// NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
 	};
 
 	template <bool IsConst>
@@ -50,8 +50,7 @@ TOML_IMPL_NAMESPACE_START
 				proxy_instantiated_ = true;
 				return p;
 			}
-			else
-				return TOML_LAUNDER(reinterpret_cast<proxy_type*>(proxy_));
+			return TOML_LAUNDER(reinterpret_cast<proxy_type*>(proxy_));
 		}
 
 	  public:
@@ -80,6 +79,7 @@ TOML_IMPL_NAMESPACE_START
 			: iter_{ other.iter_ }
 		{}
 
+		// NOLINTNEXTLINE(bugprone-unhandled-self-assignment)
 		table_iterator& operator=(const table_iterator& rhs) noexcept
 		{
 			iter_				= rhs.iter_;
@@ -677,7 +677,7 @@ TOML_NAMESPACE_START
 		///		{ "a", 42, },
 		///		{ "b", "is the meaning of life, apparently." }
 		///	};
-		/// if (auto val = arr.get_as<int64_t>("a"))
+		/// if (auto val = tbl.get_as<int64_t>("a"))
 		///		std::cout << R"(node ["a"] was an integer with value )"sv << **val << "\n";
 		/// \ecpp
 		///
@@ -787,9 +787,15 @@ TOML_NAMESPACE_START
 		/// @{
 
 		/// \brief A BidirectionalIterator for iterating over key-value pairs in a toml::table.
+		///
+		/// \attention The key-value pair it returns is stored inside the iterator, so reversing it with
+		/// 		   std::reverse_iterator or std::views::reverse gives dangling references.
 		using iterator = toml::table_iterator;
 
 		/// \brief A BidirectionalIterator for iterating over const key-value pairs in a toml::table.
+		///
+		/// \attention The key-value pair it returns is stored inside the iterator, so reversing it with
+		/// 		   std::reverse_iterator or std::views::reverse gives dangling references.
 		using const_iterator = toml::const_table_iterator;
 
 		/// \brief	Returns an iterator to the first key-value pair.
@@ -1283,13 +1289,16 @@ TOML_NAMESPACE_START
 		///	};
 		/// std::cout << tbl << "\n";
 		///
-		/// tbl.erase(tbl.begin() + 1);
+		/// tbl.erase(std::next(tbl.begin()));
 		/// std::cout << tbl << "\n";
 		/// \ecpp
 		///
 		/// \out
-		/// { a = 1, b = 2, c = 3 }
-		/// { a = 1, c = 3 }
+		/// a = 1
+		/// b = 2
+		/// c = 3
+		/// a = 1
+		/// c = 3
 		/// \eout
 		///
 		/// \param 	pos		Iterator to the key-value pair being erased.
@@ -1310,13 +1319,16 @@ TOML_NAMESPACE_START
 		///	};
 		/// std::cout << tbl << "\n";
 		///
-		/// tbl.erase(tbl.cbegin() + 1);
+		/// tbl.erase(std::next(tbl.cbegin()));
 		/// std::cout << tbl << "\n";
 		/// \ecpp
 		///
 		/// \out
-		/// { a = 1, b = 2, c = 3 }
-		/// { a = 1, c = 3 }
+		/// a = 1
+		/// b = 2
+		/// c = 3
+		/// a = 1
+		/// c = 3
 		/// \eout
 		///
 		/// \param 	pos		Iterator to the key-value pair being erased.
@@ -1338,13 +1350,17 @@ TOML_NAMESPACE_START
 		///	};
 		/// std::cout << tbl << "\n";
 		///
-		/// tbl.erase(tbl.cbegin() + 1, tbl.cbegin() + 3);
+		/// tbl.erase(std::next(tbl.cbegin()), std::next(tbl.cbegin(), 3));
 		/// std::cout << tbl << "\n";
 		/// \ecpp
 		///
 		/// \out
-		/// { a = 1, b = "bad", c = "karma", d = 2 }
-		/// { a = 1, d = 2 }
+		/// a = 1
+		/// b = 'bad'
+		/// c = 'karma'
+		/// d = 2
+		/// a = 1
+		/// d = 2
 		/// \eout
 		///
 		/// \param 	begin	Iterator to the first key-value pair being erased.
@@ -1372,10 +1388,13 @@ TOML_NAMESPACE_START
 		/// \ecpp
 		///
 		/// \out
-		/// { a = 1, b = 2, c = 3 }
-		/// true
-		/// false
-		/// { a = 1, c = 3 }
+		/// a = 1
+		/// b = 2
+		/// c = 3
+		/// 1
+		/// 0
+		/// a = 1
+		/// c = 3
 		/// \eout
 		///
 		/// \param 	key		Key to erase.
@@ -1408,15 +1427,17 @@ TOML_NAMESPACE_START
 		/// \detail \cpp
 		///
 		/// auto tbl = toml::table{ { "a", 1 }, { "b", toml::array{ } }, { "c", toml::array{ toml::table{}, toml::array{} } } };
-		/// std::cout << arr << "\n";
+		/// std::cout << tbl << "\n";
 		///
-		/// arr.prune();
-		/// std::cout << arr << "\n";
+		/// tbl.prune();
+		/// std::cout << tbl << "\n";
 		/// \ecpp
 		///
 		/// \out
-		/// { a = 1, b = [], c = [ {}, [] ] }
-		/// { a = 1 }
+		/// a = 1
+		/// b = []
+		/// c = [ {}, [] ]
+		/// a = 1
 		/// \eout
 		///
 		/// \param recursive Should child arrays and tables themselves be pruned?
@@ -1494,7 +1515,7 @@ TOML_NAMESPACE_START
 				static constexpr auto moving_node_ptr = std::is_same_v<value_type, impl::node_ptr> //
 													 && sizeof...(ValueArgs) == 1u				   //
 													 && impl::first_is_same<impl::node_ptr&&, ValueArgs&&...>;
-				using unwrapped_type = impl::remove_cvref<impl::unwrap_node<value_type>>;
+				using unwrapped_type				  = impl::remove_cvref<impl::unwrap_node<value_type>>;
 
 				static_assert(moving_node_ptr										//
 								  || impl::is_native<unwrapped_type>				//
@@ -1502,7 +1523,7 @@ TOML_NAMESPACE_START
 							  "ValueType argument of table::emplace_hint() must be one "
 							  "of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
 
-				map_iterator ipos = insert_with_hint(hint, toml::key{ static_cast<KeyType&&>(key) }, nullptr);
+				const auto ipos = insert_with_hint(hint, toml::key{ static_cast<KeyType&&>(key) }, nullptr);
 
 				// if second is nullptr then we successully claimed the key and inserted the empty sentinel,
 				// so now we have to construct the actual value
@@ -1613,7 +1634,7 @@ TOML_NAMESPACE_START
 			else
 			{
 				const auto key_view = std::string_view{ key };
-				map_iterator ipos	= get_lower_bound(key_view);
+				auto ipos			= get_lower_bound(key_view);
 				if (ipos == map_.end() || ipos->first != key_view)
 				{
 					ipos = insert_with_hint(const_iterator{ ipos },
@@ -1760,7 +1781,7 @@ TOML_NAMESPACE_START
 			else
 			{
 				const auto key_view = std::string_view{ key };
-				map_iterator ipos	= get_lower_bound(key_view);
+				auto ipos			= get_lower_bound(key_view);
 				if (ipos == map_.end() || ipos->first != key_view)
 				{
 					ipos = insert_with_hint(const_iterator{ ipos },
@@ -1768,11 +1789,9 @@ TOML_NAMESPACE_START
 											impl::make_node(static_cast<ValueType&&>(val), flags));
 					return { iterator{ ipos }, true };
 				}
-				else
-				{
-					(*ipos).second = impl::make_node(static_cast<ValueType&&>(val), flags);
-					return { iterator{ ipos }, false };
-				}
+
+				(*ipos).second = impl::make_node(static_cast<ValueType&&>(val), flags);
+				return { iterator{ ipos }, false };
 			}
 		}
 

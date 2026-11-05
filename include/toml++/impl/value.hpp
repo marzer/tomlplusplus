@@ -44,7 +44,13 @@ TOML_DISABLE_ARITHMETIC_WARNINGS;
 	TOML_SA_VALUE_MESSAGE_U8STRING_VIEW																		\
 	TOML_SA_LIST_SEP "const char*"																			\
 	TOML_SA_VALUE_MESSAGE_CONST_CHAR8																		\
-		TOML_SA_LIST_END
+	TOML_SA_LIST_END																						\
+																											\
+	TOML_SA_LIST_NXT "A user-defined 'string-like' type (see toml::is_string_like)"							\
+	TOML_SA_LIST_BEG "with const char* data() const or const char* c_str() const"							\
+	TOML_SA_LIST_SEP "and size_t length() const"															\
+	TOML_SA_LIST_SEP "and constructible from std::string_view, (const char*, size_t) or const std::string&"	\
+	TOML_SA_LIST_END
 
 #define TOML_SA_VALUE_FUNC_MESSAGE(type_arg)																\
 	"The " type_arg " must be one of:"																		\
@@ -68,6 +74,12 @@ TOML_DISABLE_ARITHMETIC_WARNINGS;
 	TOML_SA_VALUE_MESSAGE_U8STRING_VIEW																		\
 	TOML_SA_LIST_SEP "const char*"																			\
 	TOML_SA_VALUE_MESSAGE_CONST_CHAR8																		\
+	TOML_SA_LIST_END																						\
+																											\
+	TOML_SA_LIST_NXT "A user-defined 'string-like' type (see toml::is_string_like)"							\
+	TOML_SA_LIST_BEG "with const char* data() const or const char* c_str() const"							\
+	TOML_SA_LIST_SEP "and size_t length() const"															\
+	TOML_SA_LIST_SEP "and constructible from std::string_view, (const char*, size_t) or const std::string&"	\
 	TOML_SA_LIST_END
 
 // clang-format on
@@ -83,7 +95,12 @@ TOML_IMPL_NAMESPACE_START
 		TOML_NODISCARD
 		static T make(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args&&...>)
 		{
-			if constexpr (std::is_aggregate_v<T>)
+			// user-defined string-likes (see toml::is_string_like) provide their character data
+			// via data()/c_str() + length() rather than by conversion
+			if constexpr (std::is_same_v<T, std::string> && sizeof...(Args) == 1u && (is_string_like<Args> && ...)
+						  && !std::is_constructible_v<std::string, Args&&...>)
+				return std::string{ string_like_to_view(args)... };
+			else if constexpr (std::is_aggregate_v<T>)
 				return T{ static_cast<Args&&>(args)... };
 			else
 				return T(static_cast<Args&&>(args)...);
@@ -278,6 +295,27 @@ TOML_NAMESPACE_START
 #endif
 		}
 
+		/// \brief	Constructs a toml value with the given flags.
+		///
+		/// \tparam	T		The initial value's type.
+		/// \param 	val		The initial value, forwarded to the internal value's constructor.
+		/// \param 	flags	The value's flags. toml::preserve_source_value_flags leaves them empty.
+		TOML_HIDDEN_CONSTRAINT((impl::value_variadic_ctor_allowed<value<ValueType>, impl::remove_cvref<T>>::value),
+							   typename T)
+		TOML_NODISCARD_CTOR
+		explicit value(T&& val, value_flags flags)
+#if !TOML_DISABLE_NOEXCEPT_NOEXCEPT
+			noexcept(noexcept(
+				value_type(impl::native_value_maker<value_type, std::decay_t<T>>::make(static_cast<T&&>(val)))))
+#endif
+			: val_(impl::native_value_maker<value_type, std::decay_t<T>>::make(static_cast<T&&>(val))),
+			  flags_{ flags == preserve_source_value_flags ? value_flags{} : flags }
+		{
+#if TOML_LIFETIME_HOOKS
+			TOML_VALUE_CREATED;
+#endif
+		}
+
 		/// \brief	Copy constructor.
 		TOML_NODISCARD_CTOR
 		value(const value& other) noexcept //
@@ -302,6 +340,7 @@ TOML_NAMESPACE_START
 #endif
 		}
 
+		// NOLINTBEGIN(bugprone-use-after-move)
 		/// \brief	Move constructor.
 		TOML_NODISCARD_CTOR
 		value(value&& other) noexcept //
@@ -347,6 +386,7 @@ TOML_NAMESPACE_START
 			}
 			return *this;
 		}
+		// NOLINTEND(bugprone-use-after-move)
 
 #if TOML_LIFETIME_HOOKS
 		~value() noexcept
@@ -718,7 +758,7 @@ TOML_NAMESPACE_START
 
 		/// \brief	Returns a reference to the underlying value (const rvalue overload).
 		TOML_PURE_INLINE_GETTER
-		explicit operator const value_type&&() && noexcept
+		explicit operator const value_type&&() const&& noexcept
 		{
 			return static_cast<const value_type&&>(val_);
 		}
@@ -1018,6 +1058,19 @@ TOML_NAMESPACE_START
 #endif
 			}
 
+			// char -> user-defined string-like type (see toml::is_string_like)
+			else if constexpr (string_like_is_target<T>)
+			{
+				// construction preference order mirrors string_like_target_is_nothrow
+				// (parenthesized init, matching the std::is_constructible checks)
+				if constexpr (std::is_constructible_v<T, std::string_view>)
+					return T(std::string_view{ str });
+				else if constexpr (std::is_constructible_v<T, const char*, size_t>)
+					return T(str.data(), str.length());
+				else
+					return T(str);
+			}
+
 #if TOML_HAS_CHAR8
 
 			// char -> char8_t (potentially unsafe - the feature is 'experimental'!)
@@ -1063,8 +1116,7 @@ TOML_NAMESPACE_START
 		{
 			if (type() == node_type_of<T>)
 				return { this->get_value_exact<T>() };
-			else
-				return {};
+			return {};
 		}
 	}
 
@@ -1089,8 +1141,7 @@ TOML_NAMESPACE_START
 		{
 			if (type() == node_type_of<T>)
 				return { this->get_value_exact<T>() };
-			else
-				return {};
+			return {};
 		}
 
 		// everything else requires a bit of logicking.
@@ -1114,9 +1165,9 @@ TOML_NAMESPACE_START
 					else if constexpr (is_natively_one_of<T, double>)
 					{
 						const int64_t val = *ref_cast<int64_t>();
-						if constexpr (std::numeric_limits<T>::digits < 64)
+						if constexpr (value_traits<T>::digits < 64)
 						{
-							constexpr auto largest_whole_float = (int64_t{ 1 } << std::numeric_limits<T>::digits);
+							constexpr auto largest_whole_float = (int64_t{ 1 } << value_traits<T>::digits);
 							if (val < -largest_whole_float || val > largest_whole_float)
 								return {};
 						}
@@ -1144,7 +1195,7 @@ TOML_NAMESPACE_START
 						{
 							const double val = *ref_cast<double>();
 							if (impl::fpclassify(val) == fp_class::ok
-								&& (val < (std::numeric_limits<T>::lowest)() || val > (std::numeric_limits<T>::max)()))
+								&& (val < float_limits<T>::lowest() || val > float_limits<T>::highest()))
 								return {};
 							return { static_cast<T>(val) };
 						}
@@ -1154,11 +1205,10 @@ TOML_NAMESPACE_START
 					else if constexpr (is_natively_one_of<T, int64_t>)
 					{
 						const double val = *ref_cast<double>();
-						if (impl::fpclassify(val) == fp_class::ok
-							&& static_cast<double>(static_cast<int64_t>(val)) == val)
+						if (impl::fpclassify(val) == fp_class::ok && val >= -9223372036854775808.0
+							&& val < 9223372036854775808.0 && static_cast<double>(static_cast<int64_t>(val)) == val)
 							return node_integer_cast<T>(static_cast<int64_t>(val));
-						else
-							return {};
+						return {};
 					}
 
 					// float -> anything else
@@ -1258,6 +1308,12 @@ TOML_NAMESPACE_START
 				TOML_SA_LIST_SEP "const wchar_t*"
 				#endif
 				TOML_SA_LIST_END
+
+				TOML_SA_LIST_NXT "A user-defined 'string-like' type (see toml::is_string_like)"
+				TOML_SA_LIST_BEG "with const char* data() const or const char* c_str() const"
+				TOML_SA_LIST_SEP "and size_t length() const"
+				TOML_SA_LIST_SEP "and constructible from std::string_view, (const char*, size_t) or const std::string&"
+				TOML_SA_LIST_END
 			);
 
 			// clang-format on
@@ -1271,7 +1327,7 @@ TOML_NAMESPACE_START
 						return *ref_cast<typename traits::native_type>();
 				}
 				if (auto val = this->value<value_type>())
-					return *val;
+					return *std::move(val);
 				if constexpr (std::is_pointer_v<value_type>)
 					return value_type{ default_value };
 				else

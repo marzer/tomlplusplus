@@ -34,12 +34,12 @@ TOML_NAMESPACE_START
 	/// \ecpp
 	///
 	/// \out
-	/// description = "This is some TOML, yo."
-	/// fruit = ["apple", "orange", "pear"]
-	/// numbers = [1, 2, 3, 4, 5]
+	/// description = 'This is some TOML, yo.'
+	/// fruit = [ 'apple', 'orange', 'pear' ]
+	/// numbers = [ 1, 2, 3, 4, 5 ]
 	///
 	/// [table]
-	/// foo = "bar"
+	/// foo = 'bar'
 	/// \eout
 	class TOML_EXPORTED_CLASS toml_formatter : impl::formatter
 	{
@@ -135,6 +135,7 @@ TOML_NAMESPACE_START
 		{
 			rhs.attach(lhs);
 			rhs.key_path_.clear();
+			rhs.pending_table_separator_ = false;
 			rhs.print();
 			rhs.detach();
 			return lhs;

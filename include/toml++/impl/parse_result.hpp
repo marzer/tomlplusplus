@@ -41,7 +41,7 @@ TOML_NAMESPACE_START
 	/// example output:
 	///
 	/// Parse failed:
-	/// Encountered unexpected character while parsing boolean; expected 'true', saw 'trU'
+	/// Error while parsing boolean: expected 'true', saw 'trU'
 	///		(error occurred at line 1, column 13 of 'config.toml')
 	/// \eout
 	///

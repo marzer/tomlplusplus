@@ -23,12 +23,12 @@ TOML_NAMESPACE_START
 	/// \detail \cpp
 	/// auto table = toml::parse_file("config.toml"sv);
 	/// std::cout << "The node 'description' was defined at "sv
-	///		<< table.get("description")->source().begin()
+	///		<< table.get("description")->source().begin
 	///		<< "\n";
 	/// \ecpp
 	///
 	/// \out
-	///	The value 'description' was defined at line 7, column 15
+	///	The node 'description' was defined at line 7, column 15
 	/// \eout
 	///
 	/// \remarks toml++'s parser is unicode-aware insofar as it knows how to handle
@@ -118,7 +118,7 @@ TOML_NAMESPACE_START
 		/// auto tbl = toml::parse("bar = 42"sv);
 		///
 		/// std::cout << "The value for 'bar' was found on "sv
-		///		<< tbl.get("bar")->source().begin()
+		///		<< tbl.get("bar")->source().begin
 		///		<< "\n";
 		/// \ecpp
 		///
@@ -196,7 +196,7 @@ TOML_NAMESPACE_START
 		/// \brief	Prints a source_region to a stream.
 		///
 		/// \detail \cpp
-		/// auto tbl = toml::parse("bar = 42", "config.toml");
+		/// auto tbl = toml::parse("bar = 42"sv, "config.toml"sv);
 		///
 		/// std::cout << "The value for 'bar' was found on "sv
 		///		<< tbl.get("bar")->source()
@@ -204,7 +204,7 @@ TOML_NAMESPACE_START
 		/// \ecpp
 		///
 		/// \out
-		/// The value for 'bar' was found on line 1, column 7 of 'config.toml'
+		/// The value for 'bar' was found on line 1, column 7 to line 1, column 9 of 'config.toml'
 		/// \eout
 		///
 		/// \param 	lhs	The stream.
@@ -288,7 +288,10 @@ TOML_NAMESPACE_START
 		}
 
 		// Return the last line. Apparently this doc has no trailing line break character at the end.
-		return doc.substr(begin_of_line);
+		auto last_line = doc.substr(begin_of_line);
+		if (!last_line.empty() && last_line.back() == '\r')
+			last_line.remove_suffix(1u);
+		return last_line;
 	}
 }
 TOML_NAMESPACE_END;

@@ -25,7 +25,7 @@ TOML_IMPL_NAMESPACE_START
 {
 	enum class TOML_CLOSED_FLAGS_ENUM formatted_string_traits : unsigned
 	{
-		none,
+		none		  = 0,
 		line_breaks	  = 1u << 0, // \n
 		tabs		  = 1u << 1, // \t
 		control_chars = 1u << 2, // also includes non-ascii vertical whitespace
@@ -51,7 +51,11 @@ TOML_IMPL_NAMESPACE_START
 		  constants_{ &constants },
 		  config_{ config }
 	{
+#if TOML_ENABLE_PARSER && !TOML_EXCEPTIONS
+		TOML_ASSERT_ASSUME(source_ || result_);
+#else
 		TOML_ASSERT_ASSUME(source_);
+#endif
 
 		config_.flags = (config_.flags | constants_->mandatory_flags) & ~constants_->ignored_flags;
 
@@ -117,6 +121,16 @@ TOML_IMPL_NAMESPACE_START
 								 bool allow_multi_line,
 								 bool allow_bare,
 								 bool allow_literal_whitespace)
+	{
+		print_string(str, allow_multi_line, allow_bare, allow_literal_whitespace, string_dialect::toml);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	void formatter::print_string(std::string_view str,
+								 bool allow_multi_line,
+								 bool allow_bare,
+								 bool allow_literal_whitespace,
+								 string_dialect dialect)
 	{
 		if (str.empty())
 		{
@@ -195,10 +209,12 @@ TOML_IMPL_NAMESPACE_START
 					default:
 					{
 						if TOML_UNLIKELY(is_control_character(decoder.codepoint)
-							|| is_non_ascii_vertical_whitespace(decoder.codepoint))
+							|| is_non_ascii_vertical_whitespace(decoder.codepoint)
+							|| (dialect == string_dialect::yaml && is_yaml_unprintable(decoder.codepoint)))
 							traits |= formatted_string_traits::control_chars;
 
-						if (!is_bare_key_character(decoder.codepoint))
+						if (!is_bare_key_character(decoder.codepoint)
+							|| is_non_ascii_horizontal_whitespace(decoder.codepoint))
 							traits |= formatted_string_traits::non_bare;
 						break;
 					}
@@ -231,12 +247,17 @@ TOML_IMPL_NAMESPACE_START
 							 && multi_line_strings_allowed() //
 							 && !!(traits & formatted_string_traits::line_breaks);
 
+		// the parser trims a newline immediately following the opening delimiter of a multi-line string
+		const auto leading_newline = multi_line && str[0] == '\n';
+
 		// determine if this should be a literal string (single-quotes with no escaping)
-		const auto literal = literal_strings_allowed()											//
-						  && !(traits & formatted_string_traits::control_chars)					//
-						  && (!(traits & formatted_string_traits::single_quotes) || multi_line) //
-						  && (!(traits & formatted_string_traits::tabs) || real_tabs_allowed)	//
-						  && (!(traits & formatted_string_traits::line_breaks) || multi_line)	//
+		// (three or more consecutive single-quotes can't appear in a multi-line literal string)
+		const auto literal = literal_strings_allowed()										  //
+						  && !(traits & formatted_string_traits::control_chars)				  //
+						  && (!(traits & formatted_string_traits::single_quotes)			  //
+							  || (multi_line && str.find("'''"sv) == std::string_view::npos)) //
+						  && (!(traits & formatted_string_traits::tabs) || real_tabs_allowed) //
+						  && (!(traits & formatted_string_traits::line_breaks) || multi_line) //
 						  && (!(traits & formatted_string_traits::non_ascii) || unicode_allowed);
 
 		// literal strings (single quotes, no escape codes)
@@ -244,6 +265,8 @@ TOML_IMPL_NAMESPACE_START
 		{
 			const auto quot = multi_line ? R"(''')"sv : R"(')"sv;
 			print_unformatted(quot);
+			if (leading_newline)
+				print_unformatted('\n');
 			print_unformatted(str);
 			print_unformatted(quot);
 			return;
@@ -251,6 +274,8 @@ TOML_IMPL_NAMESPACE_START
 
 		// anything from here down is a non-literal string, so requires iteration and escaping.
 		print_unformatted(multi_line ? R"(""")"sv : R"(")"sv);
+		if (leading_newline)
+			print_unformatted('\n');
 
 		// ascii fast path
 		if (!(traits & formatted_string_traits::non_ascii))
@@ -282,8 +307,16 @@ TOML_IMPL_NAMESPACE_START
 		else
 		{
 			utf8_decoder decoder;
-			const char* cp_start = str.data();
-			const char* cp_end	 = cp_start;
+			const char* cp_start		= str.data();
+			const char* cp_end			= cp_start;
+			const auto escape_raw_bytes = [&]()
+			{
+				for (; cp_start != cp_end; cp_start++)
+				{
+					print_to_stream(*stream_, R"(\u00)"sv);
+					print_to_stream(*stream_, static_cast<uint8_t>(*cp_start), value_flags::format_as_hexadecimal, 2);
+				}
+			};
 			for (auto c : str)
 			{
 				decoder(c);
@@ -292,15 +325,7 @@ TOML_IMPL_NAMESPACE_START
 				// if the decoder encounters malformed unicode just emit raw bytes and
 				if (decoder.error())
 				{
-					while (cp_start != cp_end)
-					{
-						print_to_stream(*stream_, R"(\u00)"sv);
-						print_to_stream(*stream_,
-										static_cast<uint8_t>(*cp_start),
-										value_flags::format_as_hexadecimal,
-										2);
-						cp_start++;
-					}
+					escape_raw_bytes();
 					decoder.reset();
 					continue;
 				}
@@ -324,9 +349,25 @@ TOML_IMPL_NAMESPACE_START
 
 						// escaped unicode characters
 						else if (decoder.codepoint > U'\x7F'
-								 && (!unicode_allowed || is_non_ascii_vertical_whitespace(decoder.codepoint)))
+								 && (!unicode_allowed || is_non_ascii_vertical_whitespace(decoder.codepoint)
+									 || (dialect == string_dialect::yaml && is_yaml_unprintable(decoder.codepoint))))
 						{
-							if (static_cast<uint_least32_t>(decoder.codepoint) > 0xFFFFu)
+							if (static_cast<uint_least32_t>(decoder.codepoint) > 0xFFFFu
+								&& dialect == string_dialect::json)
+							{
+								const auto offset = static_cast<uint_least32_t>(decoder.codepoint) - 0x10000u;
+								print_to_stream(*stream_, R"(\u)"sv);
+								print_to_stream(*stream_,
+												0xD800u + (offset >> 10),
+												value_flags::format_as_hexadecimal,
+												4);
+								print_to_stream(*stream_, R"(\u)"sv);
+								print_to_stream(*stream_,
+												0xDC00u + (offset & 0x3FFu),
+												value_flags::format_as_hexadecimal,
+												4);
+							}
+							else if (static_cast<uint_least32_t>(decoder.codepoint) > 0xFFFFu)
 							{
 								print_to_stream(*stream_, R"(\U)"sv);
 								print_to_stream(*stream_,
@@ -352,6 +393,7 @@ TOML_IMPL_NAMESPACE_START
 
 				cp_start = cp_end;
 			}
+			escape_raw_bytes();
 		}
 
 		print_unformatted(multi_line ? R"(""")"sv : R"(")"sv);

@@ -1,0 +1,16 @@
+version: 2
+updates:
+    - package-ecosystem: "github-actions"
+      directory: "/"
+      schedule:
+          interval: "weekly"
+          timezone: "Europe/Helsinki"
+      commit-message:
+          prefix: "[chore] ⬆️ "
+      groups:
+        github-actions:
+          applies-to: version-updates
+          patterns: ["*"]
+        github-actions-security:
+          applies-to: security-updates
+          patterns: ["*"]
