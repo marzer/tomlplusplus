@@ -80,7 +80,6 @@ else
 endif
 if is_permissive
 	global_args += cpp.get_supported_arguments('/permissive')
-	global_args += '-DTOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA=1'
 else
 	global_args += cpp.get_supported_arguments('/permissive-')
 endif

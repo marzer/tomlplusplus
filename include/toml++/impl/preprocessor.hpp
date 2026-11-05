@@ -1317,7 +1317,11 @@ TOML_ENABLE_WARNINGS;
 //# }}
 
 #ifndef TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA
+#if TOML_MSVC && TOML_CPP < 20
+#define TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA 1
+#else
 #define TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA 0
+#endif
 #endif
 //# {{
 /// \def TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA
@@ -1325,6 +1329,8 @@ TOML_ENABLE_WARNINGS;
 /// \detail This macro offers a workaround to a bug in the old "legacy lambda processor" of Visual C++, which
 /// caused compile errors like "error C2057: expected constant expression", when it encountered such lambda's.
 /// These compile errors were reported by Kevin Dick, Jan 19, 2024, at https://github.com/marzer/tomlplusplus/issues/219
+/// Defaults to `1` for MSVC before C++20, which uses the legacy lambda processor unless `/permissive-` or
+/// `/Zc:lambda` is given, and to `0` otherwise.
 //# }}
 
 #ifndef TOML_DISABLE_NOEXCEPT_NOEXCEPT

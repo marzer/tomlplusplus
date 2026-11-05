@@ -1209,7 +1209,11 @@ TOML_ENABLE_WARNINGS;
 #endif
 
 #ifndef TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA
+#if TOML_MSVC && TOML_CPP < 20
+#define TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA 1
+#else
 #define TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA 0
+#endif
 #endif
 
 #ifndef TOML_DISABLE_NOEXCEPT_NOEXCEPT
@@ -12943,6 +12947,7 @@ TOML_PUSH_WARNINGS;
 #endif
 
 TOML_DISABLE_MSVC_WARNING(4702);
+TOML_DISABLE_CLANG_WARNING("-Wnan-infinity-disabled");
 
 TOML_ANON_NAMESPACE_START
 {
@@ -13876,17 +13881,20 @@ TOML_ANON_NAMESPACE_START
 	struct depth_counter_scope
 	{
 		size_t& depth_;
+		size_t previous_;
 
 		TOML_NODISCARD_CTOR
 		explicit depth_counter_scope(size_t& depth) noexcept //
-			: depth_{ depth }
+			: depth_{ depth },
+			  previous_{ depth }
 		{
 			depth_++;
 		}
 
+		// restores instead of decrementing, so msvc destroying it twice when built as a module is harmless (#288)
 		~depth_counter_scope() noexcept
 		{
-			depth_--;
+			depth_ = previous_;
 		}
 
 		TOML_DELETE_DEFAULTS(depth_counter_scope);

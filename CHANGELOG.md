@@ -54,6 +54,9 @@
 - fixed keys containing U+1680, U+180E or U+FEFF incorrectly formatting as bare keys (`TOML_ENABLE_UNRELEASED_FEATURES`)
 - fixed `json_formatter` emitting invalid JSON with some format flags
 - fixed `yaml_formatter` emitting incorrect YAML for some strings, keys and format flags
+- fixed `for_each()` not compiling with MSVC in C++17 mode (#219) (@KevDi)
+- fixed warnings when compiling with Clang and `-ffinite-math-only` (#241) (@theakman2)
+- fixed spurious nested value depth errors when using the C++20 module with MSVC (#288) (@DhirenTheHeadlights)
 
 #### Additions
 
@@ -62,7 +65,7 @@
 - added support for user-defined string types, which `toml::is_string_like` detects automatically (#306) (@mikomikotaishi)
 - added C++20 module support with `import tomlplusplus;` (#266, #267, #273, #303) (@mikomikotaishi, @N-Dekker, @davidstone)
 - added `TOML_MAX_DOTTED_KEYS_DEPTH` config (default `1024`) (#242) (@tyler92)
-- added `TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA` config to work around MSVC's legacy lambda processor (#247) (@N-Dekker)
+- added `TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA` config to work around MSVC's legacy lambda processor (on by default for MSVC before C++20) (#247) (@N-Dekker)
 - added `TOML_DISABLE_NOEXCEPT_NOEXCEPT` config to work around an MSVC bug (on by default for VS 2022 17.13 and older) (#271) (@N-Dekker)
 - added IWYU pragmas to `toml++/toml.hpp` (#277) (@fnuecke)
 - added `const char*` source-path overloads of `toml::parse()`, so string literals work as source paths

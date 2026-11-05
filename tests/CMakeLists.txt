@@ -51,6 +51,10 @@ endforeach()
 
 add_executable(tomlplusplus_odr_test odr_test_1.cpp odr_test_2.cpp)
 tomlplusplus_set_compile_options(tomlplusplus_odr_test)
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  # also checks that toml++ compiles warning-free with -ffinite-math-only (#241)
+  target_compile_options(tomlplusplus_odr_test PRIVATE -ffinite-math-only)
+endif()
 target_link_libraries(tomlplusplus_odr_test PRIVATE tomlplusplus::tomlplusplus)
 add_test(NAME odr_test COMMAND tomlplusplus_odr_test)
 

@@ -198,7 +198,7 @@ won't need to mess with these at all, but if you do, set them before including t
 | `TOML_ASSERT(expr)`                        | function macro | Sets the assert function used by the library.                                                             | `assert()`            |
 | `TOML_CALLCONV`                            |     define     | Calling convention to apply to exported free/static functions.                                            | undefined             |
 | `TOML_CONFIG_HEADER`                       | string literal | Includes the given header file before the rest of the library.                                            | undefined             |
-| `TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA` |    boolean     | Disables the conditional `noexcept`'s of internal lambda's. Needed for MSVC's "legacy lambda processor".  | `0`                   |
+| `TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA` |    boolean     | Disables the conditional `noexcept`'s of internal lambda's. Needed for MSVC's "legacy lambda processor".  | `1` on MSVC C++17     |
 | `TOML_ENABLE_FORMATTERS`                   |    boolean     | Enables the formatters. Set to `0` if you don't need them to improve compile times and binary size.       | `1`                   |
 | `TOML_ENABLE_FLOAT16`                      |    boolean     | Enables support for the built-in `_Float16` type.                                                         | per compiler settings |
 | `TOML_ENABLE_PARSER`                       |    boolean     | Enables the parser. Set to `0` if you don't need it to improve compile times and binary size.             | `1`                   |
@@ -285,9 +285,11 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 - **[@capuanob](https://github.com/capuanob)** - Integrated this project into OSSFuzz
 - **[@danielbodorin](https://github.com/danielbodorin)** - Fixed stack overflow from deeply nested arrays/inline tables
 - **[@davidstone](http://github.com/davidstone)** - Fixed bug in CMake for modules support
+- **[@DhirenTheHeadlights](https://github.com/DhirenTheHeadlights)** - Reported a bug
 - **[@GiulioRomualdi](https://github.com/GiulioRomualdi)** - Added cmake+meson support
 - **[@jonestristand](https://github.com/jonestristand)** - Designed and implemented the `toml::path`s feature
 - **[@kcsaul](https://github.com/kcsaul)** - Fixed a bug
+- **[@KevDi](https://github.com/KevDi)** - Reported a bug
 - **[@levicki](https://github.com/levicki)** - Helped design some new features
 - **[@mikomikotaishi](https://github.com/mikomikotaishi)** - Added support for C++20 modules and custom strings
 - **[@moorereason](https://github.com/moorereason)** - Reported a whole bunch of bugs
@@ -306,6 +308,7 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 - **[@sobczyk](https://github.com/sobczyk)** - Reported some bugs
 - **[@std-any-emplace](https://github.com/std-any-emplace)** - Reported some bugs
 - **[@Tachi107](https://github.com/Tachi107)** - Made some tweaks to meson.build, added compile_library build option
+- **[@theakman2](https://github.com/theakman2)** - Reported a bug
 - **[@traversaro](https://github.com/traversaro)** - Added vcpkg support and reported a bunch of bugs
 - **[@tyler92](https://github.com/tyler92)** - Fixed stack overflow that occurred during fuzzing tests
 - **[@whiterabbit963](https://github.com/whiterabbit963)** - Fixed a bug with value_or conversions

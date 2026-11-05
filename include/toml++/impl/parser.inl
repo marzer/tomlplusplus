@@ -36,6 +36,7 @@ TOML_DISABLE_WARNINGS;
 TOML_ENABLE_WARNINGS;
 #include "header_start.hpp"
 TOML_DISABLE_MSVC_WARNING(4702);
+TOML_DISABLE_CLANG_WARNING("-Wnan-infinity-disabled");
 
 //#---------------------------------------------------------------------------------------------------------------------
 //# UTF8 STREAMS
@@ -977,17 +978,20 @@ TOML_ANON_NAMESPACE_START
 	struct depth_counter_scope
 	{
 		size_t& depth_;
+		size_t previous_;
 
 		TOML_NODISCARD_CTOR
 		explicit depth_counter_scope(size_t& depth) noexcept //
-			: depth_{ depth }
+			: depth_{ depth },
+			  previous_{ depth }
 		{
 			depth_++;
 		}
 
+		// restores instead of decrementing, so msvc destroying it twice when built as a module is harmless (#288)
 		~depth_counter_scope() noexcept
 		{
-			depth_--;
+			depth_ = previous_;
 		}
 
 		TOML_DELETE_DEFAULTS(depth_counter_scope);
