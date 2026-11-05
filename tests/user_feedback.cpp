@@ -179,7 +179,7 @@ b = []
 
 		std::string s(2048_sz, '[');
 		constexpr auto start = "fl =[ "sv;
-		memcpy(s.data(), start.data(), start.length());
+		std::memcpy(s.data(), start.data(), start.length());
 		parsing_should_fail(
 			FILE_LINE_ARGS,
 			std::string_view{ s },

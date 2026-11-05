@@ -58,6 +58,7 @@ TOML_NAMESPACE_START
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void print();
 
+		TOML_EXPORTED_CONSTANT
 		static constexpr impl::formatter_constants constants = {
 			//
 			format_flags::quote_dates_and_times | format_flags::indentation,			 // mandatory

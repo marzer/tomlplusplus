@@ -57,6 +57,9 @@
 - fixed `for_each()` not compiling with MSVC in C++17 mode (#219) (@KevDi)
 - fixed warnings when compiling with Clang and `-ffinite-math-only` (#241) (@theakman2)
 - fixed spurious nested value depth errors when using the C++20 module with MSVC (#288) (@DhirenTheHeadlights)
+- fixed linker errors when using `json_formatter` or `yaml_formatter` from a DLL built with MinGW
+- fixed `TOML_INCLUDE_WINDOWS_H` failing to compile with MinGW on case-sensitive filesystems
+- fixed a Clang `-Wabsolute-value` warning when building the library with MinGW
 
 #### Additions
 
@@ -83,6 +86,7 @@
 
 - meson: builds are header-only by default, as the `build_lib` option always said. In v3.4.0 the deprecated `compile_library` option defaulted to `true`, so every default build compiled the library; pass `-Dbuild_lib=true` to keep doing that (#296) (@jfsimoneau)
 - meson: installs the examples when they're built in a top-level build (#233) (@Scrumplex)
+- meson: fixed the installed CMake package failing `find_package()` on CMake 3.14 and 3.15 when the library is compiled
 - cmake: added `tomlplusplus_INSTALL` (#240) (@DapengFeng)
 - cmake: added `tomlplusplus_BUILD_LIB` to compile the library (static or shared, per `BUILD_SHARED_LIBS`); the target is still `tomlplusplus::tomlplusplus`
 - cmake: added `tomlplusplus_UNRELEASED_FEATURES`

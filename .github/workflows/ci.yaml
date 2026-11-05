@@ -103,7 +103,7 @@ jobs:
               run: pyright
 
     clang-tidy:
-        name: "linux, clang-tidy"
+        name: clang-tidy
 
         runs-on: ubuntu-latest
 
@@ -146,26 +146,26 @@ jobs:
             fail-fast: false
             matrix:
                 include:
-                    - name: "linux, cmake, gcc, debug, header-only, c++17, sanitizers, single header"
+                    - name: sanitizers
                       compiler: "g++"
                       type: "Debug"
                       args: "-Dtomlplusplus_ASAN=ON -Dtomlplusplus_UBSAN=ON -Dtomlplusplus_TESTS_SINGLE_HEADER=ON"
                       consumers: true
-                    - name: "linux, cmake, gcc, release, shared, c++23, modules"
+                    - name: shared library
                       compiler: "g++"
                       type: "Release"
                       args: "-DCMAKE_CXX_STANDARD=23 -Dtomlplusplus_BUILD_LIB=ON -DBUILD_SHARED_LIBS=ON"
                       modules: true
                       consumers: true
                       check_symbols: true
-                    - name: "linux, cmake, clang, debug, header-only, c++26, libc++, leak tests, coverage"
+                    - name: coverage
                       compiler: "clang++"
                       type: "Debug"
                       args: >-
                           -DCMAKE_CXX_STANDARD=26 -DCMAKE_CXX_FLAGS=-stdlib=libc++ -DCMAKE_EXE_LINKER_FLAGS=-stdlib=libc++
                           -Dtomlplusplus_TESTS_LEAK=ON -Dtomlplusplus_COVERAGE=ON
                       coverage: true
-                    - name: "linux, cmake, clang, release, static, c++20, modules, unreleased features"
+                    - name: static library
                       compiler: "clang++"
                       type: "Release"
                       args: "-DCMAKE_CXX_STANDARD=20 -Dtomlplusplus_BUILD_LIB=ON -Dtomlplusplus_UNRELEASED_FEATURES=ON"
@@ -252,7 +252,7 @@ jobs:
               run: |
                   prefix="$RUNNER_TEMP/prefix"
                   cmake --install build --prefix "$prefix"
-                  cmake -S tests/consumer -B "$RUNNER_TEMP/consumer" -G Ninja -DCMAKE_PREFIX_PATH="$prefix" -DIMPORT="$MODULES"
+                  cmake -S tests/consumer -B "$RUNNER_TEMP/consumer" -G Ninja -DCMAKE_PREFIX_PATH="$prefix"
                   cmake --build "$RUNNER_TEMP/consumer"
                   "$RUNNER_TEMP/consumer/consumer"
                   if [ "$MODULES" = ON ]; then "$RUNNER_TEMP/consumer/consumer_import"; fi
@@ -264,7 +264,7 @@ jobs:
               run: git status --short
 
     cmake-floor:
-        name: "linux, cmake 3.14, gcc, debug, header-only, c++17, no exceptions"
+        name: cmake 3.14
 
         runs-on: ubuntu-latest
 
@@ -321,7 +321,7 @@ jobs:
               run: ctest --output-on-failure
 
     linux-meson:
-        name: "linux, meson, clang, debug"
+        name: meson
 
         runs-on: ubuntu-latest
 
@@ -364,7 +364,7 @@ jobs:
               run: git status --short
 
     meson-floor:
-        name: "linux, meson 0.61, gcc 11, release"
+        name: meson 0.61
 
         runs-on: ubuntu-latest
 
@@ -406,9 +406,9 @@ jobs:
                   git status --short
 
     windows-cmake:
-        name: "windows, cmake, msvc, debug, shared, c++20"
+        name: msvc
 
-        runs-on: windows-2022
+        runs-on: windows-latest
 
         defaults:
             run:
@@ -443,13 +443,21 @@ jobs:
               working-directory: build
               run: ctest --output-on-failure
 
+            - name: Test as a subproject with modules
+              run: >-
+                  cmake -S tests/consumer -B "%RUNNER_TEMP%\subproject" -G Ninja -DCMAKE_CXX_COMPILER=cl
+                  -DCMAKE_BUILD_TYPE=Release -DADD_SUBDIRECTORY="%GITHUB_WORKSPACE%" -DTOMLPLUSPLUS_BUILD_MODULES=ON
+                  && cmake --build "%RUNNER_TEMP%\subproject"
+                  && "%RUNNER_TEMP%\subproject\consumer"
+                  && "%RUNNER_TEMP%\subproject\consumer_import"
+
             - name: Report regenerated files
               run: git status --short
 
     windows-meson:
-        name: "windows, meson, msvc, release, static, permissive"
+        name: msvc permissive
 
-        runs-on: windows-2022
+        runs-on: windows-latest
 
         defaults:
             run:
@@ -478,7 +486,7 @@ jobs:
               run: git status --short
 
     macos-meson:
-        name: "macos, meson, apple clang, release"
+        name: macos
 
         runs-on: macos-latest
 

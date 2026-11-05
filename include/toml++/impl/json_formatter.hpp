@@ -61,6 +61,7 @@ TOML_NAMESPACE_START
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void print();
 
+		TOML_EXPORTED_CONSTANT
 		static constexpr impl::formatter_constants constants = {
 			format_flags::quote_dates_and_times | format_flags::quote_infinities_and_nans,		 // mandatory
 			format_flags::allow_literal_strings | format_flags::allow_multi_line_strings		 //

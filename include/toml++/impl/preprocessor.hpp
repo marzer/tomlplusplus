@@ -1095,6 +1095,12 @@
 ///	\remark You might override this with `__declspec(dllexport)` if you were building the library
 /// 		into the public API of a DLL on Windows.
 
+#if TOML_WINDOWS && TOML_GCC && TOML_IMPLEMENTATION && !TOML_HEADER_ONLY
+#define TOML_EXPORTED_CONSTANT TOML_ATTR(used)
+#else
+#define TOML_EXPORTED_CONSTANT
+#endif
+
 // experimental language features
 #if !defined(TOML_ENABLE_UNRELEASED_FEATURES) && defined(TOML_UNRELEASED_FEATURES) // was TOML_UNRELEASED_FEATURES
 																				   // pre-3.0

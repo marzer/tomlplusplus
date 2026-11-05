@@ -124,8 +124,6 @@ endif
 global_args += cpp.get_supported_arguments(
 	'-Wno-c++98-compat',
 	'-Wno-c++98-compat-pedantic',
-	'-Wno-documentation',
-	'-Wno-documentation-unknown-command',
 	'-Wno-switch-enum',
 	'-Wno-covered-switch-default',
 	'-Wno-padded',

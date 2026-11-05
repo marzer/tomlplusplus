@@ -15,7 +15,7 @@
 #include "std_string.hpp"
 #ifndef _WINDOWS_
 #if TOML_INCLUDE_WINDOWS_H
-#include <Windows.h>
+#include <windows.h>
 #else
 
 extern "C" __declspec(dllimport) int __stdcall WideCharToMultiByte(unsigned int CodePage,

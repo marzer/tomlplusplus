@@ -133,6 +133,11 @@ CheckOptions:
       value: >-
         ::std::basic_string_view
 
+    - key: bugprone-suspicious-stringview-data-usage.AllowedCallees
+      value: >-
+        ::memcmp;
+        ::std::memcmp
+
     - key: bugprone-unused-local-non-trivial-variable.IncludeTypes
       value: .*
 

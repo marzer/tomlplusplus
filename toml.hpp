@@ -1060,6 +1060,12 @@
 #define TOML_EXPORTED_FREE_FUNCTION
 #endif
 
+#if TOML_WINDOWS && TOML_GCC && TOML_IMPLEMENTATION && !TOML_HEADER_ONLY
+#define TOML_EXPORTED_CONSTANT TOML_ATTR(used)
+#else
+#define TOML_EXPORTED_CONSTANT
+#endif
+
 // experimental language features
 #if !defined(TOML_ENABLE_UNRELEASED_FEATURES) && defined(TOML_UNRELEASED_FEATURES) // was TOML_UNRELEASED_FEATURES
 																				   // pre-3.0
@@ -1411,6 +1417,8 @@ TOML_DISABLE_SUGGEST_ATTR_WARNINGS;
 #endif
 #elif TOML_CLANG
 TOML_PRAGMA_CLANG(diagnostic ignored "-Wheader-hygiene")
+TOML_PRAGMA_CLANG(diagnostic ignored "-Wdocumentation")
+TOML_PRAGMA_CLANG(diagnostic ignored "-Wdocumentation-unknown-command")
 #if TOML_CLANG >= 12
 TOML_PRAGMA_CLANG(diagnostic ignored "-Wc++20-extensions")
 #endif
@@ -10562,6 +10570,7 @@ TOML_NAMESPACE_START
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void print();
 
+		TOML_EXPORTED_CONSTANT
 		static constexpr impl::formatter_constants constants = { format_flags::none, // mandatory
 																 format_flags::none, // ignored
 																 "inf"sv,
@@ -10657,6 +10666,7 @@ TOML_NAMESPACE_START
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void print();
 
+		TOML_EXPORTED_CONSTANT
 		static constexpr impl::formatter_constants constants = {
 			format_flags::quote_dates_and_times | format_flags::quote_infinities_and_nans,		 // mandatory
 			format_flags::allow_literal_strings | format_flags::allow_multi_line_strings		 //
@@ -10752,6 +10762,7 @@ TOML_NAMESPACE_START
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void print();
 
+		TOML_EXPORTED_CONSTANT
 		static constexpr impl::formatter_constants constants = {
 			//
 			format_flags::quote_dates_and_times | format_flags::indentation,			 // mandatory
@@ -10821,7 +10832,7 @@ TOML_POP_WARNINGS;
 
 #ifndef _WINDOWS_
 #if TOML_INCLUDE_WINDOWS_H
-#include <Windows.h>
+#include <windows.h>
 #else
 
 extern "C" __declspec(dllimport) int __stdcall WideCharToMultiByte(unsigned int CodePage,
@@ -13206,7 +13217,7 @@ TOML_ANON_NAMESPACE_START
 			: source_{ sv }
 		{
 			// skip bom
-			if (source_.length() >= 3u && memcmp(utf8_byte_order_mark.data(), source_.data(), 3u) == 0)
+			if (source_.length() >= 3u && std::memcmp(utf8_byte_order_mark.data(), source_.data(), 3u) == 0)
 				position_ += 3u;
 		}
 
@@ -13352,7 +13363,7 @@ TOML_ANON_NAMESPACE_START
 			{
 				started_	= true;
 				prefix_end_ = read(prefix_, 3u);
-				if (prefix_end_ == 3u && memcmp(utf8_byte_order_mark.data(), prefix_, 3u) == 0)
+				if (prefix_end_ == 3u && std::memcmp(utf8_byte_order_mark.data(), prefix_, 3u) == 0)
 					prefix_end_ = 0u;
 			}
 
@@ -17185,7 +17196,7 @@ TOML_NAMESPACE_START
 	{
 		std::string file_path_str;
 		file_path_str.resize(file_path.length());
-		memcpy(file_path_str.data(), file_path.data(), file_path.length());
+		std::memcpy(file_path_str.data(), file_path.data(), file_path.length());
 		return TOML_ANON_NAMESPACE::do_parse_file(file_path_str);
 	}
 
@@ -17880,7 +17891,7 @@ TOML_ANON_NAMESPACE_START
 					weight += 1u;
 					magnitude = 0u - magnitude;
 				}
-				return weight + static_cast<size_t>(log10(static_cast<double>(magnitude))) + 1u;
+				return weight + static_cast<size_t>(std::log10(static_cast<double>(magnitude))) + 1u;
 			}
 
 			case node_type::floating_point:
@@ -17896,7 +17907,7 @@ TOML_ANON_NAMESPACE_START
 					weight += 1u;
 					val *= -1.0;
 				}
-				return weight + static_cast<size_t>(abs(log10(val))) + 1u;
+				return weight + static_cast<size_t>(std::abs(std::log10(val))) + 1u;
 			}
 
 			case node_type::boolean: return 5u;
@@ -18641,6 +18652,7 @@ TOML_POP_WARNINGS;
 #undef TOML_ENABLE_WARNINGS
 #undef TOML_EVAL_BOOL_0
 #undef TOML_EVAL_BOOL_1
+#undef TOML_EXPORTED_CONSTANT
 #undef TOML_EXTERNAL_LINKAGE
 #undef TOML_FLAGS_ENUM
 #undef TOML_FLOAT_CHARCONV

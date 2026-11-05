@@ -65,7 +65,7 @@ TOML_ANON_NAMESPACE_START
 			: source_{ sv }
 		{
 			// skip bom
-			if (source_.length() >= 3u && memcmp(utf8_byte_order_mark.data(), source_.data(), 3u) == 0)
+			if (source_.length() >= 3u && std::memcmp(utf8_byte_order_mark.data(), source_.data(), 3u) == 0)
 				position_ += 3u;
 		}
 
@@ -211,7 +211,7 @@ TOML_ANON_NAMESPACE_START
 			{
 				started_	= true;
 				prefix_end_ = read(prefix_, 3u);
-				if (prefix_end_ == 3u && memcmp(utf8_byte_order_mark.data(), prefix_, 3u) == 0)
+				if (prefix_end_ == 3u && std::memcmp(utf8_byte_order_mark.data(), prefix_, 3u) == 0)
 					prefix_end_ = 0u;
 			}
 
@@ -4054,7 +4054,7 @@ TOML_NAMESPACE_START
 	{
 		std::string file_path_str;
 		file_path_str.resize(file_path.length());
-		memcpy(file_path_str.data(), file_path.data(), file_path.length());
+		std::memcpy(file_path_str.data(), file_path.data(), file_path.length());
 		return TOML_ANON_NAMESPACE::do_parse_file(file_path_str);
 	}
 

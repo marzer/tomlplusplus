@@ -197,7 +197,7 @@ int main()
 			{
 				std::string s(1000u, '[');
 				constexpr auto start = "array = "sv;
-				memcpy(s.data(), start.data(), start.length());
+				std::memcpy(s.data(), start.data(), start.length());
 				parse_and_print_if_error(s);
 			}
 			else

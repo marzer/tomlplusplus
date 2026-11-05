@@ -92,8 +92,6 @@ function(tomlplusplus_set_compile_options target)
           -Weverything
           -Wno-c++98-compat
           -Wno-c++98-compat-pedantic
-          -Wno-documentation
-          -Wno-documentation-unknown-command
           -Wno-switch-enum
           -Wno-switch-default
           -Wno-covered-switch-default

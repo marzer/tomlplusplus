@@ -15,7 +15,7 @@ if(NOT TARGET tomlplusplus::tomlplusplus)
     INTERFACE_INCLUDE_DIRECTORIES "${PACKAGE_PREFIX_DIR}/@includedir@")
 
   # Require C++17
-  target_compile_features(tomlplusplus::tomlplusplus INTERFACE cxx_std_17)
+  set_property(TARGET tomlplusplus::tomlplusplus APPEND PROPERTY INTERFACE_COMPILE_FEATURES cxx_std_17)
 
   # Set the path to the installed library so that users can link to it
   if (@compile_library@)
@@ -23,7 +23,7 @@ if(NOT TARGET tomlplusplus::tomlplusplus)
       IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/@libdir@/@lib_name@"
     )
     # compile_options not quoted on purpose
-    target_compile_options(tomlplusplus::tomlplusplus INTERFACE @compile_options@)
+    set_property(TARGET tomlplusplus::tomlplusplus APPEND PROPERTY INTERFACE_COMPILE_OPTIONS @compile_options@)
   endif()
 
 endif()

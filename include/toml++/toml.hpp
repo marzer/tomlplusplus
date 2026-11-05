@@ -23,6 +23,8 @@ TOML_DISABLE_SUGGEST_ATTR_WARNINGS;
 #endif
 #elif TOML_CLANG
 TOML_PRAGMA_CLANG(diagnostic ignored "-Wheader-hygiene")
+TOML_PRAGMA_CLANG(diagnostic ignored "-Wdocumentation")
+TOML_PRAGMA_CLANG(diagnostic ignored "-Wdocumentation-unknown-command")
 #if TOML_CLANG >= 12
 TOML_PRAGMA_CLANG(diagnostic ignored "-Wc++20-extensions")
 #endif
@@ -130,6 +132,7 @@ TOML_POP_WARNINGS;
 #undef TOML_ENABLE_WARNINGS
 #undef TOML_EVAL_BOOL_0
 #undef TOML_EVAL_BOOL_1
+#undef TOML_EXPORTED_CONSTANT
 #undef TOML_EXTERNAL_LINKAGE
 #undef TOML_FLAGS_ENUM
 #undef TOML_FLOAT_CHARCONV

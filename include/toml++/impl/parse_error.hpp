@@ -119,7 +119,6 @@ TOML_NAMESPACE_START
 		///		(error occurred at line 1, column 13)
 		/// \eout
 		///
-		/// \tparam Char The output stream's underlying character type. Must be 1 byte in size.
 		/// \param 	lhs	The stream.
 		/// \param 	rhs	The parse_error.
 		///
