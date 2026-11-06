@@ -26,6 +26,7 @@
 - Supports serializing to JSON and YAML
 - Proper UTF-8 handling (incl. BOM)
 - C++17 (plus some C++20 features where available, e.g. experimental support for [char8_t] strings)
+- Reflection serialization/deserialization support (C++26)
 - Doesn't require RTTI
 - Works with or without exceptions
 - Tested on GCC 11 and 15, Clang 21, Apple Clang 21 and MSVC 19.51 (VS 2026); other compilers are best effort
@@ -202,6 +203,7 @@ won't need to mess with these at all, but if you do, set them before including t
 | `TOML_ENABLE_FORMATTERS`                   |    boolean     | Enables the formatters. Set to `0` if you don't need them to improve compile times and binary size.       | `1`                   |
 | `TOML_ENABLE_FLOAT16`                      |    boolean     | Enables support for the built-in `_Float16` type.                                                         | per compiler settings |
 | `TOML_ENABLE_PARSER`                       |    boolean     | Enables the parser. Set to `0` if you don't need it to improve compile times and binary size.             | `1`                   |
+| `TOML_ENABLE_REFLECTION`                   |    boolean     | Enables `serialize()` and `deserialize()` functions. Requires C++26 and a reflection-supporting compiler. | `0`                   |
 | `TOML_ENABLE_UNRELEASED_FEATURES`          |    boolean     | Enables support for [unreleased TOML language features].                                                  | `0`                   |
 | `TOML_ENABLE_WINDOWS_COMPAT`               |    boolean     | Enables support for transparent conversion between wide and narrow strings.                               | `1` on Windows        |
 | `TOML_EXCEPTIONS`                          |    boolean     | Sets whether the library uses exceptions.                                                                 | per compiler settings |
@@ -212,6 +214,7 @@ won't need to mess with these at all, but if you do, set them before including t
 | `TOML_HEADER_ONLY`                         |    boolean     | Disable this to explicitly control where toml++'s implementation is compiled (e.g. as part of a library). | `1`                   |
 | `TOML_IMPLEMENTATION`                      |     define     | Define this to enable compilation of the library's implementation when `TOML_HEADER_ONLY` == `0`.         | undefined             |
 | `TOML_OPTIONAL_TYPE`                       |   type name    | Overrides the `optional<T>` type used by the library if you need [something better than std::optional].   | undefined             |
+| `TOML_SERDE_ALLOW_PRIVATE`                 |    boolean     | Allows reflection-based serde to access private members without `[[=toml::reflectable]]`                  | `0`                   |
 | `TOML_SMALL_FLOAT_TYPE`                    |   type name    | If your codebase has a custom 'small float' type (e.g. half-precision), this tells toml++ about it.       | undefined             |
 | `TOML_SMALL_INT_TYPE`                      |   type name    | If your codebase has a custom 'small integer' type (e.g. 24-bits), this tells toml++ about it.            | undefined             |
 
@@ -289,11 +292,12 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 - **[@davidstone](http://github.com/davidstone)** - Fixed bug in CMake for modules support
 - **[@DhirenTheHeadlights](https://github.com/DhirenTheHeadlights)** - Reported a bug
 - **[@GiulioRomualdi](https://github.com/GiulioRomualdi)** - Added cmake+meson support
+- **[@jfsimoneau](https://github.com/jfsimoneau)** - Fixed a meson option
 - **[@jonestristand](https://github.com/jonestristand)** - Designed and implemented the `toml::path`s feature
 - **[@kcsaul](https://github.com/kcsaul)** - Fixed a bug
 - **[@KevDi](https://github.com/KevDi)** - Reported a bug
 - **[@levicki](https://github.com/levicki)** - Helped design some new features
-- **[@mikomikotaishi](https://github.com/mikomikotaishi)** - Added support for C++20 modules, `std::chrono`, and custom strings
+- **[@mikomikotaishi](https://github.com/mikomikotaishi)** - Added support for C++20 modules, `std::chrono`, C++26 reflection, and custom strings
 - **[@moorereason](https://github.com/moorereason)** - Reported a whole bunch of bugs
 - **[@mosra](https://github.com/mosra)** - Created the awesome [m.css] used to generate the API docs
 - **[@N-Dekker](https://github.com/N-Dekker)** - Added a workaround for the legacy lambda processor of MSVC 2019/2022, added `get_line`
@@ -301,11 +305,14 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 - **[@okureta](https://github.com/okureta)** - Reported a bug
 - **[@peppergrayxyz](https://github.com/peppergrayxyz)** - Reported and suggested a fix for shared-library parse error visibility
 - **[@prince-chrismc](https://github.com/prince-chrismc)** - Added toml++ to ConanCenter, and fixed some typos
+- **[@rafal-c](https://github.com/rafal-c)** - Added a formatting flag
 - **[@rbrugo](https://github.com/rbrugo)** - Helped design a new feature
 - **[@Reedbeta](https://github.com/Reedbeta)** - Fixed a bug and added additional Visual Studio debugger native visualizers
 - **[@Ryan-rsm-McKenzie](https://github.com/Ryan-rsm-McKenzie)** - Add natvis file to cmake install script
+- **[@SAY-5](https://github.com/SAY-5)** - Fixed a parser bug
 - **[@Scrumplex](https://github.com/Scrumplex)** - Tweaked the build scripts
 - **[@shdnx](https://github.com/shdnx)** - Fixed a bug on GCC 8.2.0 and some meson config issues
+- **[@ShereeMorphett](https://github.com/ShereeMorphett)** - Fixed `reinterpret_cast` usage
 - **[@sneves](https://github.com/sneves)** - Helped fix a number of parser bugs
 - **[@sobczyk](https://github.com/sobczyk)** - Reported some bugs
 - **[@std-any-emplace](https://github.com/std-any-emplace)** - Reported some bugs
@@ -315,10 +322,6 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 - **[@tyler92](https://github.com/tyler92)** - Fixed stack overflow that occurred during fuzzing tests
 - **[@whiterabbit963](https://github.com/whiterabbit963)** - Fixed a bug with `value_or` conversions
 - **[@ximion](https://github.com/ximion)** - Added support for installation with meson
-- **[@rafal-c](https://github.com/rafal-c)** - Added a formatting flag
-- **[@jfsimoneau](https://github.com/jfsimoneau)** - Fixed a meson option
-- **[@ShereeMorphett](https://github.com/ShereeMorphett)** - Fixed `reinterpret_cast` usage
-- **[@SAY-5](https://github.com/SAY-5)** - Fixed a parser bug
 
 <br>
 

@@ -105,6 +105,11 @@ TOML_NAMESPACE_START
 	class json_formatter;
 	class yaml_formatter;
 
+#if TOML_ENABLE_REFLECTION
+	template <typename T>
+	table serialize(const T&);
+#endif
+
 	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex);
 #if TOML_EXCEPTIONS
 	using parse_result = table;
