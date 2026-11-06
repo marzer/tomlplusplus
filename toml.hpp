@@ -12123,6 +12123,10 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	path& path::operator+=(const path& rhs)
 	{
+		// vector::insert can't take a range from the same vector
+		if (&rhs == this)
+			return *this += path{ rhs };
+
 		components_.insert(components_.cend(), rhs.begin(), rhs.end());
 		return *this;
 	}
@@ -12130,6 +12134,9 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	path& path::operator+=(path&& rhs)
 	{
+		if (&rhs == this)
+			return *this += path{ rhs };
+
 		components_.insert(components_.end(),
 						   std::make_move_iterator(rhs.components_.begin()),
 						   std::make_move_iterator(rhs.components_.end()));
@@ -12156,6 +12163,9 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	path& path::prepend(const path& source)
 	{
+		if (&source == this)
+			return prepend(path{ source });
+
 		components_.insert(components_.begin(), source.components_.begin(), source.components_.end());
 		return *this;
 	}
@@ -12163,6 +12173,9 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	path& path::prepend(path && source)
 	{
+		if (&source == this)
+			return prepend(path{ source });
+
 		components_.insert(components_.begin(),
 						   std::make_move_iterator(source.components_.begin()),
 						   std::make_move_iterator(source.components_.end()));

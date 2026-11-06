@@ -25,6 +25,7 @@
 - fixed warnings from inside toml++ in code built with Clang's `-Weverything`, or with GCC's `-Wshadow` or `-Wunused-variable`
 - fixed MSVC warning C4702 (unreachable code) from the parser (#307) (@soniafergusonship)
 - fixed out-of-bounds read in `path::subpath()` when the arguments go past the end of the path (#319) (@aouxwoux)
+- fixed undefined behaviour and wrong results when appending or prepending a `toml::path` to itself (@arfa-21)
 - fixed `toml_formatter` emitting multi-line strings that did not round-trip (three single quotes inside the value, or a leading newline) (#323) (@arfa-21)
 - fixed incorrect source positions and misleading messages in a number of parse errors
 - fixed times with more than 64 digits of fractional seconds failing to parse
