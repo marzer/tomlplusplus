@@ -92,6 +92,7 @@ TEMPLATE_TEST_CASE("printing - integers",
 		CHECK(printed(TestType{}) == "0"sv);
 		CHECK(printed(TestType{}, value_flags::format_as_hexadecimal) == "0"sv);
 		CHECK(printed(TestType{}, value_flags::none, 3u) == "000"sv);
+		CHECK(printed(TestType{}, value_flags::none, 100u) == std::string(100u, '0'));
 	}
 
 	SECTION("bases")
@@ -134,6 +135,10 @@ TEMPLATE_TEST_CASE("printing - integers",
 		CHECK(printed(TestType{ 127 }, value_flags::format_as_hexadecimal, 4u) == "007F"sv);
 		CHECK(printed(TestType{ 127 }, value_flags::none, 2u) == "127"sv);
 		CHECK(printed(ten, value_flags::format_as_binary, 6u) == "001010"sv);
+		CHECK(printed(TestType{ 5 }, value_flags::none, 100u) == std::string(99u, '0') + "5");
+		CHECK(printed((limits::max)(), value_flags::format_as_binary, 100u)
+			  == std::string(100u - reference_digits((limits::max)(), 2u).size(), '0')
+					 + reference_digits((limits::max)(), 2u));
 	}
 }
 

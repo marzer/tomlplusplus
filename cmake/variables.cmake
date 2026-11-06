@@ -15,6 +15,7 @@ endmacro()
 
 tomlplusplus_developer_option(tomlplusplus_BUILD_TESTS "Build the tests" OFF)
 tomlplusplus_developer_option(tomlplusplus_BUILD_TOML_TEST "Build the toml-test encoder and decoder" OFF)
+tomlplusplus_developer_option(tomlplusplus_BUILD_BENCHMARKS "Build the benchmarks" OFF)
 tomlplusplus_developer_option(tomlplusplus_PEDANTIC "Enable as many compiler warnings as possible" OFF)
 tomlplusplus_developer_option(tomlplusplus_WERROR "Treat compiler warnings as errors" OFF)
 tomlplusplus_developer_option(tomlplusplus_ASAN "Build with AddressSanitizer" OFF)

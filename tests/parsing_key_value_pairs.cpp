@@ -533,3 +533,130 @@ TEST_CASE("parsing - key-value pairs (implementation limits)")
 		deep_key,
 		"1:2050: Error while parsing key: exceeded maximum dotted keys depth of 1024 (TOML_MAX_DOTTED_KEYS_DEPTH)"sv);
 }
+
+TEST_CASE("parsing - key-value pairs (bytes after long keys and whitespace)")
+{
+	SECTION("a bare key")
+	{
+		const std::string key = "abcdefghijklmnopqrstuvwxyz0123456789-_";
+		parsing_should_succeed(FILE_LINE_ARGS, key + "=1", [&](table&& tbl) { CHECK(tbl[key] == 1); });
+		parsing_should_succeed(FILE_LINE_ARGS, key + "\t= 1", [&](table&& tbl) { CHECK(tbl[key] == 1); });
+		parsing_should_fail(FILE_LINE_ARGS, key, "1:39: Error while parsing key-value pair: encountered end-of-file"sv);
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			key + ". = 1",
+			"1:41: Error while parsing key: expected bare key starting character or string delimiter, saw '='"sv);
+		parsing_should_fail(FILE_LINE_ARGS,
+							key + "\" = 1",
+							R"(1:39: Error while parsing key-value pair: expected '=', saw '"')"sv);
+		parsing_should_fail(FILE_LINE_ARGS,
+							key + "# = 1",
+							"1:39: Error while parsing key-value pair: expected '=', saw '#'"sv);
+		parsing_should_fail(FILE_LINE_ARGS,
+							key + "\n= 1",
+							R"(1:39: Error while parsing key-value pair: expected '=', saw '\n')"sv);
+#if TOML_LANG_UNRELEASED
+		parsing_should_succeed(FILE_LINE_ARGS, key + "+ = 1", [&](table&& tbl) { CHECK(tbl[key + "+"] == 1); });
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   key + "\xC3\xA9 = 1",
+							   [&](table&& tbl) { CHECK(tbl[key + "\xC3\xA9"] == 1); });
+#else
+		parsing_should_fail(FILE_LINE_ARGS,
+							key + "+ = 1",
+							"1:39: Error while parsing key-value pair: expected '=', saw '+'"sv);
+		parsing_should_fail(FILE_LINE_ARGS,
+							key + "\xC3\xA9 = 1",
+							"1:39: Error while parsing key-value pair: expected '=', saw '\xC3\xA9'"sv);
+#endif
+	}
+
+	SECTION("whitespace")
+	{
+		const std::string blank = "  \t \t   \t\t    \t  \t  ";
+		parsing_should_succeed(FILE_LINE_ARGS, "a" + blank + "= 1", [](table&& tbl) { CHECK(tbl["a"] == 1); });
+		parsing_should_succeed(FILE_LINE_ARGS, "a = 1" + blank + "# c", [](table&& tbl) { CHECK(tbl["a"] == 1); });
+		parsing_should_fail(FILE_LINE_ARGS,
+							"a" + blank + "\v= 1",
+							R"(1:22: Error while parsing key-value pair: expected '=', saw '\u000B')"sv);
+		parsing_should_fail(FILE_LINE_ARGS,
+							"a = 1" + blank + "\r",
+							R"(1:27: Error while parsing key-value pair: expected '\n' after '\r', saw EOF)"sv);
+		parsing_should_fail(FILE_LINE_ARGS,
+							"a = 1" + blank + "x",
+							"1:26: Error while parsing key-value pair: expected a comment or whitespace, saw 'x'"sv);
+		parsing_should_fail(FILE_LINE_ARGS,
+							"a = 1" + blank + "\xC2\xA0",
+							R"(1:26: Error while parsing key-value pair: expected space or tab, saw '\u00A0')"sv);
+		parsing_should_fail(FILE_LINE_ARGS,
+							"a = 1" + blank + "\xE3\x80\x80",
+							R"(1:26: Error while parsing key-value pair: expected space or tab, saw '\u3000')"sv);
+	}
+}
+
+TEST_CASE("parsing - key-value pairs (every ascii byte in a bare key)")
+{
+	std::string bare = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-";
+#if TOML_LANG_UNRELEASED
+	bare += '+';
+#endif
+
+	for (unsigned byte = 0; byte < 0x80u; byte++)
+	{
+		INFO("byte " << byte);
+		const auto key		= "k" + std::string(1u, static_cast<char>(byte)) + "k";
+		const auto doc		= key + " = 1";
+		const auto expected = table{ { key, 1 } };
+
+		if (bare.find(static_cast<char>(byte)) != std::string::npos)
+		{
+			parsing_should_succeed(FILE_LINE_ARGS, doc, [&](table&& tbl) { CHECK(tbl == expected); });
+			continue;
+		}
+
+#if TOML_EXCEPTIONS
+		try
+		{
+			const auto tbl = toml::parse(doc);
+			CHECK(tbl != expected);
+		}
+		catch (const parse_error&)
+		{}
+#else
+		if (auto result = toml::parse(doc))
+			CHECK(result.table() != expected);
+#endif
+	}
+}
+
+TEST_CASE("parsing - key-value pairs (redefined keys written with whitespace)")
+{
+	parsing_should_fail(FILE_LINE_ARGS,
+						"\"a b\" = 1\n\"a b\" = 2"sv,
+						R"(2:1: Error while parsing key-value pair: cannot redefine existing integer '"a b"')"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"a . b = 1\na . b = 2"sv,
+						"2:1: Error while parsing key-value pair: cannot redefine existing integer 'a.b'"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"\"a\" . b = 1\n\"a\" . b = 2"sv,
+						R"(2:1: Error while parsing key-value pair: cannot redefine existing integer '"a" .b')"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"a\t.\t\"b c\" = 1\na\t.\t\"b c\" = 2"sv,
+						R"(2:1: Error while parsing key-value pair: cannot redefine existing integer 'a."b c"')"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"a . 'b\tc' . d = 1\na . 'b\tc' . d = 2"sv,
+						"2:1: Error while parsing key-value pair: cannot redefine existing integer 'a.'b\tc' .d'"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"\"a\"  .  \"b\"\t= 1\n\"a\"  .  \"b\"\t= 2"sv,
+						R"(2:1: Error while parsing key-value pair: cannot redefine existing integer '"a" ."b"')"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"x = { \"k  y\" . z = 1, \"k  y\" . z = 2 }"sv,
+						R"(1:23: Error while parsing key-value pair: cannot redefine existing integer '"k  y" .z')"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"[ a . \"b c\" ]\n[ a . \"b c\" ]"sv,
+						R"(2:1: Error while parsing table header: cannot redefine existing table 'a."b c"')"sv);
+
+	const std::string key = "a.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+	parsing_should_fail(FILE_LINE_ARGS,
+						key + std::string(40u, ' ') + "= 1\n" + key + " = 2",
+						"2:1: Error while parsing key-value pair: cannot redefine existing integer '" + key + "'");
+}

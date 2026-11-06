@@ -13,6 +13,7 @@
 #if TOML_ENABLE_FORMATTERS
 
 #include "toml_formatter.hpp"
+#include "formatter.inl"
 #include "print_to_stream.hpp"
 #include "value.hpp"
 #include "table.hpp"
@@ -385,6 +386,7 @@ TOML_NAMESPACE_START
 		{
 			case node_type::table:
 			{
+				impl::formatter_buffer buffer{ *this };
 				auto& tbl = *static_cast<const table*>(&source());
 				if (tbl.is_inline())
 					print_inline(tbl);
@@ -393,10 +395,17 @@ TOML_NAMESPACE_START
 					decrease_indent(); // so root kvps and tables have the same indent
 					print(tbl);
 				}
+				buffer.flush();
 				break;
 			}
 
-			case node_type::array: print(*static_cast<const array*>(&source())); break;
+			case node_type::array:
+			{
+				impl::formatter_buffer buffer{ *this };
+				print(*static_cast<const array*>(&source()));
+				buffer.flush();
+				break;
+			}
 
 			default: print_value(source(), source_type);
 		}

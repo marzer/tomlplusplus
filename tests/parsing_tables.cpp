@@ -758,3 +758,130 @@ TEST_CASE("parsing - inline tables (malformed)")
 						"tbl = {b = 1"sv,
 						"1:13: Error while parsing inline table: encountered end-of-file"sv);
 }
+
+TEST_CASE("parsing - thousands of tables")
+{
+	static constexpr size_t count = 2000;
+	const auto scrambled		  = [](size_t i) { return std::to_string(i * 37u % count); };
+	const auto next_line		  = [](std::string_view doc)
+	{
+		size_t lines = 1;
+		for (auto c : doc)
+			if (c == '\n')
+				lines++;
+		return std::to_string(lines);
+	};
+
+	SECTION("implicit tables, then headers for them in another order")
+	{
+		std::string doc;
+		for (size_t i = 0; i < count; i++)
+			doc += "[t" + std::to_string(i) + ".x.y]\n";
+		for (size_t i = 0; i < count; i++)
+		{
+			const auto j = scrambled(i);
+			doc += "[t" + j + "]\nx.w = " + j + "\n";
+		}
+
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   doc,
+							   [](table&& tbl)
+							   {
+								   CHECK(tbl.size() == count);
+								   for (size_t i = 0; i < count; i++)
+								   {
+									   const auto t = tbl["t" + std::to_string(i)];
+									   REQUIRE(t.is_table());
+									   CHECK(t.as_table()->size() == 1u);
+									   CHECK(t["x"]["w"] == static_cast<int64_t>(i));
+									   CHECK(t["x"]["y"].is_table());
+								   }
+							   });
+
+		parsing_should_fail(FILE_LINE_ARGS,
+							doc + "[t0]\n",
+							next_line(doc)
+								+ ":1: Error while parsing table header: cannot redefine existing table 't0'");
+		parsing_should_fail(FILE_LINE_ARGS,
+							doc + "[t" + scrambled(count - 1u) + "]\n",
+							next_line(doc) + ":1: Error while parsing table header: cannot redefine existing table 't"
+								+ scrambled(count - 1u) + "'");
+	}
+
+	SECTION("arrays of tables, then more elements in another order")
+	{
+		std::string doc = "s = [1]\n";
+		for (size_t i = 0; i < count; i++)
+			doc += "[[a" + std::to_string(i) + "]]\nx = " + std::to_string(i) + "\n";
+		for (size_t i = 0; i < count; i++)
+		{
+			const auto j = scrambled(i);
+			doc += "[[a" + j + "]]\nx = " + j + "\n[a" + j + ".t]\ny = " + j + "\n";
+		}
+
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   doc,
+							   [](table&& tbl)
+							   {
+								   CHECK(tbl.size() == count + 1u);
+								   for (size_t i = 0; i < count; i++)
+								   {
+									   const auto a = tbl["a" + std::to_string(i)];
+									   REQUIRE(a.is_array_of_tables());
+									   CHECK(a.as_array()->size() == 2u);
+									   CHECK(a[0]["x"] == static_cast<int64_t>(i));
+									   CHECK(a[1]["x"] == static_cast<int64_t>(i));
+									   CHECK(a[1]["t"]["y"] == static_cast<int64_t>(i));
+								   }
+							   });
+
+		parsing_should_fail(FILE_LINE_ARGS,
+							doc + "[a0]\n",
+							next_line(doc)
+								+ ":1: Error while parsing table header: cannot redefine existing array 'a0' as table");
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			doc + "[[s]]\n",
+			next_line(doc)
+				+ ":1: Error while parsing table header: cannot redefine existing array 's' as array-of-tables");
+	}
+
+	SECTION("dotted keys, then more keys under them in another order")
+	{
+		std::string doc = "[t]\ns = {}\n";
+		for (size_t i = 0; i < count; i++)
+		{
+			const auto k = std::to_string(i);
+			doc += "k" + k + ".a = " + k + "\n";
+			if (i % 3u == 0u)
+				doc += "k" + k + ".c = " + k + "\n";
+		}
+		for (size_t i = 0; i < count; i++)
+		{
+			const auto j = scrambled(i);
+			doc += "k" + j + ".b = " + j + "\n";
+		}
+
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   doc,
+							   [](table&& tbl)
+							   {
+								   REQUIRE(tbl["t"].is_table());
+								   CHECK(tbl["t"].as_table()->size() == count + 1u);
+								   for (size_t i = 0; i < count; i++)
+								   {
+									   const auto k = tbl["t"]["k" + std::to_string(i)];
+									   CHECK(k["a"] == static_cast<int64_t>(i));
+									   CHECK(k["b"] == static_cast<int64_t>(i));
+									   if (i % 3u == 0u)
+										   CHECK(k["c"] == static_cast<int64_t>(i));
+								   }
+							   });
+
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			doc + "s.x = 1\n",
+			next_line(doc)
+				+ ":1: Error while parsing key-value pair: cannot redefine existing table as dotted key-value pair");
+	}
+}

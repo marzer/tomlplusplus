@@ -21,6 +21,7 @@
 #include "array.hpp"
 #include "table.hpp"
 #include "unicode.hpp"
+#include "simd.hpp"
 TOML_DISABLE_WARNINGS;
 #include <istream>
 #include <fstream>
@@ -48,80 +49,20 @@ TOML_DISABLE_CLANG_WARNING("-Wnan-infinity-disabled");
 
 TOML_ANON_NAMESPACE_START
 {
-	template <typename T>
-	class utf8_byte_stream;
-
 	TOML_INTERNAL_LINKAGE
 	constexpr auto utf8_byte_order_mark = "\xEF\xBB\xBF"sv;
 
-	template <typename Char>
-	class utf8_byte_stream<std::basic_string_view<Char>>
-	{
-		static_assert(sizeof(Char) == 1);
-
-	  private:
-		std::basic_string_view<Char> source_;
-		size_t position_ = {};
-
-	  public:
-		TOML_NODISCARD_CTOR
-		explicit constexpr utf8_byte_stream(std::basic_string_view<Char> sv) noexcept //
-			: source_{ sv }
-		{
-			// skip bom
-			if (source_.length() >= 3u && std::memcmp(utf8_byte_order_mark.data(), source_.data(), 3u) == 0)
-				position_ += 3u;
-		}
-
-		TOML_CONST_INLINE_GETTER
-		constexpr bool error() const noexcept
-		{
-			return false;
-		}
-
-		TOML_PURE_INLINE_GETTER
-		constexpr bool eof() const noexcept
-		{
-			return position_ >= source_.length();
-		}
-
-		TOML_PURE_INLINE_GETTER
-		explicit constexpr operator bool() const noexcept
-		{
-			return !eof();
-		}
-
-		TOML_PURE_INLINE_GETTER
-		constexpr bool peek_eof() const noexcept
-		{
-			return eof();
-		}
-
-		TOML_NODISCARD
-		TOML_ATTR(nonnull)
-		size_t operator()(void* dest, size_t num) noexcept
-		{
-			TOML_ASSERT_ASSUME(!eof());
-
-			num = impl::min(position_ + num, source_.length()) - position_;
-			std::memcpy(dest, source_.data() + position_, num);
-			position_ += num;
-			return num;
-		}
-	};
-
-	template <>
-	class utf8_byte_stream<std::istream>
+	class utf8_byte_stream
 	{
 	  private:
-		std::istream* source_;
+		std::istream* source_ = {};
 		// bytes read for the bom check, kept because seeking back to reread them fails on pipes
-		char prefix_[3];
+		char prefix_[3]		 = {};
 		size_t prefix_begin_ = {};
 		size_t prefix_end_	 = {};
 		bool started_		 = {};
 #if TOML_COMPILER_HAS_EXCEPTIONS
-		// rethrown once the bytes read before it are decoded, so it lands where a badbit read would
+		// rethrown where the error for a failed read would be reported
 		mutable std::exception_ptr failure_;
 #endif
 
@@ -192,7 +133,64 @@ TOML_ANON_NAMESPACE_START
 #endif
 		}
 
+		// in_avail() can call the streambuf's showmanyc(), which may throw
+		TOML_NODISCARD
+		bool available(std::streamsize& held) noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
+		{
+#if TOML_COMPILER_HAS_EXCEPTIONS
+			try
+			{
+				held = source_->rdbuf()->in_avail();
+				return true;
+			}
+#if defined(__GLIBCXX__)
+			catch (abi::__forced_unwind&)
+			{
+				throw;
+			}
+#endif
+			catch (...)
+			{
+				if (!failure_)
+					failure_ = std::current_exception();
+				return false;
+			}
+#else
+			held = source_->rdbuf()->in_avail();
+			return true;
+#endif
+		}
+
+		// istream::read keeps nothing of a read the streambuf throws in, so this takes only what the stream holds,
+		// or the rest of the block from one that holds nothing even after a peek
+		TOML_NODISCARD
+		size_t take(char* dest, size_t num, size_t block) noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
+		{
+#if TOML_COMPILER_HAS_EXCEPTIONS
+			if (failure_)
+				return {};
+#endif
+			if (source_->good())
+			{
+				std::streamsize held = {};
+				if (!available(held))
+					return {};
+				if (held <= 0)
+				{
+					// msvc's peek returns 0 when the streambuf throws
+					if (peek() == std::istream::traits_type::eof() || !source_->good() || !available(held))
+						return {};
+				}
+				const auto limit = held > 0 ? held : static_cast<std::streamsize>(block);
+				num				 = static_cast<size_t>(impl::min(static_cast<std::streamsize>(num), limit));
+			}
+			return read(dest, num);
+		}
+
 	  public:
+		TOML_NODISCARD_CTOR
+		utf8_byte_stream() noexcept = default;
+
 		TOML_NODISCARD_CTOR
 		explicit utf8_byte_stream(std::istream& stream) noexcept //
 			: source_{ &stream }
@@ -210,18 +208,6 @@ TOML_ANON_NAMESPACE_START
 			return started_ && !has_prefix() && !!(source_->rdstate() & std::istream::eofbit);
 		}
 
-		TOML_PURE_INLINE_GETTER
-		explicit operator bool() const noexcept
-		{
-			return !started_ || has_prefix() || !(source_->rdstate() & (std::istream::badbit | std::istream::eofbit));
-		}
-
-		TOML_NODISCARD
-		bool peek_eof() const noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
-		{
-			return started_ && !has_prefix() && (eof() || peek() == std::istream::traits_type::eof());
-		}
-
 #if TOML_COMPILER_HAS_EXCEPTIONS
 
 		void rethrow_failure() const
@@ -234,34 +220,33 @@ TOML_ANON_NAMESPACE_START
 
 		TOML_NODISCARD
 		TOML_ATTR(nonnull)
-		size_t operator()(void* dest, size_t num) noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
+		size_t operator()(char* dest, size_t num, uint64_t offset) noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
 		{
-			TOML_ASSERT(*this);
-
 			if (!started_)
 			{
-				started_	= true;
-				prefix_end_ = read(prefix_, 3u);
+				started_   = true;
+				size_t got = {};
+				do
+				{
+					got = take(prefix_ + prefix_end_, 3u - prefix_end_, 3u - prefix_end_);
+					prefix_end_ += got;
+				}
+				while (got && prefix_end_ < 3u && source_->good());
 				if (prefix_end_ == 3u && std::memcmp(utf8_byte_order_mark.data(), prefix_, 3u) == 0)
 					prefix_end_ = 0u;
 			}
 
-			size_t count = {};
 			if (has_prefix())
 			{
-				count = impl::min(num, prefix_end_ - prefix_begin_);
+				const auto count = impl::min(num, prefix_end_ - prefix_begin_);
 				std::memcpy(dest, prefix_ + prefix_begin_, count);
 				prefix_begin_ += count;
-				if (count == num || (source_->rdstate() & (std::istream::badbit | std::istream::eofbit)))
-					return count;
+				return count;
 			}
 
-			count += read(static_cast<char*>(dest) + count, num - count);
-			// a read ending exactly at the end of the stream leaves eofbit clear, and the reader
-			// needs it to report a code point cut short there the same way as for a string
-			if (count == num)
-				static_cast<void>(peek());
-			return count;
+			if (source_->rdstate() & (std::istream::badbit | std::istream::eofbit))
+				return {};
+			return take(dest, num, 32u - static_cast<size_t>(offset % 32u));
 		}
 	};
 
@@ -270,16 +255,9 @@ TOML_ANON_NAMESPACE_START
 		char32_t value;
 		char bytes[4];
 		size_t count;
-		source_position position;
 
 		TOML_PURE_INLINE_GETTER
 		constexpr operator const char32_t&() const noexcept
-		{
-			return value;
-		}
-
-		TOML_PURE_INLINE_GETTER
-		constexpr const char32_t& operator*() const noexcept
 		{
 			return value;
 		}
@@ -288,410 +266,625 @@ TOML_ANON_NAMESPACE_START
 				  && std::is_trivially_copyable_v<utf8_codepoint>);
 	static_assert(std::is_standard_layout_v<utf8_codepoint>);
 
-	struct TOML_ABSTRACT_INTERFACE utf8_reader_interface
+	struct lookahead_pos
 	{
-		TOML_NODISCARD
-		virtual const source_path_ptr& source_path() const noexcept = 0;
-
-		TOML_NODISCARD
-		virtual const utf8_codepoint* read_next() noexcept(!TOML_COMPILER_HAS_EXCEPTIONS) = 0;
-
-		TOML_NODISCARD
-		virtual bool peek_eof() const noexcept(!TOML_COMPILER_HAS_EXCEPTIONS) = 0;
-
-#if !TOML_EXCEPTIONS
-
-		TOML_NODISCARD
-		virtual optional<parse_error>&& error() noexcept = 0;
-
-#endif
-
-		virtual ~utf8_reader_interface() noexcept = default;
+		uint64_t offset;
+		size_t count;
+		char32_t value;
 	};
 
-#if TOML_EXCEPTIONS
-#define utf8_reader_error(...)				throw parse_error(__VA_ARGS__)
-#define utf8_reader_return_after_error(...) TOML_UNREACHABLE
-#define utf8_reader_error_check(...)		static_assert(true)
+	TOML_INTERNAL_LINKAGE
+	constexpr char32_t eof_mark = static_cast<char32_t>(0x110000u);
+
+	TOML_INTERNAL_LINKAGE
+	constexpr char32_t wall_mark = static_cast<char32_t>(0x110001u);
+
+	enum class TOML_CLOSED_ENUM wall_kind : unsigned char
+	{
+		invalid,
+		cut_sequence,
+		zero_bytes,
+		io_error
+	};
+
+	enum class TOML_CLOSED_FLAGS_ENUM run_class : unsigned char
+	{
+		comment		   = 1,
+		basic_string   = 2,
+		literal_string = 4,
+		bare_key	   = 8
+	};
+
+	struct run_table
+	{
+		unsigned char classes[256];
+	};
+
+	TOML_CONST_GETTER
+	TOML_INTERNAL_LINKAGE
+	constexpr run_table make_run_table() noexcept
+	{
+		run_table table{};
+		for (unsigned i = 0; i < 0x80u; i++)
+		{
+			const auto c	 = static_cast<char32_t>(i);
+			unsigned classes = {};
+			if (!impl::is_ascii_vertical_whitespace(c) && !impl::is_nontab_control_character(c))
+			{
+				classes |= static_cast<unsigned>(run_class::comment);
+				if (c != U'"' && c != U'\\')
+					classes |= static_cast<unsigned>(run_class::basic_string);
+				if (c != U'\'')
+					classes |= static_cast<unsigned>(run_class::literal_string);
+			}
+			if (impl::is_ascii_bare_key_character(c))
+				classes |= static_cast<unsigned>(run_class::bare_key);
+			table.classes[i] = static_cast<unsigned char>(classes);
+		}
+		for (unsigned i = 0x80u; i < 0x100u; i++)
+			table.classes[i] = static_cast<unsigned char>(static_cast<unsigned>(run_class::comment)
+														  | static_cast<unsigned>(run_class::basic_string)
+														  | static_cast<unsigned>(run_class::literal_string));
+		return table;
+	}
+
+	TOML_INTERNAL_LINKAGE
+	constexpr run_table run_bytes = make_run_table();
+
+	TOML_INTERNAL_LINKAGE
+	constexpr uint64_t word_high_bits = 0x8080808080808080ull;
+
+	TOML_CONST_GETTER
+	TOML_INTERNAL_LINKAGE
+	constexpr uint64_t word_of(uint64_t byte) noexcept
+	{
+		return 0x0101010101010101ull * byte;
+	}
+
+	// the first byte is the lowest, whatever the byte order
+	TOML_PURE_GETTER
+	TOML_INTERNAL_LINKAGE
+	uint64_t load_word(const char* bytes) noexcept
+	{
+		uint64_t word = {};
+		std::memcpy(&word, bytes, 8u);
+#if defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+		word = __builtin_bswap64(word);
+#endif
+		return word;
+	}
+
+	TOML_CONST_GETTER
+	TOML_INTERNAL_LINKAGE
+	unsigned trailing_zeros(uint64_t bits) noexcept
+	{
+#if TOML_GCC_LIKE
+		return static_cast<unsigned>(__builtin_ctzll(bits));
 #else
-#define utf8_reader_error(...)				err_.emplace(__VA_ARGS__)
-#define utf8_reader_return_after_error(...) return __VA_ARGS__
-	// clang-format off
-#define utf8_reader_error_check(...)                                                                                   \
-	do                                                                                                                 \
-	{                                                                                                                  \
-		if TOML_UNLIKELY(err_)                                                                                         \
-			return __VA_ARGS__;                                                                                        \
-	}                                                                                                                  \
-	while (false)
-	// clang-format on
+		static constexpr unsigned char positions[64] = {
+			0,	1,	48, 2,	57, 49, 28, 3,	61, 58, 50, 42, 38, 29, 17, 4,	62, 55, 59, 36, 53, 51,
+			43, 22, 45, 39, 33, 30, 24, 18, 12, 5,	63, 47, 56, 27, 60, 41, 37, 16, 54, 35, 52, 21,
+			44, 32, 23, 11, 46, 26, 40, 15, 34, 20, 31, 10, 25, 14, 19, 9,	13, 8,	7,	6
+		};
+		return positions[((bits & (~bits + 1u)) * 0x03F79D71B4CB0A89ull) >> 58];
+#endif
+	}
+
+	TOML_CONST_GETTER
+	TOML_INTERNAL_LINKAGE
+	constexpr size_t count_high_bits(uint64_t bits) noexcept
+	{
+		return static_cast<size_t>(((bits >> 7) * word_of(1u)) >> 56);
+	}
+
+	// for words of ascii bytes: the bytes equal to c, as their high bits
+	TOML_CONST_GETTER
+	TOML_INTERNAL_LINKAGE
+	constexpr uint64_t bytes_equal(uint64_t ascii, unsigned c) noexcept
+	{
+		return ~((ascii ^ word_of(c)) + word_of(0x7Fu)) & word_high_bits;
+	}
+
+	// the bytes of a word that end a comment or string run, as their high bits
+	template <run_class Class>
+	TOML_CONST_GETTER
+	TOML_INTERNAL_LINKAGE
+	constexpr uint64_t run_stops(uint64_t word) noexcept
+	{
+		const auto ascii = word & ~word_high_bits;
+		auto delimiters	 = bytes_equal(ascii, 0x7Fu);
+		if constexpr (Class == run_class::basic_string)
+			delimiters |= bytes_equal(ascii, '"') | bytes_equal(ascii, '\\');
+		if constexpr (Class == run_class::literal_string)
+			delimiters |= bytes_equal(ascii, '\'');
+		const auto controls = ~((ascii + word_of(0x60u)) | word | bytes_equal(ascii, '\t')) & word_high_bits;
+		return controls | (delimiters & ~word);
+	}
+
+#if TOML_HAS_SSE2
+
+	TOML_CONST_GETTER
+	TOML_INTERNAL_LINKAGE
+	constexpr unsigned count_bits(unsigned bits) noexcept
+	{
+		bits = bits - ((bits >> 1) & 0x55555555u);
+		bits = (bits & 0x33333333u) + ((bits >> 2) & 0x33333333u);
+		return (((bits + (bits >> 4)) & 0x0F0F0F0Fu) * 0x01010101u) >> 24;
+	}
+
+	// the bytes of a block that end a comment or string run, as a movemask
+	template <run_class Class>
+	TOML_NODISCARD
+	TOML_INTERNAL_LINKAGE
+	unsigned run_stops(__m128i bytes) noexcept
+	{
+		const auto equal = [&](char c) noexcept { return _mm_cmpeq_epi8(bytes, _mm_set1_epi8(c)); };
+
+		// bytes from 0x80 compare as negative
+		const auto controls =
+			_mm_andnot_si128(equal('\t'),
+							 _mm_and_si128(_mm_cmpgt_epi8(bytes, _mm_set1_epi8(static_cast<char>(-1))),
+										   _mm_cmplt_epi8(bytes, _mm_set1_epi8(0x20))));
+		auto stops = _mm_or_si128(controls, equal(0x7F));
+		if constexpr (Class == run_class::basic_string)
+			stops = _mm_or_si128(stops, _mm_or_si128(equal('"'), equal('\\')));
+		if constexpr (Class == run_class::literal_string)
+			stops = _mm_or_si128(stops, equal('\''));
+		return static_cast<unsigned>(_mm_movemask_epi8(stops));
+	}
 
 #endif
 
-#if defined(__APPLE__) || defined(__MINGW32__) || defined(__MINGW64__)
-#define TOML_OVERALIGNED
-#else
-#define TOML_OVERALIGNED alignas(32)
+	// how many ascii bytes the first n start with
+	TOML_PURE_GETTER
+	TOML_INTERNAL_LINKAGE
+	size_t ascii_length(const char* bytes, size_t n) noexcept
+	{
+		size_t i = {};
+#if TOML_HAS_SSE2
+		for (; n - i >= 16u; i += 16u)
+			if (const auto high = static_cast<unsigned>(
+					_mm_movemask_epi8(_mm_loadu_si128(reinterpret_cast<const __m128i*>(bytes + i)))))
+				return i + trailing_zeros(high);
 #endif
+		while (n - i >= 8u && !(load_word(bytes + i) & word_high_bits))
+			i += 8u;
+		while (i < n && static_cast<unsigned char>(bytes[i]) < 0x80u)
+			i++;
+		return i;
+	}
 
-	template <typename T>
-	class TOML_EMPTY_BASES utf8_reader final : public utf8_reader_interface
+	struct run_span
+	{
+		const char* data;
+		size_t length;
+		size_t continuation;
+	};
+
+	class source_reader
 	{
 	  private:
-		static constexpr size_t block_capacity = 32;
-		utf8_byte_stream<T> stream_;
-		source_position next_pos_ = { 1, 1 };
+		static constexpr uint64_t no_wall	   = static_cast<uint64_t>(-1);
+		static constexpr size_t string_chunk   = 4096;
+		static constexpr size_t initial_window = 256;
 
-		impl::utf8_decoder decoder_;
-		struct currently_decoding_t
-		{
-			char bytes[4];
-			size_t count;
-		} currently_decoding_;
-
-		struct codepoints_t
-		{
-			TOML_OVERALIGNED utf8_codepoint buffer[block_capacity];
-			size_t current;
-			size_t count;
-		} codepoints_;
-
+		// pos_, valid_ and filled_ index data_; base_, line_start_ and wall_ are offsets into the document, 64-bit
+		// because a stream can outgrow size_t
+		utf8_codepoint current_ = {};
+		const char* data_		= {};
+		size_t pos_				= {};
+		size_t valid_			= {};
+		size_t filled_			= {};
+		uint64_t base_			= {};
+		uint64_t line_start_	= {};
+		size_t extra_			= {};
+		uint64_t wall_			= no_wall;
+		source_index line_		= 1;
+		source_index lf_column_ = {};
+		wall_kind wall_kind_	= {};
+		bool ended_				= {};
+		utf8_byte_stream stream_;
+		std::unique_ptr<char[]> window_;
+		size_t capacity_ = {};
 		source_path_ptr source_path_;
 
-#if !TOML_EXCEPTIONS
-		optional<parse_error> err_;
-#endif
-
-		bool read_next_block() noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
+		template <typename String>
+		TOML_NODISCARD
+		static source_path_ptr make_source_path(String&& source_path)
 		{
-			TOML_ASSERT(stream_);
+			if (source_path.empty())
+				return {};
+			return std::make_shared<const std::string>(static_cast<String&&>(source_path));
+		}
 
-			TOML_OVERALIGNED char raw_bytes[block_capacity];
-			size_t raw_bytes_read = {};
+		void set_wall(wall_kind kind) noexcept
+		{
+			wall_	   = base_ + valid_;
+			wall_kind_ = kind;
+		}
 
-			// read the next raw (encoded) block in from the stream
-			raw_bytes_read = stream_(raw_bytes, block_capacity);
-
-			// handle a zero-byte read
-			if TOML_UNLIKELY(!raw_bytes_read)
+		void validate(size_t limit) noexcept
+		{
+			auto i = valid_;
+			while (i < limit)
 			{
-				if (stream_.eof())
-				{
-					// EOF only sets the error state if the decoder wants more input, otherwise
-					// a zero-byte read might have just caused the underlying stream to realize it's exhaused and set
-					// the EOF flag, and that's totally fine
-					if (decoder_.needs_more_input())
-						utf8_reader_error("Encountered EOF during incomplete utf-8 code point sequence",
-										  next_pos_,
-										  source_path_);
-				}
-				else
-				{
-					rethrow_stream_failure();
-					utf8_reader_error("Reading from the underlying stream failed - zero bytes read",
-									  next_pos_,
-									  source_path_);
-				}
-				return false;
-			}
+				i += ascii_length(data_ + i, limit - i);
+				if (i == limit)
+					break;
 
-			TOML_ASSERT_ASSUME(raw_bytes_read);
-			std::memset(&codepoints_, 0, sizeof(codepoints_));
-
-			// helper for calculating decoded codepoint line+cols
-			const auto calc_positions = [&]() noexcept
-			{
-				for (size_t i = 0; i < codepoints_.count; i++)
+				impl::utf8_decoder decoder;
+				auto end = i;
+				do
 				{
-					auto& cp	= codepoints_.buffer[i];
-					cp.position = next_pos_;
-
-					if (cp == U'\n')
+					if (end == filled_)
 					{
-						next_pos_.line++;
-						next_pos_.column = source_index{ 1 };
+						valid_ = i;
+						return;
 					}
-					else
-						next_pos_.column++;
+					decoder(data_[end++]);
+					if (decoder.error())
+					{
+						valid_ = i;
+						set_wall(wall_kind::invalid);
+						return;
+					}
 				}
-			};
-
-			// decide whether we need to use the UTF-8 decoder or if we can treat this block as plain ASCII
-			const auto ascii_fast_path = !decoder_.needs_more_input() && impl::is_ascii(raw_bytes, raw_bytes_read);
-
-			// ASCII fast-path
-			if (ascii_fast_path)
-			{
-				decoder_.reset();
-				currently_decoding_.count = {};
-
-				codepoints_.count = raw_bytes_read;
-				for (size_t i = 0; i < codepoints_.count; i++)
-				{
-					auto& cp	= codepoints_.buffer[i];
-					cp.value	= static_cast<char32_t>(raw_bytes[i]);
-					cp.bytes[0] = raw_bytes[i];
-					cp.count	= 1u;
-				}
+				while (!decoder.has_code_point());
+				i = end;
 			}
+			valid_ = i;
+		}
 
-			// UTF-8 slow-path
+		void make_room()
+		{
+			const auto live = filled_ - pos_;
+			auto capacity	= capacity_;
+			while (live > capacity / 2u)
+				capacity *= 2u;
+			if (!pos_ && capacity == capacity_)
+				return;
+
+#ifdef NDEBUG
+			const bool move = capacity != capacity_;
+#else
+			// moving the window on every compaction lets asan catch a pointer kept into the old one
+			const bool move = true;
+#endif
+			if (move)
+			{
+				std::unique_ptr<char[]> window{ new char[capacity] };
+				std::memcpy(window.get(), window_.get() + pos_, live);
+				window_	  = std::move(window);
+				capacity_ = capacity;
+			}
 			else
+				std::memmove(window_.get(), window_.get() + pos_, live);
+
+			data_ = window_.get();
+			base_ += pos_;
+			valid_ -= pos_;
+			filled_ -= pos_;
+			pos_ = {};
+		}
+
+		TOML_NEVER_INLINE
+		void extend() noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
+		{
+			if (!window_)
 			{
-				for (size_t i = 0; i < raw_bytes_read; i++)
-				{
-					decoder_(static_cast<uint8_t>(raw_bytes[i]));
-					if TOML_UNLIKELY(decoder_.error())
-					{
-						calc_positions();
-						utf8_reader_error("Encountered invalid utf-8 sequence", next_pos_, source_path_);
-						utf8_reader_return_after_error(false);
-					}
-
-					currently_decoding_.bytes[currently_decoding_.count++] = raw_bytes[i];
-
-					if (decoder_.has_code_point())
-					{
-						auto& cp = codepoints_.buffer[codepoints_.count++];
-
-						cp.value = decoder_.codepoint;
-						cp.count = currently_decoding_.count;
-						std::memcpy(cp.bytes, currently_decoding_.bytes, currently_decoding_.count);
-						currently_decoding_.count = {};
-					}
-					else if TOML_UNLIKELY(currently_decoding_.count == 4u)
-					{
-						calc_positions();
-						utf8_reader_error("Encountered overlong utf-8 sequence", next_pos_, source_path_);
-						utf8_reader_return_after_error(false);
-					}
-				}
-				if TOML_UNLIKELY(decoder_.needs_more_input() && stream_.eof())
-				{
-					calc_positions();
-					utf8_reader_error("Encountered EOF during incomplete utf-8 code point sequence",
-									  next_pos_,
-									  source_path_);
-					utf8_reader_return_after_error(false);
-				}
+				const auto limit = filled_ - valid_ > string_chunk ? valid_ + string_chunk : filled_;
+				validate(limit);
+				if (wall_ == no_wall && valid_ < limit)
+					set_wall(wall_kind::cut_sequence);
+				return;
 			}
 
-			TOML_ASSERT_ASSUME(codepoints_.count);
-			calc_positions();
-
-			// handle general I/O errors
-			// (down here so the next_pos_ benefits from calc_positions())
-			if TOML_UNLIKELY(stream_.error())
+			make_room();
+			TOML_ASSERT_ASSUME(filled_ < capacity_);
+			const auto got = stream_(window_.get() + filled_, capacity_ - filled_, base_ + filled_);
+			filled_ += got;
+			validate(filled_);
+			if (wall_ != no_wall)
+				return;
+			if (got)
 			{
-				rethrow_stream_failure();
-				utf8_reader_error("An I/O error occurred while reading from the underlying stream",
-								  next_pos_,
-								  source_path_);
-				utf8_reader_return_after_error(false);
+				if (stream_.error())
+					set_wall(wall_kind::io_error);
 			}
+			else if (!stream_.eof())
+				set_wall(base_ + filled_ ? wall_kind::io_error : wall_kind::zero_bytes);
+			else if (valid_ < filled_)
+				set_wall(wall_kind::cut_sequence);
+			else
+				ended_ = true;
+		}
 
+		TOML_NODISCARD
+		bool ensure(uint64_t at) noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
+		{
+			while (at >= base_ + valid_)
+			{
+				if (at >= wall_ || (ended_ && valid_ == filled_))
+					return false;
+				extend();
+			}
 			return true;
 		}
 
-		void rethrow_stream_failure() const
+		TOML_NODISCARD
+		size_t decode(size_t i, char32_t& value) const noexcept
 		{
-			if constexpr (std::is_same_v<T, std::istream>)
+			const auto lead = static_cast<unsigned char>(data_[i]);
+			if (lead < 0x80u)
 			{
-#if TOML_EXCEPTIONS
-				try
+				value = lead;
+				return 1u;
+			}
+			const size_t count = lead < 0xE0u ? 2u : (lead < 0xF0u ? 3u : 4u);
+			uint_least32_t cp  = lead & (0x7Fu >> count);
+			for (size_t k = 1; k < count; k++)
+				cp = (cp << 6) | (static_cast<unsigned char>(data_[i + k]) & 0x3Fu);
+			value = static_cast<char32_t>(cp);
+			return count;
+		}
+
+		TOML_NODISCARD
+		const utf8_codepoint* land() noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
+		{
+			if (pos_ < valid_)
+			{
+				const auto byte = static_cast<unsigned char>(data_[pos_]);
+				if TOML_LIKELY(byte < 0x80u)
 				{
-					stream_.rethrow_failure();
+					current_.value	  = byte;
+					current_.bytes[0] = data_[pos_];
+					current_.count	  = 1u;
+					return &current_;
 				}
-				catch (const std::exception& exc)
-				{
-					throw parse_error{ exc.what(), next_pos_, source_path_ };
-				}
-				catch (...)
-				{
-					throw parse_error{ "An unspecified error occurred", next_pos_, source_path_ };
-				}
-#elif TOML_COMPILER_HAS_EXCEPTIONS
-				stream_.rethrow_failure();
-#endif
+			}
+			return land_slow();
+		}
+
+		TOML_NEVER_INLINE
+		const utf8_codepoint* land_slow() noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
+		{
+			if (!ensure(base_ + pos_))
+				return nullptr;
+
+			current_.count = decode(pos_, current_.value);
+			std::memcpy(current_.bytes, data_ + pos_, current_.count);
+			return &current_;
+		}
+
+		TOML_NEVER_INLINE
+		void step_slow(lookahead_pos& la) noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
+		{
+			if (!ensure(la.offset))
+			{
+				la.value = la.offset == wall_ ? wall_mark : eof_mark;
+				la.count = {};
+				return;
+			}
+			la.count = decode(static_cast<size_t>(la.offset - base_), la.value);
+		}
+
+	  public:
+		template <typename String>
+		TOML_NODISCARD_CTOR
+		source_reader(std::string_view doc, String&& source_path) //
+			: data_{ doc.data() },
+			  filled_{ doc.length() },
+			  ended_{ true },
+			  source_path_{ make_source_path(static_cast<String&&>(source_path)) }
+		{
+			if (filled_ >= 3u && std::memcmp(utf8_byte_order_mark.data(), data_, 3u) == 0)
+			{
+				data_ += 3u;
+				filled_ -= 3u;
 			}
 		}
 
-	  public:
-		template <typename U, typename String = std::string_view>
+#if TOML_HAS_CHAR8
+
+		template <typename String>
 		TOML_NODISCARD_CTOR
-		// NOLINTNEXTLINE(bugprone-forwarding-reference-overload)
-		explicit utf8_reader(U&& source, String&& source_path = {}) noexcept(
-			std::is_nothrow_constructible_v<utf8_byte_stream<T>, U&&>)
-			: stream_{ static_cast<U&&>(source) }
-		{
-			currently_decoding_.count = {};
-
-			codepoints_.current = {};
-			codepoints_.count	= {};
-
-			if (!source_path.empty())
-				source_path_ = std::make_shared<const std::string>(static_cast<String&&>(source_path));
-		}
-
-		TOML_PURE_INLINE_GETTER
-		const source_path_ptr& source_path() const noexcept final
-		{
-			return source_path_;
-		}
-
-		TOML_NODISCARD
-		const utf8_codepoint* read_next() noexcept(!TOML_COMPILER_HAS_EXCEPTIONS) final
-		{
-			utf8_reader_error_check({});
-
-			if (codepoints_.current == codepoints_.count)
-			{
-				if TOML_UNLIKELY(!stream_ || !read_next_block())
-					return nullptr;
-
-				TOML_ASSERT_ASSUME(!codepoints_.current);
-			}
-			TOML_ASSERT_ASSUME(codepoints_.count);
-			TOML_ASSERT_ASSUME(codepoints_.count <= block_capacity);
-			TOML_ASSERT_ASSUME(codepoints_.current < codepoints_.count);
-
-			return &codepoints_.buffer[codepoints_.current++];
-		}
-
-		TOML_NODISCARD
-		bool peek_eof() const noexcept(!TOML_COMPILER_HAS_EXCEPTIONS) final
-		{
-			return stream_.peek_eof();
-		}
-
-#if !TOML_EXCEPTIONS
-
-		TOML_NODISCARD
-		optional<parse_error>&& error() noexcept final
-		{
-			return std::move(err_);
-		}
-
-#endif
-	};
-
-	template <typename Char>
-	utf8_reader(std::basic_string_view<Char>, std::string_view) -> utf8_reader<std::basic_string_view<Char>>;
-	template <typename Char>
-	utf8_reader(std::basic_string_view<Char>, std::string&&) -> utf8_reader<std::basic_string_view<Char>>;
-	template <typename Char>
-	utf8_reader(std::basic_istream<Char>&, std::string_view) -> utf8_reader<std::basic_istream<Char>>;
-	template <typename Char>
-	utf8_reader(std::basic_istream<Char>&, std::string&&) -> utf8_reader<std::basic_istream<Char>>;
-
-#if TOML_EXCEPTIONS
-#define utf8_buffered_reader_error_check(...) static_assert(true)
-#else
-	// clang-format off
-#define utf8_buffered_reader_error_check(...)                                                                          \
-	do                                                                                                                 \
-	{                                                                                                                  \
-		if TOML_UNLIKELY(reader_.error())                                                                              \
-			return __VA_ARGS__;                                                                                        \
-	}                                                                                                                  \
-	while (false)
-	// clang-format on
-
-#endif
-
-	class TOML_EMPTY_BASES utf8_buffered_reader
-	{
-	  public:
-		static constexpr size_t max_history_length = 128;
-
-	  private:
-		static constexpr size_t history_buffer_size = max_history_length - 1; //'head' is stored in the reader
-		utf8_reader_interface& reader_; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
-		struct
-		{
-			utf8_codepoint buffer[history_buffer_size];
-			size_t count, first;
-		} history_					= {};
-		const utf8_codepoint* head_ = {};
-		size_t negative_offset_		= {};
-
-	  public:
-		TOML_NODISCARD_CTOR
-		explicit utf8_buffered_reader(utf8_reader_interface& reader) noexcept //
-			: reader_{ reader }
+		source_reader(std::u8string_view doc, String&& source_path) //
+			: source_reader{ std::string_view{ reinterpret_cast<const char*>(doc.data()), doc.length() },
+							 static_cast<String&&>(source_path) }
 		{}
+
+#endif
+
+		template <typename String>
+		TOML_NODISCARD_CTOR
+		source_reader(std::istream& doc, String&& source_path) //
+			: stream_{ doc },
+			  window_{ new char[initial_window] },
+			  capacity_{ initial_window },
+			  source_path_{ make_source_path(static_cast<String&&>(source_path)) }
+		{
+			data_ = window_.get();
+		}
 
 		TOML_PURE_INLINE_GETTER
 		const source_path_ptr& source_path() const noexcept
 		{
-			return reader_.source_path();
+			return source_path_;
 		}
 
-		TOML_NODISCARD
-		const utf8_codepoint* read_next() noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
+		// the wall is the first byte that can't be read: invalid utf-8, a cut sequence or a failed read
+		TOML_PURE_INLINE_GETTER
+		bool at_wall() const noexcept
 		{
-			utf8_buffered_reader_error_check({});
-
-			if (negative_offset_)
-			{
-				negative_offset_--;
-
-				// an entry negative offset of 1 just means "replay the current head"
-				if (!negative_offset_)
-					return head_;
-
-				// otherwise step back into the history buffer
-				return history_.buffer + ((history_.first + history_.count - negative_offset_) % history_buffer_size);
-			}
-
-			// first character read from stream
-			if TOML_UNLIKELY(!history_.count && !head_)
-				head_ = reader_.read_next();
-
-			// subsequent characters and not eof
-			else if (head_)
-			{
-				if TOML_UNLIKELY(history_.count < history_buffer_size)
-					history_.buffer[history_.count++] = *head_;
-				else
-					history_.buffer[(history_.first++ + history_buffer_size) % history_buffer_size] = *head_;
-
-				head_ = reader_.read_next();
-			}
-
-			return head_;
+			return base_ + pos_ == wall_;
 		}
 
-		TOML_NODISCARD
-		const utf8_codepoint* step_back(size_t count) noexcept
+		TOML_PURE_GETTER
+		const char* wall_reason() const noexcept
 		{
-			utf8_buffered_reader_error_check({});
+			TOML_ASSERT(at_wall());
 
-			TOML_ASSERT_ASSUME(history_.count);
-			TOML_ASSERT_ASSUME(negative_offset_ + count <= history_.count);
-
-			negative_offset_ += count;
-
-			return negative_offset_
-					 ? history_.buffer + ((history_.first + history_.count - negative_offset_) % history_buffer_size)
-					 : head_;
+			if (wall_kind_ == wall_kind::invalid)
+				return "Encountered invalid utf-8 sequence";
+			if (wall_kind_ == wall_kind::cut_sequence)
+				return "Encountered EOF during incomplete utf-8 code point sequence";
+			if (wall_kind_ == wall_kind::zero_bytes)
+				return "Reading from the underlying stream failed - zero bytes read";
+			return "An I/O error occurred while reading from the underlying stream";
 		}
 
-		TOML_NODISCARD
-		bool peek_eof() const noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
-		{
-			return reader_.peek_eof();
-		}
+#if TOML_COMPILER_HAS_EXCEPTIONS
 
-#if !TOML_EXCEPTIONS
-
-		TOML_NODISCARD
-		optional<parse_error>&& error() noexcept
+		void rethrow_stream_failure() const
 		{
-			return reader_.error();
+			if (wall_kind_ == wall_kind::zero_bytes || wall_kind_ == wall_kind::io_error)
+				stream_.rethrow_failure();
 		}
 
 #endif
+
+		TOML_PURE_INLINE_GETTER
+		source_position position() const noexcept
+		{
+			return { line_, static_cast<source_index>(base_ + pos_ - line_start_ - extra_ + 1u) };
+		}
+
+		TOML_PURE_GETTER
+		source_position eof_anchor() const noexcept
+		{
+			const auto at = base_ + pos_;
+			if (!at)
+				return { 1, 1 };
+			if (at == line_start_)
+				return { line_ - 1u, lf_column_ };
+			return { line_, static_cast<source_index>(at - line_start_ - extra_) };
+		}
+
+		TOML_PURE_INLINE_GETTER
+		lookahead_pos lookahead() const noexcept
+		{
+			return { base_ + pos_, current_.count, current_.value };
+		}
+
+		TOML_NODISCARD
+		const utf8_codepoint* first() noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
+		{
+			return land_slow();
+		}
+
+		TOML_NODISCARD
+		const utf8_codepoint* next() noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
+		{
+			if (current_.value == U'\n')
+			{
+				lf_column_ = position().column;
+				line_++;
+				line_start_ = base_ + pos_ + 1u;
+				extra_		= {};
+			}
+			else
+				extra_ += current_.count - 1u;
+			pos_ += current_.count;
+			return land();
+		}
+
+		template <run_class Class>
+		TOML_NODISCARD
+		run_span run() const noexcept
+		{
+			static constexpr auto mask		= static_cast<unsigned>(Class);
+			static constexpr bool non_ascii = (run_bytes.classes[0x80u] & mask) != 0u;
+			TOML_ASSERT(pos_ < valid_);
+
+			auto end			= pos_ + current_.count;
+			size_t continuation = current_.count - 1u;
+			if constexpr (non_ascii)
+			{
+#if TOML_HAS_SSE2
+				while (valid_ - end >= 16u)
+				{
+					const auto bytes   = _mm_loadu_si128(reinterpret_cast<const __m128i*>(data_ + end));
+					const auto stops   = run_stops<Class>(bytes);
+					auto continuations = static_cast<unsigned>(
+						_mm_movemask_epi8(_mm_cmplt_epi8(bytes, _mm_set1_epi8(static_cast<char>(-64)))));
+					if (stops)
+					{
+						continuations &= (stops & (~stops + 1u)) - 1u;
+						return { data_ + pos_,
+								 end + trailing_zeros(stops) - pos_,
+								 continuation + count_bits(continuations) };
+					}
+					if (continuations)
+						continuation += count_bits(continuations);
+					end += 16u;
+				}
+#endif
+				while (valid_ - end >= 8u)
+				{
+					const auto word	   = load_word(data_ + end);
+					const auto stops   = run_stops<Class>(word);
+					auto continuations = word & ~(word << 1) & word_high_bits;
+					if (stops)
+					{
+						continuations &= (stops & (~stops + 1u)) - 1u;
+						return { data_ + pos_,
+								 end + (trailing_zeros(stops) / 8u) - pos_,
+								 continuation + count_high_bits(continuations) };
+					}
+					continuation += count_high_bits(continuations);
+					end += 8u;
+				}
+			}
+			while (end < valid_)
+			{
+				const auto byte = static_cast<unsigned char>(data_[end]);
+				if (!(run_bytes.classes[byte] & mask))
+					break;
+				continuation += non_ascii && (byte & 0xC0u) == 0x80u;
+				end++;
+			}
+			return { data_ + pos_, end - pos_, continuation };
+		}
+
+		TOML_NODISCARD
+		const utf8_codepoint* skip(const run_span& span) noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
+		{
+			TOML_ASSERT(span.data == data_ + pos_);
+			TOML_ASSERT(span.length >= current_.count);
+#ifndef NDEBUG
+			size_t continuation = {};
+			for (size_t i = pos_, end = pos_ + span.length; i < end;)
+			{
+				char32_t value	 = {};
+				const auto count = decode(i, value);
+				TOML_ASSERT(value != U'\n');
+				continuation += count - 1u;
+				i += count;
+				TOML_ASSERT(i <= end);
+			}
+			TOML_ASSERT(continuation == span.continuation);
+#endif
+			extra_ += span.continuation;
+			pos_ += span.length;
+			return land();
+		}
+
+		void step(lookahead_pos& la) noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
+		{
+			la.offset += la.count;
+			const auto at = static_cast<size_t>(la.offset - base_);
+			if (at < valid_)
+			{
+				const auto byte = static_cast<unsigned char>(data_[at]);
+				if (byte < 0x80u)
+				{
+					la.value = byte;
+					la.count = 1u;
+					return;
+				}
+			}
+			step_slow(la);
+		}
 	};
 }
 TOML_ANON_NAMESPACE_END;
@@ -1057,6 +1250,109 @@ TOML_ANON_NAMESPACE_START
 
 		TOML_DELETE_DEFAULTS(table_vector_scope);
 	};
+
+	class node_set
+	{
+		static constexpr size_t max_pending	   = 16;
+		static constexpr unsigned initial_bits = 6;
+
+		std::vector<const node*> pending_;
+		std::vector<const node*> slots_;
+		size_t count_  = {};
+		unsigned bits_ = {};
+
+		TOML_PURE_INLINE_GETTER
+		size_t home(const node* n) const noexcept
+		{
+			const auto address = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(n));
+			return static_cast<size_t>((address * 0x9E3779B97F4A7C15ull) >> (64u - bits_));
+		}
+
+		TOML_PURE_GETTER
+		size_t slot_of(const node* n) const noexcept
+		{
+			const auto mask = slots_.size() - 1u;
+			auto i			= home(n);
+			while (slots_[i] && slots_[i] != n)
+				i = (i + 1u) & mask;
+			return i;
+		}
+
+		void flush()
+		{
+			auto bits = slots_.empty() ? initial_bits : bits_;
+			while ((count_ + pending_.size()) * 2u > (size_t{ 1 } << bits))
+				bits++;
+			if (bits != bits_)
+			{
+				std::vector<const node*> old(size_t{ 1 } << bits);
+				old.swap(slots_);
+				bits_ = bits;
+				for (auto n : old)
+					if (n)
+						slots_[slot_of(n)] = n;
+			}
+
+			for (auto n : pending_)
+			{
+				auto& slot = slots_[slot_of(n)];
+				if (!slot)
+					count_++;
+				slot = n;
+			}
+			pending_.clear();
+		}
+
+	  public:
+		void insert(const node* n)
+		{
+			TOML_ASSERT(n);
+			pending_.push_back(n);
+		}
+
+		TOML_NODISCARD
+		bool contains(const node* n)
+		{
+			TOML_ASSERT(n);
+			if (pending_.size() > max_pending)
+				flush();
+			for (auto p : pending_)
+				if (p == n)
+					return true;
+			return !slots_.empty() && slots_[slot_of(n)] == n;
+		}
+
+		void erase(const node* n) noexcept
+		{
+			for (auto& p : pending_)
+			{
+				if (p == n)
+				{
+					p = pending_.back();
+					pending_.pop_back();
+					return;
+				}
+			}
+			if (slots_.empty())
+				return;
+			auto hole = slot_of(n);
+			if (slots_[hole] != n)
+				return;
+
+			// entries after the hole move back into it unless that would put them before their home slot
+			const auto mask = slots_.size() - 1u;
+			for (auto i = (hole + 1u) & mask; slots_[i]; i = (i + 1u) & mask)
+			{
+				if (((i - home(slots_[i])) & mask) >= ((i - hole) & mask))
+				{
+					slots_[hole] = slots_[i];
+					hole		 = i;
+				}
+			}
+			slots_[hole] = nullptr;
+			count_--;
+		}
+	};
 }
 TOML_ANON_NAMESPACE_END;
 
@@ -1176,16 +1472,16 @@ TOML_IMPL_NAMESPACE_START
 	  private:
 		static constexpr size_t max_nested_values	  = TOML_MAX_NESTED_VALUES;
 		static constexpr size_t max_dotted_keys_depth = TOML_MAX_DOTTED_KEYS_DEPTH;
+		static constexpr size_t max_value_length	  = 128;
 
 		// NOLINTBEGIN(readability-identifier-naming)
-		utf8_buffered_reader reader;
+		source_reader reader;
 		table root;
-		source_position prev_pos = { 1, 1 };
 		const utf8_codepoint* cp = {};
-		std::vector<table*> implicit_tables;
-		std::vector<table*> dotted_key_tables;
+		node_set implicit_tables;
+		node_set dotted_key_tables;
 		std::vector<table*> open_inline_tables;
-		std::vector<array*> table_arrays;
+		node_set table_arrays;
 		parse_key_buffer key_buffer;
 		std::string string_buffer;
 		std::string recording_buffer; // for diagnostics
@@ -1201,8 +1497,38 @@ TOML_IMPL_NAMESPACE_START
 		source_position current_position(source_index fallback_offset = 0) const noexcept
 		{
 			if (!is_eof())
-				return cp->position;
-			return { prev_pos.line, static_cast<source_index>(prev_pos.column + fallback_offset) };
+				return reader.position();
+			auto pos = reader.eof_anchor();
+			pos.column += fallback_offset;
+			return pos;
+		}
+
+		// a stream's exception is rethrown instead, as a parse_error when exceptions are enabled
+		TOML_RETURNS_BY_THROWING
+		TOML_NEVER_INLINE
+		void set_wall_error() const
+		{
+			const auto pos = reader.position();
+#if TOML_EXCEPTIONS
+			try
+			{
+				reader.rethrow_stream_failure();
+			}
+			catch (const std::exception& exc)
+			{
+				throw parse_error{ exc.what(), pos, reader.source_path() };
+			}
+			catch (...)
+			{
+				throw parse_error{ "An unspecified error occurred", pos, reader.source_path() };
+			}
+			throw parse_error{ reader.wall_reason(), pos, reader.source_path() };
+#else
+#if TOML_COMPILER_HAS_EXCEPTIONS
+			reader.rethrow_stream_failure();
+#endif
+			err.emplace(reader.wall_reason(), pos, reader.source_path());
+#endif
 		}
 
 		template <typename... T>
@@ -1232,13 +1558,17 @@ TOML_IMPL_NAMESPACE_START
 			set_error_at(current_position(1), reason...);
 		}
 
-		void go_back(size_t count = 1) noexcept
+		void land(const utf8_codepoint* next)
 		{
-			return_if_error();
-			TOML_ASSERT_ASSUME(count);
-
-			cp		 = reader.step_back(count);
-			prev_pos = cp->position;
+			cp = next;
+			if TOML_UNLIKELY(!cp)
+			{
+				if (reader.at_wall())
+					set_wall_error();
+				return;
+			}
+			if (recording && (recording_whitespace || !is_whitespace(*cp)))
+				recording_buffer.append(cp->bytes, cp->count);
 		}
 
 		void advance()
@@ -1246,22 +1576,24 @@ TOML_IMPL_NAMESPACE_START
 			return_if_error();
 			assert_not_eof();
 
-			prev_pos = cp->position;
-			cp		 = reader.read_next();
+			land(reader.next());
+		}
 
-#if !TOML_EXCEPTIONS
-			if (reader.error())
-			{
-				err = std::move(reader.error());
-				return;
-			}
-#endif
+		template <run_class Class>
+		void advance_by(const run_span& span)
+		{
+			return_if_error();
+			assert_not_eof();
 
-			if (recording && !is_eof())
+			if (recording && span.length > cp->count)
 			{
-				if (recording_whitespace || !is_whitespace(*cp))
-					recording_buffer.append(cp->bytes, cp->count);
+				// a run mixing whitespace with other code points can only be recorded whole
+				TOML_ASSERT(Class == run_class::bare_key || recording_whitespace);
+				if (Class == run_class::bare_key || recording_whitespace)
+					recording_buffer.append(span.data + cp->count, span.length - cp->count);
 			}
+
+			land(reader.skip(span));
 		}
 
 		void start_recording(bool include_current = true) noexcept
@@ -1373,7 +1705,8 @@ TOML_IMPL_NAMESPACE_START
 						"unicode surrogates (U+D800 to U+DFFF) are explicitly prohibited in comments"sv);
 #endif
 
-				advance_and_return_if_error({});
+				advance_by<run_class::comment>(reader.run<run_class::comment>());
+				return_if_error({});
 			}
 
 			return true;
@@ -1499,9 +1832,8 @@ TOML_IMPL_NAMESPACE_START
 						case U'U':
 						{
 							push_parse_scope("unicode scalar sequence"sv);
-							const auto escape_pos =
-								source_position{ cp->position.line,
-												 static_cast<source_index>(cp->position.column - 1u) };
+							auto escape_pos = current_position();
+							escape_pos.column--;
 							advance_and_return_if_error_or_eof({});
 							skip_escaped_codepoint = false;
 
@@ -1653,18 +1985,17 @@ TOML_IMPL_NAMESPACE_START
 							"unescaped unicode surrogates (U+D800 to U+DFFF) are explicitly prohibited"sv);
 #endif
 
-					if (multi_line)
+					if (skipping_whitespace && is_horizontal_whitespace(*cp))
 					{
-						if (!skipping_whitespace || !is_horizontal_whitespace(*cp))
-						{
-							skipping_whitespace = false;
-							str.append(cp->bytes, cp->count);
-						}
+						advance_and_return_if_error({});
+						continue;
 					}
-					else
-						str.append(cp->bytes, cp->count);
 
-					advance_and_return_if_error({});
+					skipping_whitespace = false;
+					const auto span		= reader.run<run_class::basic_string>();
+					str.append(span.data, span.length);
+					advance_by<run_class::basic_string>(span);
+					return_if_error({});
 				}
 			}
 			while (!is_eof());
@@ -1767,8 +2098,10 @@ TOML_IMPL_NAMESPACE_START
 					set_error_and_return_default("unicode surrogates (U+D800 - U+DFFF) are explicitly prohibited"sv);
 #endif
 
-				str.append(cp->bytes, cp->count);
-				advance_and_return_if_error({});
+				const auto span = reader.run<run_class::literal_string>();
+				str.append(span.data, span.length);
+				advance_by<run_class::literal_string>(span);
+				return_if_error({});
 			}
 			while (!is_eof());
 
@@ -1784,15 +2117,20 @@ TOML_IMPL_NAMESPACE_START
 			TOML_ASSERT_ASSUME(is_string_delimiter(*cp));
 			push_parse_scope("string"sv);
 
-			// snapshot length so the recording buffer can be rewound alongside go_back(2u) below
-			const auto recording_buffer_rollback_size = recording_buffer.length();
-
-			// get the first three characters to determine the string type
+			// the single-line parsers start on the opening delimiter, so peek instead of consuming
 			const auto first = cp->value;
+			auto la			 = reader.lookahead();
+			reader.step(la);
+			const auto second = la.value;
+			if (second < eof_mark)
+			{
+				reader.step(la);
+				if (la.value != eof_mark && (second != first || la.value != first))
+					return { first == U'\'' ? parse_literal_string(false) : parse_basic_string(false), false };
+			}
+
 			advance_and_return_if_error_or_eof({});
-			const auto second = cp->value;
 			advance_and_return_if_error({});
-			const auto third = cp ? cp->value : U'\0';
 
 			// if we were eof at the third character then first and second need to be
 			// the same string character (otherwise it's an unterminated string)
@@ -1804,24 +2142,8 @@ TOML_IMPL_NAMESPACE_START
 				set_error_and_return_default("encountered end-of-file"sv);
 			}
 
-			// if the first three characters are all the same string delimiter then
-			// it's a multi-line string.
-			else if (first == second && first == third)
-			{
-				return { first == U'\'' ? parse_literal_string(true) : parse_basic_string(true), true };
-			}
-
-			// otherwise it's just a regular string.
-			else
-			{
-				// step back two characters so that the current
-				// character is the string delimiter
-				go_back(2u);
-				if (recording)
-					recording_buffer.resize(recording_buffer_rollback_size);
-
-				return { first == U'\'' ? parse_literal_string(false) : parse_basic_string(false), false };
-			}
+			// otherwise the first three characters are all the same string delimiter, so it's a multi-line string
+			return { first == U'\'' ? parse_literal_string(true) : parse_basic_string(true), true };
 		}
 
 		TOML_NODISCARD
@@ -1839,8 +2161,10 @@ TOML_IMPL_NAMESPACE_START
 				if (!is_bare_key_character(*cp))
 					break;
 
-				string_buffer.append(cp->bytes, cp->count);
-				advance_and_return_if_error({});
+				const auto span = reader.run<run_class::bare_key>();
+				string_buffer.append(span.data, span.length);
+				advance_by<run_class::bare_key>(span);
+				return_if_error({});
 			}
 
 			return string_buffer;
@@ -1909,7 +2233,7 @@ TOML_IMPL_NAMESPACE_START
 			assert_not_eof();
 			TOML_ASSERT_ASSUME(is_match(*cp, U'+', U'-', U'.') || is_decimal_digit(*cp));
 			push_parse_scope("floating-point"sv);
-			const auto begin_pos = cp->position;
+			const auto begin_pos = current_position();
 
 			// sign
 			const int sign					 = *cp == U'-' ? -1 : 1;
@@ -1918,25 +2242,25 @@ TOML_IMPL_NAMESPACE_START
 				advance_and_return_if_error_or_eof({});
 
 			// consume value chars
-			char chars[utf8_buffered_reader::max_history_length];
-			size_t length			   = {};
-			const utf8_codepoint* prev = {};
-			bool seen_decimal		   = false;
-			bool seen_exponent		   = false;
-			char first_integer_part	   = '\0';
+			char chars[max_value_length];
+			size_t length			= {};
+			char32_t prev			= {};
+			bool seen_decimal		= false;
+			bool seen_exponent		= false;
+			char first_integer_part = '\0';
 			source_position first_integer_pos{};
 			while (!is_eof() && !is_value_terminator(*cp))
 			{
 				if (*cp == U'_')
 				{
-					if (!prev || !is_decimal_digit(*prev))
+					if (!prev || !is_decimal_digit(prev))
 						set_error_and_return_default("underscores may only follow digits"sv);
 
-					prev = cp;
+					prev = *cp;
 					advance_and_return_if_error({});
 					continue;
 				}
-				if TOML_UNLIKELY(prev && *prev == U'_' && !is_decimal_digit(*cp))
+				if TOML_UNLIKELY(prev == U'_' && !is_decimal_digit(*cp))
 					set_error_and_return_default("underscores must be followed by digits"sv);
 				else if TOML_UNLIKELY(length == sizeof(chars))
 					set_error_and_return_default("exceeds length limit of "sv,
@@ -1953,7 +2277,7 @@ TOML_IMPL_NAMESPACE_START
 
 					// 1.0e+.10 (exponent cannot have '.')
 					else if (seen_exponent)
-						set_error_and_return_default(is_match(*prev, U'e', U'E')
+						set_error_and_return_default(is_match(prev, U'e', U'E')
 														 ? "expected exponent decimal digit or sign, saw '.'"sv
 														 : "expected exponent decimal digit, saw '.'"sv);
 
@@ -1967,8 +2291,8 @@ TOML_IMPL_NAMESPACE_START
 				}
 				else if (is_match(*cp, U'e', U'E'))
 				{
-					if ((prev && !is_decimal_digit(*prev)) //
-						|| seen_exponent)				   // 1.0ee+10 (multiple 'e')
+					if ((prev && !is_decimal_digit(prev)) //
+						|| seen_exponent)				  // 1.0ee+10 (multiple 'e')
 						set_error_and_return_default("expected decimal digit, saw '"sv, to_sv(*cp), "'"sv);
 
 					seen_decimal  = true; // implied
@@ -1981,7 +2305,7 @@ TOML_IMPL_NAMESPACE_START
 						set_error_and_return_default("expected decimal digit or '.', saw '"sv, to_sv(*cp), "'"sv);
 
 					// 1.0e1-0 (misplaced exponent sign)
-					else if (!is_match(*prev, U'e', U'E'))
+					else if (!is_match(prev, U'e', U'E'))
 						set_error_and_return_default("expected exponent digit, saw '"sv, to_sv(*cp), "'"sv);
 				}
 				else if (is_decimal_digit(*cp))
@@ -1991,7 +2315,7 @@ TOML_IMPL_NAMESPACE_START
 						if (!first_integer_part)
 						{
 							first_integer_part = static_cast<char>(cp->bytes[0]);
-							first_integer_pos  = cp->position;
+							first_integer_pos  = current_position();
 						}
 						else if (first_integer_part == '0')
 						{
@@ -2004,16 +2328,16 @@ TOML_IMPL_NAMESPACE_START
 					set_error_and_return_default("expected decimal digit, saw '"sv, to_sv(*cp), "'"sv);
 
 				chars[length++] = static_cast<char>(cp->bytes[0]);
-				prev			= cp;
+				prev			= *cp;
 				advance_and_return_if_error({});
 			}
 
 			// sanity-check ending state
 			if (prev)
 			{
-				if (*prev == U'_')
+				if (prev == U'_')
 					set_error_and_return_default("underscores must be followed by digits"sv);
-				else if (is_match(*prev, U'e', U'E', U'+', U'-', U'.'))
+				else if (is_match(prev, U'e', U'E', U'+', U'-', U'.'))
 				{
 					set_error_and_return_if_eof({});
 					set_error_and_return_default("expected decimal digit, saw '"sv, to_sv(*cp), "'"sv);
@@ -2083,7 +2407,7 @@ TOML_IMPL_NAMESPACE_START
 
 #if TOML_LANG_UNRELEASED // toml/issues/562 (hexfloats)
 
-			const auto begin_pos = cp->position;
+			const auto begin_pos = current_position();
 			char text[80];
 			size_t text_length = {};
 
@@ -2121,25 +2445,25 @@ TOML_IMPL_NAMESPACE_START
 				{}	// exponent
 			};
 			fragment* current_fragment	 = fragments;
-			const utf8_codepoint* prev	 = {};
+			char32_t prev				 = {};
 			int exponent_sign			 = 1;
 			const auto expected_exponent = [&]() noexcept
 			{
-				return is_match(*prev, U'p', U'P') ? "expected exponent digit or sign, saw '"sv
-												   : "expected exponent digit, saw '"sv;
+				return is_match(prev, U'p', U'P') ? "expected exponent digit or sign, saw '"sv
+												  : "expected exponent digit, saw '"sv;
 			};
 			while (!is_eof() && !is_value_terminator(*cp))
 			{
 				if (*cp == U'_')
 				{
-					if (!prev || !is_hexadecimal_digit(*prev))
+					if (!prev || !is_hexadecimal_digit(prev))
 						set_error_and_return_default("underscores may only follow digits"sv);
 
-					prev = cp;
+					prev = *cp;
 					advance_and_return_if_error({});
 					continue;
 				}
-				else if (prev && *prev == U'_' && !is_hexadecimal_digit(*cp))
+				else if (prev == U'_' && !is_hexadecimal_digit(*cp))
 					set_error_and_return_default("underscores must be followed by digits"sv);
 				else if (*cp == U'.')
 				{
@@ -2174,7 +2498,7 @@ TOML_IMPL_NAMESPACE_START
 						set_error_and_return_default("expected hexadecimal digit or '.', saw '"sv, to_sv(*cp), "'"sv);
 
 					// 0x10.0p0- (misplaced exponent sign)
-					else if (!is_match(*prev, U'p', U'P'))
+					else if (!is_match(prev, U'p', U'P'))
 						set_error_and_return_default("expected exponent digit, saw '"sv, to_sv(*cp), "'"sv);
 
 					else
@@ -2192,7 +2516,7 @@ TOML_IMPL_NAMESPACE_START
 					current_fragment->chars[current_fragment->length++] = static_cast<char>(cp->bytes[0]);
 
 				text[text_length++] = static_cast<char>(cp->bytes[0]);
-				prev				= cp;
+				prev				= *cp;
 				advance_and_return_if_error({});
 			}
 
@@ -2202,7 +2526,7 @@ TOML_IMPL_NAMESPACE_START
 				set_error_and_return_if_eof({});
 				set_error_and_return_default("missing exponent"sv);
 			}
-			else if (prev && *prev == U'_')
+			else if (prev == U'_')
 				set_error_and_return_default("underscores must be followed by digits"sv);
 
 			uint64_t mantissa	= {};
@@ -2288,7 +2612,7 @@ TOML_IMPL_NAMESPACE_START
 			using traits = parse_integer_traits<Base>;
 			push_parse_scope(traits::scope_qualifier);
 
-			const auto begin_pos = cp->position;
+			const auto begin_pos = current_position();
 
 			const std::string_view sign_text =
 				traits::is_signed && is_match(*cp, U'+', U'-') ? (*cp == U'-' ? "-"sv : "+"sv) : ""sv;
@@ -2300,7 +2624,7 @@ TOML_IMPL_NAMESPACE_START
 					advance_and_return_if_error_or_eof({});
 			}
 
-			[[maybe_unused]] const auto digits_pos = cp->position;
+			[[maybe_unused]] const auto digits_pos = current_position();
 
 			if constexpr (Base == 10)
 			{
@@ -2324,21 +2648,21 @@ TOML_IMPL_NAMESPACE_START
 			}
 
 			// consume digits
-			char digits[utf8_buffered_reader::max_history_length];
-			size_t length			   = {};
-			const utf8_codepoint* prev = {};
+			char digits[max_value_length];
+			size_t length = {};
+			char32_t prev = {};
 			while (!is_eof() && !is_value_terminator(*cp))
 			{
 				if (*cp == U'_')
 				{
-					if (!prev || !traits::is_digit(*prev))
+					if (!prev || !traits::is_digit(prev))
 						set_error_and_return_default("underscores may only follow digits"sv);
 
-					prev = cp;
+					prev = *cp;
 					advance_and_return_if_error({});
 					continue;
 				}
-				if TOML_UNLIKELY(prev && *prev == U'_' && !traits::is_digit(*cp))
+				if TOML_UNLIKELY(prev == U'_' && !traits::is_digit(*cp))
 					set_error_and_return_default("underscores must be followed by digits"sv);
 				else if TOML_UNLIKELY(!traits::is_digit(*cp))
 					set_error_and_return_default("expected "sv, traits::digit_name, ", saw '"sv, to_sv(*cp), "'"sv);
@@ -2347,12 +2671,12 @@ TOML_IMPL_NAMESPACE_START
 				else
 					digits[length++] = static_cast<char>(cp->bytes[0]);
 
-				prev = cp;
+				prev = *cp;
 				advance_and_return_if_error({});
 			}
 
 			// sanity check ending state
-			if (prev && *prev == U'_')
+			if (prev == U'_')
 				set_error_and_return_default("underscores must be followed by digits"sv);
 
 			// single digits can be converted trivially
@@ -2469,7 +2793,7 @@ TOML_IMPL_NAMESPACE_START
 			advance_and_return_if_error_or_eof({});
 
 			// "MM"
-			const auto month_pos = cp->position;
+			const auto month_pos = current_position();
 			if (!consume_digit_sequence(digits, 2u))
 				set_error_and_return_default("expected 2-digit month, saw '"sv, to_sv(cp), "'"sv);
 			const auto month = digits[1] + (digits[0] * 10u);
@@ -2489,7 +2813,7 @@ TOML_IMPL_NAMESPACE_START
 			advance_and_return_if_error_or_eof({});
 
 			// "DD"
-			const auto day_pos = cp->position;
+			const auto day_pos = current_position();
 			if (!consume_digit_sequence(digits, 2u))
 				set_error_and_return_default("expected 2-digit day, saw '"sv, to_sv(cp), "'"sv);
 			const auto day = digits[1] + (digits[0] * 10u);
@@ -2518,7 +2842,7 @@ TOML_IMPL_NAMESPACE_START
 			uint32_t digits[max_digits];
 
 			// "HH"
-			const auto hour_pos = cp->position;
+			const auto hour_pos = current_position();
 			if (!consume_digit_sequence(digits, 2u))
 				set_error_and_return_default("expected 2-digit hour, saw '"sv, to_sv(cp), "'"sv);
 			const auto hour = digits[1] + (digits[0] * 10u);
@@ -2535,7 +2859,7 @@ TOML_IMPL_NAMESPACE_START
 			advance_and_return_if_error_or_eof({});
 
 			// "MM"
-			const auto minute_pos = cp->position;
+			const auto minute_pos = current_position();
 			if (!consume_digit_sequence(digits, 2u))
 				set_error_and_return_default("expected 2-digit minute, saw '"sv, to_sv(cp), "'"sv);
 			const auto minute = digits[1] + (digits[0] * 10u);
@@ -2554,7 +2878,7 @@ TOML_IMPL_NAMESPACE_START
 			advance_and_return_if_error_or_eof({});
 
 			// "SS"
-			const auto second_pos = cp->position;
+			const auto second_pos = current_position();
 			if (!consume_digit_sequence(digits, 2u))
 				set_error_and_return_default("expected 2-digit second, saw '"sv, to_sv(cp), "'"sv);
 			const auto second = digits[1] + (digits[0] * 10u);
@@ -2622,7 +2946,7 @@ TOML_IMPL_NAMESPACE_START
 			// "HH:MM:SS.FFFFFFFFF"
 			if TOML_UNLIKELY(!is_decimal_digit(*cp))
 				set_error_and_return_default("expected 2-digit hour, saw '"sv, to_sv(*cp), "'"sv);
-			const auto time_pos = cp->position;
+			const auto time_pos = current_position();
 			auto time			= parse_time(true);
 			return_if_error({});
 			const source_position second_pos{ time_pos.line, static_cast<source_index>(time_pos.column + 6u) };
@@ -2656,7 +2980,7 @@ TOML_IMPL_NAMESPACE_START
 
 				// "HH"
 				int digits[2];
-				const auto hour_pos = cp->position;
+				const auto hour_pos = current_position();
 				if (!consume_digit_sequence(digits, 2u))
 					set_error_and_return_default("expected 2-digit hour, saw '"sv, to_sv(cp), "'"sv);
 				const auto hour = digits[1] + (digits[0] * 10);
@@ -2673,7 +2997,7 @@ TOML_IMPL_NAMESPACE_START
 				advance_and_return_if_error_or_eof({});
 
 				// "MM"
-				const auto minute_pos = cp->position;
+				const auto minute_pos = current_position();
 				if (!consume_digit_sequence(digits, 2u))
 					set_error_and_return_default("expected 2-digit minute, saw '"sv, to_sv(cp), "'"sv);
 				const auto minute = digits[1] + (digits[0] * 10);
@@ -2776,7 +3100,7 @@ TOML_IMPL_NAMESPACE_START
 			else if (*cp == U'_')
 				set_error_and_return_default("values may not begin with underscores"sv);
 
-			const auto begin_pos = cp->position;
+			const auto begin_pos = current_position();
 			node_ptr val;
 
 			do
@@ -2838,18 +3162,21 @@ TOML_IMPL_NAMESPACE_START
 					break;
 
 				// scan the rest of the value to determine the remaining traits
-				char32_t chars[utf8_buffered_reader::max_history_length];
+				char32_t chars[max_value_length];
 				size_t char_count		= {};
 				size_t advance_count	= {};
 				bool eof_while_scanning = false;
-				const auto scan			= [&]() noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
+				auto la					= reader.lookahead();
+				const auto ends_value	= [&]() noexcept
+				{ return la.value >= eof_mark || is_value_terminator(la.value); };
+				const auto scan = [&]() noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
 				{
-					if (is_eof() || is_value_terminator(*cp))
+					if (ends_value())
 						return;
 
 					do
 					{
-						if (const auto c = **cp; c != U'_')
+						if (const auto c = la.value; c != U'_')
 						{
 							chars[char_count++] = c;
 
@@ -2907,59 +3234,51 @@ TOML_IMPL_NAMESPACE_START
 							}
 						}
 
-						advance_and_return_if_error();
+						reader.step(la);
 						advance_count++;
-						eof_while_scanning = is_eof();
+						eof_while_scanning = la.value == eof_mark;
 					}
-					while (advance_count < (utf8_buffered_reader::max_history_length - 1u) && !is_eof()
-						   && !is_value_terminator(*cp));
+					while (advance_count < (max_value_length - 1u) && !ends_value());
 				};
 				scan();
-				return_if_error({});
 
 				// force further scanning if this could have been a date-time with a space instead of a T
 				if (char_count == 10u									 //
 					&& (traits | begins_zero) == (bzero_msk | has_minus) //
 					&& chars[4] == U'-'									 //
 					&& chars[7] == U'-'									 //
-					&& !is_eof()										 //
-					&& *cp == U' ')
+					&& la.value == U' ')
 				{
 					const auto pre_advance_count = advance_count;
 					const auto pre_scan_traits	 = traits;
-					chars[char_count++]			 = *cp;
+					chars[char_count++]			 = la.value;
 					add_trait(has_t);
 
 					const auto backpedal = [&]() noexcept
 					{
-						go_back(advance_count - pre_advance_count);
 						advance_count = pre_advance_count;
 						traits		  = pre_scan_traits;
 						char_count	  = 10u;
 					};
 
-					advance_and_return_if_error({});
+					reader.step(la);
 					advance_count++;
 
-					if (is_eof() || !is_decimal_digit(*cp))
+					if (!is_decimal_digit(la.value))
 						backpedal();
 					else
 					{
-						chars[char_count++] = *cp;
+						chars[char_count++] = la.value;
 
-						advance_and_return_if_error({});
+						reader.step(la);
 						advance_count++;
 
 						scan();
-						return_if_error({});
 
 						if (char_count == 12u)
 							backpedal();
 					}
 				}
-
-				// set the reader back to where we started
-				go_back(advance_count);
 
 				// if after scanning ahead we still only have one value character,
 				// the only valid value type is an integer.
@@ -3088,13 +3407,8 @@ TOML_IMPL_NAMESPACE_START
 					case begins_sign | has_digits | has_minus: [[fallthrough]];
 					case begins_sign | has_digits | has_plus:
 					{
-						// if the value was so long we exhausted the history buffer it's reasonable to assume
-						// there was more and the value's actual type is impossible to identify without making the
-						// buffer bigger (since it could have actually been a float), so emit an error.
-						//
-						// (this will likely only come up during fuzzing and similar scenarios)
-						static constexpr size_t max_numeric_value_length =
-							utf8_buffered_reader::max_history_length - 2u;
+						// past the scan limit the value could still be a float, so its type is unknown
+						static constexpr size_t max_numeric_value_length = max_value_length - 2u;
 						if TOML_UNLIKELY(!eof_while_scanning && advance_count > max_numeric_value_length)
 							set_error_and_return_default("numeric value too long to identify type - cannot exceed "sv,
 														 max_numeric_value_length,
@@ -3304,7 +3618,7 @@ TOML_IMPL_NAMESPACE_START
 				// "quoted key segment"
 				else if (is_string_delimiter(*cp))
 				{
-					const auto begin_pos = cp->position;
+					const auto begin_pos = current_position();
 
 					recording_whitespace	= true;
 					const parsed_string str = parse_string();
@@ -3376,7 +3690,7 @@ TOML_IMPL_NAMESPACE_START
 			TOML_ASSERT_ASSUME(*cp == U'[');
 			push_parse_scope("table header"sv);
 
-			const source_position header_begin_pos = cp->position;
+			const source_position header_begin_pos = current_position();
 			source_position header_end_pos;
 			bool is_arr = false;
 
@@ -3469,7 +3783,7 @@ TOML_IMPL_NAMESPACE_START
 
 						parent = tbl;
 					}
-					else if (auto arr = p.as_array(); arr && impl::find(table_arrays.begin(), table_arrays.end(), arr))
+					else if (auto arr = p.as_array(); arr && table_arrays.contains(arr))
 					{
 						// table arrays are a special case;
 						// the spec dictates we select the most recently declared element in the array.
@@ -3494,7 +3808,7 @@ TOML_IMPL_NAMESPACE_START
 					table& p  = pit->second.ref_cast<table>();
 					p.source_ = { header_begin_pos, header_end_pos, reader.source_path() };
 
-					implicit_tables.push_back(&p);
+					implicit_tables.insert(&p);
 					parent = &p;
 				}
 			}
@@ -3509,38 +3823,34 @@ TOML_IMPL_NAMESPACE_START
 			if (it != parent->end() && it->first == last_segment)
 			{
 				node& matching_node = it->second;
-				if (auto arr = matching_node.as_array();
-					is_arr && arr && impl::find(table_arrays.begin(), table_arrays.end(), arr))
+				if (auto arr = matching_node.as_array(); is_arr && arr && table_arrays.contains(arr))
 				{
 					table& tbl	= arr->emplace_back<table>();
 					tbl.source_ = { header_begin_pos, header_end_pos, reader.source_path() };
 					return &tbl;
 				}
 
-				if (auto tbl = matching_node.as_table(); !is_arr && tbl && !implicit_tables.empty())
+				if (auto tbl = matching_node.as_table(); !is_arr && tbl && implicit_tables.contains(tbl))
 				{
-					if (auto found = impl::find(implicit_tables.begin(), implicit_tables.end(), tbl); found)
+					bool ok = true;
+					if (!tbl->empty())
 					{
-						bool ok = true;
-						if (!tbl->empty())
+						for (auto& [_, child] : *tbl)
 						{
-							for (auto& [_, child] : *tbl)
+							if (!child.is_table() && !child.is_array_of_tables())
 							{
-								if (!child.is_table() && !child.is_array_of_tables())
-								{
-									ok = false;
-									break;
-								}
+								ok = false;
+								break;
 							}
 						}
+					}
 
-						if (ok)
-						{
-							implicit_tables.erase(implicit_tables.cbegin() + (found - implicit_tables.data()));
-							tbl->source_.begin = header_begin_pos;
-							tbl->source_.end   = header_end_pos;
-							return tbl;
-						}
+					if (ok)
+					{
+						implicit_tables.erase(tbl);
+						tbl->source_.begin = header_begin_pos;
+						tbl->source_.end   = header_end_pos;
+						return tbl;
 					}
 				}
 
@@ -3577,7 +3887,7 @@ TOML_IMPL_NAMESPACE_START
 				{
 					it			   = parent->emplace_hint<array>(it, std::move(last_key));
 					array& tbl_arr = it->second.ref_cast<array>();
-					table_arrays.push_back(&tbl_arr);
+					table_arrays.insert(&tbl_arr);
 					tbl_arr.source_ = { header_begin_pos, header_end_pos, reader.source_path() };
 
 					table& tbl	= tbl_arr.emplace_back<table>();
@@ -3642,9 +3952,7 @@ TOML_IMPL_NAMESPACE_START
 						table* p = pit->second.as_table();
 
 						// redefinition
-						if TOML_UNLIKELY(!p
-							|| !(impl::find(dotted_key_tables.begin(), dotted_key_tables.end(), p)
-								 || impl::find(implicit_tables.begin(), implicit_tables.end(), p)))
+						if TOML_UNLIKELY(!p || !(dotted_key_tables.contains(p) || implicit_tables.contains(p)))
 						{
 							set_error_at(key_buffer.starts[i],
 										 "cannot redefine existing "sv,
@@ -3663,7 +3971,7 @@ TOML_IMPL_NAMESPACE_START
 						table& p  = pit->second.ref_cast<table>();
 						p.source_ = pit->first.source();
 
-						dotted_key_tables.push_back(&p);
+						dotted_key_tables.insert(&p);
 						tbl = &p;
 					}
 				}
@@ -3782,26 +4090,14 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 	  public:
-		parser(utf8_reader_interface&& input) //
-			: reader{ input }
+		parser(source_reader&& input) //
+			: reader{ std::move(input) }
 		{
-			root.source_ = { prev_pos, prev_pos, reader.source_path() };
+			root.source_ = { source_position{ 1, 1 }, source_position{ 1, 1 }, reader.source_path() };
 
-			if (!reader.peek_eof())
-			{
-				cp = reader.read_next();
-
-#if !TOML_EXCEPTIONS
-				if (reader.error())
-				{
-					err = std::move(reader.error());
-					return;
-				}
-#endif
-
-				if (cp)
-					parse_document();
-			}
+			land(reader.first());
+			if (cp)
+				parse_document();
 
 			update_region_ends(root);
 		}
@@ -3988,10 +4284,6 @@ TOML_IMPL_NAMESPACE_END;
 #undef set_error_and_return
 #undef set_error_and_return_default
 #undef set_error_and_return_if_eof
-#undef utf8_buffered_reader_error_check
-#undef utf8_reader_error
-#undef utf8_reader_error_check
-#undef utf8_reader_return_after_error
 
 //#---------------------------------------------------------------------------------------------------------------------
 //# PARSER PUBLIC IMPLEMENTATION
@@ -4001,7 +4293,7 @@ TOML_ANON_NAMESPACE_START
 {
 	TOML_NODISCARD
 	TOML_INTERNAL_LINKAGE
-	parse_result do_parse(utf8_reader_interface && reader)
+	parse_result do_parse(source_reader && reader)
 	{
 		return impl::parser{ std::move(reader) };
 	}
@@ -4016,6 +4308,12 @@ TOML_ANON_NAMESPACE_START
 #else
 #define TOML_PARSE_FILE_ERROR(msg, path)                                                                               \
 	return parse_result(parse_error(msg, source_position{}, std::make_shared<const std::string>(std::move(path))))
+#endif
+
+#if defined(__APPLE__) || defined(__MINGW32__) || defined(__MINGW64__)
+#define TOML_OVERALIGNED
+#else
+#define TOML_OVERALIGNED alignas(32)
 #endif
 
 		std::string file_path_str(file_path);
@@ -4039,15 +4337,15 @@ TOML_ANON_NAMESPACE_START
 		file.seekg(0, std::ifstream::beg);
 
 		// read the whole file into memory first if the file isn't too large
-		constexpr auto large_file_threshold = 1024 * 1024 * 2; // 2 MB
+		static constexpr auto large_file_threshold = 1024 * 1024 * 2; // 2 MB
 		if (file_size <= large_file_threshold)
 		{
-			std::vector<char> file_data;
-			file_data.resize(static_cast<size_t>(file_size));
-			file.read(file_data.data(), static_cast<std::streamsize>(file_size));
+			const auto size = static_cast<size_t>(file_size);
+			const std::unique_ptr<char[]> file_data{ new char[size] };
+			file.read(file_data.get(), static_cast<std::streamsize>(file_size));
 			if (file.gcount() != static_cast<std::streamsize>(file_size))
 				TOML_PARSE_FILE_ERROR("File could not be read", file_path_str);
-			return parse(std::string_view{ file_data.data(), file_data.size() }, std::move(file_path_str));
+			return parse(std::string_view{ file_data.get(), size }, std::move(file_path_str));
 		}
 
 		// otherwise parse it using the streams
@@ -4056,6 +4354,7 @@ TOML_ANON_NAMESPACE_START
 		return parse(file, std::move(file_path_str));
 
 #undef TOML_PARSE_FILE_ERROR
+#undef TOML_OVERALIGNED
 	}
 }
 TOML_ANON_NAMESPACE_END;
@@ -4067,25 +4366,25 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	parse_result TOML_CALLCONV parse(std::string_view doc, std::string_view source_path)
 	{
-		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, source_path });
+		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::source_reader{ doc, source_path });
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	parse_result TOML_CALLCONV parse(std::string_view doc, std::string && source_path)
 	{
-		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, std::move(source_path) });
+		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::source_reader{ doc, std::move(source_path) });
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	parse_result TOML_CALLCONV parse(std::istream & doc, std::string_view source_path)
 	{
-		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, source_path });
+		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::source_reader{ doc, source_path });
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	parse_result TOML_CALLCONV parse(std::istream & doc, std::string && source_path)
 	{
-		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, std::move(source_path) });
+		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::source_reader{ doc, std::move(source_path) });
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -4099,13 +4398,13 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	parse_result TOML_CALLCONV parse(std::u8string_view doc, std::string_view source_path)
 	{
-		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, source_path });
+		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::source_reader{ doc, source_path });
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	parse_result TOML_CALLCONV parse(std::u8string_view doc, std::string && source_path)
 	{
-		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, std::move(source_path) });
+		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::source_reader{ doc, std::move(source_path) });
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -4124,13 +4423,13 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	parse_result TOML_CALLCONV parse(std::string_view doc, std::wstring_view source_path)
 	{
-		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, impl::narrow(source_path) });
+		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::source_reader{ doc, impl::narrow(source_path) });
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	parse_result TOML_CALLCONV parse(std::istream & doc, std::wstring_view source_path)
 	{
-		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, impl::narrow(source_path) });
+		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::source_reader{ doc, impl::narrow(source_path) });
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -4146,7 +4445,7 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	parse_result TOML_CALLCONV parse(std::u8string_view doc, std::wstring_view source_path)
 	{
-		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, impl::narrow(source_path) });
+		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::source_reader{ doc, impl::narrow(source_path) });
 	}
 
 #endif // TOML_HAS_CHAR8 && TOML_ENABLE_WINDOWS_COMPAT
@@ -4155,6 +4454,5 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
-#undef TOML_OVERALIGNED
 #include "header_end.hpp"
 #endif // TOML_ENABLE_PARSER

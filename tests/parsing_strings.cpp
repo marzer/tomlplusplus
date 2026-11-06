@@ -300,3 +300,217 @@ TEST_CASE("parsing - strings (malformed)")
 		"str = \"a\x01\""sv,
 		"1:9: Error while parsing string: unescaped control characters other than TAB (U+0009) are explicitly prohibited"sv);
 }
+
+TEST_CASE("parsing - strings (at the end of the document)")
+{
+	parsing_should_fail(FILE_LINE_ARGS, "a = '"sv, "1:6: Error while parsing string: encountered end-of-file"sv);
+	parsing_should_fail(FILE_LINE_ARGS, R"(a = ")"sv, "1:6: Error while parsing string: encountered end-of-file"sv);
+	parse_expected_value(FILE_LINE_ARGS, "''"sv, ""sv);
+	parse_expected_value(FILE_LINE_ARGS, R"("")"sv, ""sv);
+	parsing_should_fail(FILE_LINE_ARGS, "a = 'a"sv, "1:7: Error while parsing string: encountered end-of-file"sv);
+	parsing_should_fail(FILE_LINE_ARGS, R"(a = "a)"sv, "1:7: Error while parsing string: encountered end-of-file"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"a = '''"sv,
+						"1:8: Error while parsing literal string: encountered end-of-file"sv);
+	parsing_should_fail(FILE_LINE_ARGS, R"(a = """)"sv, "1:8: Error while parsing string: encountered end-of-file"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "a = '\n"sv, "1:7: Error while parsing string: encountered end-of-file"sv);
+	parsing_should_fail(
+		FILE_LINE_ARGS,
+		"a = 'a\n"sv,
+		"1:7: Error while parsing literal string: control characters other than TAB (U+0009) are explicitly prohibited"sv);
+}
+
+TEST_CASE("parsing - strings (bytes after long stretches)")
+{
+	std::string accented;
+	for (size_t i = 0; i < 40u; i++)
+		accented += "\xC3\xA9";
+
+	SECTION("every ascii byte")
+	{
+		for (const auto& filler : { std::string(40u, 'x'), accented })
+		{
+			for (unsigned byte = 0; byte < 0x80u; byte++)
+			{
+				INFO("byte " << byte);
+				const auto c	   = static_cast<char>(byte);
+				const bool control = c != '\t' && (byte < 0x20u || byte == 0x7Fu);
+				const auto value   = filler + c + "y";
+				auto check		   = [&](table&& tbl) { CHECK(tbl["a"] == std::string_view{ value }); };
+
+				const auto basic = "a = \"" + filler + c + "y\"";
+				if (c == '"')
+					parsing_should_fail(
+						FILE_LINE_ARGS,
+						basic,
+						"1:47: Error while parsing key-value pair: expected a comment or whitespace, saw 'y'"sv);
+				else if (c == '\\')
+					parsing_should_fail(FILE_LINE_ARGS,
+										basic,
+										R"(1:47: Error while parsing string: unknown escape sequence '\y')"sv);
+				else if (control)
+					parsing_should_fail(
+						FILE_LINE_ARGS,
+						basic,
+						"1:46: Error while parsing string: unescaped control characters other than TAB (U+0009) are explicitly prohibited"sv);
+				else
+					parsing_should_succeed(FILE_LINE_ARGS, basic, check);
+
+				const auto literal = "a = '" + filler + c + "y'";
+				if (c == '\'')
+					parsing_should_fail(
+						FILE_LINE_ARGS,
+						literal,
+						"1:47: Error while parsing key-value pair: expected a comment or whitespace, saw 'y'"sv);
+				else if (control)
+					parsing_should_fail(
+						FILE_LINE_ARGS,
+						literal,
+						"1:46: Error while parsing literal string: control characters other than TAB (U+0009) are explicitly prohibited"sv);
+				else
+					parsing_should_succeed(FILE_LINE_ARGS, literal, check);
+
+				const auto multi_basic = "a = \"\"\"" + filler + c + "y\"\"\"";
+				if (c == '\\')
+					parsing_should_fail(FILE_LINE_ARGS,
+										multi_basic,
+										R"(1:49: Error while parsing string: unknown escape sequence '\y')"sv);
+				else if (c == '\r')
+					parsing_should_fail(FILE_LINE_ARGS,
+										multi_basic,
+										R"(1:49: Error while parsing string: expected '\n' after '\r', saw 'y')"sv);
+				else if (c == '\v' || c == '\f')
+					parsing_should_fail(
+						FILE_LINE_ARGS,
+						multi_basic,
+						R"(1:48: Error while parsing string: vertical tabs '\v' and form-feeds '\f' are not legal line breaks in TOML)"sv);
+				else if (control && c != '\n')
+					parsing_should_fail(
+						FILE_LINE_ARGS,
+						multi_basic,
+						"1:48: Error while parsing string: unescaped control characters other than TAB (U+0009) are explicitly prohibited"sv);
+				else
+					parsing_should_succeed(FILE_LINE_ARGS, multi_basic, check);
+
+				const auto multi_literal = "a = '''" + filler + c + "y'''";
+				if (c == '\r')
+					parsing_should_fail(
+						FILE_LINE_ARGS,
+						multi_literal,
+						R"(1:49: Error while parsing literal string: expected '\n' after '\r', saw 'y')"sv);
+				else if (c == '\v' || c == '\f')
+					parsing_should_fail(
+						FILE_LINE_ARGS,
+						multi_literal,
+						R"(1:48: Error while parsing literal string: vertical tabs '\v' and form-feeds '\f' are not legal line breaks in TOML)"sv);
+				else if (control && c != '\n')
+					parsing_should_fail(
+						FILE_LINE_ARGS,
+						multi_literal,
+						"1:48: Error while parsing literal string: control characters other than TAB (U+0009) are explicitly prohibited"sv);
+				else
+					parsing_should_succeed(FILE_LINE_ARGS, multi_literal, check);
+			}
+		}
+	}
+
+	SECTION("multi-byte code points before an error")
+	{
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			"a = \"\xC3\xA9\xE2\x82\xAC\xF0\x9F\x98\x82\xC3\xA9\xE2\x82\xAC\xF0\x9F\x98\x82\x01\""sv,
+			"1:12: Error while parsing string: unescaped control characters other than TAB (U+0009) are explicitly prohibited"sv);
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			"a = '\xC3\xA9\xE2\x82\xAC\xF0\x9F\x98\x82\xC3\xA9\xE2\x82\xAC\xF0\x9F\x98\x82\x01'"sv,
+			"1:12: Error while parsing literal string: control characters other than TAB (U+0009) are explicitly prohibited"sv);
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			"a = \"\"\"\xC3\xA9\xE2\x82\xAC\xF0\x9F\x98\x82\x01\"\"\""sv,
+			"1:11: Error while parsing string: unescaped control characters other than TAB (U+0009) are explicitly prohibited"sv);
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			"a = '''\xC3\xA9\xE2\x82\xAC\xF0\x9F\x98\x82\x01'''"sv,
+			"1:11: Error while parsing literal string: control characters other than TAB (U+0009) are explicitly prohibited"sv);
+	}
+}
+
+TEST_CASE("parsing - strings (bytes within a 16-byte block)")
+{
+	struct kind
+	{
+		std::string_view open;
+		std::string_view close;
+		std::string_view scope;
+	};
+
+	for (const auto& k : { kind{ "\"", "\"", "string" },
+						   kind{ "'", "'", "literal string" },
+						   kind{ "\"\"\"", "\"\"\"", "string" },
+						   kind{ "'''", "'''", "literal string" } })
+	{
+		const bool basic	  = k.close[0] == '"';
+		const bool multi_line = k.close.length() == 3u;
+		const auto error_at	  = [](size_t column, std::string_view scope)
+		{ return "1:" + std::to_string(column) + ": Error while parsing " + std::string{ scope } + ": "; };
+
+		const auto check = [&](const std::string& filler, size_t columns, char c, std::string_view tail)
+		{
+			INFO(k.open << ", byte " << static_cast<unsigned>(c) << " after " << filler.length() << " bytes");
+			const auto column = 5u + k.open.length() + columns;
+			const auto doc = "a = " + std::string{ k.open } + filler + c + std::string{ tail } + std::string{ k.close };
+			const auto value   = std::string{ k.open.substr(multi_line ? 3u : 1u) } + filler + c + std::string{ tail };
+			const bool control = c != '\t' && (static_cast<unsigned char>(c) < 0x20u || c == '\x7F');
+
+			if (!multi_line && c == k.close[0])
+				parsing_should_fail(FILE_LINE_ARGS,
+									doc,
+									error_at(column + 1u, "key-value pair")
+										+ "expected a comment or whitespace, saw 'y'");
+			else if (basic && c == '\\')
+				parsing_should_fail(FILE_LINE_ARGS,
+									doc,
+									error_at(column + 1u, k.scope) + R"(unknown escape sequence '\y')");
+			else if (multi_line && c == '\r')
+				parsing_should_fail(FILE_LINE_ARGS,
+									doc,
+									error_at(column + 1u, k.scope) + R"(expected '\n' after '\r', saw 'y')");
+			else if (multi_line && (c == '\v' || c == '\f'))
+				parsing_should_fail(
+					FILE_LINE_ARGS,
+					doc,
+					error_at(column, k.scope)
+						+ R"(vertical tabs '\v' and form-feeds '\f' are not legal line breaks in TOML)");
+			else if (control && !(multi_line && c == '\n'))
+				parsing_should_fail(FILE_LINE_ARGS,
+									doc,
+									error_at(column, k.scope) + (basic ? "unescaped " : "")
+										+ "control characters other than TAB (U+0009) are explicitly prohibited");
+			else
+				parsing_should_succeed(FILE_LINE_ARGS,
+									   doc,
+									   [&](table&& tbl) { CHECK(tbl["a"] == std::string_view{ value }); });
+		};
+
+		static constexpr auto ys	   = "yyyyyyyyyyyyyyyy"sv;
+		static constexpr auto accented = "\xC3\xA9\xC3\xA9\xC3\xA9\xC3\xA9\xC3\xA9\xC3\xA9\xC3\xA9\xC3\xA9"sv;
+		for (unsigned byte = 0; byte < 0x80u; byte++)
+		{
+			check(std::string(5u, 'x'), 5u, static_cast<char>(byte), ys);
+			check("\xC3\xA9" + std::string(3u, 'x'), 4u, static_cast<char>(byte), ys);
+		}
+
+		for (size_t length = 0; length < 18u; length++)
+		{
+			for (const auto& [c, tail] : { std::pair{ '\x01', accented },
+										   std::pair{ '\x7F', accented },
+										   std::pair{ '\\', ys },
+										   std::pair{ k.close[0], ys } })
+			{
+				check(std::string(length, 'x'), length, c, tail);
+				if (length >= 2u)
+					check("\xC3\xA9" + std::string(length - 2u, 'x'), length - 1u, c, tail);
+			}
+		}
+	}
+}

@@ -46,9 +46,12 @@ TOML_IMPL_NAMESPACE_START
 		return (c >= U'\x80' && c <= U'\x9F' && c != U'\x85') || c == U'\xFFFE' || c == U'\xFFFF';
 	}
 
+	class formatter_buffer;
+
 	class TOML_EXPORTED_CLASS formatter
 	{
 	  private:
+		friend class formatter_buffer;
 		const node* source_;
 #if TOML_ENABLE_PARSER && !TOML_EXCEPTIONS
 		const parse_result* result_;

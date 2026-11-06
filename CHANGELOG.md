@@ -12,6 +12,7 @@
 - fixed "unresolved symbol" error with nvc++ (#220) (@Tomcat-42)
 - fixed stack overflow when parsing deeply nested dotted keys (#242) (@tyler92)
 - fixed some malformed input hitting an assertion in the parser; it now gets a parse error (#321) (@emincan2000)
+- fixed assertion failure or undefined behaviour when parsing some long, invalid values containing underscores
 - fixed precondition violation when parsing a table header that starts with `[[[` (#301) (@gistrec)
 - fixed redefinition error messages showing the wrong text for quoted keys (#300) (@SAY-5)
 - fixed undefined behaviour when checking some non-whitespace Unicode code points for whitespace (#295) (@94xhn)
@@ -31,11 +32,14 @@
 - fixed times with more than 64 digits of fractional seconds failing to parse
 - fixed leap seconds failing to parse
 - fixed subnormal floats failing to parse with libc++
+- fixed some long numbers containing underscores failing to parse, or parsing despite a trailing underscore
 - fixed long or out-of-range hexadecimal floats parsing to the wrong value (`TOML_ENABLE_UNRELEASED_FEATURES`)
 - fixed `toml::parse()` returning an empty table for streams that can't seek, such as a piped `std::cin`
-- fixed `toml::parse()` not reporting a parse error for streams that have already failed or fail on their first read
+- fixed `toml::parse()` not reporting a parse error, or crashing, for streams that have already failed or fail on their first read
+- fixed invalid UTF-8 or a failed stream read hiding an earlier error in the document
 - fixed `toml::parse()` failing on streams with exceptions enabled for failbit or eofbit
 - fixed `toml::parse_file()` returning an empty table for a directory or a failed read
+- fixed parsing slowing down quadratically in documents with many tables
 - fixed a default-constructed `toml::key` leaving its source region uninitialised
 - fixed use-after-free or wrong results when assigning a `toml::table` or `toml::array` from a descendant or ancestor
 - fixed null-pointer dereference when inserting a `toml::array` into itself
@@ -79,6 +83,8 @@
 #### Changes
 
 - `operator<<` for `source_region` (and so for `parse_error`) also prints the end of the region when it differs from the start (#244) (@N-Dekker)
+- parsing is up to twice as fast, and up to five times as fast on documents that are mostly strings
+- the formatters write to the stream in chunks of up to 4 KiB, which speeds up unbuffered streams such as `std::cerr`; `json_formatter` is about 30% faster
 
 #### Removals
 
@@ -95,7 +101,7 @@
 - cmake: added a pkg-config file, `tomlplusplus.pc` (#274) (@enessmr)
 - cmake: added the install components `tomlplusplus_Runtime` and `tomlplusplus_Development`
 - cmake: fixed `TOMLPLUSPLUS_BUILD_MODULES` never installing the module; its target is `tomlplusplus::modules`
-- cmake: added developer options for the tests, the toml-test encoder and decoder, sanitizers and coverage; they only apply to top-level builds
+- cmake: added developer options for the tests, the toml-test encoder and decoder, the benchmarks, sanitizers and coverage; they only apply to top-level builds
 - cmake, meson: builds from a git checkout keep `toml.hpp` up to date; `-Dtomlplusplus_REGENERATE=OFF` and `-Dregenerate=false` turn this off
 - the tests use Catch2 v3, which fixes building them with libc++ in C++23 mode; `-Duse_vendored_libs=false` now needs an installed Catch2 v3 (#315) (@peppergrayxyz)
 - added OSS-Fuzz integration (#214) (@capuanob)

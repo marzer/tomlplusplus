@@ -127,6 +127,10 @@ if(tomlplusplus_BUILD_TOML_TEST AND tomlplusplus_EXCEPTIONS)
   add_subdirectory(toml-test)
 endif()
 
+if(tomlplusplus_BUILD_BENCHMARKS)
+  add_subdirectory(benchmarks)
+endif()
+
 # ---- Examples and fuzzing ----
 if(PROJECT_IS_TOP_LEVEL)
   option(BUILD_EXAMPLES "Build examples tree." OFF)

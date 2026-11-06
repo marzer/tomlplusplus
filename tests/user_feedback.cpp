@@ -93,7 +93,10 @@ TEST_CASE("user feedback")
 		parsing_should_fail(FILE_LINE_ARGS,
 							"1= 0x6cA#+\xf1",
 							"1:11: Encountered EOF during incomplete utf-8 code point sequence"sv);
-		parsing_should_fail(FILE_LINE_ARGS, "p=06:06:06#\x0b\xff", "1:13: Encountered invalid utf-8 sequence"sv);
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			"p=06:06:06#\x0b\xff",
+			R"(1:12: Error while parsing comment: vertical tabs '\v' and form-feeds '\f' are not legal line breaks in TOML)"sv);
 		parsing_should_fail(
 			FILE_LINE_ARGS,
 			"''''d' 't' '+o\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c"

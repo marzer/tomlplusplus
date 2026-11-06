@@ -353,3 +353,45 @@ TEST_CASE("parsing - integers (malformed)")
 						"int = 0o17_"sv,
 						"1:12: Error while parsing octal integer: underscores must be followed by digits"sv);
 }
+
+TEST_CASE("parsing - integers (long values with underscores)")
+{
+	struct base
+	{
+		std::string_view prefix;
+		std::string_view scope;
+		int64_t eleven;
+	};
+
+	for (const auto& b : { base{ "0x"sv, "hexadecimal integer"sv, 0x11 },
+						   base{ "0o"sv, "octal integer"sv, 011 },
+						   base{ "0b"sv, "binary integer"sv, 0b11 } })
+	{
+		for (const auto key : { "a"sv, "ab"sv })
+		{
+			for (size_t pairs = 60; pairs <= 110; pairs++)
+			{
+				std::string doc = std::string{ key } + " = " + std::string{ b.prefix };
+				for (size_t i = 0; i < pairs; i++)
+					doc += "0_";
+
+				parsing_should_succeed(
+					FILE_LINE_ARGS,
+					doc + "1_1",
+					[&](table&& tbl)
+					{
+						CHECK(tbl[key] == b.eleven);
+						REQUIRE(tbl[key].node());
+						const auto& region = tbl[key].node()->source();
+						CHECK(region.begin == source_position{ 1, static_cast<source_index>(key.length() + 4u) });
+						CHECK(region.end == source_position{ 1, static_cast<source_index>(doc.length() + 4u) });
+					});
+
+				parsing_should_fail(FILE_LINE_ARGS,
+									doc + "1_\n",
+									"1:" + std::to_string(doc.length() + 3u) + ": Error while parsing "
+										+ std::string{ b.scope } + ": underscores must be followed by digits");
+			}
+		}
+	}
+}

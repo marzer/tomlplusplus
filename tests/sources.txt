@@ -28,6 +28,7 @@ parsing_spec_example.cpp
 parsing_streams_and_files.cpp
 parsing_strings.cpp
 parsing_tables.cpp
+parsing_utf8.cpp
 path.cpp
 printing.cpp
 round_trips.cpp

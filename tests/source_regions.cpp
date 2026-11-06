@@ -34,6 +34,22 @@ namespace
 	}
 
 	constexpr auto max_index = std::numeric_limits<source_index>::max();
+
+	void check_region(const node* n, source_position begin, source_position end)
+	{
+		REQUIRE(n);
+		CHECK(n->source().begin == begin);
+		CHECK(n->source().end == end);
+	}
+
+	void check_key_region(const table& parent, std::string_view name, source_position begin, source_position end)
+	{
+		INFO(name);
+		const auto it = parent.find(name);
+		REQUIRE(it != parent.end());
+		CHECK(it->first.source().begin == begin);
+		CHECK(it->first.source().end == end);
+	}
 }
 
 TEST_CASE("source positions - validity")
@@ -155,64 +171,162 @@ m = 9
 n = 10
 )"sv);
 
-	const auto check_node = [](const node* n, source_position begin, source_position end)
-	{
-		REQUIRE(n);
-		CHECK(n->source().begin == begin);
-		CHECK(n->source().end == end);
-	};
-
-	const auto check_key = [](const table& parent, std::string_view name, source_position begin, source_position end)
-	{
-		const auto it = parent.find(name);
-		REQUIRE(it != parent.end());
-		CHECK(it->first.source().begin == begin);
-		CHECK(it->first.source().end == end);
-	};
-
 	SECTION("the root table spans the document")
 	{
-		check_node(&static_cast<const table&>(tbl), { 1, 1 }, { 17, 8 });
+		check_region(&static_cast<const table&>(tbl), { 1, 1 }, { 17, 8 });
 	}
 
 	SECTION("values and inline containers span their text")
 	{
-		check_key(tbl, "a", { 1, 1 }, { 1, 2 });
-		check_node(tbl["a"].node(), { 1, 5 }, { 1, 6 });
-		check_node(tbl["b"].node(), { 2, 5 }, { 2, 10 });
-		check_node(tbl["c"].node(), { 3, 5 }, { 3, 20 });
-		check_node(tbl["c"][0].node(), { 3, 7 }, { 3, 8 });
-		check_node(tbl["c"][1].node(), { 3, 10 }, { 3, 18 });
-		check_node(tbl["c"][1][1].node(), { 3, 15 }, { 3, 16 });
-		check_node(tbl["d"].node(), { 4, 5 }, { 4, 29 });
-		check_key(*tbl["d"].as_table(), "f", { 4, 14 }, { 4, 15 });
-		check_node(tbl["d"]["f"].node(), { 4, 18 }, { 4, 27 });
-		check_node(tbl["d"]["f"]["g"].node(), { 4, 24 }, { 4, 25 });
+		check_key_region(tbl, "a", { 1, 1 }, { 1, 2 });
+		check_region(tbl["a"].node(), { 1, 5 }, { 1, 6 });
+		check_region(tbl["b"].node(), { 2, 5 }, { 2, 10 });
+		check_region(tbl["c"].node(), { 3, 5 }, { 3, 20 });
+		check_region(tbl["c"][0].node(), { 3, 7 }, { 3, 8 });
+		check_region(tbl["c"][1].node(), { 3, 10 }, { 3, 18 });
+		check_region(tbl["c"][1][1].node(), { 3, 15 }, { 3, 16 });
+		check_region(tbl["d"].node(), { 4, 5 }, { 4, 29 });
+		check_key_region(*tbl["d"].as_table(), "f", { 4, 14 }, { 4, 15 });
+		check_region(tbl["d"]["f"].node(), { 4, 18 }, { 4, 27 });
+		check_region(tbl["d"]["f"]["g"].node(), { 4, 24 }, { 4, 25 });
 	}
 
 	SECTION("tables made by dotted keys span the key that made them")
 	{
-		check_node(tbl["h"].node(), { 5, 1 }, { 5, 2 });
-		check_node(tbl["h"]["i"].node(), { 5, 3 }, { 5, 4 });
-		check_key(*tbl["h"]["i"].as_table(), "j", { 5, 5 }, { 5, 6 });
-		check_node(tbl["h"]["i"]["j"].node(), { 5, 9 }, { 5, 10 });
+		check_region(tbl["h"].node(), { 5, 1 }, { 5, 2 });
+		check_region(tbl["h"]["i"].node(), { 5, 3 }, { 5, 4 });
+		check_key_region(*tbl["h"]["i"].as_table(), "j", { 5, 5 }, { 5, 6 });
+		check_region(tbl["h"]["i"]["j"].node(), { 5, 9 }, { 5, 10 });
 	}
 
 	SECTION("tables made by headers span the header")
 	{
-		check_key(tbl, "table", { 7, 2 }, { 7, 7 });
-		check_node(tbl["table"].node(), { 7, 1 }, { 7, 8 });
-		check_node(tbl["table"]["k"].node(), { 8, 5 }, { 8, 6 });
-		check_key(*tbl["table"].as_table(), "sub", { 10, 8 }, { 10, 11 });
-		check_node(tbl["table"]["sub"].node(), { 10, 1 }, { 10, 12 });
+		check_key_region(tbl, "table", { 7, 2 }, { 7, 7 });
+		check_region(tbl["table"].node(), { 7, 1 }, { 7, 8 });
+		check_region(tbl["table"]["k"].node(), { 8, 5 }, { 8, 6 });
+		check_key_region(*tbl["table"].as_table(), "sub", { 10, 8 }, { 10, 11 });
+		check_region(tbl["table"]["sub"].node(), { 10, 1 }, { 10, 12 });
 	}
 
 	SECTION("arrays of tables span their headers")
 	{
-		check_key(tbl, "aot", { 13, 3 }, { 13, 6 });
-		check_node(tbl["aot"].node(), { 13, 1 }, { 16, 8 });
-		check_node(tbl["aot"][0].node(), { 13, 1 }, { 13, 8 });
-		check_node(tbl["aot"][1].node(), { 16, 1 }, { 16, 8 });
-		check_node(tbl["aot"][1]["n"].node(), { 17, 5 }, { 17, 7 });
+		check_key_region(tbl, "aot", { 13, 3 }, { 13, 6 });
+		check_region(tbl["aot"].node(), { 13, 1 }, { 16, 8 });
+		check_region(tbl["aot"][0].node(), { 13, 1 }, { 13, 8 });
+		check_region(tbl["aot"][1].node(), { 16, 1 }, { 16, 8 });
+		check_region(tbl["aot"][1]["n"].node(), { 17, 5 }, { 17, 7 });
 	}
+}
+
+TEST_CASE("source regions - after multi-byte code points")
+{
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   "'\xC3\xA9' = '\xE2\x82\xAC'\n"
+						   "'\xF0\x9F\x98\x82' = ['\xC3\xA9\xE2\x82\xAC\xF0\x9F\x98\x82', 1]\n"
+						   "t = { '\xE2\x82\xAC' = 1, b = 2 }"sv,
+						   [](table&& tbl)
+						   {
+							   check_region(&tbl, { 1, 1 }, { 3, 23 });
+
+							   check_key_region(tbl, "\xC3\xA9"sv, { 1, 1 }, { 1, 4 });
+							   check_region(tbl["\xC3\xA9"].node(), { 1, 7 }, { 1, 10 });
+
+							   check_key_region(tbl, "\xF0\x9F\x98\x82"sv, { 2, 1 }, { 2, 4 });
+							   check_region(tbl["\xF0\x9F\x98\x82"].node(), { 2, 7 }, { 2, 17 });
+							   check_region(tbl["\xF0\x9F\x98\x82"][0].node(), { 2, 8 }, { 2, 13 });
+							   check_region(tbl["\xF0\x9F\x98\x82"][1].node(), { 2, 15 }, { 2, 16 });
+
+							   REQUIRE(tbl["t"].as_table());
+							   check_region(tbl["t"].node(), { 3, 5 }, { 3, 23 });
+							   check_key_region(*tbl["t"].as_table(), "\xE2\x82\xAC"sv, { 3, 7 }, { 3, 10 });
+							   check_region(tbl["t"]["\xE2\x82\xAC"].node(), { 3, 13 }, { 3, 14 });
+							   check_key_region(*tbl["t"].as_table(), "b"sv, { 3, 16 }, { 3, 17 });
+							   check_region(tbl["t"]["b"].node(), { 3, 20 }, { 3, 21 });
+						   });
+}
+
+TEST_CASE("source regions - after a byte order mark")
+{
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   BOM_PREFIX "'\xC3\xA9' = 1\nb = '" BOM_PREFIX "'"sv,
+						   [](table&& tbl)
+						   {
+							   check_region(&tbl, { 1, 1 }, { 2, 8 });
+							   check_key_region(tbl, "\xC3\xA9"sv, { 1, 1 }, { 1, 4 });
+							   check_region(tbl["\xC3\xA9"].node(), { 1, 7 }, { 1, 8 });
+							   check_region(tbl["b"].node(), { 2, 5 }, { 2, 8 });
+							   CHECK(tbl["b"] == BOM_PREFIX ""sv);
+						   });
+
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   BOM_PREFIX ""sv,
+						   [](table&& tbl)
+						   {
+							   check_region(&tbl, { 1, 1 }, { 1, 1 });
+							   CHECK(tbl.empty());
+						   });
+}
+
+TEST_CASE("source regions - on CRLF lines")
+{
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   "a = 1\r\n"
+						   "b = 'two'\r\n"
+						   "\r\n"
+						   "[t]\r\n"
+						   "c = [\r\n"
+						   "  3,\r\n"
+						   "]\r\n"
+						   "d = \"\"\"\r\n"
+						   "x\r\n"
+						   "y\"\"\"\r\n"sv,
+						   [](table&& tbl)
+						   {
+							   check_region(&tbl, { 1, 1 }, { 10, 7 });
+							   check_region(tbl["a"].node(), { 1, 5 }, { 1, 6 });
+							   check_region(tbl["b"].node(), { 2, 5 }, { 2, 10 });
+							   check_key_region(tbl, "t"sv, { 4, 2 }, { 4, 3 });
+							   check_region(tbl["t"].node(), { 4, 1 }, { 4, 4 });
+							   check_region(tbl["t"]["c"].node(), { 5, 5 }, { 7, 2 });
+							   check_region(tbl["t"]["c"][0].node(), { 6, 3 }, { 6, 4 });
+							   check_region(tbl["t"]["d"].node(), { 8, 5 }, { 10, 5 });
+							   CHECK(tbl["t"]["d"] == "x\ny"sv);
+						   });
+}
+
+TEST_CASE("source regions - at the end of the document")
+{
+	const auto check = [](std::string_view doc,
+						  source_position root_end,
+						  source_position first_begin = {},
+						  source_position first_end	  = {})
+	{
+		INFO(doc);
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   doc,
+							   [&](table&& tbl)
+							   {
+								   check_region(&tbl, { 1, 1 }, root_end);
+								   if (!first_begin)
+									   return;
+								   REQUIRE(!tbl.empty());
+								   check_region(&tbl.begin()->second, first_begin, first_end);
+							   });
+	};
+
+	check(""sv, { 1, 1 });
+	check("\n"sv, { 1, 2 });
+	check("a = 1"sv, { 1, 6 }, { 1, 5 }, { 1, 6 });
+	check("a = 1\n"sv, { 1, 7 }, { 1, 5 }, { 1, 6 });
+	check("a = 1\r\n"sv, { 1, 8 }, { 1, 5 }, { 1, 6 });
+	check("a = 1 # c"sv, { 1, 10 }, { 1, 5 }, { 1, 6 });
+	check("a = 1 # c\n"sv, { 1, 11 }, { 1, 5 }, { 1, 6 });
+	check("[t]"sv, { 1, 4 }, { 1, 1 }, { 1, 4 });
+	check("[t]\n"sv, { 1, 5 }, { 1, 1 }, { 1, 4 });
+	check("[[t]]"sv, { 1, 6 }, { 1, 1 }, { 1, 6 });
+	check("[[t]]\n"sv, { 1, 7 }, { 1, 1 }, { 1, 6 });
+	check("a = [1,\n2]"sv, { 2, 3 }, { 1, 5 }, { 2, 3 });
+	check("a = [1,\n2]\n"sv, { 2, 4 }, { 1, 5 }, { 2, 3 });
+	check("a = '''x\ny'''"sv, { 2, 5 }, { 1, 5 }, { 2, 5 });
+	check("a = '''x\ny'''\n"sv, { 2, 6 }, { 1, 5 }, { 2, 5 });
 }

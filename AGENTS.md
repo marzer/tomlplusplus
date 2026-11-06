@@ -142,13 +142,18 @@ A green `ctest` after a failed build is the previous binary passing. Read the bu
 Keep build directories and scratch files outside the repository. An instrumented Meson setup writes `default.profraw`
 to the current directory. Run heavy work under `nice -n 19`, in bounded steps, and report progress while it runs.
 
-Measure performance; never guess. A measurement goes in the report, and the conclusion goes in the code or the docs.
+Measure performance; never guess. `benchmarks/` times parsing and formatting, and CONTRIBUTING.md says how to compare
+two builds. A measurement goes in the report, and the conclusion goes in the code or the docs.
 
 ## CI
 
 The job matrix only shrinks. New coverage goes into a job that already exists, and an untested combination is something
-to report. Jobs run on the `-latest` runner images. A job's name is a word or two saying what sets it apart, and the
-workflow holds the rest of its configuration. Actions stay on version tags, which dependabot updates. No CodeQL.
+to report. Jobs run on the `-latest` runner images. Linux and Windows ARM64 have no `-latest` label, so those jobs use
+the ARM64 image of the release `ubuntu-latest` points at, and `windows-11-arm`. They run the code x64 never compiles,
+the paths without SSE2, under the sanitizers and with MSVC. A test job is named `<os>-<toolchain>-<arch>`, plus a
+final trait where that alone doesn't tell it apart, as in `windows-msvc-x64-permissive`. A job that isn't a matrix uses
+that name as its key and has no `name:`, and the workflow holds the rest of its configuration. Actions stay on version
+tags, which dependabot updates. No CodeQL.
 
 ## Changelog
 

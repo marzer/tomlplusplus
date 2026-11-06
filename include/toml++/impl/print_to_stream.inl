@@ -23,11 +23,8 @@ TOML_DISABLE_WARNINGS;
 #if TOML_INT_CHARCONV || TOML_FLOAT_CHARCONV
 #include <charconv>
 #endif
-#if !TOML_INT_CHARCONV || !TOML_FLOAT_CHARCONV
+#if !TOML_FLOAT_CHARCONV
 #include <sstream>
-#endif
-#if !TOML_INT_CHARCONV
-#include <iomanip>
 #endif
 TOML_ENABLE_WARNINGS;
 #include "header_start.hpp"
@@ -71,17 +68,6 @@ TOML_ANON_NAMESPACE_START
 	TOML_INTERNAL_LINKAGE
 	void print_integer_to_stream(std::ostream & stream, T val, value_flags format = {}, size_t min_digits = 0)
 	{
-		if (!val)
-		{
-			if (!min_digits)
-				min_digits = 1;
-
-			for (size_t i = 0; i < min_digits; i++)
-				stream.put('0');
-
-			return;
-		}
-
 		static constexpr auto value_flags_mask =
 			value_flags::format_as_binary | value_flags::format_as_octal | value_flags::format_as_hexadecimal;
 		format &= value_flags_mask;
@@ -98,50 +84,47 @@ TOML_ANON_NAMESPACE_START
 			}
 		}
 
+		static constexpr size_t max_padding = 16;
+		char buf[max_padding + (sizeof(T) * CHAR_BIT)];
+
 #if TOML_INT_CHARCONV
 
-		char buf[(sizeof(T) * CHAR_BIT)];
-		const auto res = std::to_chars(buf, buf + sizeof(buf), val, base);
-		const auto len = static_cast<size_t>(res.ptr - buf);
-		for (size_t i = len; i < min_digits; i++)
-			stream.put('0');
+		char* const first	   = buf + max_padding;
+		const char* const last = std::to_chars(first, buf + sizeof(buf), val, base).ptr;
 		if (base == 16)
 		{
-			for (size_t i = 0; i < len; i++)
-				if (buf[i] >= 'a')
-					buf[i] -= 32;
+			for (auto c = first; c != last; c++)
+				if (*c >= 'a')
+					*c -= 32;
 		}
-		impl::print_to_stream(stream, buf, len);
 
 #else
 
-		using unsigned_type = std::conditional_t<(sizeof(T) > sizeof(unsigned)), std::make_unsigned_t<T>, unsigned>;
-		using cast_type		= std::conditional_t<std::is_signed_v<T>, std::make_signed_t<unsigned_type>, unsigned_type>;
+		using unsigned_type = std::make_unsigned_t<T>;
+		const auto radix	= static_cast<unsigned_type>(base);
+		auto magnitude		= static_cast<unsigned_type>(val);
+		if (val < T{})
+			magnitude = static_cast<unsigned_type>(unsigned_type{} - magnitude);
 
-		if (base == 2)
+		char* const last = buf + sizeof(buf);
+		char* first		 = last;
+		do
 		{
-			const auto v = static_cast<unsigned_type>(val);
-			size_t len	 = {};
-			for (auto bits = v; bits; bits >>= 1)
-				len++;
-			for (size_t i = len; i < min_digits; i++)
-				stream.put('0');
-			for (size_t i = len; i-- > 0u;)
-				stream.put((v >> i) & 1u ? '1' : '0');
+			*--first  = "0123456789ABCDEF"[magnitude % radix];
+			magnitude = static_cast<unsigned_type>(magnitude / radix);
 		}
-		else
-		{
-			std::ostringstream ss;
-			ss.imbue(std::locale::classic());
-			ss << std::uppercase << std::setbase(base);
-			if (min_digits)
-				ss << std::setfill('0') << std::setw(static_cast<int>(min_digits));
-			ss << static_cast<cast_type>(val);
-			const auto str = std::move(ss).str();
-			impl::print_to_stream(stream, str);
-		}
+		while (magnitude);
+		if (val < T{})
+			*--first = '-';
 
 #endif
+
+		const auto len = static_cast<size_t>(last - first);
+		size_t padding = min_digits > len ? min_digits - len : 0u;
+		for (; padding > max_padding; padding--)
+			stream.put('0');
+		std::memset(first - padding, '0', padding);
+		impl::print_to_stream(stream, first - padding, len + padding);
 	}
 
 	template <typename T>
@@ -203,6 +186,74 @@ TOML_ANON_NAMESPACE_START
 
 			default: TOML_UNREACHABLE;
 		}
+	}
+
+	TOML_INTERNAL_LINKAGE
+	char* write_decimal(char* out, uint_least32_t val, size_t min_digits) noexcept
+	{
+		char digits[10];
+		size_t len = {};
+		do
+		{
+			digits[len++] = static_cast<char>('0' + (val % 10u));
+			val /= 10u;
+		}
+		while (val);
+		for (; min_digits > len; min_digits--)
+			*out++ = '0';
+		while (len)
+			*out++ = digits[--len];
+		return out;
+	}
+
+	TOML_INTERNAL_LINKAGE
+	char* write_date(char* out, const toml::date& val) noexcept
+	{
+		out	   = write_decimal(out, val.year, 4u);
+		*out++ = '-';
+		out	   = write_decimal(out, val.month, 2u);
+		*out++ = '-';
+		return write_decimal(out, val.day, 2u);
+	}
+
+	TOML_INTERNAL_LINKAGE
+	char* write_time(char* out, const toml::time& val) noexcept
+	{
+		out	   = write_decimal(out, val.hour, 2u);
+		*out++ = ':';
+		out	   = write_decimal(out, val.minute, 2u);
+		*out++ = ':';
+		out	   = write_decimal(out, val.second, 2u);
+		if (!val.nanosecond || val.nanosecond > 999999999u)
+			return out;
+
+		*out++		  = '.';
+		auto ns		  = val.nanosecond;
+		size_t digits = 9u;
+		while (ns % 10u == 0u)
+		{
+			ns /= 10u;
+			digits--;
+		}
+		return write_decimal(out, ns, digits);
+	}
+
+	TOML_INTERNAL_LINKAGE
+	char* write_time_offset(char* out, const toml::time_offset& val) noexcept
+	{
+		if (!val.minutes)
+		{
+			*out++ = 'Z';
+			return out;
+		}
+
+		auto mins = static_cast<int>(val.minutes);
+		*out++	  = mins < 0 ? '-' : '+';
+		if (mins < 0)
+			mins = -mins;
+		out	   = write_decimal(out, static_cast<uint_least32_t>(mins / 60), 2u);
+		*out++ = ':';
+		return write_decimal(out, static_cast<uint_least32_t>(mins % 60), 2u);
 	}
 }
 TOML_ANON_NAMESPACE_END;
@@ -321,72 +372,34 @@ TOML_IMPL_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	void TOML_CALLCONV print_to_stream(std::ostream & stream, const toml::date& val)
 	{
-		print_to_stream(stream, val.year, {}, 4);
-		stream.put('-');
-		print_to_stream(stream, val.month, {}, 2);
-		stream.put('-');
-		print_to_stream(stream, val.day, {}, 2);
+		char buf[64];
+		print_to_stream(stream, buf, static_cast<size_t>(TOML_ANON_NAMESPACE::write_date(buf, val) - buf));
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void TOML_CALLCONV print_to_stream(std::ostream & stream, const toml::time& val)
 	{
-		print_to_stream(stream, val.hour, {}, 2);
-		stream.put(':');
-		print_to_stream(stream, val.minute, {}, 2);
-		stream.put(':');
-		print_to_stream(stream, val.second, {}, 2);
-		if (val.nanosecond && val.nanosecond <= 999999999u)
-		{
-			stream.put('.');
-			auto ns		  = val.nanosecond;
-			size_t digits = 9u;
-			while (ns % 10u == 0u)
-			{
-				ns /= 10u;
-				digits--;
-			}
-			print_to_stream(stream, ns, {}, digits);
-		}
+		char buf[64];
+		print_to_stream(stream, buf, static_cast<size_t>(TOML_ANON_NAMESPACE::write_time(buf, val) - buf));
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void TOML_CALLCONV print_to_stream(std::ostream & stream, const toml::time_offset& val)
 	{
-		if (!val.minutes)
-		{
-			stream.put('Z');
-			return;
-		}
-
-		auto mins = static_cast<int>(val.minutes);
-		if (mins < 0)
-		{
-			stream.put('-');
-			mins = -mins;
-		}
-		else
-			stream.put('+');
-		const auto hours = mins / 60;
-		if (hours)
-		{
-			print_to_stream(stream, static_cast<unsigned int>(hours), {}, 2);
-			mins -= hours * 60;
-		}
-		else
-			print_to_stream(stream, "00"sv);
-		stream.put(':');
-		print_to_stream(stream, static_cast<unsigned int>(mins), {}, 2);
+		char buf[64];
+		print_to_stream(stream, buf, static_cast<size_t>(TOML_ANON_NAMESPACE::write_time_offset(buf, val) - buf));
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void TOML_CALLCONV print_to_stream(std::ostream & stream, const toml::date_time& val)
 	{
-		print_to_stream(stream, val.date);
-		stream.put('T');
-		print_to_stream(stream, val.time);
+		char buf[64];
+		auto end = TOML_ANON_NAMESPACE::write_date(buf, val.date);
+		*end++	 = 'T';
+		end		 = TOML_ANON_NAMESPACE::write_time(end, val.time);
 		if (val.offset)
-			print_to_stream(stream, *val.offset);
+			end = TOML_ANON_NAMESPACE::write_time_offset(end, *val.offset);
+		print_to_stream(stream, buf, static_cast<size_t>(end - buf));
 	}
 
 	TOML_EXTERNAL_LINKAGE

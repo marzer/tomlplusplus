@@ -127,7 +127,7 @@ namespace
 			}
 			else
 			{
-				if (c >= 0 && std::iscntrl(c))
+				if (const auto byte = static_cast<unsigned char>(c); byte < 0x80u && std::iscntrl(byte))
 				{
 					// Print a string, just like `toml::impl::control_char_escapes[c]`.
 					std::ostringstream stream;
