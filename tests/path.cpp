@@ -567,6 +567,37 @@ TEST_CASE("path - appending or prepending an unparseable string leaves the path 
 	CHECK("c[x]"sv + p == p);
 }
 
+TEST_CASE("path - appending or prepending a path to itself")
+{
+	// truncating leaves spare capacity, so the insert doesn't reallocate
+	toml::path p{ "a.b[1].c.d.e" };
+	p.truncate(2);
+
+	SECTION("append copy")
+	{
+		p += p;
+		CHECK(p.str() == "a.b[1].c.a.b[1].c");
+	}
+
+	SECTION("append move")
+	{
+		p += std::move(p);
+		CHECK(p.str() == "a.b[1].c.a.b[1].c");
+	}
+
+	SECTION("prepend copy")
+	{
+		p.prepend(p);
+		CHECK(p.str() == "a.b[1].c.a.b[1].c");
+	}
+
+	SECTION("prepend move")
+	{
+		p.prepend(std::move(p));
+		CHECK(p.str() == "a.b[1].c.a.b[1].c");
+	}
+}
+
 TEST_CASE("path - element access")
 {
 	SECTION("const subscript")
