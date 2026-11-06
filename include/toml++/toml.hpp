@@ -59,6 +59,7 @@ TOML_PRAGMA_CLANG(diagnostic ignored "-Wreserved-identifier")
 #include "impl/toml_formatter.hpp"
 #include "impl/json_formatter.hpp"
 #include "impl/yaml_formatter.hpp"
+#include "impl/serde.hpp"
 // IWYU pragma: end_exports
 
 #if TOML_IMPLEMENTATION
@@ -129,6 +130,7 @@ TOML_POP_WARNINGS;
 #undef TOML_DOXYGEN
 #undef TOML_EMPTY_BASES
 #undef TOML_ENABLE_IF
+#undef TOML_ENABLE_REFLECTION
 #undef TOML_ENABLE_WARNINGS
 #undef TOML_EVAL_BOOL_0
 #undef TOML_EVAL_BOOL_1
@@ -146,6 +148,7 @@ TOML_POP_WARNINGS;
 #undef TOML_HAS_CUSTOM_OPTIONAL_TYPE
 #undef TOML_HAS_FEATURE
 #undef TOML_HAS_INCLUDE
+#undef TOML_HAS_REFLECTION
 #undef TOML_HAS_SSE2
 #undef TOML_HAS_SSE4_1
 #undef TOML_HIDDEN_CONSTRAINT
@@ -210,6 +213,7 @@ TOML_POP_WARNINGS;
 #undef TOML_SA_VALUE_MESSAGE_CONST_CHAR8
 #undef TOML_SA_VALUE_MESSAGE_U8STRING_VIEW
 #undef TOML_SA_VALUE_MESSAGE_WSTRING
+#undef TOML_SERDE_ALLOW_PRIVATE
 #undef TOML_SIMPLE_STATIC_ASSERT_MESSAGES
 #undef TOML_TRIVIAL_ABI
 #undef TOML_UINT128

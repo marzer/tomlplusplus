@@ -1155,6 +1155,44 @@
 #define TOML_ENABLE_SIMD 1
 #endif
 
+// reflection-based serialization
+#if TOML_HAS_INCLUDE(<meta>)                                                                                                   \
+					 && ((defined(__cpp_impl_reflection) && __cpp_impl_reflection >= 202506L)                          \
+						 || (defined(__cpp_reflection) && __cpp_reflection >= 202411L))
+#define TOML_HAS_REFLECTION 1
+#else
+#define TOML_HAS_REFLECTION 0
+#endif
+#if !defined(TOML_ENABLE_REFLECTION) && TOML_HAS_REFLECTION
+#define TOML_ENABLE_REFLECTION 1
+#endif
+#if defined(TOML_ENABLE_REFLECTION) && TOML_ENABLE_REFLECTION && !TOML_HAS_REFLECTION && !TOML_INTELLISENSE
+#error TOML_ENABLE_REFLECTION was explicitly enabled but the compiler does not support C++26 static reflection + annotations.
+#endif
+#ifndef TOML_ENABLE_REFLECTION
+#define TOML_ENABLE_REFLECTION 0
+#endif
+/// \def TOML_ENABLE_REFLECTION
+/// \brief Enables reflection-based serialization (toml::serialize / toml::deserialize).
+/// \detail Defaults to `1` when the compiler advertises C++26 static reflection (P2996) and annotations (P3394),
+/// 		`0` otherwise.
+/// \remark As of this writing only GCC 16+ implements the required language features.
+/// \see
+///  - toml::serialize()
+///  - toml::deserialize()
+
+// reflection: allow reaching private members without an explicit [[=toml::reflectable]] annotation
+#if !defined(TOML_SERDE_ALLOW_PRIVATE)
+#define TOML_SERDE_ALLOW_PRIVATE 0
+#endif
+/// \def TOML_SERDE_ALLOW_PRIVATE
+/// \brief When `1`, serialization may read/write private members of any type without requiring
+/// 	   the type to be annotated with `[[=toml::reflectable]]`.
+/// \detail Defaults to `0`. This is a project-wide override of the per-type opt-in; enabling it bypasses the
+/// 		encapsulation of every serialized type, so use it deliberately.
+/// \warning Deserializing into private members writes them directly, skipping any constructor/setter logic that
+/// 		 would normally enforce the type's invariants.
+
 // windows compat
 #if !defined(TOML_ENABLE_WINDOWS_COMPAT) && defined(TOML_WINDOWS_COMPAT) // was TOML_WINDOWS_COMPAT pre-3.0
 #define TOML_ENABLE_WINDOWS_COMPAT TOML_WINDOWS_COMPAT
