@@ -94,7 +94,9 @@ namespace
 	  protected:
 		std::streamsize showmanyc() override
 		{
-			throw pipe_broke{};
+			if (gptr() == egptr())
+				throw pipe_broke{};
+			return egptr() - gptr();
 		}
 	};
 

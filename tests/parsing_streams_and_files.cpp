@@ -152,7 +152,9 @@ namespace
 	  protected:
 		std::streamsize showmanyc() override
 		{
-			throw std::runtime_error{ "the pipe broke" };
+			if (gptr() == egptr())
+				throw std::runtime_error{ "the pipe broke" };
+			return egptr() - gptr();
 		}
 	};
 
