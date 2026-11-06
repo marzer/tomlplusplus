@@ -417,9 +417,10 @@ TOML_ANON_NAMESPACE_START
 		const auto equal = [&](char c) noexcept { return _mm_cmpeq_epi8(bytes, _mm_set1_epi8(c)); };
 
 		// bytes from 0x80 compare as negative
-		const auto controls = _mm_andnot_si128(
-			equal('\t'),
-			_mm_and_si128(_mm_cmpgt_epi8(bytes, _mm_set1_epi8(-1)), _mm_cmplt_epi8(bytes, _mm_set1_epi8(0x20))));
+		const auto controls =
+			_mm_andnot_si128(equal('\t'),
+							 _mm_and_si128(_mm_cmpgt_epi8(bytes, _mm_set1_epi8(static_cast<char>(-1))),
+										   _mm_cmplt_epi8(bytes, _mm_set1_epi8(0x20))));
 		auto stops = _mm_or_si128(controls, equal(0x7F));
 		if constexpr (Class == run_class::basic_string)
 			stops = _mm_or_si128(stops, _mm_or_si128(equal('"'), equal('\\')));
@@ -798,10 +799,10 @@ TOML_ANON_NAMESPACE_START
 #if TOML_HAS_SSE2
 				while (valid_ - end >= 16u)
 				{
-					const auto bytes = _mm_loadu_si128(reinterpret_cast<const __m128i*>(data_ + end));
-					const auto stops = run_stops<Class>(bytes);
-					auto continuations =
-						static_cast<unsigned>(_mm_movemask_epi8(_mm_cmplt_epi8(bytes, _mm_set1_epi8(-64))));
+					const auto bytes   = _mm_loadu_si128(reinterpret_cast<const __m128i*>(data_ + end));
+					const auto stops   = run_stops<Class>(bytes);
+					auto continuations = static_cast<unsigned>(
+						_mm_movemask_epi8(_mm_cmplt_epi8(bytes, _mm_set1_epi8(static_cast<char>(-64)))));
 					if (stops)
 					{
 						continuations &= (stops & (~stops + 1u)) - 1u;
@@ -823,7 +824,7 @@ TOML_ANON_NAMESPACE_START
 					{
 						continuations &= (stops & (~stops + 1u)) - 1u;
 						return { data_ + pos_,
-								 end + trailing_zeros(stops) / 8u - pos_,
+								 end + (trailing_zeros(stops) / 8u) - pos_,
 								 continuation + count_high_bits(continuations) };
 					}
 					continuation += count_high_bits(continuations);

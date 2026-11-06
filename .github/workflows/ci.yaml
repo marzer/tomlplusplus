@@ -103,8 +103,6 @@ jobs:
               run: pyright
 
     clang-tidy:
-        name: clang-tidy
-
         runs-on: ubuntu-latest
 
         defaults:
@@ -147,12 +145,12 @@ jobs:
             fail-fast: false
             matrix:
                 include:
-                    - name: sanitizers
+                    - name: linux-gcc-x64-sanitizers
                       compiler: "g++"
                       type: "Debug"
                       args: "-Dtomlplusplus_ASAN=ON -Dtomlplusplus_UBSAN=ON -Dtomlplusplus_TESTS_SINGLE_HEADER=ON"
                       consumers: true
-                    - name: shared library
+                    - name: linux-gcc-x64-shared
                       compiler: "g++"
                       type: "Release"
                       args: "-DCMAKE_CXX_STANDARD=23 -Dtomlplusplus_BUILD_LIB=ON -DBUILD_SHARED_LIBS=ON"
@@ -160,20 +158,20 @@ jobs:
                       consumers: true
                       check_symbols: true
                       toml_test: true
-                    - name: coverage
+                    - name: linux-clang-x64-coverage
                       compiler: "clang++"
                       type: "Debug"
                       args: >-
                           -DCMAKE_CXX_STANDARD=26 -DCMAKE_CXX_FLAGS=-stdlib=libc++ -DCMAKE_EXE_LINKER_FLAGS=-stdlib=libc++
                           -Dtomlplusplus_TESTS_LEAK=ON -Dtomlplusplus_COVERAGE=ON
                       coverage: true
-                    - name: static library
+                    - name: linux-clang-x64-static
                       compiler: "clang++"
                       type: "Release"
                       args: "-DCMAKE_CXX_STANDARD=20 -Dtomlplusplus_BUILD_LIB=ON -Dtomlplusplus_UNRELEASED_FEATURES=ON"
                       modules: true
                       consumers: true
-                    - name: arm64
+                    - name: linux-gcc-arm64-sanitizers
                       runner: ubuntu-24.04-arm
                       compiler: "g++"
                       type: "Debug"
@@ -279,9 +277,7 @@ jobs:
             - name: Report regenerated files
               run: git status --short
 
-    cmake-floor:
-        name: cmake 3.14
-
+    linux-gcc-x64-oldest-cmake:
         runs-on: ubuntu-latest
 
         defaults:
@@ -336,9 +332,7 @@ jobs:
               working-directory: build
               run: ctest --output-on-failure
 
-    linux-meson:
-        name: meson
-
+    linux-clang-x64-meson:
         runs-on: ubuntu-latest
 
         defaults:
@@ -379,9 +373,7 @@ jobs:
             - name: Report regenerated files
               run: git status --short
 
-    meson-floor:
-        name: meson 0.61
-
+    linux-gcc-x64-oldest-meson:
         runs-on: ubuntu-latest
 
         container: ubuntu:22.04
@@ -428,10 +420,10 @@ jobs:
             fail-fast: false
             matrix:
                 include:
-                    - name: msvc
+                    - name: windows-msvc-x64
                       runner: windows-latest
                       arch: x64
-                    - name: msvc arm64
+                    - name: windows-msvc-arm64
                       runner: windows-11-arm
                       arch: arm64
 
@@ -484,9 +476,7 @@ jobs:
             - name: Report regenerated files
               run: git status --short
 
-    windows-meson:
-        name: msvc permissive
-
+    windows-msvc-x64-permissive:
         runs-on: windows-latest
 
         defaults:
@@ -515,9 +505,7 @@ jobs:
             - name: Report regenerated files
               run: git status --short
 
-    macos-meson:
-        name: macos
-
+    macos-appleclang-arm64:
         runs-on: macos-latest
 
         defaults:
@@ -554,7 +542,16 @@ jobs:
 
     release:
         needs:
-            [generated, pyright, clang-tidy, linux-cmake, cmake-floor, linux-meson, meson-floor, windows-cmake, windows-meson, macos-meson]
+            - generated
+            - pyright
+            - clang-tidy
+            - linux-cmake
+            - linux-gcc-x64-oldest-cmake
+            - linux-clang-x64-meson
+            - linux-gcc-x64-oldest-meson
+            - windows-cmake
+            - windows-msvc-x64-permissive
+            - macos-appleclang-arm64
 
         if: github.repository == 'marzer/tomlplusplus' && github.ref == 'refs/heads/master'
 

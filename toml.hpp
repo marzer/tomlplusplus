@@ -10348,9 +10348,12 @@ TOML_IMPL_NAMESPACE_START
 		return (c >= U'\x80' && c <= U'\x9F' && c != U'\x85') || c == U'\xFFFE' || c == U'\xFFFF';
 	}
 
+	class formatter_buffer;
+
 	class TOML_EXPORTED_CLASS formatter
 	{
 	  private:
+		friend class formatter_buffer;
 		const node* source_;
 #if TOML_ENABLE_PARSER && !TOML_EXCEPTIONS
 		const parse_result* result_;
@@ -10941,11 +10944,8 @@ TOML_DISABLE_WARNINGS;
 #if TOML_INT_CHARCONV || TOML_FLOAT_CHARCONV
 #include <charconv>
 #endif
-#if !TOML_INT_CHARCONV || !TOML_FLOAT_CHARCONV
+#if !TOML_FLOAT_CHARCONV
 #include <sstream>
-#endif
-#if !TOML_INT_CHARCONV
-#include <iomanip>
 #endif
 TOML_ENABLE_WARNINGS;
 TOML_PUSH_WARNINGS;
@@ -10998,17 +10998,6 @@ TOML_ANON_NAMESPACE_START
 	TOML_INTERNAL_LINKAGE
 	void print_integer_to_stream(std::ostream & stream, T val, value_flags format = {}, size_t min_digits = 0)
 	{
-		if (!val)
-		{
-			if (!min_digits)
-				min_digits = 1;
-
-			for (size_t i = 0; i < min_digits; i++)
-				stream.put('0');
-
-			return;
-		}
-
 		static constexpr auto value_flags_mask =
 			value_flags::format_as_binary | value_flags::format_as_octal | value_flags::format_as_hexadecimal;
 		format &= value_flags_mask;
@@ -11025,50 +11014,47 @@ TOML_ANON_NAMESPACE_START
 			}
 		}
 
+		static constexpr size_t max_padding = 16;
+		char buf[max_padding + sizeof(T) * CHAR_BIT];
+
 #if TOML_INT_CHARCONV
 
-		char buf[(sizeof(T) * CHAR_BIT)];
-		const auto res = std::to_chars(buf, buf + sizeof(buf), val, base);
-		const auto len = static_cast<size_t>(res.ptr - buf);
-		for (size_t i = len; i < min_digits; i++)
-			stream.put('0');
+		char* const first = buf + max_padding;
+		char* const last  = std::to_chars(first, buf + sizeof(buf), val, base).ptr;
 		if (base == 16)
 		{
-			for (size_t i = 0; i < len; i++)
-				if (buf[i] >= 'a')
-					buf[i] -= 32;
+			for (auto c = first; c != last; c++)
+				if (*c >= 'a')
+					*c -= 32;
 		}
-		impl::print_to_stream(stream, buf, len);
 
 #else
 
-		using unsigned_type = std::conditional_t<(sizeof(T) > sizeof(unsigned)), std::make_unsigned_t<T>, unsigned>;
-		using cast_type		= std::conditional_t<std::is_signed_v<T>, std::make_signed_t<unsigned_type>, unsigned_type>;
+		using unsigned_type = std::make_unsigned_t<T>;
+		const auto radix	= static_cast<unsigned_type>(base);
+		auto magnitude		= static_cast<unsigned_type>(val);
+		if (val < T{})
+			magnitude = static_cast<unsigned_type>(unsigned_type{} - magnitude);
 
-		if (base == 2)
+		char* const last = buf + sizeof(buf);
+		char* first		 = last;
+		do
 		{
-			const auto v = static_cast<unsigned_type>(val);
-			size_t len	 = {};
-			for (auto bits = v; bits; bits >>= 1)
-				len++;
-			for (size_t i = len; i < min_digits; i++)
-				stream.put('0');
-			for (size_t i = len; i-- > 0u;)
-				stream.put((v >> i) & 1u ? '1' : '0');
+			*--first  = "0123456789ABCDEF"[magnitude % radix];
+			magnitude = static_cast<unsigned_type>(magnitude / radix);
 		}
-		else
-		{
-			std::ostringstream ss;
-			ss.imbue(std::locale::classic());
-			ss << std::uppercase << std::setbase(base);
-			if (min_digits)
-				ss << std::setfill('0') << std::setw(static_cast<int>(min_digits));
-			ss << static_cast<cast_type>(val);
-			const auto str = std::move(ss).str();
-			impl::print_to_stream(stream, str);
-		}
+		while (magnitude);
+		if (val < T{})
+			*--first = '-';
 
 #endif
+
+		const auto len = static_cast<size_t>(last - first);
+		size_t padding = min_digits > len ? min_digits - len : 0u;
+		for (; padding > max_padding; padding--)
+			stream.put('0');
+		std::memset(first - padding, '0', padding);
+		impl::print_to_stream(stream, first - padding, len + padding);
 	}
 
 	template <typename T>
@@ -11130,6 +11116,74 @@ TOML_ANON_NAMESPACE_START
 
 			default: TOML_UNREACHABLE;
 		}
+	}
+
+	TOML_INTERNAL_LINKAGE
+	char* write_decimal(char* out, uint_least32_t val, size_t min_digits) noexcept
+	{
+		char digits[10];
+		size_t len = {};
+		do
+		{
+			digits[len++] = static_cast<char>('0' + val % 10u);
+			val /= 10u;
+		}
+		while (val);
+		for (; min_digits > len; min_digits--)
+			*out++ = '0';
+		while (len)
+			*out++ = digits[--len];
+		return out;
+	}
+
+	TOML_INTERNAL_LINKAGE
+	char* write_date(char* out, const toml::date& val) noexcept
+	{
+		out	   = write_decimal(out, val.year, 4u);
+		*out++ = '-';
+		out	   = write_decimal(out, val.month, 2u);
+		*out++ = '-';
+		return write_decimal(out, val.day, 2u);
+	}
+
+	TOML_INTERNAL_LINKAGE
+	char* write_time(char* out, const toml::time& val) noexcept
+	{
+		out	   = write_decimal(out, val.hour, 2u);
+		*out++ = ':';
+		out	   = write_decimal(out, val.minute, 2u);
+		*out++ = ':';
+		out	   = write_decimal(out, val.second, 2u);
+		if (!val.nanosecond || val.nanosecond > 999999999u)
+			return out;
+
+		*out++		  = '.';
+		auto ns		  = val.nanosecond;
+		size_t digits = 9u;
+		while (ns % 10u == 0u)
+		{
+			ns /= 10u;
+			digits--;
+		}
+		return write_decimal(out, ns, digits);
+	}
+
+	TOML_INTERNAL_LINKAGE
+	char* write_time_offset(char* out, const toml::time_offset& val) noexcept
+	{
+		if (!val.minutes)
+		{
+			*out++ = 'Z';
+			return out;
+		}
+
+		auto mins = static_cast<int>(val.minutes);
+		*out++	  = mins < 0 ? '-' : '+';
+		if (mins < 0)
+			mins = -mins;
+		out	   = write_decimal(out, static_cast<uint_least32_t>(mins / 60), 2u);
+		*out++ = ':';
+		return write_decimal(out, static_cast<uint_least32_t>(mins % 60), 2u);
 	}
 }
 TOML_ANON_NAMESPACE_END;
@@ -11248,72 +11302,34 @@ TOML_IMPL_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	void TOML_CALLCONV print_to_stream(std::ostream & stream, const toml::date& val)
 	{
-		print_to_stream(stream, val.year, {}, 4);
-		stream.put('-');
-		print_to_stream(stream, val.month, {}, 2);
-		stream.put('-');
-		print_to_stream(stream, val.day, {}, 2);
+		char buf[64];
+		print_to_stream(stream, buf, static_cast<size_t>(TOML_ANON_NAMESPACE::write_date(buf, val) - buf));
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void TOML_CALLCONV print_to_stream(std::ostream & stream, const toml::time& val)
 	{
-		print_to_stream(stream, val.hour, {}, 2);
-		stream.put(':');
-		print_to_stream(stream, val.minute, {}, 2);
-		stream.put(':');
-		print_to_stream(stream, val.second, {}, 2);
-		if (val.nanosecond && val.nanosecond <= 999999999u)
-		{
-			stream.put('.');
-			auto ns		  = val.nanosecond;
-			size_t digits = 9u;
-			while (ns % 10u == 0u)
-			{
-				ns /= 10u;
-				digits--;
-			}
-			print_to_stream(stream, ns, {}, digits);
-		}
+		char buf[64];
+		print_to_stream(stream, buf, static_cast<size_t>(TOML_ANON_NAMESPACE::write_time(buf, val) - buf));
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void TOML_CALLCONV print_to_stream(std::ostream & stream, const toml::time_offset& val)
 	{
-		if (!val.minutes)
-		{
-			stream.put('Z');
-			return;
-		}
-
-		auto mins = static_cast<int>(val.minutes);
-		if (mins < 0)
-		{
-			stream.put('-');
-			mins = -mins;
-		}
-		else
-			stream.put('+');
-		const auto hours = mins / 60;
-		if (hours)
-		{
-			print_to_stream(stream, static_cast<unsigned int>(hours), {}, 2);
-			mins -= hours * 60;
-		}
-		else
-			print_to_stream(stream, "00"sv);
-		stream.put(':');
-		print_to_stream(stream, static_cast<unsigned int>(mins), {}, 2);
+		char buf[64];
+		print_to_stream(stream, buf, static_cast<size_t>(TOML_ANON_NAMESPACE::write_time_offset(buf, val) - buf));
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void TOML_CALLCONV print_to_stream(std::ostream & stream, const toml::date_time& val)
 	{
-		print_to_stream(stream, val.date);
-		stream.put('T');
-		print_to_stream(stream, val.time);
+		char buf[64];
+		auto end = TOML_ANON_NAMESPACE::write_date(buf, val.date);
+		*end++	 = 'T';
+		end		 = TOML_ANON_NAMESPACE::write_time(end, val.time);
 		if (val.offset)
-			print_to_stream(stream, *val.offset);
+			end = TOML_ANON_NAMESPACE::write_time_offset(end, *val.offset);
+		print_to_stream(stream, buf, static_cast<size_t>(end - buf));
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -13569,9 +13585,10 @@ TOML_ANON_NAMESPACE_START
 		const auto equal = [&](char c) noexcept { return _mm_cmpeq_epi8(bytes, _mm_set1_epi8(c)); };
 
 		// bytes from 0x80 compare as negative
-		const auto controls = _mm_andnot_si128(
-			equal('\t'),
-			_mm_and_si128(_mm_cmpgt_epi8(bytes, _mm_set1_epi8(-1)), _mm_cmplt_epi8(bytes, _mm_set1_epi8(0x20))));
+		const auto controls =
+			_mm_andnot_si128(equal('\t'),
+							 _mm_and_si128(_mm_cmpgt_epi8(bytes, _mm_set1_epi8(static_cast<char>(-1))),
+										   _mm_cmplt_epi8(bytes, _mm_set1_epi8(0x20))));
 		auto stops = _mm_or_si128(controls, equal(0x7F));
 		if constexpr (Class == run_class::basic_string)
 			stops = _mm_or_si128(stops, _mm_or_si128(equal('"'), equal('\\')));
@@ -13950,10 +13967,10 @@ TOML_ANON_NAMESPACE_START
 #if TOML_HAS_SSE2
 				while (valid_ - end >= 16u)
 				{
-					const auto bytes = _mm_loadu_si128(reinterpret_cast<const __m128i*>(data_ + end));
-					const auto stops = run_stops<Class>(bytes);
-					auto continuations =
-						static_cast<unsigned>(_mm_movemask_epi8(_mm_cmplt_epi8(bytes, _mm_set1_epi8(-64))));
+					const auto bytes   = _mm_loadu_si128(reinterpret_cast<const __m128i*>(data_ + end));
+					const auto stops   = run_stops<Class>(bytes);
+					auto continuations = static_cast<unsigned>(
+						_mm_movemask_epi8(_mm_cmplt_epi8(bytes, _mm_set1_epi8(static_cast<char>(-64)))));
 					if (stops)
 					{
 						continuations &= (stops & (~stops + 1u)) - 1u;
@@ -13975,7 +13992,7 @@ TOML_ANON_NAMESPACE_START
 					{
 						continuations &= (stops & (~stops + 1u)) - 1u;
 						return { data_ + pos_,
-								 end + trailing_zeros(stops) / 8u - pos_,
+								 end + (trailing_zeros(stops) / 8u) - pos_,
 								 continuation + count_high_bits(continuations) };
 					}
 					continuation += count_high_bits(continuations);
@@ -17514,6 +17531,10 @@ TOML_POP_WARNINGS;
 
 #if TOML_ENABLE_FORMATTERS
 
+TOML_DISABLE_WARNINGS;
+#include <ostream>
+#include <streambuf>
+TOML_ENABLE_WARNINGS;
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
 #ifndef __clang__
@@ -17527,6 +17548,86 @@ TOML_PUSH_WARNINGS;
 
 TOML_IMPL_NAMESPACE_START
 {
+	class formatter_buffer
+	{
+	  private:
+		class chunks final : public std::streambuf
+		{
+		  private:
+			std::ostream& target_;
+			char chars_[4096];
+
+		  public:
+			explicit chunks(std::ostream& target) noexcept //
+				: target_{ target }
+			{
+				setp(chars_, chars_ + sizeof(chars_));
+			}
+
+			void flush()
+			{
+				const auto len = pptr() - pbase();
+				if (!len)
+					return;
+				setp(chars_, chars_ + sizeof(chars_));
+				target_.write(chars_, len);
+			}
+
+		  protected:
+			int_type overflow(int_type ch) override
+			{
+				flush();
+				if (traits_type::eq_int_type(ch, traits_type::eof()))
+					return traits_type::not_eof(ch);
+				*pptr() = traits_type::to_char_type(ch);
+				pbump(1);
+				return ch;
+			}
+
+			std::streamsize xsputn(const char* str, std::streamsize len) override
+			{
+				if (len > epptr() - pptr())
+				{
+					flush();
+					if (len > epptr() - pptr())
+					{
+						target_.write(str, len);
+						return len;
+					}
+				}
+				traits_type::copy(pptr(), str, static_cast<size_t>(len));
+				pbump(static_cast<int>(len));
+				return len;
+			}
+		};
+
+		formatter& formatter_;
+		std::ostream* target_;
+		chunks chunks_;
+		std::ostream stream_;
+
+	  public:
+		explicit formatter_buffer(formatter& f) //
+			: formatter_{ f },
+			  target_{ f.stream_ },
+			  chunks_{ *f.stream_ },
+			  stream_{ &chunks_ }
+		{
+			stream_.exceptions(std::ios::badbit);
+			formatter_.stream_ = &stream_;
+		}
+
+		~formatter_buffer() noexcept
+		{
+			formatter_.stream_ = target_;
+		}
+
+		void flush()
+		{
+			chunks_.flush();
+		}
+	};
+
 	enum class TOML_CLOSED_FLAGS_ENUM formatted_string_traits : unsigned
 	{
 		none		  = 0,
@@ -17540,7 +17641,25 @@ TOML_IMPL_NAMESPACE_START
 		all = (non_ascii << 1u) - 1u
 	};
 	TOML_MAKE_FLAGS(formatted_string_traits);
+}
+TOML_IMPL_NAMESPACE_END;
 
+TOML_ANON_NAMESPACE_START
+{
+	TOML_INTERNAL_LINKAGE
+	char* write_unicode_escape(char* out, char prefix, uint_least32_t value, int digits) noexcept
+	{
+		*out++ = '\\';
+		*out++ = prefix;
+		while (digits-- > 0)
+			*out++ = "0123456789ABCDEF"[(value >> (digits * 4)) & 0xFu];
+		return out;
+	}
+}
+TOML_ANON_NAMESPACE_END;
+
+TOML_IMPL_NAMESPACE_START
+{
 	TOML_EXTERNAL_LINKAGE
 	formatter::formatter(const node* source_node,
 						 const parse_result* source_pr,
@@ -17599,11 +17718,24 @@ TOML_IMPL_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	void formatter::print_indent()
 	{
+		if (indent_ <= 0)
+			return;
+
+		char buf[128];
+		TOML_ASSERT(config_.indent.length() <= sizeof(buf));
+		size_t len = {};
 		for (int i = 0; i < indent_; i++)
 		{
-			print_to_stream(*stream_, config_.indent);
-			naked_newline_ = false;
+			if (sizeof(buf) - len < config_.indent.length())
+			{
+				print_to_stream(*stream_, buf, len);
+				len = {};
+			}
+			std::memcpy(buf + len, config_.indent.data(), config_.indent.length());
+			len += config_.indent.length();
 		}
+		print_to_stream(*stream_, buf, len);
+		naked_newline_ = false;
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -17784,41 +17916,61 @@ TOML_IMPL_NAMESPACE_START
 		// ascii fast path
 		if (!(traits & formatted_string_traits::non_ascii))
 		{
-			for (auto c : str)
+			const char* run		  = str.data();
+			const char* const end = str.data() + str.length();
+			for (auto it = run; it != end; it++)
 			{
-				switch (c)
+				std::string_view escape;
+				switch (*it)
 				{
-					case '"': print_to_stream(*stream_, R"(\")"sv); break;
-					case '\\': print_to_stream(*stream_, R"(\\)"sv); break;
-					case '\x7F': print_to_stream(*stream_, R"(\u007F)"sv); break;
-					case '\t': print_to_stream(*stream_, real_tabs_allowed ? "\t"sv : R"(\t)"sv); break;
-					case '\n': print_to_stream(*stream_, multi_line ? "\n"sv : R"(\n)"sv); break;
+					case '"': escape = R"(\")"sv; break;
+					case '\\': escape = R"(\\)"sv; break;
+					case '\x7F': escape = R"(\u007F)"sv; break;
+					case '\t':
+						if (real_tabs_allowed)
+							continue;
+						escape = R"(\t)"sv;
+						break;
+					case '\n':
+						if (multi_line)
+							continue;
+						escape = R"(\n)"sv;
+						break;
 					default:
-					{
-						// control characters from lookup table
-						if TOML_UNLIKELY(c >= '\x00' && c <= '\x1F')
-							print_to_stream(*stream_, control_char_escapes[c]);
-
-						// regular characters
-						else
-							print_to_stream(*stream_, c);
-					}
+						if TOML_LIKELY(*it > '\x1F')
+							continue;
+						escape = control_char_escapes[static_cast<unsigned char>(*it)];
 				}
+				if (run != it)
+					print_to_stream(*stream_, run, static_cast<size_t>(it - run));
+				print_to_stream(*stream_, escape);
+				run = it + 1;
 			}
+			if (run != end)
+				print_to_stream(*stream_, run, static_cast<size_t>(end - run));
 		}
 
 		// unicode slow path
 		else
 		{
 			utf8_decoder decoder;
-			const char* cp_start		= str.data();
-			const char* cp_end			= cp_start;
+			const char* run		 = str.data();
+			const char* cp_start = str.data();
+			const char* cp_end	 = cp_start;
+			const auto print_run = [&]()
+			{
+				if (run != cp_start)
+					print_to_stream(*stream_, run, static_cast<size_t>(cp_start - run));
+				run = cp_end;
+			};
 			const auto escape_raw_bytes = [&]()
 			{
+				print_run();
 				for (; cp_start != cp_end; cp_start++)
 				{
-					print_to_stream(*stream_, R"(\u00)"sv);
-					print_to_stream(*stream_, static_cast<uint8_t>(*cp_start), value_flags::format_as_hexadecimal, 2);
+					char escape[6];
+					TOML_ANON_NAMESPACE::write_unicode_escape(escape, 'u', static_cast<uint8_t>(*cp_start), 4);
+					print_to_stream(*stream_, escape, sizeof(escape));
 				}
 			};
 			for (auto c : str)
@@ -17837,64 +17989,56 @@ TOML_IMPL_NAMESPACE_START
 				if (!decoder.has_code_point())
 					continue;
 
+				std::string_view escape;
+				char unicode_escape[12];
 				switch (decoder.codepoint)
 				{
-					case U'"': print_to_stream(*stream_, R"(\")"sv); break;
-					case U'\\': print_to_stream(*stream_, R"(\\)"sv); break;
-					case U'\x7F': print_to_stream(*stream_, R"(\u007F)"sv); break;
-					case U'\t': print_to_stream(*stream_, real_tabs_allowed ? "\t"sv : R"(\t)"sv); break;
-					case U'\n': print_to_stream(*stream_, multi_line ? "\n"sv : R"(\n)"sv); break;
+					case U'"': escape = R"(\")"sv; break;
+					case U'\\': escape = R"(\\)"sv; break;
+					case U'\x7F': escape = R"(\u007F)"sv; break;
+					case U'\t':
+						if (!real_tabs_allowed)
+							escape = R"(\t)"sv;
+						break;
+					case U'\n':
+						if (!multi_line)
+							escape = R"(\n)"sv;
+						break;
 					default:
 					{
+						const auto cp = static_cast<uint_least32_t>(decoder.codepoint);
+
 						// control characters from lookup table
-						if TOML_UNLIKELY(decoder.codepoint <= U'\x1F')
-							print_to_stream(*stream_,
-											control_char_escapes[static_cast<uint_least32_t>(decoder.codepoint)]);
+						if TOML_UNLIKELY(cp <= 0x1Fu)
+							escape = control_char_escapes[cp];
 
 						// escaped unicode characters
-						else if (decoder.codepoint > U'\x7F'
+						else if (cp > 0x7Fu
 								 && (!unicode_allowed || is_non_ascii_vertical_whitespace(decoder.codepoint)
 									 || (dialect == string_dialect::yaml && is_yaml_unprintable(decoder.codepoint))))
 						{
-							if (static_cast<uint_least32_t>(decoder.codepoint) > 0xFFFFu
-								&& dialect == string_dialect::json)
+							using TOML_ANON_NAMESPACE::write_unicode_escape;
+							char* escape_end = unicode_escape;
+							if (cp > 0xFFFFu && dialect == string_dialect::json)
 							{
-								const auto offset = static_cast<uint_least32_t>(decoder.codepoint) - 0x10000u;
-								print_to_stream(*stream_, R"(\u)"sv);
-								print_to_stream(*stream_,
-												0xD800u + (offset >> 10),
-												value_flags::format_as_hexadecimal,
-												4);
-								print_to_stream(*stream_, R"(\u)"sv);
-								print_to_stream(*stream_,
-												0xDC00u + (offset & 0x3FFu),
-												value_flags::format_as_hexadecimal,
-												4);
+								const auto offset = cp - 0x10000u;
+								escape_end		  = write_unicode_escape(escape_end, 'u', 0xD800u + (offset >> 10), 4);
+								escape_end = write_unicode_escape(escape_end, 'u', 0xDC00u + (offset & 0x3FFu), 4);
 							}
-							else if (static_cast<uint_least32_t>(decoder.codepoint) > 0xFFFFu)
-							{
-								print_to_stream(*stream_, R"(\U)"sv);
-								print_to_stream(*stream_,
-												static_cast<uint_least32_t>(decoder.codepoint),
-												value_flags::format_as_hexadecimal,
-												8);
-							}
+							else if (cp > 0xFFFFu)
+								escape_end = write_unicode_escape(escape_end, 'U', cp, 8);
 							else
-							{
-								print_to_stream(*stream_, R"(\u)"sv);
-								print_to_stream(*stream_,
-												static_cast<uint_least32_t>(decoder.codepoint),
-												value_flags::format_as_hexadecimal,
-												4);
-							}
+								escape_end = write_unicode_escape(escape_end, 'u', cp, 4);
+							escape = { unicode_escape, static_cast<size_t>(escape_end - unicode_escape) };
 						}
-
-						// regular characters
-						else
-							print_to_stream(*stream_, cp_start, static_cast<size_t>(cp_end - cp_start));
 					}
 				}
 
+				if (!escape.empty())
+				{
+					print_run();
+					print_to_stream(*stream_, escape);
+				}
 				cp_start = cp_end;
 			}
 			escape_raw_bytes();
@@ -18457,6 +18601,7 @@ TOML_NAMESPACE_START
 		{
 			case node_type::table:
 			{
+				impl::formatter_buffer buffer{ *this };
 				auto& tbl = *static_cast<const table*>(&source());
 				if (tbl.is_inline())
 					print_inline(tbl);
@@ -18465,10 +18610,17 @@ TOML_NAMESPACE_START
 					decrease_indent(); // so root kvps and tables have the same indent
 					print(tbl);
 				}
+				buffer.flush();
 				break;
 			}
 
-			case node_type::array: print(*static_cast<const array*>(&source())); break;
+			case node_type::array:
+			{
+				impl::formatter_buffer buffer{ *this };
+				print(*static_cast<const array*>(&source()));
+				buffer.flush();
+				break;
+			}
 
 			default: print_value(source(), source_type);
 		}
@@ -18607,8 +18759,22 @@ TOML_NAMESPACE_START
 
 		switch (auto source_type = source().type())
 		{
-			case node_type::table: print(*static_cast<const table*>(&source())); break;
-			case node_type::array: print(*static_cast<const array*>(&source())); break;
+			case node_type::table:
+			{
+				impl::formatter_buffer buffer{ *this };
+				print(*static_cast<const table*>(&source()));
+				buffer.flush();
+				break;
+			}
+
+			case node_type::array:
+			{
+				impl::formatter_buffer buffer{ *this };
+				print(*static_cast<const array*>(&source()));
+				buffer.flush();
+				break;
+			}
+
 			case node_type::string:
 				print_string(static_cast<const value<std::string>*>(&source())->get(),
 							 false,
@@ -18831,11 +18997,21 @@ TOML_NAMESPACE_START
 		switch (auto source_type = source().type())
 		{
 			case node_type::table:
+			{
+				impl::formatter_buffer buffer{ *this };
 				decrease_indent(); // so root kvps and tables have the same indent
 				print(*static_cast<const table*>(&source()));
+				buffer.flush();
 				break;
+			}
 
-			case node_type::array: print(*static_cast<const array*>(&source())); break;
+			case node_type::array:
+			{
+				impl::formatter_buffer buffer{ *this };
+				print(*static_cast<const array*>(&source()));
+				buffer.flush();
+				break;
+			}
 
 			case node_type::string: print_yaml_string(*static_cast<const value<std::string>*>(&source())); break;
 

@@ -13,6 +13,7 @@
 #if TOML_ENABLE_FORMATTERS
 
 #include "yaml_formatter.hpp"
+#include "formatter.inl"
 #include "print_to_stream.hpp"
 #include "table.hpp"
 #include "array.hpp"
@@ -202,11 +203,21 @@ TOML_NAMESPACE_START
 		switch (auto source_type = source().type())
 		{
 			case node_type::table:
+			{
+				impl::formatter_buffer buffer{ *this };
 				decrease_indent(); // so root kvps and tables have the same indent
 				print(*static_cast<const table*>(&source()));
+				buffer.flush();
 				break;
+			}
 
-			case node_type::array: print(*static_cast<const array*>(&source())); break;
+			case node_type::array:
+			{
+				impl::formatter_buffer buffer{ *this };
+				print(*static_cast<const array*>(&source()));
+				buffer.flush();
+				break;
+			}
 
 			case node_type::string: print_yaml_string(*static_cast<const value<std::string>*>(&source())); break;
 

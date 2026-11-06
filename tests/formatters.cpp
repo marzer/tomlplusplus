@@ -6,6 +6,8 @@
 #include "tests.hpp"
 TOML_DISABLE_WARNINGS;
 #include <cmath>
+#include <stdexcept>
+#include <streambuf>
 TOML_ENABLE_WARNINGS;
 
 namespace
@@ -150,6 +152,52 @@ namespace
 	static constexpr auto f64_nan = std::numeric_limits<double>::quiet_NaN();
 	static constexpr auto i64_min = (std::numeric_limits<int64_t>::min)();
 	static constexpr auto i64_max = (std::numeric_limits<int64_t>::max)();
+
+	static std::string letters(size_t length)
+	{
+		std::string str(length, '\0');
+		for (size_t i = 0; i < length; i++)
+			str[i] = static_cast<char>('a' + i % 26u);
+		return str;
+	}
+
+	static void check_same(const std::string& printed, const std::string& expected)
+	{
+		if (const auto diff = find_first_difference(printed, expected))
+			FORCE_FAIL("string mismatch: "sv << *diff);
+	}
+
+	struct limited_buf : std::streambuf
+	{
+		std::string received;
+		size_t limit;
+		bool throws;
+
+		explicit limited_buf(size_t max_bytes, bool throw_at_limit = false) //
+			: limit{ max_bytes },
+			  throws{ throw_at_limit }
+		{}
+
+	  protected:
+		int_type overflow(int_type ch) override
+		{
+			if (traits_type::eq_int_type(ch, traits_type::eof()))
+				return traits_type::not_eof(ch);
+			const auto c = traits_type::to_char_type(ch);
+			return xsputn(&c, 1) == 1 ? ch : traits_type::eof();
+		}
+
+		std::streamsize xsputn(const char* str, std::streamsize len) override
+		{
+			const auto accepted = (std::min)(static_cast<size_t>(len), limit - received.size());
+			received.append(str, accepted);
+#if TOML_EXCEPTIONS
+			if (throws && accepted < static_cast<size_t>(len))
+				throw std::runtime_error{ "the disk is full" };
+#endif
+			return static_cast<std::streamsize>(accepted);
+		}
+	};
 }
 
 #define CHECK_FORMATTER(formatter, data, expected)                                                                     \
@@ -1323,6 +1371,148 @@ TEST_CASE("formatters - printing a formatter twice gives the same output")
 	{
 		yaml_formatter formatter{ data };
 		check_reuse(formatter, "a: \n  b: 1\nc: \n  - d: 2"sv);
+	}
+}
+
+TEST_CASE("formatters - long output")
+{
+	toml::array numbers;
+	for (int64_t i = 0; i < 2000; i++)
+		numbers.push_back(i);
+	toml::array strings;
+	for (const size_t length : { 1000u, 3000u, 4095u, 4096u, 4097u, 10000u })
+		strings.push_back(letters(length));
+	const auto data = toml::table{ { "numbers", numbers }, { "strings", strings } };
+
+	std::string toml_expected = "numbers = [";
+	std::string json_expected = "{\n    \"numbers\" : [";
+	std::string yaml_expected = "numbers: ";
+	for (size_t i = 0; i < numbers.size(); i++)
+	{
+		toml_expected += (i ? ",\n    " : "\n    ") + std::to_string(i);
+		json_expected += (i ? ",\n        " : "\n        ") + std::to_string(i);
+		yaml_expected += "\n  - " + std::to_string(i);
+	}
+	toml_expected += "\n]\nstrings = [";
+	json_expected += "\n    ],\n    \"strings\" : [";
+	yaml_expected += "\nstrings: ";
+	for (size_t i = 0; i < strings.size(); i++)
+	{
+		const auto& str = strings[i].ref<std::string>();
+		toml_expected += (i ? ",\n    '" : "\n    '") + str + "'";
+		json_expected += (i ? ",\n        \"" : "\n        \"") + str + "\"";
+		yaml_expected += "\n  - " + str;
+	}
+	toml_expected += "\n]";
+	json_expected += "\n    ]\n}";
+
+	const auto toml_printed = print_with<toml_formatter>(data);
+	check_same(toml_printed, toml_expected);
+	const auto reparsed = parse_printed(toml_printed);
+	REQUIRE(reparsed);
+	CHECK(*reparsed == data);
+	check_same(print_with<json_formatter>(data), json_expected);
+	check_same(print_with<yaml_formatter>(data), yaml_expected);
+}
+
+TEST_CASE("formatters - deep indentation")
+{
+	static constexpr size_t depth = 50;
+	toml::array root;
+	auto innermost = &root;
+	for (size_t i = 1; i < depth; i++)
+	{
+		innermost->push_back(toml::array{});
+		innermost = innermost->back().as_array();
+	}
+	innermost->push_back(1);
+
+	std::string expected;
+	for (size_t level = 1; level <= depth; level++)
+		expected += "[\n" + std::string(level * 4u, ' ');
+	expected += '1';
+	for (size_t level = depth; level-- > 0u;)
+		expected += '\n' + std::string(level * 4u, ' ') + ']';
+
+	check_same(print_with<json_formatter>(root), expected);
+}
+
+TEST_CASE("formatters - a stream that fails partway")
+{
+	toml::array numbers;
+	for (int64_t i = 0; i < 1000; i++)
+		numbers.push_back(i);
+	toml::array strings;
+	for (const size_t length : { 100u, 3000u, 5000u })
+		strings.push_back(letters(length));
+	const auto data = toml::table{ { "numbers", numbers }, { "strings", strings } };
+
+	const auto check_failures = [](auto& formatter)
+	{
+		std::ostringstream ss;
+		ss << formatter;
+		const auto full = ss.str();
+		REQUIRE(full.size() > 8192u);
+
+		for (const size_t limit : { size_t{},
+									size_t{ 1 },
+									size_t{ 100 },
+									size_t{ 4095 },
+									size_t{ 4096 },
+									size_t{ 4097 },
+									full.size() - 1u,
+									full.size(),
+									full.size() + 1u })
+		{
+			CAPTURE(limit);
+			const auto delivered = full.substr(0, (std::min)(limit, full.size()));
+			const auto fails	 = limit < full.size();
+
+			limited_buf refusing{ limit };
+			std::ostream refusing_stream{ &refusing };
+			refusing_stream << formatter;
+			CHECK(refusing.received == delivered);
+			CHECK(refusing_stream.bad() == fails);
+
+#if TOML_EXCEPTIONS
+			limited_buf throwing{ limit, true };
+			std::ostream throwing_stream{ &throwing };
+			throwing_stream << formatter;
+			CHECK(throwing.received == delivered);
+			CHECK(throwing_stream.bad() == fails);
+
+			limited_buf rethrowing{ limit, true };
+			std::ostream rethrowing_stream{ &rethrowing };
+			rethrowing_stream.exceptions(std::ios::badbit);
+			if (fails)
+				CHECK_THROWS_WITH(rethrowing_stream << formatter, "the disk is full");
+			else
+				CHECK_NOTHROW(rethrowing_stream << formatter);
+			CHECK(rethrowing.received == delivered);
+#endif
+		}
+
+		std::ostringstream again;
+		again << formatter;
+		CHECK(again.str() == full);
+	};
+
+	SECTION("toml_formatter")
+	{
+		toml_formatter formatter{ data };
+		check_failures(formatter);
+	}
+
+	SECTION("json_formatter")
+	{
+		json_formatter formatter{ data };
+		check_failures(formatter);
+	}
+
+	SECTION("yaml_formatter")
+	{
+		yaml_formatter formatter{ data };
+		check_failures(formatter);
 	}
 }
 

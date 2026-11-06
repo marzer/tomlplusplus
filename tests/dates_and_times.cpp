@@ -95,6 +95,7 @@ TEST_CASE("dates - stream output")
 		{ date{ 5, 1, 2 }, "0005-01-02"sv },
 		{ date{ 2000, 10, 10 }, "2000-10-10"sv },
 		{ date{ 9999, 12, 31 }, "9999-12-31"sv },
+		{ date{ 65535, 255, 255 }, "65535-255-255"sv },
 	}));
 
 	CHECK(streamed(val) == expected);
@@ -185,6 +186,7 @@ TEST_CASE("times - stream output")
 		{ toml::time{ 12, 0, 0, 120000 }, "12:00:00.00012"sv },
 		{ toml::time{ 12, 0, 0, 10 }, "12:00:00.00000001"sv },
 		{ toml::time{ 12, 0, 0, 100000000 }, "12:00:00.1"sv },
+		{ toml::time{ 255, 255, 255, 999999999 }, "255:255:255.999999999"sv },
 	}));
 
 	CHECK(streamed(val) == expected);
@@ -240,6 +242,8 @@ TEST_CASE("time offsets - stream output")
 		{ time_offset{ -1, 0 }, "-01:00"sv },
 		{ time_offset{ 23, 59 }, "+23:59"sv },
 		{ time_offset{ -23, -59 }, "-23:59"sv },
+		{ time_offset{ 546, 7 }, "+546:07"sv },
+		{ time_offset{ -546, -8 }, "-546:08"sv },
 	}));
 
 	CHECK(streamed(val) == expected);
@@ -363,6 +367,8 @@ TEST_CASE("date-times - stream output")
 		{ date_time{ { 1987, 3, 16 }, { 10, 20, 34, 500000000 }, { 5, 45 } }, "1987-03-16T10:20:34.5+05:45"sv },
 		{ date_time{ { 1987, 3, 16 }, { 10, 20, 34, 5000 }, { 0, 45 } }, "1987-03-16T10:20:34.000005+00:45"sv },
 		{ date_time{ date{ 1, 2, 3 } }, "0001-02-03T00:00:00"sv },
+		{ date_time{ { 65535, 255, 255 }, { 255, 255, 255, 999999999 }, { -546, -8 } },
+		  "65535-255-255T255:255:255.999999999-546:08"sv },
 	}));
 
 	CHECK(streamed(val) == expected);
