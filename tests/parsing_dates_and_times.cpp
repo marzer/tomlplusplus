@@ -332,3 +332,14 @@ TEST_CASE("parsing - dates and times (malformed)")
 						"val = 1987-03-16T10:20:30+5:00"sv,
 						"1:28: Error while parsing date-time offset: expected 2-digit hour, saw ':'"sv);
 }
+
+TEST_CASE("parsing - dates and times (long underscored values before a space)")
+{
+	for (size_t underscores = 113; underscores <= 118; underscores++)
+	{
+		INFO(underscores << " underscores");
+		parsing_should_fail(FILE_LINE_ARGS,
+							"a = 1" + std::string(underscores, '_') + "979-05-27 12:00:00",
+							"1:6: Error while parsing date: expected 4-digit year, saw '_'"sv);
+	}
+}

@@ -74,3 +74,20 @@ executable(
 	cpp_args: test_args,
 	dependencies: test_deps
 )
+
+#-----------------------------------------------------------------------------------------------------------------------
+# TOML_EXCEPTIONS=0 with compiler exceptions
+#-----------------------------------------------------------------------------------------------------------------------
+
+if has_exceptions
+	test(
+		'mixed exceptions',
+		executable(
+			'tomlplusplus_mixed_exceptions_test',
+			files('mixed_exceptions.cpp'),
+			cpp_args: global_args,
+			include_directories: include_dir,
+			override_options: global_overrides
+		)
+	)
+endif

@@ -51,6 +51,59 @@ TEST_CASE("parsing - floats (underscores)")
 						"1:12: Error while parsing floating-point: underscores may only follow digits"sv);
 }
 
+TEST_CASE("parsing - floats (long values with underscores)")
+{
+	for (const auto key : { "a"sv, "ab"sv })
+	{
+		for (size_t pairs = 60; pairs <= 110; pairs++)
+		{
+			std::string doc = std::string{ key } + " = 1.";
+			for (size_t i = 0; i < pairs; i++)
+				doc += "0_";
+
+			parsing_should_succeed(
+				FILE_LINE_ARGS,
+				doc + "1e5\n",
+				[&](table&& tbl)
+				{
+					CHECK(tbl[key] == 100000.0);
+					REQUIRE(tbl[key].node());
+					const auto& region = tbl[key].node()->source();
+					CHECK(region.begin == source_position{ 1, static_cast<source_index>(key.length() + 4u) });
+					CHECK(region.end == source_position{ 1, static_cast<source_index>(doc.length() + 4u) });
+				});
+
+			parsing_should_fail(FILE_LINE_ARGS,
+								doc + "1_\n",
+								"1:" + std::to_string(doc.length() + 3u)
+									+ ": Error while parsing floating-point: underscores must be followed by digits");
+		}
+	}
+
+#if TOML_LANG_UNRELEASED
+	std::string value = "0x";
+	for (size_t i = 0; i < 23u; i++)
+		value += "1_";
+	value += "1.";
+	for (size_t i = 0; i < 23u; i++)
+		value += "1_";
+	value += "1p+";
+	for (size_t i = 0; i < 18u; i++)
+		value += "0_";
+	value += "1_";
+
+	for (size_t key_length = 1; key_length <= 40u; key_length++)
+	{
+		const auto doc = std::string(key_length, 'k') + " = " + value + "\n";
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			doc,
+			"1:" + std::to_string(doc.length())
+				+ ": Error while parsing hexadecimal floating-point: underscores must be followed by digits");
+	}
+#endif
+}
+
 TEST_CASE("parsing - floats (signed zeroes)")
 {
 	// "Float values -0.0 and +0.0 are valid and should map according to IEEE 754."

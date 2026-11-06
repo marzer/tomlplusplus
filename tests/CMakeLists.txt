@@ -58,6 +58,16 @@ endif()
 target_link_libraries(tomlplusplus_odr_test PRIVATE tomlplusplus::tomlplusplus)
 add_test(NAME odr_test COMMAND tomlplusplus_odr_test)
 
+# ---- TOML_EXCEPTIONS=0 with compiler exceptions ----
+
+if(tomlplusplus_EXCEPTIONS)
+  add_executable(tomlplusplus_mixed_exceptions_test mixed_exceptions.cpp)
+  tomlplusplus_set_compile_options(tomlplusplus_mixed_exceptions_test)
+  # header-only, since a compiled library is built with TOML_EXCEPTIONS=1
+  target_include_directories(tomlplusplus_mixed_exceptions_test PRIVATE "${PROJECT_SOURCE_DIR}/include")
+  add_test(NAME mixed_exceptions_test COMMAND tomlplusplus_mixed_exceptions_test)
+endif()
+
 # ---- check-cmake ----
 
 find_program(check-cmake check-cmake)

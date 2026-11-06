@@ -53,3 +53,32 @@ TEST_CASE("parsing - comments (control characters)")
 		"# \f"sv,
 		R"(1:3: Error while parsing comment: vertical tabs '\v' and form-feeds '\f' are not legal line breaks in TOML)"sv);
 }
+
+TEST_CASE("parsing - comments (every ascii byte after a long comment)")
+{
+	std::string accented;
+	for (size_t i = 0; i < 40u; i++)
+		accented += "\xC3\xA9";
+
+	for (const auto& filler : { std::string(40u, 'x'), accented })
+	{
+		for (unsigned byte = 0; byte < 0x80u; byte++)
+		{
+			INFO("byte " << byte);
+			const auto c   = static_cast<char>(byte);
+			const auto doc = "# " + filler + c + "\na = 1";
+			if (c == '\v' || c == '\f')
+				parsing_should_fail(
+					FILE_LINE_ARGS,
+					doc,
+					R"(1:43: Error while parsing comment: vertical tabs '\v' and form-feeds '\f' are not legal line breaks in TOML)"sv);
+			else if (c != '\t' && c != '\n' && c != '\r' && (byte < 0x20u || byte == 0x7Fu))
+				parsing_should_fail(
+					FILE_LINE_ARGS,
+					doc,
+					"1:43: Error while parsing comment: control characters other than TAB (U+0009) are explicitly prohibited in comments"sv);
+			else
+				parsing_should_succeed(FILE_LINE_ARGS, doc, [](table&& tbl) { CHECK(tbl["a"] == 1); });
+		}
+	}
+}
