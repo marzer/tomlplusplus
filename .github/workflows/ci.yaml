@@ -173,8 +173,13 @@ jobs:
                       args: "-DCMAKE_CXX_STANDARD=20 -Dtomlplusplus_BUILD_LIB=ON -Dtomlplusplus_UNRELEASED_FEATURES=ON"
                       modules: true
                       consumers: true
+                    - name: arm64
+                      runner: ubuntu-24.04-arm
+                      compiler: "g++"
+                      type: "Debug"
+                      args: "-Dtomlplusplus_ASAN=ON -Dtomlplusplus_UBSAN=ON"
 
-        runs-on: ubuntu-latest
+        runs-on: ${{ matrix.runner || 'ubuntu-latest' }}
 
         defaults:
             run:
@@ -417,9 +422,20 @@ jobs:
                   git status --short
 
     windows-cmake:
-        name: msvc
+        name: ${{ matrix.name }}
 
-        runs-on: windows-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    - name: msvc
+                      runner: windows-latest
+                      arch: x64
+                    - name: msvc arm64
+                      runner: windows-11-arm
+                      arch: arm64
+
+        runs-on: ${{ matrix.runner }}
 
         defaults:
             run:
@@ -434,6 +450,8 @@ jobs:
             - uses: actions/checkout@v7
 
             - uses: ilammy/msvc-dev-cmd@v1
+              with:
+                  arch: ${{ matrix.arch }}
 
             - name: Print tool versions
               run: |

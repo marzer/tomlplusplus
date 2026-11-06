@@ -216,7 +216,7 @@ namespace
 
 		void floating_point()
 		{
-			constexpr std::string_view specials[] = { "inf"sv, "-inf"sv, "+inf"sv, "nan"sv, "-nan"sv, "+nan"sv };
+			static constexpr std::string_view specials[] = { "inf"sv, "-inf"sv, "+inf"sv, "nan"sv, "-nan"sv, "+nan"sv };
 			if (one_in(50u))
 			{
 				out_ += specials[below(std::size(specials))];
@@ -286,9 +286,8 @@ namespace
 
 		void basic_string(size_t length)
 		{
-			constexpr std::string_view escapes[] = {
-				"\\n"sv, "\\t"sv, "\\\""sv, "\\\\"sv, "\\u00E9"sv, "\\U0001F600"sv
-			};
+			static constexpr std::string_view escapes[] = { "\\n"sv,  "\\t"sv,	   "\\\""sv,
+															"\\\\"sv, "\\u00E9"sv, "\\U0001F600"sv };
 			out_ += '"';
 			for (size_t i = 0; i < length; i++)
 			{

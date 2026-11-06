@@ -21,6 +21,7 @@
 #include "array.hpp"
 #include "table.hpp"
 #include "unicode.hpp"
+#include "simd.hpp"
 TOML_DISABLE_WARNINGS;
 #include <istream>
 #include <fstream>
@@ -326,6 +327,128 @@ TOML_ANON_NAMESPACE_START
 	TOML_INTERNAL_LINKAGE
 	constexpr run_table run_bytes = make_run_table();
 
+	TOML_INTERNAL_LINKAGE
+	constexpr uint64_t word_high_bits = 0x8080808080808080ull;
+
+	TOML_CONST_GETTER
+	TOML_INTERNAL_LINKAGE
+	constexpr uint64_t word_of(uint64_t byte) noexcept
+	{
+		return 0x0101010101010101ull * byte;
+	}
+
+	// the first byte is the lowest, whatever the byte order
+	TOML_PURE_GETTER
+	TOML_INTERNAL_LINKAGE
+	uint64_t load_word(const char* bytes) noexcept
+	{
+		uint64_t word = {};
+		std::memcpy(&word, bytes, 8u);
+#if defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+		word = __builtin_bswap64(word);
+#endif
+		return word;
+	}
+
+	TOML_CONST_GETTER
+	TOML_INTERNAL_LINKAGE
+	unsigned trailing_zeros(uint64_t bits) noexcept
+	{
+#if TOML_GCC_LIKE
+		return static_cast<unsigned>(__builtin_ctzll(bits));
+#else
+		static constexpr unsigned char positions[64] = {
+			0,	1,	48, 2,	57, 49, 28, 3,	61, 58, 50, 42, 38, 29, 17, 4,	62, 55, 59, 36, 53, 51,
+			43, 22, 45, 39, 33, 30, 24, 18, 12, 5,	63, 47, 56, 27, 60, 41, 37, 16, 54, 35, 52, 21,
+			44, 32, 23, 11, 46, 26, 40, 15, 34, 20, 31, 10, 25, 14, 19, 9,	13, 8,	7,	6
+		};
+		return positions[((bits & (~bits + 1u)) * 0x03F79D71B4CB0A89ull) >> 58];
+#endif
+	}
+
+	TOML_CONST_GETTER
+	TOML_INTERNAL_LINKAGE
+	constexpr size_t count_high_bits(uint64_t bits) noexcept
+	{
+		return static_cast<size_t>(((bits >> 7) * word_of(1u)) >> 56);
+	}
+
+	// for words of ascii bytes: the bytes equal to c, as their high bits
+	TOML_CONST_GETTER
+	TOML_INTERNAL_LINKAGE
+	constexpr uint64_t bytes_equal(uint64_t ascii, unsigned c) noexcept
+	{
+		return ~((ascii ^ word_of(c)) + word_of(0x7Fu)) & word_high_bits;
+	}
+
+	// the bytes of a word that end a comment or string run, as their high bits
+	template <run_class Class>
+	TOML_CONST_GETTER
+	TOML_INTERNAL_LINKAGE
+	constexpr uint64_t run_stops(uint64_t word) noexcept
+	{
+		const auto ascii = word & ~word_high_bits;
+		auto delimiters	 = bytes_equal(ascii, 0x7Fu);
+		if constexpr (Class == run_class::basic_string)
+			delimiters |= bytes_equal(ascii, '"') | bytes_equal(ascii, '\\');
+		if constexpr (Class == run_class::literal_string)
+			delimiters |= bytes_equal(ascii, '\'');
+		const auto controls = ~((ascii + word_of(0x60u)) | word | bytes_equal(ascii, '\t')) & word_high_bits;
+		return controls | (delimiters & ~word);
+	}
+
+#if TOML_HAS_SSE2
+
+	TOML_CONST_GETTER
+	TOML_INTERNAL_LINKAGE
+	constexpr unsigned count_bits(unsigned bits) noexcept
+	{
+		bits = bits - ((bits >> 1) & 0x55555555u);
+		bits = (bits & 0x33333333u) + ((bits >> 2) & 0x33333333u);
+		return (((bits + (bits >> 4)) & 0x0F0F0F0Fu) * 0x01010101u) >> 24;
+	}
+
+	// the bytes of a block that end a comment or string run, as a movemask
+	template <run_class Class>
+	TOML_NODISCARD
+	TOML_INTERNAL_LINKAGE
+	unsigned run_stops(__m128i bytes) noexcept
+	{
+		const auto equal = [&](char c) noexcept { return _mm_cmpeq_epi8(bytes, _mm_set1_epi8(c)); };
+
+		// bytes from 0x80 compare as negative
+		const auto controls = _mm_andnot_si128(
+			equal('\t'),
+			_mm_and_si128(_mm_cmpgt_epi8(bytes, _mm_set1_epi8(-1)), _mm_cmplt_epi8(bytes, _mm_set1_epi8(0x20))));
+		auto stops = _mm_or_si128(controls, equal(0x7F));
+		if constexpr (Class == run_class::basic_string)
+			stops = _mm_or_si128(stops, _mm_or_si128(equal('"'), equal('\\')));
+		if constexpr (Class == run_class::literal_string)
+			stops = _mm_or_si128(stops, equal('\''));
+		return static_cast<unsigned>(_mm_movemask_epi8(stops));
+	}
+
+#endif
+
+	// how many ascii bytes the first n start with
+	TOML_PURE_GETTER
+	TOML_INTERNAL_LINKAGE
+	size_t ascii_length(const char* bytes, size_t n) noexcept
+	{
+		size_t i = {};
+#if TOML_HAS_SSE2
+		for (; n - i >= 16u; i += 16u)
+			if (const auto high = static_cast<unsigned>(
+					_mm_movemask_epi8(_mm_loadu_si128(reinterpret_cast<const __m128i*>(bytes + i)))))
+				return i + trailing_zeros(high);
+#endif
+		while (n - i >= 8u && !(load_word(bytes + i) & word_high_bits))
+			i += 8u;
+		while (i < n && static_cast<unsigned char>(bytes[i]) < 0x80u)
+			i++;
+		return i;
+	}
+
 	struct run_span
 	{
 		const char* data;
@@ -380,21 +503,9 @@ TOML_ANON_NAMESPACE_START
 			auto i = valid_;
 			while (i < limit)
 			{
-				if (limit - i >= 8u)
-				{
-					uint64_t word = {};
-					std::memcpy(&word, data_ + i, 8u);
-					if (!(word & 0x8080808080808080ull))
-					{
-						i += 8u;
-						continue;
-					}
-				}
-				if (static_cast<unsigned char>(data_[i]) < 0x80u)
-				{
-					i++;
-					continue;
-				}
+				i += ascii_length(data_ + i, limit - i);
+				if (i == limit)
+					break;
 
 				impl::utf8_decoder decoder;
 				auto end = i;
@@ -676,12 +787,49 @@ TOML_ANON_NAMESPACE_START
 		TOML_NODISCARD
 		run_span run() const noexcept
 		{
-			constexpr auto mask		 = static_cast<unsigned>(Class);
-			constexpr bool non_ascii = (run_bytes.classes[0x80u] & mask) != 0u;
+			static constexpr auto mask		= static_cast<unsigned>(Class);
+			static constexpr bool non_ascii = (run_bytes.classes[0x80u] & mask) != 0u;
 			TOML_ASSERT(base_ + pos_ < wall_);
 
 			auto end			= pos_ + current_.count;
 			size_t continuation = current_.count - 1u;
+			if constexpr (non_ascii)
+			{
+#if TOML_HAS_SSE2
+				while (valid_ - end >= 16u)
+				{
+					const auto bytes = _mm_loadu_si128(reinterpret_cast<const __m128i*>(data_ + end));
+					const auto stops = run_stops<Class>(bytes);
+					auto continuations =
+						static_cast<unsigned>(_mm_movemask_epi8(_mm_cmplt_epi8(bytes, _mm_set1_epi8(-64))));
+					if (stops)
+					{
+						continuations &= (stops & (~stops + 1u)) - 1u;
+						return { data_ + pos_,
+								 end + trailing_zeros(stops) - pos_,
+								 continuation + count_bits(continuations) };
+					}
+					if (continuations)
+						continuation += count_bits(continuations);
+					end += 16u;
+				}
+#endif
+				while (valid_ - end >= 8u)
+				{
+					const auto word	   = load_word(data_ + end);
+					const auto stops   = run_stops<Class>(word);
+					auto continuations = word & ~(word << 1) & word_high_bits;
+					if (stops)
+					{
+						continuations &= (stops & (~stops + 1u)) - 1u;
+						return { data_ + pos_,
+								 end + trailing_zeros(stops) / 8u - pos_,
+								 continuation + count_high_bits(continuations) };
+					}
+					continuation += count_high_bits(continuations);
+					end += 8u;
+				}
+			}
 			while (end < valid_)
 			{
 				const auto byte = static_cast<unsigned char>(data_[end]);

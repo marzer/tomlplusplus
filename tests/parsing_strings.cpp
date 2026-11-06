@@ -434,3 +434,84 @@ TEST_CASE("parsing - strings (bytes after long stretches)")
 			"1:11: Error while parsing literal string: control characters other than TAB (U+0009) are explicitly prohibited"sv);
 	}
 }
+
+TEST_CASE("parsing - strings (bytes within a 16-byte block)")
+{
+	struct kind
+	{
+		std::string_view open;
+		std::string_view close;
+		std::string_view scope;
+	};
+
+	// the multi-line strings start with a z so their leading line break is never trimmed
+	for (const auto& k : { kind{ "\"", "\"", "string" },
+						   kind{ "'", "'", "literal string" },
+						   kind{ "\"\"\"z", "\"\"\"", "string" },
+						   kind{ "'''z", "'''", "literal string" } })
+	{
+		const bool basic	  = k.close[0] == '"';
+		const bool multi_line = k.close.length() == 3u;
+		const auto error_at	  = [](size_t column, std::string_view scope)
+		{ return "1:" + std::to_string(column) + ": Error while parsing " + std::string{ scope } + ": "; };
+
+		const auto check = [&](const std::string& filler, size_t columns, char c, std::string_view tail)
+		{
+			INFO(k.open << ", byte " << static_cast<unsigned>(c) << " after " << filler.length() << " bytes");
+			const auto column = 5u + k.open.length() + columns;
+			const auto doc = "a = " + std::string{ k.open } + filler + c + std::string{ tail } + std::string{ k.close };
+			const auto value   = std::string{ k.open.substr(multi_line ? 3u : 1u) } + filler + c + std::string{ tail };
+			const bool control = c != '\t' && (static_cast<unsigned char>(c) < 0x20u || c == '\x7F');
+
+			if (!multi_line && c == k.close[0])
+				parsing_should_fail(FILE_LINE_ARGS,
+									doc,
+									error_at(column + 1u, "key-value pair")
+										+ "expected a comment or whitespace, saw 'y'");
+			else if (basic && c == '\\')
+				parsing_should_fail(FILE_LINE_ARGS,
+									doc,
+									error_at(column + 1u, k.scope) + R"(unknown escape sequence '\y')");
+			else if (multi_line && c == '\r')
+				parsing_should_fail(FILE_LINE_ARGS,
+									doc,
+									error_at(column + 1u, k.scope) + R"(expected '\n' after '\r', saw 'y')");
+			else if (multi_line && (c == '\v' || c == '\f'))
+				parsing_should_fail(
+					FILE_LINE_ARGS,
+					doc,
+					error_at(column, k.scope)
+						+ R"(vertical tabs '\v' and form-feeds '\f' are not legal line breaks in TOML)");
+			else if (control && !(multi_line && c == '\n'))
+				parsing_should_fail(FILE_LINE_ARGS,
+									doc,
+									error_at(column, k.scope) + (basic ? "unescaped " : "")
+										+ "control characters other than TAB (U+0009) are explicitly prohibited");
+			else
+				parsing_should_succeed(FILE_LINE_ARGS,
+									   doc,
+									   [&](table&& tbl) { CHECK(tbl["a"] == std::string_view{ value }); });
+		};
+
+		constexpr auto ys		= "yyyyyyyyyyyyyyyy"sv;
+		constexpr auto accented = "\xC3\xA9\xC3\xA9\xC3\xA9\xC3\xA9\xC3\xA9\xC3\xA9\xC3\xA9\xC3\xA9"sv;
+		for (unsigned byte = 0; byte < 0x80u; byte++)
+		{
+			check(std::string(5u, 'x'), 5u, static_cast<char>(byte), ys);
+			check("\xC3\xA9" + std::string(3u, 'x'), 4u, static_cast<char>(byte), ys);
+		}
+
+		for (size_t length = 0; length < 18u; length++)
+		{
+			for (const auto& [c, tail] : { std::pair{ '\x01', accented },
+										   std::pair{ '\x7F', accented },
+										   std::pair{ '\\', ys },
+										   std::pair{ k.close[0], ys } })
+			{
+				check(std::string(length, 'x'), length, c, tail);
+				if (length >= 2u)
+					check("\xC3\xA9" + std::string(length - 2u, 'x'), length - 1u, c, tail);
+			}
+		}
+	}
+}

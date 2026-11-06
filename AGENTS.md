@@ -148,8 +148,10 @@ two builds. A measurement goes in the report, and the conclusion goes in the cod
 ## CI
 
 The job matrix only shrinks. New coverage goes into a job that already exists, and an untested combination is something
-to report. Jobs run on the `-latest` runner images. A job's name is a word or two saying what sets it apart, and the
-workflow holds the rest of its configuration. Actions stay on version tags, which dependabot updates. No CodeQL.
+to report. Jobs run on the `-latest` runner images. ARM64 has no `-latest` label, so its jobs use the ARM64 image of
+the release `ubuntu-latest` points at, and `windows-11-arm`; they exist for the code x64 never compiles, the paths
+without SSE2. A job's name is a word or two saying what sets it apart, and the workflow holds the rest of its
+configuration. Actions stay on version tags, which dependabot updates. No CodeQL.
 
 ## Changelog
 

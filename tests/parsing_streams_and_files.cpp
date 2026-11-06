@@ -676,6 +676,57 @@ TEST_CASE("parsing - long stretches across a read or validation boundary")
 	}
 }
 
+TEST_CASE("parsing - runs reaching the end of the bytes read")
+{
+	// sized exactly, so asan catches a read past the end
+	const auto parse_exactly = [](const std::string& doc)
+	{
+		std::unique_ptr<char[]> bytes{ new char[doc.length()] };
+		std::memcpy(bytes.get(), doc.data(), doc.length());
+		return toml::parse(std::string_view{ bytes.get(), doc.length() });
+	};
+
+	const auto parses = [&](const std::string& doc, const auto& check)
+	{
+		INFO(doc);
+		check(parse_exactly(doc));
+		check(parse_through<unbuffered_buf>(doc));
+	};
+
+	const auto fails = [&](const std::string& doc, source_position where, std::string_view description)
+	{
+		INFO(doc);
+		for (const auto& err : { parse_failure([&]() { return parse_exactly(doc); }),
+								 parse_failure([&]() { return parse_through<unbuffered_buf>(doc); }) })
+		{
+			REQUIRE(err);
+			CHECK(err->description() == description);
+			CHECK(err->source().begin == where);
+		}
+	};
+
+	for (size_t length = 0; length < 48u; length++)
+	{
+		for (const bool accented : { false, true })
+		{
+			const auto content = std::string(length, 'x') + (accented ? "\xC3\xA9" : "");
+			const auto columns = static_cast<source_index>(length + (accented ? 1u : 0u));
+			const auto value   = [&](std::string_view expected)
+			{ return [=](auto&& tbl) { CHECK(tbl["a"] == expected); }; };
+
+			parses("#" + content, [](auto&& tbl) { CHECK(tbl.begin() == tbl.end()); });
+			for (const auto after : { ""sv, "\xC3\xA9"sv })
+				fails(
+					"#" + content + "\x01" + std::string{ after },
+					{ 1, columns + 2u },
+					"Error while parsing comment: control characters other than TAB (U+0009) are explicitly prohibited in comments"sv);
+			parses("a = '" + content + "'", value(content));
+			parses("a = \"" + content + "\"", value(content));
+			parses("a = \"" + content + "\\t\"", value(content + "\t"));
+		}
+	}
+}
+
 TEST_CASE("parsing - source paths")
 {
 	SECTION("string_view")
