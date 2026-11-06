@@ -135,6 +135,7 @@ jobs:
               run: >-
                   cmake -S . -B build -G Ninja -DCMAKE_CXX_COMPILER=clang++-22 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
                   -Dtomlplusplus_BUILD_LIB=ON -DBUILD_EXAMPLES=ON -Dtomlplusplus_BUILD_TOML_TEST=ON
+                  -Dtomlplusplus_BUILD_BENCHMARKS=ON
 
             - name: Run clang-tidy
               run: clang-tidier build --werror
@@ -213,6 +214,7 @@ jobs:
               run: >-
                   cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.type }}
                   -Dtomlplusplus_BUILD_TESTS=ON -DBUILD_EXAMPLES=ON -Dtomlplusplus_BUILD_TOML_TEST=ON
+                  -Dtomlplusplus_BUILD_BENCHMARKS=ON
                   -Dtomlplusplus_PEDANTIC=ON -Dtomlplusplus_WERROR=ON -DTOMLPLUSPLUS_BUILD_MODULES="$MODULES"
                   ${{ matrix.args }}
 
@@ -319,7 +321,7 @@ jobs:
             - name: Configure
               run: >-
                   cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
-                  -Dtomlplusplus_BUILD_TESTS=ON -DBUILD_EXAMPLES=ON
+                  -Dtomlplusplus_BUILD_TESTS=ON -DBUILD_EXAMPLES=ON -Dtomlplusplus_BUILD_BENCHMARKS=ON
                   -Dtomlplusplus_PEDANTIC=ON -Dtomlplusplus_WERROR=ON -Dtomlplusplus_EXCEPTIONS=OFF
 
             - name: Build
@@ -442,6 +444,7 @@ jobs:
               run: >-
                   cmake -S . -B build -G Ninja -DCMAKE_CXX_COMPILER=cl -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_STANDARD=20
                   -Dtomlplusplus_BUILD_TESTS=ON -DBUILD_EXAMPLES=ON -Dtomlplusplus_BUILD_TOML_TEST=ON
+                  -Dtomlplusplus_BUILD_BENCHMARKS=ON
                   -Dtomlplusplus_PEDANTIC=ON -Dtomlplusplus_WERROR=ON
                   -Dtomlplusplus_BUILD_LIB=ON -DBUILD_SHARED_LIBS=ON
 

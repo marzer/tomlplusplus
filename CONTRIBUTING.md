@@ -129,6 +129,26 @@ CMake warns that it can't install the fuzzer without `$OUT`. That only matters t
 
 <br>
 
+## Benchmarks
+
+`tomlplusplus_BUILD_BENCHMARKS` builds a program that times parsing and formatting. It uses
+`examples/benchmark_data.toml` and a set of generated documents: mixed content, strings, numbers, non-ASCII text, deep
+nesting and lots of small tables. Build it with optimisations:
+
+```bash
+cmake -S . -B build-bench -DCMAKE_BUILD_TYPE=Release -Dtomlplusplus_BUILD_BENCHMARKS=ON
+cmake --build build-bench --config Release
+build-bench/benchmarks/tomlplusplus_benchmarks
+```
+
+With Visual Studio or another multi-config generator, the program is in `build-bench/benchmarks/Release`.
+
+Arguments filter the benchmarks by name, so `tomlplusplus_benchmarks parse` runs only the parsing ones. The generated
+documents are the same in every build, so to measure a change, build both versions with the same compiler and run them
+on the same machine.
+
+<br>
+
 ## Testing with the [toml-test] suite
 
 As an optional extra you may wish to test against the official TOML test suite, [toml-test]. See the

@@ -142,7 +142,8 @@ A green `ctest` after a failed build is the previous binary passing. Read the bu
 Keep build directories and scratch files outside the repository. An instrumented Meson setup writes `default.profraw`
 to the current directory. Run heavy work under `nice -n 19`, in bounded steps, and report progress while it runs.
 
-Measure performance; never guess. A measurement goes in the report, and the conclusion goes in the code or the docs.
+Measure performance; never guess. `benchmarks/` times parsing and formatting, and CONTRIBUTING.md says how to compare
+two builds. A measurement goes in the report, and the conclusion goes in the code or the docs.
 
 ## CI
 
