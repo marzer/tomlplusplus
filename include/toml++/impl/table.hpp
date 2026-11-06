@@ -963,6 +963,52 @@ TOML_NAMESPACE_START
 
 		/// @}
 
+#if TOML_ENABLE_REFLECTION || TOML_INTELLISENSE
+
+		/// \name Reflection
+		/// @{
+
+		/// \brief	Deserializes this table into an object of type `T` using C++26 static reflection.
+		///
+		/// \detail	\cpp
+		/// struct Point { int x; int y; };
+		/// auto pt = toml::parse("x = 3\ny = 4").deserialize<Point>();
+		/// \ecpp
+		///
+		/// \throws	toml::deserialization_error	A required member was missing or had the wrong type (when exceptions
+		///								are enabled).
+		/// \returns When exceptions are enabled, the deserialized `T`. When they are disabled, a
+		///			#toml::serde_result<T> holding either the value or a #toml::deserialization_error.
+		///
+		/// \availability This is only available when #TOML_ENABLE_REFLECTION is enabled.
+		//
+		// defined out-of-line in serde.hpp (included after this header), where serde_result is visible.
+		template <typename T>
+		TOML_NODISCARD
+		auto deserialize() const;
+
+		/// \brief	Deserializes this table into an object of type `T`, writing its private members too.
+		///
+		/// \detail	For a type that cannot be annotated with #toml::reflectable, such as one from another library. \cpp
+		/// auto obj = tbl.deserialize<third_party::Widget>(toml::allow_private);
+		/// \ecpp
+		///
+		/// \throws	toml::deserialization_error	A required member was missing or had the wrong type (when exceptions
+		///								are enabled).
+		/// \returns When exceptions are enabled, the deserialized `T`. When they are disabled, a
+		///			#toml::serde_result<T> holding either the value or a #toml::deserialization_error.
+		///
+		/// \see #toml::allow_private
+		///
+		/// \availability This is only available when #TOML_ENABLE_REFLECTION is enabled.
+		template <typename T>
+		TOML_NODISCARD
+		auto deserialize(impl::allow_private_) const;
+
+		/// @}
+
+#endif // TOML_ENABLE_REFLECTION
+
 		/// \name Iteration
 		/// @{
 

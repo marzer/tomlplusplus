@@ -88,5 +88,18 @@ export TOML_NAMESPACE_START
 	using TOML_NAMESPACE::is_value;
 
 	using TOML_NAMESPACE::preserve_source_value_flags;
+
+#if TOML_ENABLE_REFLECTION
+	using TOML_NAMESPACE::allow_private;
+	using TOML_NAMESPACE::deserialization_error;
+	using TOML_NAMESPACE::flatten;
+	using TOML_NAMESPACE::reflectable;
+	using TOML_NAMESPACE::rename;
+	using TOML_NAMESPACE::serialize;
+	using TOML_NAMESPACE::transient;
+#if !TOML_EXCEPTIONS
+	using TOML_NAMESPACE::serde_result;
+#endif
+#endif
 }
 TOML_NAMESPACE_END;
