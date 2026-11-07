@@ -1086,7 +1086,7 @@ TOML_NAMESPACE_START
 
 #endif
 		}
-#if TOML_CPP >= 20
+#if TOML_ENABLE_CHRONO
 		else if constexpr (std::is_same_v<T, std::chrono::year_month_day>)
 			return ref_cast<date>()->to_chrono();
 #endif
@@ -1112,7 +1112,7 @@ TOML_NAMESPACE_START
 		{
 			if (type() == node_type_of<T>)
 			{
-#if TOML_CPP >= 20
+#if TOML_ENABLE_CHRONO
 				if constexpr (is_chrono_local_time<T>::value)
 				{
 					const auto& dt = *ref_cast<date_time>();
@@ -1148,7 +1148,7 @@ TOML_NAMESPACE_START
 		{
 			if (type() == node_type_of<T>)
 			{
-#if TOML_CPP >= 20
+#if TOML_ENABLE_CHRONO
 				if constexpr (is_chrono_local_time<T>::value)
 					return ref_cast<date_time>()->template to_chrono<typename T::duration>();
 				else if constexpr (is_chrono_hh_mm_ss<T>::value)

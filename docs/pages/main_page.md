@@ -454,10 +454,12 @@ do it manually before including toml++ in some global header that's used everywh
 
 <strong>Bonus Step: Disable any library features you don't need</strong>
 
-Some library features can be disabled wholesale so you can avoid paying their the compilation cost if you don't need them.
-For example, if all you need to do is serialize some code-generated TOML and don't actually need the parser at all you, can
+Some library features can be disabled wholesale so you can avoid paying the compilation cost if you don't need them.
+For example, if all you need to do is serialize some code-generated TOML and don't actually need the parser at all, you can
 set #TOML_ENABLE_PARSER to `0` to disable the parser altogether. This can yield fairly significant compilation
 speedups since the parser accounts for a good chunk of the library's code.
+
+From C++20, setting #TOML_ENABLE_CHRONO to `0` stops toml++ including `<chrono>`, which is expensive to compile.
 
 @see @ref configuration
 

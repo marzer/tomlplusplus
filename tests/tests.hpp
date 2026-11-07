@@ -38,6 +38,7 @@ TOML_DISABLE_ARITHMETIC_WARNINGS;
 
 TOML_DISABLE_WARNINGS;
 #include "lib_catch2.hpp"
+#include <cmath>
 #include <sstream>
 namespace toml
 {

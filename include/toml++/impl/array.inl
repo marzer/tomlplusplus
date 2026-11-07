@@ -367,16 +367,9 @@ TOML_NAMESPACE_START
 			return false;
 		for (size_t i = 0, e = lhs.elems_.size(); i < e; i++)
 		{
-			const auto lhs_type	 = lhs.elems_[i]->type();
-			const node& rhs_node = *rhs.elems_[i];
-			const auto rhs_type	 = rhs_node.type();
-			if (lhs_type != rhs_type)
-				return false;
-
-			const bool equal = lhs.elems_[i]->visit(
-				[&](const auto& lhs_value) noexcept
-				{ return lhs_value == *static_cast<std::remove_reference_t<decltype(lhs_value)>*>(&rhs_node); });
-			if (!equal)
+			const node& lhs_elem = *lhs.elems_[i];
+			const node& rhs_elem = *rhs.elems_[i];
+			if (lhs_elem.type() != rhs_elem.type() || !lhs_elem.visit(impl::equal_to_same_type{ &rhs_elem }))
 				return false;
 		}
 		return true;

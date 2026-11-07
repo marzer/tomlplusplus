@@ -374,7 +374,7 @@ TEST_CASE("date-times - stream output")
 	CHECK(streamed(val) == expected);
 }
 
-#if TOML_CPP >= 20
+#if TOML_ENABLE_CHRONO
 
 TEST_CASE("dates - std::chrono conversion")
 {

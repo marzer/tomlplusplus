@@ -62,7 +62,7 @@ TOML_NAMESPACE_START
 		  inline_{ other.inline_ }
 	{
 		for (auto&& [k, v] : other.map_)
-			map_.emplace_hint(map_.end(), k, impl::make_node(*v));
+			map_.emplace_hint(map_.end(), k, impl::make_node(std::as_const(*v)));
 
 #if TOML_LIFETIME_HOOKS
 		TOML_TABLE_CREATED;
@@ -88,7 +88,7 @@ TOML_NAMESPACE_START
 		{
 			map_type copy;
 			for (auto&& [k, v] : rhs.map_)
-				copy.emplace_hint(copy.end(), k, impl::make_node(*v));
+				copy.emplace_hint(copy.end(), k, impl::make_node(std::as_const(*v)));
 			node::operator=(rhs);
 			inline_ = rhs.inline_;
 			map_.swap(copy);
@@ -302,16 +302,9 @@ TOML_NAMESPACE_START
 			if (l->first != r->first)
 				return false;
 
-			const auto lhs_type	 = l->second->type();
-			const node& rhs_node = *r->second;
-			const auto rhs_type	 = rhs_node.type();
-			if (lhs_type != rhs_type)
-				return false;
-
-			const bool equal = l->second->visit(
-				[&](const auto& lhs_value) noexcept
-				{ return lhs_value == *static_cast<std::remove_reference_t<decltype(lhs_value)>*>(&rhs_node); });
-			if (!equal)
+			const node& lhs_val = *l->second;
+			const node& rhs_val = *r->second;
+			if (lhs_val.type() != rhs_val.type() || !lhs_val.visit(impl::equal_to_same_type{ &rhs_val }))
 				return false;
 		}
 		return true;

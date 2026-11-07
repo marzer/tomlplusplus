@@ -79,7 +79,7 @@ TOML_ANON_NAMESPACE_START
 					weight += 1u;
 					magnitude = 0u - magnitude;
 				}
-				return weight + static_cast<size_t>(std::log10(static_cast<double>(magnitude))) + 1u;
+				return weight + static_cast<size_t>(impl::log10(static_cast<double>(magnitude))) + 1u;
 			}
 
 			case node_type::floating_point:
@@ -95,7 +95,7 @@ TOML_ANON_NAMESPACE_START
 					weight += 1u;
 					val *= -1.0;
 				}
-				return weight + static_cast<size_t>(std::abs(std::log10(val))) + 1u;
+				return weight + static_cast<size_t>(impl::fabs(impl::log10(val))) + 1u;
 			}
 
 			case node_type::boolean: return 5u;

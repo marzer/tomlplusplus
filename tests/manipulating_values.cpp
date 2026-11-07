@@ -819,7 +819,7 @@ TEST_CASE("string-like types - retrieval works when copying can throw")
 	CHECK(integer.value_or(potentially_throwing_copy_string{ "y"sv }).text == "y"sv);
 }
 
-#if TOML_CPP >= 20
+#if TOML_ENABLE_CHRONO
 
 namespace
 {

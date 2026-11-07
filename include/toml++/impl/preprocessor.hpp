@@ -1132,7 +1132,7 @@
 /// \brief		Sets whether the parser-related parts of the library are included.
 /// \detail		Defaults to `1`.
 /// \remarks	If you don't parse any TOML from files or strings, setting `TOML_ENABLE_PARSER`
-///				to `0` can improve compilation speed and reduce binary size.
+///				to `0` can improve compilation speed.
 
 // formatters
 #if !defined(TOML_ENABLE_FORMATTERS) || (defined(TOML_ENABLE_FORMATTERS) && TOML_ENABLE_FORMATTERS) || TOML_INTELLISENSE
@@ -1143,11 +1143,26 @@
 /// \brief		Sets whether the various formatter classes are enabled.
 /// \detail		Defaults to `1`.
 /// \remarks	If you don't need to re-serialize TOML data, setting `TOML_ENABLE_FORMATTERS`
-///				to `0` can improve compilation speed and reduce binary size.
+///				to `0` can improve compilation speed.
 /// \see
 ///  - toml::toml_formatter
 ///  - toml::json_formatter
 ///  - toml::yaml_formatter
+
+// std::chrono
+#if !defined(TOML_ENABLE_CHRONO) || (defined(TOML_ENABLE_CHRONO) && TOML_ENABLE_CHRONO) || TOML_INTELLISENSE
+#undef TOML_ENABLE_CHRONO
+#define TOML_ENABLE_CHRONO 1
+#endif
+#if TOML_CPP < 20
+#undef TOML_ENABLE_CHRONO
+#define TOML_ENABLE_CHRONO 0
+#endif
+/// \def		TOML_ENABLE_CHRONO
+/// \brief		Sets whether conversions to and from the C++20 `std::chrono` types are enabled.
+/// \detail		Defaults to `1` from C++20, and is always `0` before C++20.
+/// \remarks	If you don't use them, setting `TOML_ENABLE_CHRONO` to `0` stops toml++ including `<chrono>`,
+///				which can improve compilation speed.
 
 // SIMD
 #if !defined(TOML_ENABLE_SIMD) || (defined(TOML_ENABLE_SIMD) && TOML_ENABLE_SIMD) || TOML_INTELLISENSE

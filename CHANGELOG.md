@@ -8,7 +8,7 @@
 - fixed `is_homogeneous()` overloads with `first_nonmatch` outparam being broken in optimized builds (#231) (@Forbinn)
 - fixed unclear error message when parsing integers that would overflow (#224) (@chrimbo)
 - fixed CMake `install` target installing `meson.build` files (#236) (@JWCS)
-- lowered `TOML_MAX_NESTED_VALUES` default from 256 to 128 to prevent stack overflow on deeply nested arrays/inline tables in sanitizer builds (@danielbodorin)
+- fixed `TOML_MAX_NESTED_VALUES` default being too high (@danielbodorin)
 - fixed "unresolved symbol" error with nvc++ (#220) (@Tomcat-42)
 - fixed stack overflow when parsing deeply nested dotted keys (#242) (@tyler92)
 - fixed some malformed input hitting an assertion in the parser; it now gets a parse error (#321) (@emincan2000)
@@ -23,18 +23,19 @@
 - fixed missing `#include` in `date_time.hpp` (#298) (@dwithun-dev)
 - fixed Clang 20 warning about whitespace in literal operator declarations (#263) (@eddelbuettel)
 - fixed C++26 deprecation warning about `std::is_trivial` (#270) (@nmpassthf)
-- fixed warnings from inside toml++ in code built with Clang's `-Weverything`, or with GCC's `-Wshadow` or `-Wunused-variable`, and GCC's `-Wreturn-type` in unoptimised builds with `TOML_FLOAT_CHARCONV` enabled
+- fixed `TOML_FLOAT_CHARCONV` causing compiler warnings to leak from inside the library on some toolchains
 - fixed MSVC warning C4702 (unreachable code) from the parser (#307) (@soniafergusonship)
 - fixed out-of-bounds read in `path::subpath()` when the arguments go past the end of the path (#319) (@aouxwoux)
 - fixed undefined behaviour and wrong results when appending or prepending a `toml::path` to itself (@arfa-21)
-- fixed `toml_formatter` emitting multi-line strings that did not round-trip (three single quotes inside the value, or a leading newline) (#323) (@arfa-21)
+- fixed `toml_formatter` emitting multi-line strings that did not round-trip in some cases (#323) (@arfa-21)
 - fixed incorrect source positions and misleading messages in a number of parse errors
 - fixed times with more than 64 digits of fractional seconds failing to parse
 - fixed leap seconds failing to parse
 - fixed very small floats, such as subnormals and `1e-999` (which rounds to zero), failing to parse with MSVC or libc++
-- fixed floats printing differently with each compiler, such as `0.1` as `0.10000000000000001` with GCC and Clang, or `100000.0` as `1e+05` with MSVC (#179) (@aborisovich)
+- fixed floats not printing consistently across different compilers (#179) (@aborisovich)
 - fixed `yaml_formatter` writing floats such as `1e+16` that YAML 1.1 loaders read as strings
-- fixed floats parsing or printing as a different value when the floating-point rounding mode isn't round-to-nearest, and out-of-range floats crashing the parser with `SIGFPE` when floating-point traps are enabled, with GCC and Clang
+- fixed floats parsing or printing as a different value when the floating-point rounding mode isn't round-to-nearest
+- fixed out-of-range floats crashing the parser with `SIGFPE` when floating-point traps are enabled
 - fixed running out of memory while parsing a float giving a parse error instead of `std::bad_alloc`, or while printing one giving a truncated number
 - fixed some long numbers containing underscores failing to parse, or parsing despite a trailing underscore
 - fixed long or out-of-range hexadecimal floats parsing to the wrong value (`TOML_ENABLE_UNRELEASED_FEATURES`)
@@ -79,6 +80,7 @@
 - added support for C++20 `std::chrono` types (#291, #322) (@mikomikotaishi)
 - added C++20 module support with `import tomlplusplus;` (#266, #267, #273, #303) (@mikomikotaishi, @N-Dekker, @davidstone)
 - added `TOML_MAX_DOTTED_KEYS_DEPTH` config (default `1024`) (#242) (@tyler92)
+- added `TOML_ENABLE_CHRONO` config (default `1`) to turn off the C++20 `std::chrono` support where it is not needed
 - added `TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA` config to work around MSVC's legacy lambda processor (on by default for MSVC before C++20) (#247) (@N-Dekker)
 - added `TOML_DISABLE_NOEXCEPT_NOEXCEPT` config to work around an MSVC bug (on by default for VS 2022 17.13 and older) (#271) (@N-Dekker)
 - added IWYU pragmas to `toml++/toml.hpp` (#277) (@fnuecke)
@@ -86,10 +88,11 @@
 
 #### Changes
 
-- `operator<<` for `source_region` (and so for `parse_error`) also prints the end of the region when it differs from the start (#244) (@N-Dekker)
-- parsing is up to twice as fast, and up to five times as fast on documents that are mostly strings
-- the formatters write to the stream in chunks of up to 4 KiB, which speeds up unbuffered streams such as `std::cerr`; `json_formatter` is about 30% faster
-- `TOML_FLOAT_CHARCONV` and `TOML_INT_CHARCONV` are documented and default to what the standard library supports, so GCC, Clang and clang-cl use `<charconv>` for floats, and documents full of floats print about three times as fast
+- `operator<<` for `source_region` also prints the end of the region when it differs from the start (#244) (@N-Dekker)
+- parsing speed improved, particularly for documents containing mostly strings
+- improvements to text formatting speed (`json_formatter` in particular)
+- improvements to float parsing, using `<charconv>` in more places where it is supported
+- improvements to compile speed and binary size
 
 #### Removals
 
@@ -97,7 +100,7 @@
 
 #### Build system
 
-- meson: builds are header-only by default, as the `build_lib` option always said. In v3.4.0 the deprecated `compile_library` option defaulted to `true`, so every default build compiled the library; pass `-Dbuild_lib=true` to keep doing that (#296) (@jfsimoneau)
+- meson: builds are header-only by default to reflect what the documentation indicates (#296) (@jfsimoneau)
 - meson: installs the examples when they're built in a top-level build (#233) (@Scrumplex)
 - meson: fixed the installed CMake package failing `find_package()` on CMake 3.14 and 3.15 when the library is compiled
 - cmake: added `tomlplusplus_INSTALL` (#240) (@DapengFeng)
@@ -108,7 +111,7 @@
 - cmake: fixed `TOMLPLUSPLUS_BUILD_MODULES` never installing the module; its target is `tomlplusplus::modules`
 - cmake: added developer options for the tests, the toml-test encoder and decoder, the benchmarks, sanitizers and coverage; they only apply to top-level builds
 - cmake, meson: builds from a git checkout keep `toml.hpp` up to date; `-Dtomlplusplus_REGENERATE=OFF` and `-Dregenerate=false` turn this off
-- the tests use Catch2 v3, which fixes building them with libc++ in C++23 mode; `-Duse_vendored_libs=false` now needs an installed Catch2 v3 (#315) (@peppergrayxyz)
+- fixed the tests failing to build with libc++ in C++23 mode (#315) (@peppergrayxyz)
 - added OSS-Fuzz integration (#214) (@capuanob)
 
 <br><br>

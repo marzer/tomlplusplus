@@ -54,9 +54,17 @@ if(tomlplusplus_BUILD_LIB)
   if(BUILD_SHARED_LIBS)
     add_library(tomlplusplus_tomlplusplus SHARED src/toml.cpp)
     target_compile_definitions(tomlplusplus_tomlplusplus PUBLIC TOML_SHARED_LIB=1)
-    set_target_properties(tomlplusplus_tomlplusplus PROPERTIES CXX_VISIBILITY_PRESET hidden)
+    set_target_properties(
+        tomlplusplus_tomlplusplus PROPERTIES CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON
+    )
+    target_compile_options(
+        tomlplusplus_tomlplusplus PRIVATE $<$<CXX_COMPILER_ID:GNU>:-fno-semantic-interposition>
+    )
   else()
     add_library(tomlplusplus_tomlplusplus STATIC src/toml.cpp)
+    if(NOT MSVC)
+      target_compile_options(tomlplusplus_tomlplusplus PRIVATE -ffunction-sections -fdata-sections)
+    endif()
   endif()
   set_target_properties(
       tomlplusplus_tomlplusplus PROPERTIES

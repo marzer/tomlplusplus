@@ -11,14 +11,18 @@ TOML_DISABLE_WARNINGS;
 #include <cstdint>
 #include <cstddef>
 #include <cstring>
-#include <cfenv>
 #include <cfloat>
 #include <climits>
-#include <cmath>
 #include <limits>
 #include <memory>
 #include <iosfwd>
 #include <type_traits>
+#if TOML_IMPLEMENTATION
+#include <cfenv>
+#if !TOML_GCC_LIKE
+#include <cmath>
+#endif
+#endif
 TOML_ENABLE_WARNINGS;
 #include "header_start.hpp"
 
@@ -956,7 +960,7 @@ TOML_IMPL_NAMESPACE_START
 	struct value_traits<date_time> : native_value_traits<date_time, node_type::date_time>
 	{};
 
-#if TOML_CPP >= 20
+#if TOML_ENABLE_CHRONO
 	template <typename T>
 	struct is_chrono_local_time : std::false_type
 	{};
@@ -1276,6 +1280,39 @@ TOML_IMPL_NAMESPACE_START
 		return (val_bits & sign) ? fp_class::neg_inf : fp_class::pos_inf;
 	}
 
+#if TOML_IMPLEMENTATION
+#if TOML_GCC_LIKE
+	TOML_CONST_INLINE_GETTER
+	double ldexp(double x, int exp) noexcept
+	{
+		return __builtin_ldexp(x, exp);
+	}
+
+	TOML_CONST_INLINE_GETTER
+	double log10(double x) noexcept
+	{
+		return __builtin_log10(x);
+	}
+
+	TOML_CONST_INLINE_GETTER
+	double fabs(double x) noexcept
+	{
+		return __builtin_fabs(x);
+	}
+
+	template <typename T>
+	TOML_CONST_INLINE_GETTER
+	bool signbit(T x) noexcept
+	{
+		return __builtin_signbit(x);
+	}
+#else
+	using std::fabs;
+	using std::ldexp;
+	using std::log10;
+	using std::signbit;
+#endif
+
 	// printf, strtod and libc++'s from_chars follow the rounding mode, and strtod raises floating-point exceptions
 	// that trap in programs which unmask them
 	struct default_fenv
@@ -1298,6 +1335,7 @@ TOML_IMPL_NAMESPACE_START
 		default_fenv(const default_fenv&)			 = delete;
 		default_fenv& operator=(const default_fenv&) = delete;
 	};
+#endif
 
 	// Q: "why not use std::find and std::min?"
 	// A: Because <algorithm> is _huge_ and these would be the only things I used from it.

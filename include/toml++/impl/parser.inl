@@ -1061,18 +1061,46 @@ TOML_ANON_NAMESPACE_START
 			}
 		}
 
-		// all other integers (fallback - coerce to (u)int64_t)
-		else if constexpr (std::is_arithmetic_v<arg_type> && std::is_integral_v<arg_type>)
-		{
-			using cast_type = std::conditional_t<std::is_unsigned_v<arg_type>, uint64_t, int64_t>;
-			concatenate(write_pos, buf_end, static_cast<cast_type>(arg));
-		}
-
 		else
 		{
-			static_assert(impl::always_false<T>,
-						  "concatenate() inputs are limited to std::string_views, integers and escaped_codepoint");
+			static_assert(
+				impl::always_false<T>,
+				"concatenate() inputs are limited to std::string_views, 64-bit integers and escaped_codepoint");
 		}
+	}
+
+	struct error_arg
+	{
+		enum class kinds : unsigned char
+		{
+			string,
+			signed_integer,
+			unsigned_integer,
+			codepoint
+		};
+
+		const void* ptr = {};
+		uint64_t val	= {};
+		kinds kind		= {};
+	};
+
+	template <typename T>
+	TOML_PURE_GETTER
+	TOML_INTERNAL_LINKAGE
+	error_arg make_error_arg(const T& arg) noexcept
+	{
+		using arg_type = impl::remove_cvref<T>;
+		if constexpr (std::is_same_v<arg_type, std::string_view>)
+			return { arg.data(), static_cast<uint64_t>(arg.length()), error_arg::kinds::string };
+		else if constexpr (std::is_same_v<arg_type, escaped_codepoint>)
+			return { &arg.cp, {}, error_arg::kinds::codepoint };
+		else if constexpr (std::is_integral_v<arg_type> && std::is_signed_v<arg_type>)
+			return { {}, static_cast<uint64_t>(static_cast<int64_t>(arg)), error_arg::kinds::signed_integer };
+		else if constexpr (std::is_integral_v<arg_type>)
+			return { {}, static_cast<uint64_t>(arg), error_arg::kinds::unsigned_integer };
+		else
+			static_assert(impl::always_false<T>,
+						  "error inputs are limited to std::string_views, integers and escaped_codepoint");
 	}
 
 	struct error_builder
@@ -1090,10 +1118,25 @@ TOML_ANON_NAMESPACE_START
 			concatenate(write_pos, max_write_pos, ": "sv);
 		}
 
-		template <typename T>
-		void append(const T& arg) noexcept
+		void append(const error_arg& arg) noexcept
 		{
-			concatenate(write_pos, max_write_pos, arg);
+			switch (arg.kind)
+			{
+				case error_arg::kinds::string:
+					concatenate(write_pos,
+								max_write_pos,
+								std::string_view{ static_cast<const char*>(arg.ptr), static_cast<size_t>(arg.val) });
+					break;
+				case error_arg::kinds::signed_integer:
+					concatenate(write_pos, max_write_pos, static_cast<int64_t>(arg.val));
+					break;
+				case error_arg::kinds::unsigned_integer: concatenate(write_pos, max_write_pos, arg.val); break;
+				case error_arg::kinds::codepoint:
+					concatenate(write_pos,
+								max_write_pos,
+								escaped_codepoint{ *static_cast<const utf8_codepoint*>(arg.ptr) });
+					break;
+			}
 		}
 
 		TOML_RETURNS_BY_THROWING
@@ -1477,7 +1520,11 @@ TOML_ANON_NAMESPACE_END;
 	do                                                                                                                 \
 	{                                                                                                                  \
 		if TOML_UNLIKELY(is_eof())                                                                                     \
-			set_error_and_return(__VA_ARGS__, "encountered end-of-file"sv);                                            \
+		{                                                                                                              \
+			if (!is_error())                                                                                           \
+				set_eof_error();                                                                                       \
+			return_after_error(__VA_ARGS__);                                                                           \
+		}                                                                                                              \
 	}                                                                                                                  \
 	while (false)
 // clang-format on
@@ -1569,16 +1616,15 @@ TOML_IMPL_NAMESPACE_START
 #endif
 		}
 
-		template <typename... T>
 		TOML_RETURNS_BY_THROWING
 		TOML_NEVER_INLINE
-		void set_error_at(source_position pos, const T&... reason) const
+		void set_error_at_impl(source_position pos, const error_arg* args, size_t count) const
 		{
-			static_assert(sizeof...(T) > 0);
 			return_if_error();
 
 			error_builder builder{ current_scope };
-			(builder.append(reason), ...);
+			for (size_t i = 0; i < count; i++)
+				builder.append(args[i]);
 
 			parse_error_break();
 
@@ -1591,9 +1637,26 @@ TOML_IMPL_NAMESPACE_START
 
 		template <typename... T>
 		TOML_RETURNS_BY_THROWING
+		TOML_NEVER_INLINE
+		void set_error_at(source_position pos, const T&... reason) const
+		{
+			static_assert(sizeof...(T) > 0);
+			const error_arg args[] = { make_error_arg(reason)... };
+			set_error_at_impl(pos, args, sizeof...(T));
+		}
+
+		template <typename... T>
+		TOML_RETURNS_BY_THROWING
 		void set_error(const T&... reason) const
 		{
 			set_error_at(current_position(1), reason...);
+		}
+
+		TOML_RETURNS_BY_THROWING
+		TOML_NEVER_INLINE
+		void set_eof_error() const
+		{
+			set_error("encountered end-of-file"sv);
 		}
 
 		void land(const utf8_codepoint* next)
@@ -2586,7 +2649,7 @@ TOML_IMPL_NAMESPACE_START
 					binary_exponent += drop;
 			}
 
-			const double result = std::ldexp(static_cast<double>(mantissa), binary_exponent);
+			const double result = impl::ldexp(static_cast<double>(mantissa), binary_exponent);
 			if (result > (std::numeric_limits<double>::max)())
 			{
 				set_error_at(begin_pos,

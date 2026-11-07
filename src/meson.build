@@ -25,12 +25,18 @@ if is_pedantic and is_release
 		'-Wsuggest-attribute=pure'
 	)
 endif
+if get_option('default_library') != 'shared'
+	lib_internal_args += cpp.get_supported_arguments('-ffunction-sections', '-fdata-sections')
+endif
+if get_option('default_library') != 'static' and is_gcc
+	lib_internal_args += cpp.get_supported_arguments('-fno-semantic-interposition')
+endif
 
 tomlplusplus_lib = library(
 	meson.project_name(),
 	files('toml.cpp'),
 	cpp_args: lib_internal_args,
-	gnu_symbol_visibility: get_option('default_library') == 'static' ? '' : 'hidden',
+	gnu_symbol_visibility: get_option('default_library') == 'static' ? '' : 'inlineshidden',
 	include_directories: include_dir,
 	install: not is_subproject,
 	version: meson.project_version(),

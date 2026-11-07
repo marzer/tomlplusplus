@@ -58,6 +58,17 @@ endif()
 target_link_libraries(tomlplusplus_odr_test PRIVATE tomlplusplus::tomlplusplus)
 add_test(NAME odr_test COMMAND tomlplusplus_odr_test)
 
+# ---- header-only vtables ----
+
+if(NOT tomlplusplus_BUILD_LIB AND NOT MSVC AND CMAKE_NM)
+  add_test(
+      NAME header_only_vtables
+      COMMAND
+      "${CMAKE_COMMAND}" "-DNM=${CMAKE_NM}" "-DBINARY=$<TARGET_FILE:tomlplusplus_odr_test>"
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/no_vtables.cmake"
+  )
+endif()
+
 # ---- TOML_EXCEPTIONS=0 with compiler exceptions ----
 
 if(tomlplusplus_EXCEPTIONS)

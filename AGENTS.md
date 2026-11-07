@@ -63,8 +63,9 @@ Return early and keep the happy path left-aligned. Member state goes at the top 
 - A new macro goes in `include/toml++/impl/preprocessor.hpp`. One that users may set also needs an `#ifndef` guard, a
   `\def` doc comment, a row in the README's configuration table and an entry in `PUBLIC_MACROS`.
 - The public API carries Doxygen markup, including poxy's commands (`\cpp`, `\out`, `\detail` and so on).
-- C library functions are called through `std::`, as in `std::memcpy` and `std::log10`. The `<c...>` headers only
-  promise the `std::` names.
+- C library functions are called through `std::`, as in `std::memcpy`. The `<c...>` headers only promise the `std::`
+  names. Maths functions are the exception: they go through the `impl::` wrappers in `forward_declarations.hpp`, so
+  that `toml.hpp` doesn't include `<cmath>` with GCC or Clang.
 - Before writing a helper, look for one in `impl::`.
 - The library has no dependencies, and the tests vendor theirs. Don't add one.
 
@@ -157,9 +158,11 @@ tags, which dependabot updates. No CodeQL.
 
 ## Changelog
 
-A user-visible change gets one line under `## Unreleased` in `CHANGELOG.md`. A fix reads "fixed X when doing Y", as the
-user meets the bug, without how it worked or what the code does now. Credit the issue and the person as
-`(#123) (@name)`, and merge fixes of the same kind into one line. A change nobody using or packaging the library can see
+A user-visible change gets one line under `## Unreleased` in `CHANGELOG.md`, of about 60 characters before the credits.
+Aim for that length in the first draft. A fix reads "fixed X when doing Y", as the user meets the bug, with no cause,
+internals, numbers or advice. Two changes are two lines: never "fixed X and Y", and never a semicolon that adds an item
+or context. The exception is an umbrella line that names no single fix, such as "fixed a number of spec conformance
+issues". Credit the issue and the person as `(#123) (@name)`. A change nobody using or packaging the library can see
 gets no entry.
 
 ## Source control

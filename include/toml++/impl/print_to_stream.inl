@@ -35,7 +35,7 @@ TOML_ANON_NAMESPACE_START
 {
 	template <typename T>
 	TOML_INTERNAL_LINKAGE
-	void print_integer_to_stream(std::ostream & stream, T val, value_flags format = {}, size_t min_digits = 0)
+	void print_wide_integer_to_stream(std::ostream & stream, T val, value_flags format, size_t min_digits)
 	{
 		static constexpr auto value_flags_mask =
 			value_flags::format_as_binary | value_flags::format_as_octal | value_flags::format_as_hexadecimal;
@@ -94,6 +94,14 @@ TOML_ANON_NAMESPACE_START
 			stream.put('0');
 		std::memset(first - padding, '0', padding);
 		impl::print_to_stream(stream, first - padding, len + padding);
+	}
+
+	template <typename T>
+	TOML_INTERNAL_LINKAGE
+	void print_integer_to_stream(std::ostream & stream, T val, value_flags format, size_t min_digits)
+	{
+		using wide_type = std::conditional_t<std::is_signed_v<T>, long long, unsigned long long>;
+		print_wide_integer_to_stream(stream, static_cast<wide_type>(val), format, min_digits);
 	}
 
 	TOML_INTERNAL_LINKAGE
@@ -312,7 +320,7 @@ TOML_ANON_NAMESPACE_START
 		static_assert(N >= 32u);
 
 		char* out = buf;
-		if (std::signbit(val))
+		if (impl::signbit(val))
 		{
 			*out++ = '-';
 			val	   = -val;

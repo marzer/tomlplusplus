@@ -165,7 +165,7 @@ jobs:
                           -DCMAKE_CXX_STANDARD=26 -DCMAKE_CXX_FLAGS=-stdlib=libc++ -DCMAKE_EXE_LINKER_FLAGS=-stdlib=libc++
                           -Dtomlplusplus_TESTS_LEAK=ON -Dtomlplusplus_COVERAGE=ON
                       coverage: true
-                      alt_cxx_flags: "-stdlib=libc++ -DTOML_FLOAT_CHARCONV=0 -DTOML_INT_CHARCONV=0"
+                      alt_cxx_flags: "-stdlib=libc++ -DTOML_FLOAT_CHARCONV=0 -DTOML_INT_CHARCONV=0 -DTOML_ENABLE_CHRONO=0"
                     - name: linux-clang-x64-static
                       compiler: "clang++"
                       type: "Release"
@@ -240,7 +240,7 @@ jobs:
                   chmod +x "$RUNNER_TEMP/toml-test"
                   "$RUNNER_TEMP/toml-test" test -toml 1.1 -decoder build/toml-test/tt_decoder -encoder build/toml-test/tt_encoder
 
-            - name: Build and test without exceptions or charconv, with unreleased features
+            - name: Build and test without exceptions, charconv or chrono, with unreleased features
               if: matrix.coverage
               run: |
                   cmake -S . -B build-alt -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.type }} -Dtomlplusplus_BUILD_TESTS=ON \

@@ -144,6 +144,7 @@ TOML_NAMESPACE_START
 
 	  public:
 		TOML_EXPORTED_MEMBER_FUNCTION
+		TOML_EXTERNAL_LINKAGE
 		virtual ~node() noexcept;
 
 		/// \name Type checks
@@ -1131,6 +1132,18 @@ TOML_IMPL_NAMESPACE_START
 	TOML_PURE_GETTER
 	TOML_EXPORTED_FREE_FUNCTION
 	bool TOML_CALLCONV node_deep_equality(const node*, const node*) noexcept;
+
+	struct equal_to_same_type
+	{
+		const node* rhs = {};
+
+		template <typename T>
+		TOML_PURE_GETTER
+		bool operator()(const T& lhs) const noexcept
+		{
+			return lhs == *static_cast<const T*>(rhs);
+		}
+	};
 }
 TOML_IMPL_NAMESPACE_END;
 /// \endcond

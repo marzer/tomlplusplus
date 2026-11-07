@@ -9,7 +9,7 @@
 #include "std_optional.hpp"
 #include "header_start.hpp"
 
-#if TOML_CPP >= 20
+#if TOML_ENABLE_CHRONO
 TOML_IMPL_NAMESPACE_START
 {
 	template <typename ToDuration, typename FromDuration>
@@ -64,7 +64,7 @@ TOML_NAMESPACE_START
 			  day{ static_cast<uint8_t>(d) }
 		{}
 
-#if TOML_DOXYGEN || TOML_CPP >= 20
+#if TOML_DOXYGEN || TOML_ENABLE_CHRONO
 		/// \brief Constructs a date from a year_month_day value.
 		TOML_NODISCARD_CTOR
 		constexpr date(std::chrono::year_month_day value) noexcept
@@ -137,7 +137,7 @@ TOML_NAMESPACE_START
 			return pack(lhs) >= pack(rhs);
 		}
 
-#if TOML_DOXYGEN || TOML_CPP >= 20
+#if TOML_DOXYGEN || TOML_ENABLE_CHRONO
 		/// \brief	Converts the date to a std::chrono::year_month_day.
 		TOML_PURE_GETTER
 		constexpr std::chrono::year_month_day to_chrono() const noexcept
@@ -200,7 +200,7 @@ TOML_NAMESPACE_START
 			  nanosecond{ static_cast<uint32_t>(ns) }
 		{}
 
-#if TOML_DOXYGEN || TOML_CPP >= 20
+#if TOML_DOXYGEN || TOML_ENABLE_CHRONO
 		/// \brief Constructs a time from a hh_mm_ss value.
 		template <typename Duration>
 		TOML_NODISCARD_CTOR
@@ -271,7 +271,7 @@ TOML_NAMESPACE_START
 			return pack(lhs) >= pack(rhs);
 		}
 
-#if TOML_DOXYGEN || TOML_CPP >= 20
+#if TOML_DOXYGEN || TOML_ENABLE_CHRONO
 		/// \brief	Converts the time to a std::chrono::hh_mm_ss.
 		///
 		/// \tparam	Duration	The duration type of the result. Finer parts are truncated.
@@ -348,7 +348,7 @@ TOML_NAMESPACE_START
 				  + static_cast<impl::common_signed_type<H, M>>(m)) }
 		{}
 
-#if TOML_DOXYGEN || TOML_CPP >= 20
+#if TOML_DOXYGEN || TOML_ENABLE_CHRONO
 		/// \brief Constructs a time_offset from hours/minutes values.
 		///
 		/// \param 	h  	The total hours.
@@ -408,7 +408,7 @@ TOML_NAMESPACE_START
 			return lhs.minutes >= rhs.minutes;
 		}
 
-#if TOML_DOXYGEN || TOML_CPP >= 20
+#if TOML_DOXYGEN || TOML_ENABLE_CHRONO
 		/// \brief	Converts the offset to std::chrono::minutes.
 		TOML_PURE_GETTER
 		constexpr std::chrono::minutes to_chrono() const noexcept
@@ -503,7 +503,7 @@ TOML_NAMESPACE_START
 			  offset{ off }
 		{}
 
-#if TOML_DOXYGEN || TOML_CPP >= 20
+#if TOML_DOXYGEN || TOML_ENABLE_CHRONO
 		/// \brief Constructs a date_time from year_month_day/hh_mm_ss values.
 		///
 		/// \param 	d  	The date component.
@@ -617,7 +617,7 @@ TOML_NAMESPACE_START
 			return !(lhs < rhs);
 		}
 
-#if TOML_DOXYGEN || TOML_CPP >= 20
+#if TOML_DOXYGEN || TOML_ENABLE_CHRONO
 		/// \brief	Converts the date and time to a std::chrono::local_time. The offset is ignored.
 		///
 		/// \tparam	Duration	The duration type of the result. Finer parts are truncated.

@@ -5,7 +5,7 @@
 #pragma once
 
 #include "preprocessor.hpp"
-#if TOML_CPP >= 20
+#if TOML_ENABLE_CHRONO
 TOML_DISABLE_WARNINGS;
 #include <chrono>
 TOML_ENABLE_WARNINGS;
