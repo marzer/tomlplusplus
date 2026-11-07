@@ -783,6 +783,34 @@ TOML_NAMESPACE_START
 
 		/// @}
 
+#if TOML_ENABLE_REFLECTION || TOML_INTELLISENSE
+
+		/// \name Reflection
+		/// @{
+
+		/// \brief	Deserializes this table into an object of type `T` using C++26 static reflection.
+		///
+		/// \detail	\cpp
+		/// struct Point { int x; int y; };
+		/// auto pt = toml::parse("x = 3\ny = 4").deserialize<Point>();
+		/// \ecpp
+		///
+		/// \throws	toml::serde_error	A required member was missing or had the wrong type (when exceptions
+		///								are enabled).
+		/// \returns When exceptions are enabled, the deserialized `T`. When they are disabled, a
+		///			#toml::serde_result<T> holding either the value or a #toml::serde_error.
+		///
+		/// \availability This is only available when #TOML_ENABLE_REFLECTION is enabled.
+		//
+		// defined out-of-line in serde.hpp (included after this header), where serde_result is visible.
+		template <typename T>
+		TOML_NODISCARD
+		auto deserialize() const;
+
+		/// @}
+
+#endif // TOML_ENABLE_REFLECTION
+
 		/// \name Iteration
 		/// @{
 

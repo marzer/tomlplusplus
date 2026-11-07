@@ -1101,6 +1101,29 @@
 #define TOML_ENABLE_SIMD 1
 #endif
 
+// reflection-based serialization
+#if TOML_HAS_INCLUDE(<meta>)                                                                                                   \
+					 && ((defined(__cpp_impl_reflection) && __cpp_impl_reflection >= 202506L)                          \
+						 || (defined(__cpp_reflection) && __cpp_reflection >= 202411L))
+#define TOML_HAS_REFLECTION 1
+#else
+#define TOML_HAS_REFLECTION 0
+#endif
+#if !defined(TOML_ENABLE_REFLECTION) && TOML_HAS_REFLECTION
+#define TOML_ENABLE_REFLECTION 1
+#endif
+#if defined(TOML_ENABLE_REFLECTION) && TOML_ENABLE_REFLECTION && !TOML_HAS_REFLECTION && !TOML_INTELLISENSE
+#error TOML_ENABLE_REFLECTION was explicitly enabled but the compiler does not support C++26 static reflection + annotations.
+#endif
+#ifndef TOML_ENABLE_REFLECTION
+#define TOML_ENABLE_REFLECTION 0
+#endif
+
+// reflection: allow reaching private members without an explicit [[=toml::reflectable]] annotation
+#if !defined(TOML_SERDE_ALLOW_PRIVATE)
+#define TOML_SERDE_ALLOW_PRIVATE 0
+#endif
+
 // windows compat
 #if !defined(TOML_ENABLE_WINDOWS_COMPAT) && defined(TOML_WINDOWS_COMPAT) // was TOML_WINDOWS_COMPAT pre-3.0
 #define TOML_ENABLE_WINDOWS_COMPAT TOML_WINDOWS_COMPAT
@@ -1616,6 +1639,11 @@ TOML_NAMESPACE_START
 	class toml_formatter;
 	class json_formatter;
 	class yaml_formatter;
+
+#if TOML_ENABLE_REFLECTION
+	template <typename T>
+	table serialize(const T&);
+#endif
 
 	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex);
 #if TOML_EXCEPTIONS
@@ -8620,6 +8648,16 @@ TOML_NAMESPACE_START
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
 
+#if TOML_ENABLE_REFLECTION || TOML_INTELLISENSE
+
+		//
+		// defined out-of-line in serde.hpp (included after this header), where serde_result is visible.
+		template <typename T>
+		TOML_NODISCARD
+		auto deserialize() const;
+
+#endif // TOML_ENABLE_REFLECTION
+
 		using iterator = toml::table_iterator;
 
 		using const_iterator = toml::const_table_iterator;
@@ -10824,6 +10862,388 @@ TOML_NAMESPACE_END;
 TOML_POP_WARNINGS;
 
 #endif // TOML_ENABLE_FORMATTERS
+
+//********  impl/serde.hpp  ********************************************************************************************
+
+#if TOML_ENABLE_REFLECTION
+
+//********  impl/std_meta.hpp  *****************************************************************************************
+
+TOML_DISABLE_WARNINGS;
+#if TOML_ENABLE_REFLECTION
+#include <meta>
+#endif
+TOML_ENABLE_WARNINGS;
+
+//********  impl/serde.hpp  ********************************************************************************************
+
+#if !TOML_EXCEPTIONS
+
+//********  impl/std_variant.hpp  **************************************************************************************
+
+TOML_DISABLE_WARNINGS;
+#include <variant>
+TOML_ENABLE_WARNINGS;
+
+//********  impl/serde.hpp  ********************************************************************************************
+
+#endif
+
+TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#ifndef __clang__
+#pragma inline_recursion(on)
+#endif
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
+
+TOML_IMPL_NAMESPACE_START
+{
+	struct transient_
+	{};
+	struct flatten_
+	{};
+	struct reflectable_
+	{};
+}
+TOML_IMPL_NAMESPACE_END;
+
+TOML_NAMESPACE_START
+{
+	inline constexpr impl::transient_ transient;
+
+	inline constexpr impl::flatten_ flatten;
+
+	inline constexpr impl::reflectable_ reflectable;
+
+	template <size_t N>
+	struct rename
+	{
+		char value[N]{};
+
+		consteval rename(const char (&str)[N]) noexcept
+		{
+			for (size_t i = 0; i < N; ++i)
+				value[i] = str[i];
+		}
+	};
+	template <size_t N>
+	rename(const char (&)[N]) -> rename<N>;
+
+	class serde_error
+	{
+	  private:
+		std::string desc;
+		std::string where;
+
+	  public:
+		TOML_NODISCARD_CTOR
+		serde_error(std::string desc, std::string key) noexcept
+			: desc{ static_cast<std::string&&>(desc) },
+			  where{ static_cast<std::string&&>(key) }
+		{}
+
+		TOML_NODISCARD
+		std::string_view description() const noexcept
+		{
+			return desc;
+		}
+
+		TOML_NODISCARD
+		std::string_view key() const noexcept
+		{
+			return where;
+		}
+	};
+
+#if !TOML_EXCEPTIONS
+
+	template <typename T>
+	class serde_result
+	{
+	  private:
+		std::variant<T, serde_error> storage;
+
+	  public:
+		TOML_NODISCARD_CTOR
+		serde_result() noexcept(std::is_nothrow_default_constructible_v<T>) : storage{ std::in_place_index<0> }
+		{}
+
+		TOML_NODISCARD_CTOR
+		serde_result(serde_error err) noexcept : storage{ static_cast<serde_error&&>(err) }
+		{}
+
+		TOML_NODISCARD
+		explicit operator bool() const noexcept
+		{
+			return storage.index() == 0;
+		}
+
+		TOML_NODISCARD
+		bool has_value() const noexcept
+		{
+			return storage.index() == 0;
+		}
+
+		TOML_NODISCARD
+		T& value() noexcept
+		{
+			return std::get<0>(storage);
+		}
+
+		TOML_NODISCARD
+		const T& value() const noexcept
+		{
+			return std::get<0>(storage);
+		}
+
+		TOML_NODISCARD
+		const serde_error& error() const noexcept
+		{
+			return std::get<1>(storage);
+		}
+	};
+#endif // !TOML_EXCEPTIONS
+}
+TOML_NAMESPACE_END;
+
+TOML_IMPL_NAMESPACE_START
+{
+	template <typename>
+	struct is_optional_ : std::false_type
+	{};
+	template <typename U>
+	struct is_optional_<optional<U>> : std::true_type
+	{};
+	template <typename T>
+	inline constexpr bool is_optional = is_optional_<remove_cvref<T>>::value;
+
+	consteval std::meta::info annotation_type(std::meta::info a)
+	{
+		return std::meta::remove_const(std::meta::dealias(std::meta::type_of(a)));
+	}
+
+	template <typename Tag, std::meta::info Mem>
+	consteval bool has_annotation()
+	{
+		template for (constexpr auto a : std::define_static_array(
+						  std::meta::annotations_of(Mem))) if (annotation_type(a) == ^^Tag) return true;
+		return false;
+	}
+
+	template <std::meta::info Mem>
+	consteval std::string_view member_key()
+	{
+		template for (constexpr auto a : std::define_static_array(std::meta::annotations_of(Mem)))
+		{
+			constexpr std::meta::info t = annotation_type(a);
+			if constexpr (std::meta::has_template_arguments(t) && std::meta::template_of(t) == ^^rename)
+			{
+				constexpr auto r = std::meta::extract<typename[:t:]>(a);
+				return std::define_static_string(std::string_view{ r.value, sizeof(r.value) - 1 });
+			}
+		}
+		return std::meta::identifier_of(Mem);
+	}
+
+	template <typename T>
+	consteval bool reflectable_type()
+	{
+		return TOML_SERDE_ALLOW_PRIVATE != 0 || has_annotation<reflectable_, ^^T>();
+	}
+
+	template <typename T>
+	consteval std::meta::access_context serde_access()
+	{
+		if constexpr (reflectable_type<T>())
+			return std::meta::access_context::unchecked();
+		else
+			return std::meta::access_context::current();
+	}
+
+	template <typename T>
+	inline constexpr bool is_serde_struct =
+		std::is_class_v<remove_cvref<T>> && !is_one_of<remove_cvref<T>, table, array, std::string> && !is_wide_string<T>
+		&& !is_string_like<remove_cvref<T>> && !can_partially_represent_native<remove_cvref<T>>;
+
+	template <typename T>
+	node_ptr serde_to_node(const T& val);
+
+	template <typename T>
+	table serde_struct_to_table(const T& obj)
+	{
+		table out;
+		template for (constexpr auto member :
+					  std::define_static_array(std::meta::nonstatic_data_members_of(^^T, serde_access<T>())))
+		{
+			if constexpr (!has_annotation<transient_, member>())
+			{
+				using member_type = typename[:std::meta::type_of(member):];
+				const auto& field = obj.[:member:];
+
+				if constexpr (is_optional<member_type>)
+				{
+					if (field)
+						out.insert(member_key<member>(), std::move(*serde_to_node(*field)));
+				}
+				else if constexpr (has_annotation<flatten_, member>() && is_serde_struct<member_type>)
+				{
+					table sub = serde_struct_to_table(field);
+					for (auto&& [k, v] : sub)
+						out.insert(k, std::move(v));
+				}
+				else
+				{
+					out.insert(member_key<member>(), std::move(*serde_to_node(field)));
+				}
+			}
+		}
+		return out;
+	}
+
+	template <typename T>
+	node_ptr serde_to_node(const T& val)
+	{
+		if constexpr (is_serde_struct<T>)
+			return node_ptr{ new table{ serde_struct_to_table(val) } };
+		else
+			return make_node(val);
+	}
+
+	struct serde_sink
+	{
+#if !TOML_EXCEPTIONS
+		optional<serde_error> err;
+#endif
+
+		void fail(std::string desc, std::string key)
+		{
+#if TOML_EXCEPTIONS
+			throw serde_error{ static_cast<std::string&&>(desc), static_cast<std::string&&>(key) };
+#else
+			if (!err)
+				err.emplace(static_cast<std::string&&>(desc), static_cast<std::string&&>(key));
+#endif
+		}
+
+		TOML_NODISCARD
+		bool failed() const noexcept
+		{
+#if TOML_EXCEPTIONS
+			return false;
+#else
+			return err.has_value();
+#endif
+		}
+	};
+
+	template <typename T>
+	void serde_from_node(const node& n, T& out, std::string_view key, serde_sink& sink);
+
+	template <typename T>
+	void serde_table_to_struct(const table& tbl, T& out, serde_sink& sink)
+	{
+		template for (constexpr auto member :
+					  std::define_static_array(std::meta::nonstatic_data_members_of(^^T, serde_access<T>())))
+		{
+			if (sink.failed())
+				return;
+
+			if constexpr (!has_annotation<transient_, member>())
+			{
+				using member_type			   = typename[:std::meta::type_of(member):];
+				constexpr std::string_view key = member_key<member>();
+
+				if constexpr (has_annotation<flatten_, member>() && is_serde_struct<member_type>)
+				{
+					serde_table_to_struct(tbl, out.[:member:], sink);
+				}
+				else if (const node* n = tbl.get(key))
+				{
+					serde_from_node(*n, out.[:member:], key, sink);
+				}
+				else if constexpr (!is_optional<member_type>)
+				{
+					sink.fail("missing required key", std::string{ key });
+				}
+			}
+		}
+	}
+
+	// write a single node into a destination field
+	template <typename T>
+	void serde_from_node(const node& n, T& out, std::string_view key, serde_sink& sink)
+	{
+		if constexpr (is_optional<T>)
+		{
+			out.emplace();
+			serde_from_node(n, *out, key, sink);
+		}
+		else if constexpr (is_serde_struct<T>)
+		{
+			const table* sub = n.as_table();
+			if (!sub)
+			{
+				sink.fail("expected a table", std::string{ key });
+				return;
+			}
+			serde_table_to_struct(*sub, out, sink);
+		}
+		else
+		{
+			auto v = n.value<T>();
+			if (!v)
+				sink.fail("type mismatch", std::string{ key });
+			else
+				out = static_cast<T&&>(*v);
+		}
+	}
+}
+TOML_IMPL_NAMESPACE_END;
+
+TOML_NAMESPACE_START
+{
+	template <typename T>
+	TOML_NODISCARD
+	table serialize(const T& obj)
+	{
+		static_assert(impl::is_serde_struct<T>, "toml::serialize requires a struct or class type");
+		return impl::serde_struct_to_table(obj);
+	}
+
+	template <typename T>
+	auto table::deserialize() const
+	{
+		static_assert(impl::is_serde_struct<T>, "table::deserialize requires a struct or class type");
+		impl::serde_sink sink;
+#if TOML_EXCEPTIONS
+		T out{};
+		impl::serde_table_to_struct(*this, out, sink);
+		return out;
+#else
+		serde_result<T> res;
+		impl::serde_table_to_struct(*this, res.value(), sink);
+		if (sink.err)
+			return serde_result<T>{ static_cast<serde_error&&>(*sink.err) };
+		return res;
+#endif
+	}
+}
+TOML_NAMESPACE_END;
+
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#ifndef __clang__
+#pragma inline_recursion(off)
+#endif
+#endif
+TOML_POP_WARNINGS;
+
+#endif // TOML_ENABLE_REFLECTION
 
 #if TOML_IMPLEMENTATION
 
@@ -18722,6 +19142,7 @@ TOML_POP_WARNINGS;
 #undef TOML_DOXYGEN
 #undef TOML_EMPTY_BASES
 #undef TOML_ENABLE_IF
+#undef TOML_ENABLE_REFLECTION
 #undef TOML_ENABLE_WARNINGS
 #undef TOML_EVAL_BOOL_0
 #undef TOML_EVAL_BOOL_1
@@ -18739,6 +19160,7 @@ TOML_POP_WARNINGS;
 #undef TOML_HAS_CUSTOM_OPTIONAL_TYPE
 #undef TOML_HAS_FEATURE
 #undef TOML_HAS_INCLUDE
+#undef TOML_HAS_REFLECTION
 #undef TOML_HAS_SSE2
 #undef TOML_HAS_SSE4_1
 #undef TOML_HIDDEN_CONSTRAINT
@@ -18803,6 +19225,7 @@ TOML_POP_WARNINGS;
 #undef TOML_SA_VALUE_MESSAGE_CONST_CHAR8
 #undef TOML_SA_VALUE_MESSAGE_U8STRING_VIEW
 #undef TOML_SA_VALUE_MESSAGE_WSTRING
+#undef TOML_SERDE_ALLOW_PRIVATE
 #undef TOML_SIMPLE_STATIC_ASSERT_MESSAGES
 #undef TOML_TRIVIAL_ABI
 #undef TOML_UINT128
