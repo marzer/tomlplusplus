@@ -4,6 +4,25 @@
 // SPDX-License-Identifier: MIT
 
 #include "tests.hpp"
+TOML_DISABLE_WARNINGS;
+#if __has_include(<charconv>)
+#include <charconv>
+#endif
+#include <cmath>
+#include <cstring>
+#include <random>
+#include <tuple>
+#if defined(__SSE2__) || defined(_M_X64)
+#include <pmmintrin.h>
+#endif
+TOML_ENABLE_WARNINGS;
+
+#if TOML_HAS_FLOAT_CHARCONV                                                                                            \
+	|| (defined(_LIBCPP_AVAILABILITY_HAS_TO_CHARS_FLOATING_POINT) && _LIBCPP_AVAILABILITY_HAS_TO_CHARS_FLOATING_POINT)
+#define HAS_FLOAT_TO_CHARS 1
+#else
+#define HAS_FLOAT_TO_CHARS 0
+#endif
 
 namespace
 {
@@ -43,6 +62,50 @@ namespace
 			digits.insert(digits.begin(), '-');
 		return digits;
 	}
+
+#if HAS_FLOAT_TO_CHARS
+
+	template <typename T>
+	std::string reference_float(T val, bool relaxed)
+	{
+		std::string text = std::signbit(val) ? "-" : "";
+		val				 = std::abs(val);
+		if (val == T{})
+			return text + "0.0";
+
+		const auto scientific = [&](auto... precision)
+		{
+			char buf[64];
+			const auto str = std::string{ buf, std::to_chars(buf, buf + sizeof(buf), val, precision...).ptr };
+			const auto e   = str.find('e');
+			return std::pair{ str.substr(0, 1) + (e > 1u ? str.substr(2u, e - 2u) : ""s),
+							  std::stoi(str.substr(e + 1u)) };
+		};
+
+		auto [digits, exponent] = scientific(std::chars_format::scientific);
+		if (relaxed && digits.length() > 6u)
+			std::tie(digits, exponent) = scientific(std::chars_format::scientific, 5);
+		while (digits.length() > 1u && digits.back() == '0')
+			digits.pop_back();
+
+		if (exponent < -4 || exponent >= (relaxed ? 6 : 16))
+		{
+			text += digits.substr(0, 1);
+			if (digits.length() > 1u)
+				text += "." + digits.substr(1);
+			const auto magnitude = std::to_string(exponent < 0 ? -exponent : exponent);
+			return text + (exponent < 0 ? "e-" : "e+") + (magnitude.length() < 2u ? "0" : "") + magnitude;
+		}
+		if (exponent < 0)
+			return text + "0." + std::string(static_cast<size_t>(-exponent - 1), '0') + digits;
+
+		const auto whole = static_cast<size_t>(exponent) + 1u;
+		if (digits.length() <= whole)
+			return text + digits + std::string(whole - digits.length(), '0') + ".0";
+		return text + digits.substr(0, whole) + "." + digits.substr(whole);
+	}
+
+#endif
 }
 
 TEST_CASE("printing - nodes use the toml formatter")
@@ -192,7 +255,81 @@ TEMPLATE_TEST_CASE("printing - floating-point", "", float, double)
 		CHECK(printed(TestType{ 1 } / TestType{ 3 }, value_flags::none, true) == "0.333333"sv);
 		CHECK(printed(TestType{ 123456.75 }, value_flags::none, true) == "123457.0"sv);
 	}
+
+#if HAS_FLOAT_TO_CHARS
+
+	SECTION("shortest digits in python's repr() layout, or 6 digits in %g's layout when relaxed")
+	{
+		using bits_type					= std::conditional_t<sizeof(TestType) == sizeof(uint32_t), uint32_t, uint64_t>;
+		static constexpr auto from_bits = [](bits_type bits) noexcept
+		{
+			TestType val;
+			std::memcpy(&val, &bits, sizeof(val));
+			return val;
+		};
+
+		std::vector<TestType> values{ (limits::min)(),
+									  (limits::max)(),
+									  limits::denorm_min(),
+									  limits::epsilon(),
+									  std::nextafter(static_cast<TestType>(1e-4), TestType{}),
+									  static_cast<TestType>(1e-4),
+									  std::nextafter(static_cast<TestType>(1e16), TestType{}),
+									  static_cast<TestType>(1e16) };
+		for (int exp = limits::min_exponent - limits::digits; exp < limits::max_exponent; exp++)
+			values.push_back(std::ldexp(TestType{ 1 }, exp));
+		for (int exp = limits::min_exponent10; exp <= limits::max_exponent10; exp++)
+			values.push_back(static_cast<TestType>(std::pow(10.0, exp)));
+
+		std::mt19937_64 rng{ 0x5407u };
+		static constexpr auto subnormal_count = bits_type{ 1 } << (limits::digits - 1);
+		for (size_t i = 0; i < 20000u; i++)
+		{
+			const auto bits = static_cast<bits_type>(rng());
+			if (const auto val = from_bits(bits); std::isfinite(val))
+				values.push_back(val);
+			const auto subnormal = from_bits(static_cast<bits_type>(bits % subnormal_count));
+			values.push_back(i % 2u ? -subnormal : subnormal);
+		}
+
+		std::vector<std::string> mismatches;
+		for (const auto val : values)
+		{
+			for (const bool relaxed : { false, true })
+			{
+				const auto expected = reference_float(val, relaxed);
+				const auto str		= printed(val, value_flags::none, relaxed);
+				if (str != expected && mismatches.size() < 10u)
+					mismatches.push_back(str + " should be " + expected);
+			}
+		}
+		CAPTURE(mismatches);
+		CHECK(mismatches.empty());
+	}
+
+#endif
 }
+
+#if !TOML_FLOAT_CHARCONV && (defined(__SSE2__) || defined(_M_X64))
+
+TEST_CASE("printing - subnormals with denormals-are-zero set")
+{
+	using limits = std::numeric_limits<double>;
+
+	for (const auto val : { limits::denorm_min(), std::nextafter((limits::min)(), 0.0) })
+	{
+		const auto node		= toml::value{ val };
+		const auto expected = streamed(node);
+		const auto csr		= _mm_getcsr();
+		_MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_ON);
+		_MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
+		const auto str = streamed(node);
+		_mm_setcsr(csr);
+		CHECK(str == expected);
+	}
+}
+
+#endif
 
 TEST_CASE("printing - booleans")
 {

@@ -1356,33 +1356,73 @@ TOML_ENABLE_WARNINGS;
 /// compile errors, saying: "error C3878: syntax error: unexpected token ',' following 'simple-type-specifier'"
 //# }}
 
-/// @}
 //#====================================================================================================================
 //# CHARCONV SUPPORT
 //#====================================================================================================================
 
-#if !defined(TOML_FLOAT_CHARCONV) && (TOML_GCC || TOML_CLANG || (TOML_ICC && !TOML_ICC_CL))
-// not supported by any version of GCC or Clang as of 26/11/2020
-// not supported by any version of ICC on Linux as of 11/01/2021
+#if TOML_HAS_INCLUDE(<version>)
+TOML_DISABLE_WARNINGS;
+#include <version>
+TOML_ENABLE_WARNINGS;
+#endif
+
+// libc++ never defines __cpp_lib_to_chars, and its availability flags follow the deployment target on apple
+#if !TOML_HAS_INCLUDE(<charconv>)
+#define TOML_HAS_FLOAT_CHARCONV 0
+#elif defined(_LIBCPP_VERSION)
+#if defined(_LIBCPP_AVAILABILITY_HAS_FROM_CHARS_FLOATING_POINT) && _LIBCPP_AVAILABILITY_HAS_FROM_CHARS_FLOATING_POINT  \
+	&& defined(_LIBCPP_AVAILABILITY_HAS_TO_CHARS_FLOATING_POINT) && _LIBCPP_AVAILABILITY_HAS_TO_CHARS_FLOATING_POINT
+#define TOML_HAS_FLOAT_CHARCONV 1
+#else
+#define TOML_HAS_FLOAT_CHARCONV 0
+#endif
+#elif defined(__cpp_lib_to_chars) && __cpp_lib_to_chars >= 201611L
+#define TOML_HAS_FLOAT_CHARCONV 1
+#else
+#define TOML_HAS_FLOAT_CHARCONV 0
+#endif
+
+#ifndef TOML_FLOAT_CHARCONV
+#if TOML_HAS_FLOAT_CHARCONV
+#define TOML_FLOAT_CHARCONV 1
+#else
 #define TOML_FLOAT_CHARCONV 0
 #endif
-#if !defined(TOML_INT_CHARCONV) && (defined(__EMSCRIPTEN__) || defined(__APPLE__))
-// causes link errors on emscripten
-// causes Mac OS SDK version errors on some versions of Apple Clang
+#endif
+//# {{
+/// \def TOML_FLOAT_CHARCONV
+/// \brief Use `std::from_chars()` and `std::to_chars()` to parse and print floats.
+/// \detail Defaults to `1` when the standard library has both for `float` and `double`: libstdc++ from GCC 11, the
+///			MSVC STL from Visual Studio 2019 16.4, and libc++ from version 20 (on Apple platforms, from a deployment
+///			target of macOS 26 or the matching iOS, tvOS and watchOS). Otherwise `0`, which uses `snprintf()` and
+///			`strtod()` instead. Both give the same values and the same text; `1` is faster.
+//# }}
+
+#ifndef TOML_INT_CHARCONV
+// libc++ before 15 needed a newer apple deployment target for integer to_chars, and early emscripten didn't build it
+#if TOML_HAS_INCLUDE(<charconv>)                                                                                                   \
+					 && !(defined(_LIBCPP_VERSION) && _LIBCPP_VERSION < 15000                                          \
+						  && (defined(__APPLE__) || defined(__EMSCRIPTEN__)))
+#define TOML_INT_CHARCONV 1
+#else
 #define TOML_INT_CHARCONV 0
 #endif
-#ifndef TOML_INT_CHARCONV
-#define TOML_INT_CHARCONV 1
 #endif
-#ifndef TOML_FLOAT_CHARCONV
-#define TOML_FLOAT_CHARCONV 1
-#endif
+//# {{
+/// \def TOML_INT_CHARCONV
+/// \brief Use `std::from_chars()` and `std::to_chars()` to parse and print integers.
+/// \detail Defaults to `1` when the standard library has `<charconv>`, except libc++ before version 15 on Apple
+///			platforms and Emscripten. Both settings give the same results.
+//# }}
+
 #if (TOML_INT_CHARCONV || TOML_FLOAT_CHARCONV) && !TOML_HAS_INCLUDE(<charconv>)
 #undef TOML_INT_CHARCONV
 #undef TOML_FLOAT_CHARCONV
 #define TOML_INT_CHARCONV	0
 #define TOML_FLOAT_CHARCONV 0
 #endif
+
+/// @}
 
 //#=====================================================================================================================
 //# SFINAE

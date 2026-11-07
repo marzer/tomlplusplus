@@ -14,6 +14,19 @@
 #include "../include/toml++/toml.hpp"
 #endif
 
+#if (defined(_GLIBCXX_RELEASE) && (_GLIBCXX_RELEASE >= 12 || (_GLIBCXX_RELEASE == 11 && defined(__linux__))))          \
+	|| (defined(_MSVC_STL_VERSION) && _MSC_VER >= 1924)                                                                \
+	|| (defined(_LIBCPP_VERSION) && _LIBCPP_VERSION >= 200000 && !defined(__APPLE__))
+static_assert(TOML_HAS_FLOAT_CHARCONV,
+			  "libstdc++ 11, the MSVC STL from VS 2019 16.4 and libc++ 20 have float charconv");
+#endif
+#ifndef FLOAT_CHARCONV_SET_BY_BUILD
+static_assert(TOML_FLOAT_CHARCONV == TOML_HAS_FLOAT_CHARCONV);
+#endif
+#if !defined(INT_CHARCONV_SET_BY_BUILD) && (!defined(_LIBCPP_VERSION) || _LIBCPP_VERSION >= 15000)
+static_assert(TOML_INT_CHARCONV);
+#endif
+
 namespace toml
 {
 	using std::declval;

@@ -71,4 +71,5 @@ toml::v3::toml_formatter::print
 toml::v3::toml_formatter::print_inline
 toml::v3::toml_formatter::print_pending_table_separator
 toml::v3::yaml_formatter::print
+toml::v3::yaml_formatter::print_yaml_float
 toml::v3::yaml_formatter::print_yaml_string

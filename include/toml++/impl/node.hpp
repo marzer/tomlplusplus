@@ -530,6 +530,11 @@ TOML_NAMESPACE_START
 		/// 		(e.g. std::wstring on Windows). If the source value cannot be represented by
 		/// 		the destination type, an empty optional is returned.
 		///
+		/// 		A float converts to a narrower floating-point type when it is within that type's range, and is
+		/// 		rounded to the nearest value the type can hold. An integer converts to a floating-point type
+		/// 		only where that type holds every integer exactly: up to 2^24 in magnitude for `float`, and up to
+		/// 		2^53 for `double`.
+		///
 		/// \godbolt{zzG81K}
 		///
 		/// \cpp

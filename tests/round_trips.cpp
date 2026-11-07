@@ -5,6 +5,7 @@
 
 #include "tests.hpp"
 TOML_DISABLE_WARNINGS;
+#include <cfenv>
 #include <cmath>
 #include <cstring>
 #include <random>
@@ -450,6 +451,57 @@ TEST_CASE("round trips - floats")
 								toml_formatter::default_flags,
 								[](double a, double b) { return (std::isnan(a) && std::isnan(b)) || a == b; });
 	}
+
+#if defined(FE_TONEAREST) && defined(FE_DOWNWARD) && defined(FE_UPWARD) && defined(FE_TOWARDZERO)
+
+	SECTION("the rounding mode changes nothing")
+	{
+		static constexpr auto doc = "a = 0.1\nb = 1023.9999999999999\nc = 2.4703282292062328e-324\nd = -1e-400\n"sv;
+		static constexpr auto expected = "a = 0.1\nb = 1023.9999999999999\nc = 5e-324\nd = -0.0"sv;
+
+		for (const int mode : { FE_TONEAREST, FE_DOWNWARD, FE_UPWARD, FE_TOWARDZERO })
+		{
+			const int previous = std::fegetround();
+			std::fesetround(mode);
+			const auto parsed  = parse_quietly(doc);
+			const auto printed = parsed ? print_toml(*parsed, toml_formatter::default_flags) : ""s;
+			std::fesetround(previous);
+
+			CAPTURE(mode);
+			CHECK(printed == expected);
+		}
+	}
+
+#endif
+
+	SECTION("the floating-point exception flags are left as they were")
+	{
+		std::feclearexcept(FE_ALL_EXCEPT);
+		const auto parsed	= parse_quietly("a = 0.1\nb = 1e-400\nc = 5e-324\n");
+		const auto printed	= parsed ? print_toml(*parsed, toml_formatter::default_flags) : ""s;
+		const auto overflow = parse_quietly("d = 1e999");
+		const auto raised	= std::fetestexcept(FE_ALL_EXCEPT);
+
+		CHECK(printed == "a = 0.1\nb = 0.0\nc = 5e-324"sv);
+		CHECK(!overflow);
+		CHECK(raised == 0);
+	}
+
+#if defined(__GLIBC__) && (defined(__x86_64__) || defined(__i386__))
+
+	SECTION("nothing traps with floating-point traps enabled")
+	{
+		feenableexcept(FE_OVERFLOW | FE_UNDERFLOW | FE_DIVBYZERO | FE_INVALID);
+		const auto parsed	= parse_quietly("a = 1e-400\nb = 5e-324\nc = -2.2250738585072011e-308\n");
+		const auto printed	= parsed ? print_toml(*parsed, toml_formatter::default_flags) : ""s;
+		const auto overflow = parse_quietly("d = 1e999");
+		fedisableexcept(FE_OVERFLOW | FE_UNDERFLOW | FE_DIVBYZERO | FE_INVALID);
+
+		CHECK(printed == "a = 0.0\nb = 5e-324\nc = -2.225073858507201e-308"sv);
+		CHECK(!overflow);
+	}
+
+#endif
 }
 
 TEST_CASE("round trips - dates and times")

@@ -152,6 +152,12 @@ TOML_IMPL_NAMESPACE_START
 			return !!(config_.flags & format_flags::force_multiline_arrays);
 		}
 
+		TOML_PURE_INLINE_GETTER
+		bool relaxed_float_precision() const noexcept
+		{
+			return !!(config_.flags & format_flags::relaxed_float_precision);
+		}
+
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void attach(std::ostream& stream) noexcept;
 

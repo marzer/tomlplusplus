@@ -339,6 +339,47 @@ namespace
 			}
 		}
 	}
+
+#ifndef _MSVC_STL_VERSION // msvc's std::map allocates in table's noexcept constructors, so failing there terminates
+	int parse_with_failing_allocations(std::string_view doc)
+	{
+		int failures = {};
+		for (size_t n = 1;; n++)
+		{
+			std::string outcome = "parsed";
+			allocations			= {};
+			failing_allocation	= n;
+			try
+			{
+				const auto result = toml::parse(doc);
+				if (!result)
+					outcome = "failed: " + std::string{ result.error().description() };
+			}
+			catch (const std::bad_alloc&)
+			{
+				outcome = "threw std::bad_alloc";
+			}
+			catch (...)
+			{
+				outcome = "threw something else";
+			}
+			failing_allocation = {};
+
+			if (allocations < n)
+			{
+				if (outcome == "parsed")
+					return failures;
+				std::cerr << "parse, with no allocation failing: " << outcome << "\n";
+				return failures + 1;
+			}
+			if (outcome != "threw std::bad_alloc")
+			{
+				std::cerr << "parse, failing allocation " << n << ": " << outcome << "\n";
+				failures++;
+			}
+		}
+	}
+#endif
 }
 
 int main()
@@ -426,11 +467,16 @@ int main()
 			  + print_to_failing_stream<toml::yaml_formatter>("yaml_formatter", big);
 
 	const auto small = toml::table{ { "a", 1 },
-									{ "b", toml::array{ 1.5, "two" } },
+									{ "b", toml::array{ -1.2345678901234568e+17, "two" } },
 									{ "c", toml::table{ { "d", toml::table{ { "e", true } } } } } };
 	failures += print_with_failing_allocations<toml::toml_formatter>("toml_formatter", small)
 			  + print_with_failing_allocations<toml::json_formatter>("json_formatter", small)
 			  + print_with_failing_allocations<toml::yaml_formatter>("yaml_formatter", small);
+
+#ifndef _MSVC_STL_VERSION
+	failures += parse_with_failing_allocations(
+		"a = 1.5\nb = 0.1000000000000000055511151231257827021181583404541015625\nc = 1e-400\n");
+#endif
 
 	return failures ? EXIT_FAILURE : EXIT_SUCCESS;
 }

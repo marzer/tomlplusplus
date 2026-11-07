@@ -23,7 +23,7 @@
 - fixed missing `#include` in `date_time.hpp` (#298) (@dwithun-dev)
 - fixed Clang 20 warning about whitespace in literal operator declarations (#263) (@eddelbuettel)
 - fixed C++26 deprecation warning about `std::is_trivial` (#270) (@nmpassthf)
-- fixed warnings from inside toml++ in code built with Clang's `-Weverything`, or with GCC's `-Wshadow` or `-Wunused-variable`
+- fixed warnings from inside toml++ in code built with Clang's `-Weverything`, or with GCC's `-Wshadow` or `-Wunused-variable`, and GCC's `-Wreturn-type` in unoptimised builds with `TOML_FLOAT_CHARCONV` enabled
 - fixed MSVC warning C4702 (unreachable code) from the parser (#307) (@soniafergusonship)
 - fixed out-of-bounds read in `path::subpath()` when the arguments go past the end of the path (#319) (@aouxwoux)
 - fixed undefined behaviour and wrong results when appending or prepending a `toml::path` to itself (@arfa-21)
@@ -31,7 +31,11 @@
 - fixed incorrect source positions and misleading messages in a number of parse errors
 - fixed times with more than 64 digits of fractional seconds failing to parse
 - fixed leap seconds failing to parse
-- fixed subnormal floats failing to parse with libc++
+- fixed very small floats, such as subnormals and `1e-999` (which rounds to zero), failing to parse with MSVC or libc++
+- fixed floats printing differently with each compiler, such as `0.1` as `0.10000000000000001` with GCC and Clang, or `100000.0` as `1e+05` with MSVC (#179) (@aborisovich)
+- fixed `yaml_formatter` writing floats such as `1e+16` that YAML 1.1 loaders read as strings
+- fixed floats parsing or printing as a different value when the floating-point rounding mode isn't round-to-nearest, and out-of-range floats crashing the parser with `SIGFPE` when floating-point traps are enabled, with GCC and Clang
+- fixed running out of memory while parsing a float giving a parse error instead of `std::bad_alloc`, or while printing one giving a truncated number
 - fixed some long numbers containing underscores failing to parse, or parsing despite a trailing underscore
 - fixed long or out-of-range hexadecimal floats parsing to the wrong value (`TOML_ENABLE_UNRELEASED_FEATURES`)
 - fixed `toml::parse()` returning an empty table for streams that can't seek, such as a piped `std::cin`
@@ -85,6 +89,7 @@
 - `operator<<` for `source_region` (and so for `parse_error`) also prints the end of the region when it differs from the start (#244) (@N-Dekker)
 - parsing is up to twice as fast, and up to five times as fast on documents that are mostly strings
 - the formatters write to the stream in chunks of up to 4 KiB, which speeds up unbuffered streams such as `std::cerr`; `json_formatter` is about 30% faster
+- `TOML_FLOAT_CHARCONV` and `TOML_INT_CHARCONV` are documented and default to what the standard library supports, so GCC, Clang and clang-cl use `<charconv>` for floats, and documents full of floats print about three times as fast
 
 #### Removals
 

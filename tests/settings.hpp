@@ -6,6 +6,12 @@
 
 // toml++ config
 #define TOML_UNDEF_MACROS 0
+#ifdef TOML_FLOAT_CHARCONV
+#define FLOAT_CHARCONV_SET_BY_BUILD 1
+#endif
+#ifdef TOML_INT_CHARCONV
+#define INT_CHARCONV_SET_BY_BUILD 1
+#endif
 #ifndef TOML_HEADER_ONLY
 #define TOML_HEADER_ONLY 0
 #endif

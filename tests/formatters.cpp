@@ -824,7 +824,6 @@ zero = 0.0)"sv);
 
 	SECTION("full precision of inexact values")
 	{
-#if TOML_FLOAT_CHARCONV
 		CHECK_TOML_ROUND_TRIP(inexact, toml_formatter::default_flags, R"(
 big = 1e+300
 epsilon = 2.220446049250313e-16
@@ -832,15 +831,26 @@ pow10_16 = 1e+16
 pow10_minus_5 = 1e-05
 tenth = 0.1
 third = 0.3333333333333333)"sv);
-#else
-		CHECK_TOML_ROUND_TRIP(inexact, toml_formatter::default_flags, R"(
-big = 1.0000000000000001e+300
-epsilon = 2.2204460492503131e-16
-pow10_16 = 10000000000000000.0
-pow10_minus_5 = 1.0000000000000001e-05
-tenth = 0.10000000000000001
-third = 0.33333333333333331)"sv);
-#endif
+	}
+
+	SECTION("fixed notation from 1e-4 up to 1e16")
+	{
+		const auto boundaries = toml::table{ { "fixed_max", std::nextafter(1e16, 0.0) },
+											 { "fixed_min", 1e-4 },
+											 { "just_below_fixed_min", std::nextafter(1e-4, 0.0) },
+											 { "pow10_15", 1e15 },
+											 { "pow10_5", 100000.0 },
+											 { "pow2_minus_1017", std::ldexp(1.0, -1017) },
+											 { "seventeen_digits", 123456789012345680.0 } };
+
+		CHECK_TOML_ROUND_TRIP(boundaries, toml_formatter::default_flags, R"(
+fixed_max = 9999999999999998.0
+fixed_min = 0.0001
+just_below_fixed_min = 9.999999999999999e-05
+pow10_15 = 1000000000000000.0
+pow10_5 = 100000.0
+pow2_minus_1017 = 7.120236347223045e-307
+seventeen_digits = 1.2345678901234568e+17)"sv);
 	}
 
 	SECTION("relaxed precision")
@@ -867,6 +877,19 @@ pow10_16 = 1e+16
 pow10_minus_5 = 1e-05
 tenth = 0.1
 third = 0.333333)"sv);
+
+		const auto boundaries = toml::table{ { "denorm_min", std::numeric_limits<double>::denorm_min() },
+											 { "fixed_max", 999999.0 },
+											 { "rounds_to_fixed_min", std::nextafter(1e-4, 0.0) },
+											 { "rounds_up_out_of_fixed", 999999.5 },
+											 { "seven_digits", 1234567.0 } };
+
+		CHECK_OUTPUT(toml_formatter, boundaries, format_flags::relaxed_float_precision, R"(
+denorm_min = 5e-324
+fixed_max = 999999.0
+rounds_to_fixed_min = 0.0001
+rounds_up_out_of_fixed = 1e+06
+seven_digits = 1.23457e+06)"sv);
 	}
 
 	SECTION("quoted infinities and nans")
@@ -886,15 +909,9 @@ neg_inf = "-inf")"sv);
 	{
 		const auto denormals = toml::table{ { "denorm_min", std::numeric_limits<double>::denorm_min() },
 											{ "neg_denorm_min", -std::numeric_limits<double>::denorm_min() } };
-#if TOML_FLOAT_CHARCONV
 		CHECK_TOML_ROUND_TRIP(denormals, toml_formatter::default_flags, R"(
 denorm_min = 5e-324
 neg_denorm_min = -5e-324)"sv);
-#else
-		CHECK_OUTPUT(toml_formatter, denormals, toml_formatter::default_flags, R"(
-denorm_min = 4.9406564584124654e-324
-neg_denorm_min = -4.9406564584124654e-324)"sv);
-#endif
 	}
 }
 
@@ -1712,6 +1729,7 @@ TEST_CASE("formatters - json_formatter")
 					 "[\n    1,\n    \"two\"\n]"sv);
 		CHECK_OUTPUT(json_formatter, toml::value{ "two"s }, json_formatter::default_flags, R"("two")"sv);
 		CHECK_OUTPUT(json_formatter, toml::value{ 42 }, json_formatter::default_flags, "42"sv);
+		CHECK_OUTPUT(json_formatter, toml::value{ 1e16 }, json_formatter::default_flags, "1e+16"sv);
 		CHECK_OUTPUT(json_formatter, toml::value{ f64_inf }, json_formatter::default_flags, R"("Infinity")"sv);
 		CHECK_OUTPUT(json_formatter,
 					 toml::value{ toml::time{ 3, 4, 5 } },
@@ -1913,6 +1931,32 @@ oct: 10)"sv);
 
 		CHECK_OUTPUT(yaml_formatter, toml::value{ 42 }, yaml_formatter::default_flags, "42"sv);
 		CHECK_OUTPUT(yaml_formatter, toml::value{ -f64_inf }, yaml_formatter::default_flags, "-.inf"sv);
+	}
+
+	SECTION("floats in exponent notation keep a decimal point for YAML 1.1")
+	{
+		const auto data =
+			toml::table{ { "exponent", 1e16 },	{ "exponent_with_fraction", 1.5e300 },
+						 { "fixed", 100000.0 }, { "in_array", toml::array{ 1e-5, 0.5 } },
+						 { "neg_zero", -0.0 },	{ "subnormal", -std::numeric_limits<double>::denorm_min() } };
+
+		CHECK_OUTPUT(yaml_formatter,
+					 data,
+					 yaml_formatter::default_flags,
+					 "exponent: 1.0e+16\n"
+					 "exponent_with_fraction: 1.5e+300\n"
+					 "fixed: 100000.0\n"
+					 "in_array: \n"
+					 "  - 1.0e-05\n"
+					 "  - 0.5\n"
+					 "neg_zero: -0.0\n"
+					 "subnormal: -5.0e-324"sv);
+
+		CHECK_OUTPUT(yaml_formatter, toml::value{ 1e16 }, yaml_formatter::default_flags, "1.0e+16"sv);
+		CHECK_OUTPUT(yaml_formatter,
+					 toml::value{ 999999.5 },
+					 yaml_formatter::default_flags | format_flags::relaxed_float_precision,
+					 "1.0e+06"sv);
 	}
 
 	SECTION("containers")

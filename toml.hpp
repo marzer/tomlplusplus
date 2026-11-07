@@ -1233,22 +1233,47 @@ TOML_ENABLE_WARNINGS;
 #endif
 #endif
 
-#if !defined(TOML_FLOAT_CHARCONV) && (TOML_GCC || TOML_CLANG || (TOML_ICC && !TOML_ICC_CL))
-// not supported by any version of GCC or Clang as of 26/11/2020
-// not supported by any version of ICC on Linux as of 11/01/2021
+#if TOML_HAS_INCLUDE(<version>)
+TOML_DISABLE_WARNINGS;
+#include <version>
+TOML_ENABLE_WARNINGS;
+#endif
+
+// libc++ never defines __cpp_lib_to_chars, and its availability flags follow the deployment target on apple
+#if !TOML_HAS_INCLUDE(<charconv>)
+#define TOML_HAS_FLOAT_CHARCONV 0
+#elif defined(_LIBCPP_VERSION)
+#if defined(_LIBCPP_AVAILABILITY_HAS_FROM_CHARS_FLOATING_POINT) && _LIBCPP_AVAILABILITY_HAS_FROM_CHARS_FLOATING_POINT  \
+	&& defined(_LIBCPP_AVAILABILITY_HAS_TO_CHARS_FLOATING_POINT) && _LIBCPP_AVAILABILITY_HAS_TO_CHARS_FLOATING_POINT
+#define TOML_HAS_FLOAT_CHARCONV 1
+#else
+#define TOML_HAS_FLOAT_CHARCONV 0
+#endif
+#elif defined(__cpp_lib_to_chars) && __cpp_lib_to_chars >= 201611L
+#define TOML_HAS_FLOAT_CHARCONV 1
+#else
+#define TOML_HAS_FLOAT_CHARCONV 0
+#endif
+
+#ifndef TOML_FLOAT_CHARCONV
+#if TOML_HAS_FLOAT_CHARCONV
+#define TOML_FLOAT_CHARCONV 1
+#else
 #define TOML_FLOAT_CHARCONV 0
 #endif
-#if !defined(TOML_INT_CHARCONV) && (defined(__EMSCRIPTEN__) || defined(__APPLE__))
-// causes link errors on emscripten
-// causes Mac OS SDK version errors on some versions of Apple Clang
+#endif
+
+#ifndef TOML_INT_CHARCONV
+// libc++ before 15 needed a newer apple deployment target for integer to_chars, and early emscripten didn't build it
+#if TOML_HAS_INCLUDE(<charconv>)                                                                                                   \
+					 && !(defined(_LIBCPP_VERSION) && _LIBCPP_VERSION < 15000                                          \
+						  && (defined(__APPLE__) || defined(__EMSCRIPTEN__)))
+#define TOML_INT_CHARCONV 1
+#else
 #define TOML_INT_CHARCONV 0
 #endif
-#ifndef TOML_INT_CHARCONV
-#define TOML_INT_CHARCONV 1
 #endif
-#ifndef TOML_FLOAT_CHARCONV
-#define TOML_FLOAT_CHARCONV 1
-#endif
+
 #if (TOML_INT_CHARCONV || TOML_FLOAT_CHARCONV) && !TOML_HAS_INCLUDE(<charconv>)
 #undef TOML_INT_CHARCONV
 #undef TOML_FLOAT_CHARCONV
@@ -1525,6 +1550,7 @@ TOML_DISABLE_WARNINGS;
 #include <cstdint>
 #include <cstddef>
 #include <cstring>
+#include <cfenv>
 #include <cfloat>
 #include <climits>
 #include <cmath>
@@ -2636,6 +2662,29 @@ TOML_IMPL_NAMESPACE_START
 			return fp_class::nan;
 		return (val_bits & sign) ? fp_class::neg_inf : fp_class::pos_inf;
 	}
+
+	// printf, strtod and libc++'s from_chars follow the rounding mode, and strtod raises floating-point exceptions
+	// that trap in programs which unmask them
+	struct default_fenv
+	{
+		std::fenv_t saved = {};
+
+		default_fenv() noexcept
+		{
+			std::feholdexcept(&saved);
+#ifdef FE_TONEAREST
+			std::fesetround(FE_TONEAREST);
+#endif
+		}
+
+		~default_fenv() noexcept
+		{
+			std::fesetenv(&saved);
+		}
+
+		default_fenv(const default_fenv&)			 = delete;
+		default_fenv& operator=(const default_fenv&) = delete;
+	};
 
 	// Q: "why not use std::find and std::min?"
 	// A: Because <algorithm> is _huge_ and these would be the only things I used from it.
@@ -10454,6 +10503,12 @@ TOML_IMPL_NAMESPACE_START
 			return !!(config_.flags & format_flags::force_multiline_arrays);
 		}
 
+		TOML_PURE_INLINE_GETTER
+		bool relaxed_float_precision() const noexcept
+		{
+			return !!(config_.flags & format_flags::relaxed_float_precision);
+		}
+
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void attach(std::ostream& stream) noexcept;
 
@@ -10758,6 +10813,9 @@ TOML_NAMESPACE_START
 		void print_yaml_string(const value<std::string>&);
 
 		TOML_EXPORTED_MEMBER_FUNCTION
+		void print_yaml_float(const value<double>&);
+
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const toml::table&, bool = false);
 
 		TOML_EXPORTED_MEMBER_FUNCTION
@@ -10945,7 +11003,8 @@ TOML_DISABLE_WARNINGS;
 #include <charconv>
 #endif
 #if !TOML_FLOAT_CHARCONV
-#include <sstream>
+#include <cstdio>
+#include <cstdlib>
 #endif
 TOML_ENABLE_WARNINGS;
 TOML_PUSH_WARNINGS;
@@ -10959,41 +11018,10 @@ TOML_PUSH_WARNINGS;
 #undef max
 #endif
 
+TOML_DISABLE_ARITHMETIC_WARNINGS;
+
 TOML_ANON_NAMESPACE_START
 {
-	template <typename T>
-	inline constexpr size_t charconv_buffer_length = 0;
-
-	template <>
-	inline constexpr size_t charconv_buffer_length<int8_t> = 4; // strlen("-128")
-
-	template <>
-	inline constexpr size_t charconv_buffer_length<int16_t> = 6; // strlen("-32768")
-
-	template <>
-	inline constexpr size_t charconv_buffer_length<int32_t> = 11; // strlen("-2147483648")
-
-	template <>
-	inline constexpr size_t charconv_buffer_length<int64_t> = 20; // strlen("-9223372036854775808")
-
-	template <>
-	inline constexpr size_t charconv_buffer_length<uint8_t> = 3; // strlen("255")
-
-	template <>
-	inline constexpr size_t charconv_buffer_length<uint16_t> = 5; // strlen("65535")
-
-	template <>
-	inline constexpr size_t charconv_buffer_length<uint32_t> = 10; // strlen("4294967295")
-
-	template <>
-	inline constexpr size_t charconv_buffer_length<uint64_t> = 20; // strlen("18446744073709551615")
-
-	template <>
-	inline constexpr size_t charconv_buffer_length<float> = 64;
-
-	template <>
-	inline constexpr size_t charconv_buffer_length<double> = 64;
-
 	template <typename T>
 	TOML_INTERNAL_LINKAGE
 	void print_integer_to_stream(std::ostream & stream, T val, value_flags format = {}, size_t min_digits = 0)
@@ -11055,67 +11083,6 @@ TOML_ANON_NAMESPACE_START
 			stream.put('0');
 		std::memset(first - padding, '0', padding);
 		impl::print_to_stream(stream, first - padding, len + padding);
-	}
-
-	template <typename T>
-	TOML_INTERNAL_LINKAGE
-	void print_floating_point_to_stream(std::ostream & stream, T val, [[maybe_unused]] bool relaxed_precision)
-	{
-		switch (impl::fpclassify(val))
-		{
-			case impl::fp_class::neg_inf: impl::print_to_stream(stream, "-inf"sv); break;
-
-			case impl::fp_class::pos_inf: impl::print_to_stream(stream, "inf"sv); break;
-
-			case impl::fp_class::nan: impl::print_to_stream(stream, "nan"sv); break;
-
-			case impl::fp_class::ok:
-			{
-				static constexpr auto needs_decimal_point = [](auto&& s) noexcept
-				{
-					for (auto c : s)
-						if (c == '.' || c == 'E' || c == 'e')
-							return false;
-					return true;
-				};
-
-#if TOML_FLOAT_CHARCONV
-
-				char buf[charconv_buffer_length<T>];
-				auto res = std::to_chars(buf, buf + sizeof(buf), val);
-				auto str = std::string_view{ buf, static_cast<size_t>(res.ptr - buf) };
-
-				char buf2[charconv_buffer_length<T>];
-				if (relaxed_precision)
-				{
-					res				= std::to_chars(buf2, buf2 + sizeof(buf2), val, std::chars_format::general, 6);
-					const auto str2 = std::string_view{ buf2, static_cast<size_t>(res.ptr - buf2) };
-					if (str2.length() < str.length())
-						str = str2;
-				}
-
-				impl::print_to_stream(stream, str);
-				if (needs_decimal_point(str))
-					toml::impl::print_to_stream(stream, ".0"sv);
-
-#else
-
-				std::ostringstream ss;
-				ss.imbue(std::locale::classic());
-				if (!relaxed_precision)
-					ss.precision(std::numeric_limits<T>::max_digits10);
-				ss << val;
-				const auto str = std::move(ss).str();
-				impl::print_to_stream(stream, str);
-				if (needs_decimal_point(str))
-					impl::print_to_stream(stream, ".0"sv);
-
-#endif
-			}
-			break;
-
-			default: TOML_UNREACHABLE;
-		}
 	}
 
 	TOML_INTERNAL_LINKAGE
@@ -11184,6 +11151,273 @@ TOML_ANON_NAMESPACE_START
 		out	   = write_decimal(out, static_cast<uint_least32_t>(mins / 60), 2u);
 		*out++ = ':';
 		return write_decimal(out, static_cast<uint_least32_t>(mins % 60), 2u);
+	}
+
+	struct float_digits
+	{
+		char digits[17];
+		size_t count;
+		int exponent;
+	};
+
+	// printf takes its decimal point from setlocale(), so non-digits are skipped
+	TOML_INTERNAL_LINKAGE
+	float_digits read_scientific(const char* text) noexcept
+	{
+		float_digits result{};
+		bool in_exponent	   = {};
+		bool negative_exponent = {};
+		for (; *text; text++)
+		{
+			const char c = *text;
+			if (c == 'e')
+				in_exponent = true;
+			else if (c == '-')
+				negative_exponent = true;
+			else if (c < '0' || c > '9')
+				continue;
+			else if (in_exponent)
+				result.exponent = (result.exponent * 10) + (c - '0');
+			else if (result.count < sizeof(result.digits))
+				result.digits[result.count++] = c;
+		}
+		if (negative_exponent)
+			result.exponent = -result.exponent;
+		return result;
+	}
+
+	// with denormals-are-zero set, every subnormal compares equal to zero
+	template <typename T>
+	TOML_INTERNAL_LINKAGE
+	bool same_bits(T a, T b) noexcept
+	{
+		using bits_type = std::conditional_t<sizeof(T) == sizeof(uint32_t), uint32_t, uint64_t>;
+		static_assert(sizeof(T) == sizeof(bits_type));
+
+		bits_type a_bits = {};
+		bits_type b_bits = {};
+		std::memcpy(&a_bits, &a, sizeof(T));
+		std::memcpy(&b_bits, &b, sizeof(T));
+		return a_bits == b_bits;
+	}
+
+#if TOML_FLOAT_CHARCONV
+
+	template <typename T>
+	TOML_INTERNAL_LINKAGE
+	float_digits rounded_digits(T val, int precision) noexcept
+	{
+		char buf[33];
+		*std::to_chars(buf, buf + 32, val, std::chars_format::scientific, precision).ptr = '\0';
+		return read_scientific(buf);
+	}
+
+	template <typename T>
+	TOML_INTERNAL_LINKAGE
+	float_digits shortest_digits(T val) noexcept
+	{
+		char buf[33];
+		*std::to_chars(buf, buf + 32, val, std::chars_format::scientific).ptr = '\0';
+		return read_scientific(buf);
+	}
+
+#else
+
+	template <typename T>
+	TOML_INTERNAL_LINKAGE
+	float_digits rounded_digits(T val, int precision) noexcept
+	{
+		char buf[64];
+		std::snprintf(buf, sizeof(buf), "%.*e", precision, static_cast<double>(val)); // NOLINT(*-pro-type-vararg)
+		return read_scientific(buf);
+	}
+
+	template <typename T>
+	TOML_INTERNAL_LINKAGE
+	T read_back(const float_digits& val) noexcept
+	{
+		// strtod takes its decimal point from setlocale(), so the digits go in without one
+		char text[32];
+		std::memcpy(text, val.digits, val.count);
+		char* out	  = text + val.count;
+		*out++		  = 'e';
+		auto exponent = val.exponent - static_cast<int>(val.count - 1u);
+		if (exponent < 0)
+		{
+			*out++	 = '-';
+			exponent = -exponent;
+		}
+		*write_decimal(out, static_cast<uint_least32_t>(exponent), 1u) = '\0';
+
+		if constexpr (std::is_same_v<T, float>)
+			return std::strtof(text, nullptr);
+		else
+			return std::strtod(text, nullptr);
+	}
+
+	template <typename T>
+	TOML_INTERNAL_LINKAGE
+	float_digits shortest_digits(T val) noexcept
+	{
+		using limits = std::numeric_limits<T>;
+
+		for (int precision = val < (limits::min)() ? 0 : limits::digits10 - 1;; precision++)
+		{
+			auto result = rounded_digits(val, precision);
+			if (precision + 1 >= limits::max_digits10)
+				return result;
+
+			const auto back = read_back<T>(result);
+			if (same_bits(back, val))
+				return result;
+
+			// the gap below a power of two is half the one above it, so past digits10 the nearest candidate can
+			// fall outside while the next one up reads back
+			if (precision >= limits::digits10 && back < val)
+			{
+				size_t i = result.count;
+				while (i && result.digits[i - 1u] == '9')
+					result.digits[--i] = '0';
+				if (i)
+					result.digits[i - 1u]++;
+				else
+				{
+					result.digits[0] = '1';
+					result.exponent++;
+				}
+				if (same_bits(read_back<T>(result), val))
+					return result;
+			}
+		}
+	}
+
+#endif
+
+	// python's repr() layout, or %g's when relaxed
+	template <typename T, size_t N>
+	TOML_INTERNAL_LINKAGE
+	char* write_float(char (&buf)[N], T val, bool relaxed_precision, bool point_before_exponent) noexcept
+	{
+		static_assert(N >= 32u);
+
+		char* out = buf;
+		if (std::signbit(val))
+		{
+			*out++ = '-';
+			val	   = -val;
+		}
+		if (same_bits(val, T{}))
+		{
+			*out++ = '0';
+			*out++ = '.';
+			*out++ = '0';
+			return out;
+		}
+
+#if TOML_FLOAT_CHARCONV
+		// fixed form keeps integer digits the shortest text drops once the gap between values passes 2,
+		// which happens below 1e16 for floats
+		if (std::is_same_v<T, double> && !relaxed_precision)
+		{
+			// the shortest text reads back, so comparing the value with the bounds matches comparing the text
+			const bool fixed  = val >= 1e-4 && val < 1e16;
+			char* const first = out;
+			out = std::to_chars(first, buf + N, val, fixed ? std::chars_format::fixed : std::chars_format::scientific)
+					  .ptr;
+			if (fixed)
+			{
+				if (!std::memchr(first, '.', static_cast<size_t>(out - first)))
+				{
+					*out++ = '.';
+					*out++ = '0';
+				}
+			}
+			else if (point_before_exponent && first[1] == 'e')
+			{
+				std::memmove(first + 3, first + 1, static_cast<size_t>(out - first - 1));
+				first[1] = '.';
+				first[2] = '0';
+				out += 2;
+			}
+			return out;
+		}
+#endif
+
+#if !TOML_FLOAT_CHARCONV
+		[[maybe_unused]] const impl::default_fenv fenv;
+#endif
+		auto digits = shortest_digits(val);
+		if (relaxed_precision && digits.count > 6u)
+			digits = rounded_digits(val, 5);
+		while (digits.count > 1u && digits.digits[digits.count - 1u] == '0')
+			digits.count--;
+
+		if (digits.exponent < -4 || digits.exponent >= (relaxed_precision ? 6 : 16))
+		{
+			*out++ = digits.digits[0];
+			if (digits.count > 1u)
+			{
+				*out++ = '.';
+				std::memcpy(out, digits.digits + 1, digits.count - 1u);
+				out += digits.count - 1u;
+			}
+			else if (point_before_exponent)
+			{
+				*out++ = '.';
+				*out++ = '0';
+			}
+			*out++ = 'e';
+			*out++ = digits.exponent < 0 ? '-' : '+';
+			return write_decimal(out,
+								 static_cast<uint_least32_t>(digits.exponent < 0 ? -digits.exponent : digits.exponent),
+								 2u);
+		}
+
+		if (digits.exponent < 0)
+		{
+			*out++ = '0';
+			*out++ = '.';
+			for (int i = digits.exponent + 1; i < 0; i++)
+				*out++ = '0';
+			std::memcpy(out, digits.digits, digits.count);
+			return out + digits.count;
+		}
+
+		const auto whole = static_cast<size_t>(digits.exponent) + 1u;
+		for (size_t i = 0; i < whole; i++)
+			*out++ = i < digits.count ? digits.digits[i] : '0';
+		*out++ = '.';
+		if (whole >= digits.count)
+		{
+			*out++ = '0';
+			return out;
+		}
+		std::memcpy(out, digits.digits + whole, digits.count - whole);
+		return out + (digits.count - whole);
+	}
+
+	template <typename T>
+	TOML_INTERNAL_LINKAGE
+	void print_floating_point_to_stream(std::ostream & stream, T val, bool relaxed_precision)
+	{
+		switch (impl::fpclassify(val))
+		{
+			case impl::fp_class::neg_inf: impl::print_to_stream(stream, "-inf"sv); break;
+
+			case impl::fp_class::pos_inf: impl::print_to_stream(stream, "inf"sv); break;
+
+			case impl::fp_class::nan: impl::print_to_stream(stream, "nan"sv); break;
+
+			case impl::fp_class::ok:
+			{
+				char buf[32];
+				const auto end = write_float(buf, val, relaxed_precision, false);
+				impl::print_to_stream(stream, buf, static_cast<size_t>(end - buf));
+			}
+			break;
+
+			default: TOML_UNREACHABLE;
+		}
 	}
 }
 TOML_ANON_NAMESPACE_END;
@@ -13203,12 +13437,11 @@ TOML_DISABLE_WARNINGS;
 #if TOML_INT_CHARCONV || TOML_FLOAT_CHARCONV
 #include <charconv>
 #endif
-#if !TOML_INT_CHARCONV || !TOML_FLOAT_CHARCONV
-#include <sstream>
-#endif
 #if !TOML_INT_CHARCONV
+#include <sstream>
 #include <iomanip>
 #endif
+#include <cstdlib>
 #include <exception>
 #if defined(__GLIBCXX__)
 #include <cxxabi.h>
@@ -14203,21 +14436,6 @@ TOML_ANON_NAMESPACE_START
 			write_pos += len;
 		}
 
-		// doubles
-		else if constexpr (std::is_same_v<arg_type, double>)
-		{
-#if TOML_FLOAT_CHARCONV
-			const auto result = std::to_chars(write_pos, buf_end, arg);
-			write_pos		  = result.ptr;
-#else
-			std::ostringstream ss;
-			ss.imbue(std::locale::classic());
-			ss.precision(std::numeric_limits<arg_type>::max_digits10);
-			ss << arg;
-			concatenate(write_pos, buf_end, to_sv(std::move(ss).str()));
-#endif
-		}
-
 		// 64-bit integers
 		else if constexpr (impl::is_one_of<arg_type, int64_t, uint64_t>)
 		{
@@ -14254,10 +14472,6 @@ TOML_ANON_NAMESPACE_START
 			}
 		}
 
-		// all other floats (fallback - coerce to double)
-		else if constexpr (std::is_floating_point_v<arg_type>)
-			concatenate(write_pos, buf_end, static_cast<double>(arg));
-
 		// all other integers (fallback - coerce to (u)int64_t)
 		else if constexpr (std::is_arithmetic_v<arg_type> && std::is_integral_v<arg_type>)
 		{
@@ -14267,9 +14481,8 @@ TOML_ANON_NAMESPACE_START
 
 		else
 		{
-			static_assert(
-				impl::always_false<T>,
-				"concatenate() inputs are limited to std::string_views, integers, floats, and escaped_codepoint");
+			static_assert(impl::always_false<T>,
+						  "concatenate() inputs are limited to std::string_views, integers and escaped_codepoint");
 		}
 	}
 
@@ -14530,6 +14743,65 @@ TOML_ANON_NAMESPACE_START
 			count_--;
 		}
 	};
+
+	template <size_t N>
+	TOML_NODISCARD
+	TOML_INTERNAL_LINKAGE
+	bool decimal_to_double(const char (&chars)[N], size_t length, double& result) noexcept
+	{
+		// strtod takes its decimal point from setlocale(), so the digits go in without one
+		char text[N + 16];
+		size_t text_length = {};
+		int64_t exponent   = {};
+		bool in_fraction   = {};
+		size_t i		   = {};
+		for (; i < length && chars[i] != 'e' && chars[i] != 'E'; i++)
+		{
+			if (chars[i] == '.')
+				in_fraction = true;
+			else
+			{
+				text[text_length++] = chars[i];
+				if (in_fraction)
+					exponent--;
+			}
+		}
+
+		if (i < length)
+		{
+			i++;
+			const bool negative = chars[i] == '-';
+			if (chars[i] == '+' || chars[i] == '-')
+				i++;
+			int64_t written = {};
+			for (; i < length; i++)
+				if (written < 1'000'000'000)
+					written = (written * 10) + (chars[i] - '0');
+			exponent += negative ? -written : written;
+		}
+
+		text[text_length++] = 'e';
+		if (exponent < 0)
+		{
+			text[text_length++] = '-';
+			exponent			= -exponent;
+		}
+		char reversed[20];
+		size_t digits = {};
+		do
+		{
+			reversed[digits++] = static_cast<char>('0' + (exponent % 10));
+			exponent /= 10;
+		}
+		while (exponent);
+		while (digits)
+			text[text_length++] = reversed[--digits];
+		text[text_length] = '\0';
+
+		char* end = {};
+		result	  = std::strtod(text, &end);
+		return end == text + text_length && impl::fpclassify(result) != impl::fp_class::pos_inf;
+	}
 }
 TOML_ANON_NAMESPACE_END;
 
@@ -15468,8 +15740,8 @@ TOML_IMPL_NAMESPACE_START
 				}
 				else if (is_match(*cp, U'e', U'E'))
 				{
-					if ((prev && !is_decimal_digit(prev)) //
-						|| seen_exponent)				  // 1.0ee+10 (multiple 'e')
+					if (!is_decimal_digit(prev) // +e5, 1.e5
+						|| seen_exponent)		// 1.0ee+10 (multiple 'e')
 						set_error_and_return_default("expected decimal digit, saw '"sv, to_sv(*cp), "'"sv);
 
 					seen_decimal  = true; // implied
@@ -15524,53 +15796,18 @@ TOML_IMPL_NAMESPACE_START
 			// convert to double
 			double result = {};
 #if TOML_FLOAT_CHARCONV
-			{
-				auto fc_result = std::from_chars(chars, chars + length, result);
-				switch (fc_result.ec)
-				{
-					TOML_LIKELY_CASE
-					case std::errc{}: // ok
-						return result * sign;
-
-					case std::errc::invalid_argument:
-						set_error_and_return_default("'"sv,
-													 std::string_view{ chars, length },
-													 "' could not be interpreted as a value"sv);
-						break;
-
-					case std::errc::result_out_of_range:
-						set_error_at(begin_pos,
-									 "'"sv,
-									 sign_text,
-									 std::string_view{ chars, length },
-									 "' is not representable in 64 bits"sv);
-						return_after_error({});
-
-					default: //??
-						set_error_and_return_default("an unspecified error occurred while trying to interpret '"sv,
-													 std::string_view{ chars, length },
-													 "' as a value"sv);
-				}
-			}
-#else
-			{
-				std::stringstream ss;
-				ss.imbue(std::locale::classic());
-				ss.write(chars, static_cast<std::streamsize>(length));
-				const bool read = static_cast<bool>(ss >> result);
-				// libc++ fails the read when the result underflows, even to a representable subnormal
-				const bool subnormal = result != 0.0 && result > -(std::numeric_limits<double>::min)()
-									&& result < (std::numeric_limits<double>::min)();
-				if (read || subnormal)
-					return result * sign;
-				set_error_at(begin_pos,
-							 "'"sv,
-							 sign_text,
-							 std::string_view{ chars, length },
-							 "' is not representable in 64 bits"sv);
-				return_after_error({});
-			}
+			if TOML_LIKELY(std::from_chars(chars, chars + length, result).ec == std::errc{})
+				return result * sign;
 #endif
+			if (decimal_to_double(chars, length, result))
+				return result * sign;
+
+			set_error_at(begin_pos,
+						 "'"sv,
+						 sign_text,
+						 std::string_view{ chars, length },
+						 "' is not representable in 64 bits"sv);
+			return_after_error({});
 		}
 
 		TOML_NODISCARD
@@ -17466,6 +17703,7 @@ TOML_ANON_NAMESPACE_START
 	TOML_INTERNAL_LINKAGE
 	parse_result do_parse(source_reader && reader)
 	{
+		[[maybe_unused]] const impl::default_fenv fenv;
 		return impl::parser{ std::move(reader) };
 	}
 
@@ -18219,12 +18457,7 @@ TOML_IMPL_NAMESPACE_START
 			case fp_class::neg_inf: inf_nan = &constants_->float_neg_inf; break;
 			case fp_class::pos_inf: inf_nan = &constants_->float_pos_inf; break;
 			case fp_class::nan: inf_nan = &constants_->float_nan; break;
-			case fp_class::ok:
-				print_to_stream(*stream_,
-								*val,
-								value_flags::none,
-								!!(config_.flags & format_flags::relaxed_float_precision));
-				break;
+			case fp_class::ok: print_to_stream(*stream_, *val, value_flags::none, relaxed_float_precision()); break;
 			default: TOML_UNREACHABLE;
 		}
 
@@ -19021,6 +19254,21 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
+	void yaml_formatter::print_yaml_float(const value<double>& val)
+	{
+		if (impl::fpclassify(*val) != impl::fp_class::ok)
+		{
+			base::print(val);
+			return;
+		}
+
+		// yaml 1.1 reads 1e+16 as a string
+		char buf[32];
+		const auto end = TOML_ANON_NAMESPACE::write_float(buf, *val, relaxed_float_precision(), true);
+		print_unformatted(std::string_view{ buf, static_cast<size_t>(end - buf) });
+	}
+
+	TOML_EXTERNAL_LINKAGE
 	void yaml_formatter::print(const toml::table& tbl, bool parent_is_array)
 	{
 		if (tbl.empty())
@@ -19054,6 +19302,7 @@ TOML_NAMESPACE_START
 				case node_type::table: print(*static_cast<const table*>(&v)); break;
 				case node_type::array: print(*static_cast<const array*>(&v)); break;
 				case node_type::string: print_yaml_string(*static_cast<const value<std::string>*>(&v)); break;
+				case node_type::floating_point: print_yaml_float(*static_cast<const value<double>*>(&v)); break;
 				default: print_value(v, type);
 			}
 		}
@@ -19090,6 +19339,7 @@ TOML_NAMESPACE_START
 				case node_type::table: print(*static_cast<const table*>(&v), true); break;
 				case node_type::array: print(*static_cast<const array*>(&v), true); break;
 				case node_type::string: print_yaml_string(*static_cast<const value<std::string>*>(&v)); break;
+				case node_type::floating_point: print_yaml_float(*static_cast<const value<double>*>(&v)); break;
 				default: print_value(v, type);
 			}
 		}
@@ -19123,6 +19373,8 @@ TOML_NAMESPACE_START
 			}
 
 			case node_type::string: print_yaml_string(*static_cast<const value<std::string>*>(&source())); break;
+
+			case node_type::floating_point: print_yaml_float(*static_cast<const value<double>*>(&source())); break;
 
 			default: print_value(source(), source_type);
 		}
@@ -19199,7 +19451,6 @@ TOML_POP_WARNINGS;
 #undef TOML_EXPORTED_CONSTANT
 #undef TOML_EXTERNAL_LINKAGE
 #undef TOML_FLAGS_ENUM
-#undef TOML_FLOAT_CHARCONV
 #undef TOML_FLOAT128
 #undef TOML_GCC
 #undef TOML_GCC_LIKE
@@ -19209,6 +19460,7 @@ TOML_POP_WARNINGS;
 #undef TOML_HAS_CPP_ATTR
 #undef TOML_HAS_CUSTOM_OPTIONAL_TYPE
 #undef TOML_HAS_FEATURE
+#undef TOML_HAS_FLOAT_CHARCONV
 #undef TOML_HAS_INCLUDE
 #undef TOML_HAS_SSE2
 #undef TOML_HAS_SSE4_1
@@ -19220,7 +19472,6 @@ TOML_POP_WARNINGS;
 #undef TOML_IMPLEMENTATION
 #undef TOML_INCLUDE_WINDOWS_H
 #undef TOML_INLINE_GETTER
-#undef TOML_INT_CHARCONV
 #undef TOML_INT128
 #undef TOML_INTELLISENSE
 #undef TOML_INTERNAL_LINKAGE

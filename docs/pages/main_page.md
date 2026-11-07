@@ -408,6 +408,23 @@ toml:
 
 <!-- --------------------------------------------------------------------------------------------------------------- -->
 
+@subsection mainpage-example-floats Floating-point values
+
+A float parses to the nearest `double`. A value too large for a `double` is a parse error, and one too small becomes a
+subnormal, or a zero with the literal's sign. Decimal float literals are limited to 128 characters, not counting a
+leading sign or underscores.
+
+The formatters print a float as the shortest text that parses back to the same `double`, laid out as Python's `repr()`
+does: fixed notation from `1e-4` up to `1e16`, and exponent notation outside that range. So `0.1` prints as `0.1`,
+`100000.0` as `100000.0` and `1e16` as `1e+16`. toml::format_flags::relaxed_float_precision rounds floats to at most
+six significant digits instead, laid out as C's `%g` does, so `1000000.0` prints as `1e+06`. The text may then parse
+back to a different value.
+
+toml::yaml_formatter writes exponent forms with a decimal point, as in `1.0e+16`, because YAML 1.1 loaders read
+`1e+16` as a string.
+
+<!-- --------------------------------------------------------------------------------------------------------------- -->
+
 @subsection mainpage-example-speed-up-compilation Speeding up compilation
 
 Because toml++ is a header-only library of nontrivial size you might find that compilation times noticeably

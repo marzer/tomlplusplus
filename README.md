@@ -198,9 +198,8 @@ won't need to mess with these at all, but if you do, set them before including t
 | `TOML_ASSERT(expr)`                        | function macro | Sets the assert function used by the library.                                                             | `assert()`            |
 | `TOML_CALLCONV`                            |     define     | Calling convention to apply to exported free/static functions.                                            | undefined             |
 | `TOML_CONFIG_HEADER`                       | string literal | Includes the given header file before the rest of the library.                                            | undefined             |
-| `TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA` |    boolean     | Disables the conditional `noexcept`'s of internal lambda's. Needed for MSVC's "legacy lambda processor".  | `1` on MSVC C++17     |
 | `TOML_ENABLE_FORMATTERS`                   |    boolean     | Enables the formatters. Set to `0` if you don't need them to improve compile times and binary size.       | `1`                   |
-| `TOML_ENABLE_FLOAT16`                      |    boolean     | Enables support for the built-in `_Float16` type.                                                         | per compiler settings |
+| `TOML_ENABLE_FLOAT16`                      |    boolean     | Enables support for the built-in `_Float16` type.                                                         | `0`                   |
 | `TOML_ENABLE_PARSER`                       |    boolean     | Enables the parser. Set to `0` if you don't need it to improve compile times and binary size.             | `1`                   |
 | `TOML_ENABLE_UNRELEASED_FEATURES`          |    boolean     | Enables support for [unreleased TOML language features].                                                  | `0`                   |
 | `TOML_ENABLE_WINDOWS_COMPAT`               |    boolean     | Enables support for transparent conversion between wide and narrow strings.                               | `1` on Windows        |
@@ -211,7 +210,7 @@ won't need to mess with these at all, but if you do, set them before including t
 | `TOML_EXPORTED_STATIC_FUNCTION`            |     define     | API export annotation to add to static functions.                                                         | undefined             |
 | `TOML_HEADER_ONLY`                         |    boolean     | Disable this to explicitly control where toml++'s implementation is compiled (e.g. as part of a library). | `1`                   |
 | `TOML_IMPLEMENTATION`                      |     define     | Define this to enable compilation of the library's implementation when `TOML_HEADER_ONLY` == `0`.         | undefined             |
-| `TOML_OPTIONAL_TYPE`                       |   type name    | Overrides the `optional<T>` type used by the library if you need [something better than std::optional].   | undefined             |
+| `TOML_OPTIONAL_TYPE`                       |   type name    | Overrides the `optional<T>` type used by the library if you prefer something other than `std::optional`.   | undefined             |
 | `TOML_SMALL_FLOAT_TYPE`                    |   type name    | If your codebase has a custom 'small float' type (e.g. half-precision), this tells toml++ about it.       | undefined             |
 | `TOML_SMALL_INT_TYPE`                      |   type name    | If your codebase has a custom 'small integer' type (e.g. 24-bits), this tells toml++ about it.            | undefined             |
 
@@ -360,6 +359,5 @@ though you're welcome to reach out via other means. In order of likely response 
 [#790]: https://github.com/toml-lang/toml/pull/790
 [#796]: https://github.com/toml-lang/toml/pull/796
 [#891]: https://github.com/toml-lang/toml/pull/891
-[something better than std::optional]: https://github.com/TartanLlama/optional
 [m.css]: https://mcss.mosra.cz/documentation/doxygen
 [`toml.hpp`]: https://raw.githubusercontent.com/marzer/tomlplusplus/master/toml.hpp

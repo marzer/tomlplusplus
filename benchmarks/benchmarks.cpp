@@ -904,6 +904,10 @@ int main(int argc, char** argv)
 	format("toml_formatter/mixed"sv, [&](std::ostream& out) { out << toml::toml_formatter{ *table }; });
 	format("json_formatter/mixed"sv, [&](std::ostream& out) { out << toml::json_formatter{ *table }; });
 	format("yaml_formatter/mixed"sv, [&](std::ostream& out) { out << toml::yaml_formatter{ *table }; });
+	const auto numbers_table = parse_table("numbers"sv, [&] { return toml::parse(numbers); });
+	if (!numbers_table)
+		return 1;
+	format("toml_formatter/numbers"sv, [&](std::ostream& out) { out << toml::toml_formatter{ *numbers_table }; });
 #endif
 
 	return 0;

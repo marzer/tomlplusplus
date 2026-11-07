@@ -28,12 +28,11 @@ TOML_DISABLE_WARNINGS;
 #if TOML_INT_CHARCONV || TOML_FLOAT_CHARCONV
 #include <charconv>
 #endif
-#if !TOML_INT_CHARCONV || !TOML_FLOAT_CHARCONV
-#include <sstream>
-#endif
 #if !TOML_INT_CHARCONV
+#include <sstream>
 #include <iomanip>
 #endif
+#include <cstdlib>
 #include <exception>
 #if defined(__GLIBCXX__)
 #include <cxxabi.h>
@@ -1026,21 +1025,6 @@ TOML_ANON_NAMESPACE_START
 			write_pos += len;
 		}
 
-		// doubles
-		else if constexpr (std::is_same_v<arg_type, double>)
-		{
-#if TOML_FLOAT_CHARCONV
-			const auto result = std::to_chars(write_pos, buf_end, arg);
-			write_pos		  = result.ptr;
-#else
-			std::ostringstream ss;
-			ss.imbue(std::locale::classic());
-			ss.precision(std::numeric_limits<arg_type>::max_digits10);
-			ss << arg;
-			concatenate(write_pos, buf_end, to_sv(std::move(ss).str()));
-#endif
-		}
-
 		// 64-bit integers
 		else if constexpr (impl::is_one_of<arg_type, int64_t, uint64_t>)
 		{
@@ -1077,10 +1061,6 @@ TOML_ANON_NAMESPACE_START
 			}
 		}
 
-		// all other floats (fallback - coerce to double)
-		else if constexpr (std::is_floating_point_v<arg_type>)
-			concatenate(write_pos, buf_end, static_cast<double>(arg));
-
 		// all other integers (fallback - coerce to (u)int64_t)
 		else if constexpr (std::is_arithmetic_v<arg_type> && std::is_integral_v<arg_type>)
 		{
@@ -1090,9 +1070,8 @@ TOML_ANON_NAMESPACE_START
 
 		else
 		{
-			static_assert(
-				impl::always_false<T>,
-				"concatenate() inputs are limited to std::string_views, integers, floats, and escaped_codepoint");
+			static_assert(impl::always_false<T>,
+						  "concatenate() inputs are limited to std::string_views, integers and escaped_codepoint");
 		}
 	}
 
@@ -1353,6 +1332,65 @@ TOML_ANON_NAMESPACE_START
 			count_--;
 		}
 	};
+
+	template <size_t N>
+	TOML_NODISCARD
+	TOML_INTERNAL_LINKAGE
+	bool decimal_to_double(const char (&chars)[N], size_t length, double& result) noexcept
+	{
+		// strtod takes its decimal point from setlocale(), so the digits go in without one
+		char text[N + 16];
+		size_t text_length = {};
+		int64_t exponent   = {};
+		bool in_fraction   = {};
+		size_t i		   = {};
+		for (; i < length && chars[i] != 'e' && chars[i] != 'E'; i++)
+		{
+			if (chars[i] == '.')
+				in_fraction = true;
+			else
+			{
+				text[text_length++] = chars[i];
+				if (in_fraction)
+					exponent--;
+			}
+		}
+
+		if (i < length)
+		{
+			i++;
+			const bool negative = chars[i] == '-';
+			if (chars[i] == '+' || chars[i] == '-')
+				i++;
+			int64_t written = {};
+			for (; i < length; i++)
+				if (written < 1'000'000'000)
+					written = (written * 10) + (chars[i] - '0');
+			exponent += negative ? -written : written;
+		}
+
+		text[text_length++] = 'e';
+		if (exponent < 0)
+		{
+			text[text_length++] = '-';
+			exponent			= -exponent;
+		}
+		char reversed[20];
+		size_t digits = {};
+		do
+		{
+			reversed[digits++] = static_cast<char>('0' + (exponent % 10));
+			exponent /= 10;
+		}
+		while (exponent);
+		while (digits)
+			text[text_length++] = reversed[--digits];
+		text[text_length] = '\0';
+
+		char* end = {};
+		result	  = std::strtod(text, &end);
+		return end == text + text_length && impl::fpclassify(result) != impl::fp_class::pos_inf;
+	}
 }
 TOML_ANON_NAMESPACE_END;
 
@@ -2291,8 +2329,8 @@ TOML_IMPL_NAMESPACE_START
 				}
 				else if (is_match(*cp, U'e', U'E'))
 				{
-					if ((prev && !is_decimal_digit(prev)) //
-						|| seen_exponent)				  // 1.0ee+10 (multiple 'e')
+					if (!is_decimal_digit(prev) // +e5, 1.e5
+						|| seen_exponent)		// 1.0ee+10 (multiple 'e')
 						set_error_and_return_default("expected decimal digit, saw '"sv, to_sv(*cp), "'"sv);
 
 					seen_decimal  = true; // implied
@@ -2347,53 +2385,18 @@ TOML_IMPL_NAMESPACE_START
 			// convert to double
 			double result = {};
 #if TOML_FLOAT_CHARCONV
-			{
-				auto fc_result = std::from_chars(chars, chars + length, result);
-				switch (fc_result.ec)
-				{
-					TOML_LIKELY_CASE
-					case std::errc{}: // ok
-						return result * sign;
-
-					case std::errc::invalid_argument:
-						set_error_and_return_default("'"sv,
-													 std::string_view{ chars, length },
-													 "' could not be interpreted as a value"sv);
-						break;
-
-					case std::errc::result_out_of_range:
-						set_error_at(begin_pos,
-									 "'"sv,
-									 sign_text,
-									 std::string_view{ chars, length },
-									 "' is not representable in 64 bits"sv);
-						return_after_error({});
-
-					default: //??
-						set_error_and_return_default("an unspecified error occurred while trying to interpret '"sv,
-													 std::string_view{ chars, length },
-													 "' as a value"sv);
-				}
-			}
-#else
-			{
-				std::stringstream ss;
-				ss.imbue(std::locale::classic());
-				ss.write(chars, static_cast<std::streamsize>(length));
-				const bool read = static_cast<bool>(ss >> result);
-				// libc++ fails the read when the result underflows, even to a representable subnormal
-				const bool subnormal = result != 0.0 && result > -(std::numeric_limits<double>::min)()
-									&& result < (std::numeric_limits<double>::min)();
-				if (read || subnormal)
-					return result * sign;
-				set_error_at(begin_pos,
-							 "'"sv,
-							 sign_text,
-							 std::string_view{ chars, length },
-							 "' is not representable in 64 bits"sv);
-				return_after_error({});
-			}
+			if TOML_LIKELY(std::from_chars(chars, chars + length, result).ec == std::errc{})
+				return result * sign;
 #endif
+			if (decimal_to_double(chars, length, result))
+				return result * sign;
+
+			set_error_at(begin_pos,
+						 "'"sv,
+						 sign_text,
+						 std::string_view{ chars, length },
+						 "' is not representable in 64 bits"sv);
+			return_after_error({});
 		}
 
 		TOML_NODISCARD
@@ -4295,6 +4298,7 @@ TOML_ANON_NAMESPACE_START
 	TOML_INTERNAL_LINKAGE
 	parse_result do_parse(source_reader && reader)
 	{
+		[[maybe_unused]] const impl::default_fenv fenv;
 		return impl::parser{ std::move(reader) };
 	}
 

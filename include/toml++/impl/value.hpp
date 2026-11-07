@@ -826,6 +826,9 @@ TOML_NAMESPACE_START
 		/// @{
 
 		/// \brief	Value equality operator.
+		///
+		/// \detail For floating-point values, a NaN equals any other NaN, so a table holding one still equals
+		/// 		itself. Otherwise floats compare as `double` does, so `-0.0` equals `0.0`.
 		TOML_PURE_GETTER
 		friend bool operator==(const value& lhs, value_arg rhs) noexcept
 		{

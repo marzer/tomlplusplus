@@ -165,6 +165,7 @@ jobs:
                           -DCMAKE_CXX_STANDARD=26 -DCMAKE_CXX_FLAGS=-stdlib=libc++ -DCMAKE_EXE_LINKER_FLAGS=-stdlib=libc++
                           -Dtomlplusplus_TESTS_LEAK=ON -Dtomlplusplus_COVERAGE=ON
                       coverage: true
+                      alt_cxx_flags: "-stdlib=libc++ -DTOML_FLOAT_CHARCONV=0 -DTOML_INT_CHARCONV=0"
                     - name: linux-clang-x64-static
                       compiler: "clang++"
                       type: "Release"
@@ -175,7 +176,7 @@ jobs:
                       runner: ubuntu-26.04-arm
                       compiler: "g++"
                       type: "Debug"
-                      args: "-Dtomlplusplus_ASAN=ON -Dtomlplusplus_UBSAN=ON"
+                      args: "-Dtomlplusplus_ASAN=ON -Dtomlplusplus_UBSAN=ON -DCMAKE_CXX_FLAGS=-DTOML_ENABLE_FLOAT16=1"
                       # asan's fake stacks make the tests ~200x slower on ubuntu arm64: https://bugs.launchpad.net/bugs/2142105
                       asan_options: "detect_stack_use_after_return=0"
 
@@ -239,11 +240,12 @@ jobs:
                   chmod +x "$RUNNER_TEMP/toml-test"
                   "$RUNNER_TEMP/toml-test" test -toml 1.1 -decoder build/toml-test/tt_decoder -encoder build/toml-test/tt_encoder
 
-            - name: Build and test without exceptions, with unreleased features
+            - name: Build and test without exceptions or charconv, with unreleased features
               if: matrix.coverage
               run: |
                   cmake -S . -B build-alt -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.type }} -Dtomlplusplus_BUILD_TESTS=ON \
                     -Dtomlplusplus_PEDANTIC=ON -Dtomlplusplus_WERROR=ON ${{ matrix.args }} \
+                    -DCMAKE_CXX_FLAGS="${{ matrix.alt_cxx_flags }}" \
                     -Dtomlplusplus_EXCEPTIONS=OFF -Dtomlplusplus_UNRELEASED_FEATURES=ON
                   cmake --build build-alt
                   ctest --test-dir build-alt --output-on-failure
@@ -510,6 +512,10 @@ jobs:
 
     macos-appleclang-arm64:
         runs-on: macos-latest
+
+        # libc++'s floating-point from_chars needs macOS 26, so this tests the fallback against apple's libc
+        env:
+            MACOSX_DEPLOYMENT_TARGET: "13.3"
 
         defaults:
             run:

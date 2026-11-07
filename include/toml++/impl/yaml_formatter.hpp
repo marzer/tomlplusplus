@@ -50,6 +50,9 @@ TOML_NAMESPACE_START
 		void print_yaml_string(const value<std::string>&);
 
 		TOML_EXPORTED_MEMBER_FUNCTION
+		void print_yaml_float(const value<double>&);
+
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const toml::table&, bool = false);
 
 		TOML_EXPORTED_MEMBER_FUNCTION

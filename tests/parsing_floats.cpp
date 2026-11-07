@@ -272,6 +272,85 @@ TEST_CASE("parsing - floats (subnormal values)")
 	parse_expected_value(FILE_LINE_ARGS, "1e-320"sv, 1e-320);
 }
 
+TEST_CASE("parsing - floats (exact values)")
+{
+	static constexpr auto bits = [](double val) noexcept
+	{
+		uint64_t out;
+		std::memcpy(&out, &val, sizeof(out));
+		return out;
+	};
+
+	parsing_should_succeed(
+		FILE_LINE_ARGS,
+		R"(
+								smallest_subnormal = 5e-324
+								rounds_up_to_smallest_subnormal = 3e-324
+								just_over_half_smallest_subnormal = 2.4703282292062328e-324
+								rounds_down_to_largest_subnormal = 2.2250738585072011e-308
+								rounds_up_to_smallest_normal = 2.2250738585072012e-308
+								negative_rounds_up_to_smallest_normal = -2.2250738585072012e-308
+								smallest_normal = 2.2250738585072014e-308
+								tie_to_even = 9007199254740993.0
+								hard_to_round = 1e23
+								tenth = 0.1
+								largest = 1.7976931348623157e308
+								rounds_down_to_largest = 1.7976931348623158e308
+								fraction_and_exponent = 123.456e-2
+							)"sv,
+		[](table&& tbl)
+		{
+			CHECK(bits(*tbl["smallest_subnormal"].value<double>()) == 0x0000000000000001u);
+			CHECK(bits(*tbl["rounds_up_to_smallest_subnormal"].value<double>()) == 0x0000000000000001u);
+			CHECK(bits(*tbl["just_over_half_smallest_subnormal"].value<double>()) == 0x0000000000000001u);
+			CHECK(bits(*tbl["rounds_down_to_largest_subnormal"].value<double>()) == 0x000FFFFFFFFFFFFFu);
+			CHECK(bits(*tbl["rounds_up_to_smallest_normal"].value<double>()) == 0x0010000000000000u);
+			CHECK(bits(*tbl["negative_rounds_up_to_smallest_normal"].value<double>()) == 0x8010000000000000u);
+			CHECK(bits(*tbl["smallest_normal"].value<double>()) == 0x0010000000000000u);
+			CHECK(bits(*tbl["tie_to_even"].value<double>()) == 0x4340000000000000u);
+			CHECK(bits(*tbl["hard_to_round"].value<double>()) == 0x44B52D02C7E14AF6u);
+			CHECK(bits(*tbl["tenth"].value<double>()) == 0x3FB999999999999Au);
+			CHECK(bits(*tbl["largest"].value<double>()) == 0x7FEFFFFFFFFFFFFFu);
+			CHECK(bits(*tbl["rounds_down_to_largest"].value<double>()) == 0x7FEFFFFFFFFFFFFFu);
+			CHECK(bits(*tbl["fraction_and_exponent"].value<double>()) == 0x3FF3C0C1FC8F3238u);
+		});
+}
+
+TEST_CASE("parsing - floats (underflow to zero)")
+{
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   R"(
+								positive = [
+									1e-999,
+									2e-324,
+									2.4703282292062327e-324,
+									1e-99999999999999999999,
+									1234567890123456789012345678901234567890e-400,
+									0.000_001e-400,
+								]
+								negative = [
+									-1e-999,
+									-2e-324,
+									-1e-99999999999999999999,
+								]
+							)"sv,
+						   [](table&& tbl)
+						   {
+							   for (auto&& [arr, negative] : { std::pair{ tbl["positive"].as_array(), false },
+															   std::pair{ tbl["negative"].as_array(), true } })
+							   {
+								   REQUIRE(arr);
+								   for (auto&& elem : *arr)
+								   {
+									   const auto val = elem.value<double>();
+									   REQUIRE(val);
+									   CHECK(*val == 0.0);
+									   CHECK(std::signbit(*val) == negative);
+								   }
+							   }
+						   });
+}
+
 TEST_CASE("parsing - floats (hexadecimal)")
 {
 // toml/issues/562 (hexfloats)
@@ -526,6 +605,15 @@ TEST_CASE("parsing - floats (malformed)")
 						"flt = 1e+x"sv,
 						"1:10: Error while parsing floating-point: expected decimal digit, saw 'x'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
+						"flt = +e5"sv,
+						"1:8: Error while parsing floating-point: expected decimal digit, saw 'e'"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"flt = -E+1_0"sv,
+						"1:8: Error while parsing floating-point: expected decimal digit, saw 'E'"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"arr = [ -e-5 ]"sv,
+						"1:10: Error while parsing floating-point: expected decimal digit, saw 'e'"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
 						"flt = 1e+"sv,
 						"1:10: Error while parsing floating-point: encountered end-of-file"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
@@ -537,6 +625,14 @@ TEST_CASE("parsing - floats (malformed)")
 	parsing_should_fail(FILE_LINE_ARGS,
 						"flt = +1e999"sv,
 						"1:7: Error while parsing floating-point: '+1e999' is not representable in 64 bits"sv);
+	parsing_should_fail(
+		FILE_LINE_ARGS,
+		"flt = 1.7976931348623159e308"sv,
+		"1:7: Error while parsing floating-point: '1.7976931348623159e308' is not representable in 64 bits"sv);
+	parsing_should_fail(
+		FILE_LINE_ARGS,
+		"flt = -1e99999999999999999999"sv,
+		"1:7: Error while parsing floating-point: '-1e99999999999999999999' is not representable in 64 bits"sv);
 }
 
 #if TOML_LANG_UNRELEASED

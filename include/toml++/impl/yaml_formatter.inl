@@ -14,7 +14,7 @@
 
 #include "yaml_formatter.hpp"
 #include "formatter.inl"
-#include "print_to_stream.hpp"
+#include "print_to_stream.inl"
 #include "table.hpp"
 #include "array.hpp"
 #include "unicode.hpp"
@@ -118,6 +118,21 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
+	void yaml_formatter::print_yaml_float(const value<double>& val)
+	{
+		if (impl::fpclassify(*val) != impl::fp_class::ok)
+		{
+			base::print(val);
+			return;
+		}
+
+		// yaml 1.1 reads 1e+16 as a string
+		char buf[32];
+		const auto end = TOML_ANON_NAMESPACE::write_float(buf, *val, relaxed_float_precision(), true);
+		print_unformatted(std::string_view{ buf, static_cast<size_t>(end - buf) });
+	}
+
+	TOML_EXTERNAL_LINKAGE
 	void yaml_formatter::print(const toml::table& tbl, bool parent_is_array)
 	{
 		if (tbl.empty())
@@ -151,6 +166,7 @@ TOML_NAMESPACE_START
 				case node_type::table: print(*static_cast<const table*>(&v)); break;
 				case node_type::array: print(*static_cast<const array*>(&v)); break;
 				case node_type::string: print_yaml_string(*static_cast<const value<std::string>*>(&v)); break;
+				case node_type::floating_point: print_yaml_float(*static_cast<const value<double>*>(&v)); break;
 				default: print_value(v, type);
 			}
 		}
@@ -187,6 +203,7 @@ TOML_NAMESPACE_START
 				case node_type::table: print(*static_cast<const table*>(&v), true); break;
 				case node_type::array: print(*static_cast<const array*>(&v), true); break;
 				case node_type::string: print_yaml_string(*static_cast<const value<std::string>*>(&v)); break;
+				case node_type::floating_point: print_yaml_float(*static_cast<const value<double>*>(&v)); break;
 				default: print_value(v, type);
 			}
 		}
@@ -220,6 +237,8 @@ TOML_NAMESPACE_START
 			}
 
 			case node_type::string: print_yaml_string(*static_cast<const value<std::string>*>(&source())); break;
+
+			case node_type::floating_point: print_yaml_float(*static_cast<const value<double>*>(&source())); break;
 
 			default: print_value(source(), source_type);
 		}

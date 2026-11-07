@@ -11,6 +11,7 @@ TOML_DISABLE_WARNINGS;
 #include <cstdint>
 #include <cstddef>
 #include <cstring>
+#include <cfenv>
 #include <cfloat>
 #include <climits>
 #include <cmath>
@@ -336,7 +337,7 @@ TOML_NAMESPACE_START // abi namespace
 		/// \brief Combination mask of all indentation-enabling flags.
 		indentation = indent_sub_tables | indent_array_elements,
 
-		/// \brief Emit floating-point values with relaxed (human-friendly) precision.
+		/// \brief Emit floating-point values rounded to at most six significant digits, laid out as C's `%g` does.
 		/// \warning	Setting this flag may cause serialized documents to no longer round-trip correctly
 		///				since floats might have a less precise value upon being written out than they did when being
 		///				read in. Use this flag at your own risk.
@@ -1274,6 +1275,29 @@ TOML_IMPL_NAMESPACE_START
 			return fp_class::nan;
 		return (val_bits & sign) ? fp_class::neg_inf : fp_class::pos_inf;
 	}
+
+	// printf, strtod and libc++'s from_chars follow the rounding mode, and strtod raises floating-point exceptions
+	// that trap in programs which unmask them
+	struct default_fenv
+	{
+		std::fenv_t saved = {};
+
+		default_fenv() noexcept
+		{
+			std::feholdexcept(&saved);
+#ifdef FE_TONEAREST
+			std::fesetround(FE_TONEAREST);
+#endif
+		}
+
+		~default_fenv() noexcept
+		{
+			std::fesetenv(&saved);
+		}
+
+		default_fenv(const default_fenv&)			 = delete;
+		default_fenv& operator=(const default_fenv&) = delete;
+	};
 
 	// Q: "why not use std::find and std::min?"
 	// A: Because <algorithm> is _huge_ and these would be the only things I used from it.
