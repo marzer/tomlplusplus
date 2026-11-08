@@ -34,6 +34,7 @@ printing.cpp
 round_trips.cpp
 source_regions.cpp
 tests.cpp
+unicode.cpp
 user_feedback.cpp
 using_iterators.cpp
 values.cpp

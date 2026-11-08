@@ -482,17 +482,17 @@ TEST_CASE("parsing - key-value pairs (non-ASCII whitespace)")
 						"1"sv,
 						R"(1:4: Error while parsing key-value pair: expected space or tab, saw '\u3000')"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
-						"a =\xEF\xBB\xBF"
+						"a =\xE2\x80\x8A"
 						"1"sv,
-						R"(1:4: Error while parsing key-value pair: expected space or tab, saw '\uFEFF')"sv);
+						R"(1:4: Error while parsing key-value pair: expected space or tab, saw '\u200A')"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"a =\xE1\x9A\x80"
 						"1"sv,
 						R"(1:4: Error while parsing key-value pair: expected space or tab, saw '\u1680')"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
-						"a =\xE1\xA0\x8E"
+						"a =\xE2\x81\x9F"
 						"1"sv,
-						R"(1:4: Error while parsing key-value pair: expected space or tab, saw '\u180E')"sv);
+						R"(1:4: Error while parsing key-value pair: expected space or tab, saw '\u205F')"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"\xC2\xA0"
 						"a = 1"sv,
@@ -501,6 +501,49 @@ TEST_CASE("parsing - key-value pairs (non-ASCII whitespace)")
 						"a = [1,\xE3\x80\x80"
 						"2]"sv,
 						R"(1:8: Error while parsing array: expected space or tab, saw '\u3000')"sv);
+}
+
+TEST_CASE("parsing - key-value pairs (U+180E, U+200B, U+2060 and U+FEFF aren't whitespace)")
+{
+	static constexpr std::pair<std::string_view, std::string_view> code_points[] = {
+		{ "\xE1\xA0\x8E"sv, R"(\u180E)"sv },
+		{ "\xE2\x80\x8B"sv, R"(\u200B)"sv },
+		{ "\xE2\x81\xA0"sv, R"(\u2060)"sv },
+		{ "\xEF\xBB\xBF"sv, R"(\uFEFF)"sv },
+	};
+
+	SECTION("around values")
+	{
+		for (const auto& [utf8, escaped] : code_points)
+		{
+			parsing_should_fail(FILE_LINE_ARGS,
+								"a =" + std::string{ utf8 } + "1",
+								"1:4: Error while parsing value: could not determine value type"sv);
+			parsing_should_fail(FILE_LINE_ARGS,
+								"a = 1" + std::string{ utf8 },
+								"1:6: Error while parsing decimal integer: expected digit, saw '"
+									+ std::string{ escaped } + "'");
+		}
+	}
+
+	SECTION("at the start of a bare key (toml/pull/891)")
+	{
+		for (const auto& cp : { code_points[0], code_points[3] })
+		{
+			const auto key = std::string{ cp.first } + "b";
+#if TOML_LANG_UNRELEASED
+			parsing_should_succeed(FILE_LINE_ARGS,
+								   "a = 0\n" + key + " = 1",
+								   [&](table&& tbl) { CHECK(tbl[key] == 1); });
+#else
+			parsing_should_fail(
+				FILE_LINE_ARGS,
+				"a = 0\n" + key + " = 1",
+				"2:1: Error while parsing root table: expected keys, tables, whitespace or comments, saw '"
+					+ std::string{ cp.second } + "'");
+#endif
+		}
+	}
 }
 
 TEST_CASE("parsing - key-value pairs (malformed)")

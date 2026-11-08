@@ -112,7 +112,7 @@ TOML_IMPL_NAMESPACE_START
 		none		  = 0,
 		line_breaks	  = 1u << 0, // \n
 		tabs		  = 1u << 1, // \t
-		control_chars = 1u << 2, // also includes non-ascii vertical whitespace
+		control_chars = 1u << 2, // also includes the non-ascii code points that are always escaped
 		single_quotes = 1u << 3,
 		non_bare	  = 1u << 4, // anything not satisfying "is bare key character"
 		non_ascii	  = 1u << 5, // any codepoint >= 128
@@ -324,12 +324,12 @@ TOML_IMPL_NAMESPACE_START
 					default:
 					{
 						if TOML_UNLIKELY(is_control_character(decoder.codepoint)
-							|| is_non_ascii_vertical_whitespace(decoder.codepoint)
-							|| (dialect == string_dialect::yaml && is_yaml_unprintable(decoder.codepoint)))
+							|| is_non_ascii_unprintable(decoder.codepoint, dialect))
 							traits |= formatted_string_traits::control_chars;
 
+						// U+FEFF can't be bare: at the start of a document it reads back as a BOM
 						if (!is_bare_key_character(decoder.codepoint)
-							|| is_non_ascii_horizontal_whitespace(decoder.codepoint))
+							|| is_non_ascii_horizontal_whitespace(decoder.codepoint) || decoder.codepoint == U'\uFEFF')
 							traits |= formatted_string_traits::non_bare;
 						break;
 					}
@@ -340,10 +340,10 @@ TOML_IMPL_NAMESPACE_START
 				bad_unicode();
 		}
 
-		// strings with line breaks, tabs, and single-quotes can't be bare
+		// strings with line breaks, tabs, single-quotes or anything that gets escaped can't be bare
 		if (!!(traits
 			   & (formatted_string_traits::line_breaks | formatted_string_traits::tabs
-				  | formatted_string_traits::single_quotes)))
+				  | formatted_string_traits::single_quotes | formatted_string_traits::control_chars)))
 			traits |= formatted_string_traits::non_bare;
 
 		// if the string meets the requirements of being 'bare' we can emit a bare string
@@ -493,8 +493,7 @@ TOML_IMPL_NAMESPACE_START
 
 						// escaped unicode characters
 						else if (cp > 0x7Fu
-								 && (!unicode_allowed || is_non_ascii_vertical_whitespace(decoder.codepoint)
-									 || (dialect == string_dialect::yaml && is_yaml_unprintable(decoder.codepoint))))
+								 && (!unicode_allowed || is_non_ascii_unprintable(decoder.codepoint, dialect)))
 						{
 							using TOML_ANON_NAMESPACE::write_unicode_escape;
 							char* escape_end = unicode_escape;

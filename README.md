@@ -234,7 +234,7 @@ defines `TOML_LANG_MAJOR`, `TOML_LANG_MINOR` and `TOML_LANG_PATCH`.
 - [#562]: Allow hex floating-point values
 - [#644]: Support `+` in key names
 - [#687]: Relax bare key restrictions to allow additional unicode characters
-- [#891]: Allow non-English scripts for unquoted keys
+- [#891]: Allow non-English scripts for unquoted keys (backed out of TOML in [#979], see [possible v4 changes])
 
 > ℹ&#xFE0F; _`#define TOML_ENABLE_UNRELEASED_FEATURES 1` to enable these features (see [Configuration](#configuration))._
 
@@ -360,5 +360,7 @@ though you're welcome to reach out via other means. In order of likely response 
 [#790]: https://github.com/toml-lang/toml/pull/790
 [#796]: https://github.com/toml-lang/toml/pull/796
 [#891]: https://github.com/toml-lang/toml/pull/891
+[#979]: https://github.com/toml-lang/toml/pull/979
+[possible v4 changes]: https://marzer.github.io/tomlplusplus/v4.html
 [m.css]: https://mcss.mosra.cz/documentation/doxygen
 [`toml.hpp`]: https://raw.githubusercontent.com/marzer/tomlplusplus/master/toml.hpp

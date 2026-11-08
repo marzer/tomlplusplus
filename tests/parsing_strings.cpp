@@ -243,6 +243,20 @@ TEST_CASE("parsing - strings (quotes next to multi-line delimiters)")
 	parse_expected_value(FILE_LINE_ARGS, R"( """""\"""\"""""" )"sv, R"("""""""")"sv);
 }
 
+TEST_CASE("parsing - strings (line-ending backslashes only trim ASCII whitespace)")
+{
+	for (const auto cp :
+		 { "\xC2\xA0"sv, "\xE1\x9A\x80"sv, "\xE2\x80\x8B"sv, "\xE2\x80\xA8"sv, "\xE3\x80\x80"sv, "\xEF\xBB\xBF"sv })
+	{
+		const auto str		= std::string{ cp };
+		const auto expected = "x" + str + " \ty";
+		parse_expected_value(FILE_LINE_ARGS, "\"\"\"x\\\n" + str + " \ty\"\"\"", std::string_view{ expected });
+		parse_expected_value(FILE_LINE_ARGS,
+							 "\"\"\"x\\ \t\n \t\n\t " + str + " \ty\"\"\"",
+							 std::string_view{ expected });
+	}
+}
+
 TEST_CASE("parsing - strings (malformed)")
 {
 	parsing_should_fail(

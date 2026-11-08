@@ -588,6 +588,7 @@ it's""")"sv);
 TEST_CASE("formatters - toml_formatter string escapes")
 {
 	const auto data = toml::table{ { "backslash_apostrophe", "a\\b'c"sv },
+								   { "c1_controls", "a\\b\xC2\x80z\xC2\x9F"sv },
 								   { "controls", "bell\x07 esc\x1B del\x7F"sv },
 								   { "crlf", "a\r\nb"sv },
 								   { "every_ascii_trait", "\n\t'\x01 x"sv },
@@ -603,6 +604,7 @@ TEST_CASE("formatters - toml_formatter string escapes")
 							  toml_formatter::default_flags,
 							  R"(
 backslash_apostrophe = "a\\b'c"
+c1_controls = "a\\b\u0080z\u009F"
 controls = "bell\u0007 esc\u001B del\u007F"
 crlf = """a\r
 b"""
@@ -626,6 +628,7 @@ unicode_lines_controls = """é
 	{
 		CHECK_TOML_ROUND_TRIP(data, format_flags::none, R"(
 backslash_apostrophe = "a\\b'c"
+c1_controls = "a\\b\u0080z\u009F"
 controls = "bell\u0007 esc\u001B del\u007F"
 crlf = "a\r\nb"
 every_ascii_trait = "\n\t'\u0001 x"
@@ -1019,14 +1022,27 @@ bare-key_09 = 7
 "it's" = 9)"sv);
 	}
 
-	SECTION("characters the parser reads as whitespace are quoted")
+	SECTION("keys containing U+1680 or U+FEFF are quoted")
 	{
-		for (const auto key : { "\xE1\x9A\x80"sv, "\xE1\xA0\x8E"sv, "\xEF\xBB\xBF"sv })
+		for (const auto key : { "\xE1\x9A\x80"sv,
+								"\xEF\xBB\xBF"sv,
+								"\xEF\xBB\xBF"
+								"a"sv,
+								"a\xEF\xBB\xBF"sv })
 		{
 			const auto data = toml::table{ { key, 1 } };
 			CHECK_TOML_ROUND_TRIP(data, toml_formatter::default_flags, "'" + std::string{ key } + "' = 1");
 		}
 	}
+
+#if TOML_LANG_UNRELEASED
+	SECTION("U+180E can be bare (toml/pull/891)")
+	{
+		CHECK_TOML_ROUND_TRIP(toml::table{ { "\xE1\xA0\x8E"sv, 1 } },
+							  toml_formatter::default_flags,
+							  "\xE1\xA0\x8E = 1"sv);
+	}
+#endif
 
 	SECTION("table headers")
 	{
@@ -1630,9 +1646,17 @@ TEST_CASE("formatters - json_formatter")
 			controls += static_cast<char>(c);
 		controls += '\x7F';
 
-		CHECK_OUTPUT(json_formatter, toml::array{ controls }, json_formatter::default_flags, R"(
+		std::string c1_controls;
+		for (int c = 0x80; c < 0xA0; c++)
+		{
+			c1_controls += '\xC2';
+			c1_controls += static_cast<char>(c);
+		}
+
+		CHECK_OUTPUT(json_formatter, toml::array{ controls, c1_controls }, json_formatter::default_flags, R"(
 [
-    "\u0000\u0001\u0002\u0003\u0004\u0005\u0006\u0007\b\t\n\u000B\f\r\u000E\u000F\u0010\u0011\u0012\u0013\u0014\u0015\u0016\u0017\u0018\u0019\u001A\u001B\u001C\u001D\u001E\u001F\u007F"
+    "\u0000\u0001\u0002\u0003\u0004\u0005\u0006\u0007\b\t\n\u000B\f\r\u000E\u000F\u0010\u0011\u0012\u0013\u0014\u0015\u0016\u0017\u0018\u0019\u001A\u001B\u001C\u001D\u001E\u001F\u007F",
+    "\u0080\u0081\u0082\u0083\u0084\u0085\u0086\u0087\u0088\u0089\u008A\u008B\u008C\u008D\u008E\u008F\u0090\u0091\u0092\u0093\u0094\u0095\u0096\u0097\u0098\u0099\u009A\u009B\u009C\u009D\u009E\u009F"
 ])"sv);
 	}
 
@@ -1793,6 +1817,9 @@ TEST_CASE("formatters - yaml_formatter")
 	SECTION("multi-line strings that block scalars can't hold are quoted")
 	{
 		const auto data = toml::table{
+			{ "bom",
+			  "a\n\xEF\xBB\xBF"
+			  "b"sv },
 			{ "control", "a\x01\nb"sv },
 			{ "crlf", "a\r\nb"sv },
 			{ "del", "a\x7F\nb"sv },
@@ -1805,6 +1832,7 @@ TEST_CASE("formatters - yaml_formatter")
 		};
 
 		CHECK_OUTPUT(yaml_formatter, data, yaml_formatter::default_flags, R"(
+bom: "a\n\uFEFFb"
 control: "a\u0001\nb"
 crlf: "a\r\nb"
 del: "a\u007F\nb"
@@ -1822,6 +1850,7 @@ trailing_newline: "a\n")"sv);
 			{ "c1",
 			  "a\xC2\x80"
 			  "b"sv },
+			{ "feff", "\xEF\xBB\xBF"sv },
 			{ "fffe", "\xEF\xBF\xBE"sv },
 			{ "ffff", "\xEF\xBF\xBF"sv },
 			{ "multi_line", "a\n\xC2\x9F"sv },
@@ -1829,6 +1858,7 @@ trailing_newline: "a\n")"sv);
 
 		CHECK_OUTPUT(yaml_formatter, data, yaml_formatter::default_flags, R"(
 c1: "a\u0080b"
+feff: "\uFEFF"
 fffe: "\uFFFE"
 ffff: "\uFFFF"
 multi_line: "a\n\u009F")"sv);
@@ -1836,6 +1866,10 @@ multi_line: "a\n\u009F")"sv);
 					 toml::table{ { "a\xC2\x80", 1 } },
 					 yaml_formatter::default_flags,
 					 R"("a\u0080": 1)"sv);
+		CHECK_OUTPUT(yaml_formatter,
+					 toml::table{ { "a\xEF\xBB\xBF", 1 } },
+					 yaml_formatter::default_flags,
+					 R"("a\uFEFF": 1)"sv);
 	}
 
 	SECTION("single-line strings")

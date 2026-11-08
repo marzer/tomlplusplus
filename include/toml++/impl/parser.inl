@@ -981,30 +981,11 @@ TOML_ANON_NAMESPACE_START
 		return val ? "true"sv : "false"sv;
 	}
 
-	TOML_PURE_GETTER
+	// code points would otherwise convert to bool
 	TOML_INTERNAL_LINKAGE
-	std::string_view to_sv(const utf8_codepoint& cp) noexcept
-	{
-		if (cp.value <= U'\x1F')
-			return impl::control_char_escapes[cp.value];
-		if (cp.value == U'\x7F')
-			return "\\u007F"sv;
-		return std::string_view{ cp.bytes, cp.count };
-	}
-
-	TOML_PURE_GETTER
+	std::string_view to_sv(const utf8_codepoint&) = delete;
 	TOML_INTERNAL_LINKAGE
-	std::string_view to_sv(const utf8_codepoint* cp) noexcept
-	{
-		if (cp)
-			return to_sv(*cp);
-		return ""sv;
-	}
-
-	struct escaped_codepoint
-	{
-		const utf8_codepoint& cp; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
-	};
+	std::string_view to_sv(const utf8_codepoint*) = delete;
 
 	template <typename T>
 	TOML_ATTR(nonnull)
@@ -1040,14 +1021,20 @@ TOML_ANON_NAMESPACE_START
 #endif
 		}
 
-		// escaped_codepoint
-		else if constexpr (std::is_same_v<arg_type, escaped_codepoint>)
+		// code points
+		else if constexpr (std::is_same_v<arg_type, utf8_codepoint>)
 		{
-			if (arg.cp.value <= U'\x7F')
-				concatenate(write_pos, buf_end, to_sv(arg.cp));
+			if (arg.value <= U'\x1F')
+				concatenate(write_pos, buf_end, impl::control_char_escapes[arg.value]);
+			else if (arg.value == U'\x7F')
+				concatenate(write_pos, buf_end, "\\u007F"sv);
+			else if (arg.value <= U'\x7F'
+					 || (arg.value > U'\x9F' && !impl::is_whitespace(arg.value)
+						 && !impl::is_default_ignorable(arg.value)))
+				concatenate(write_pos, buf_end, std::string_view{ arg.bytes, arg.count });
 			else
 			{
-				auto val			= static_cast<uint_least32_t>(arg.cp.value);
+				auto val			= static_cast<uint_least32_t>(arg.value);
 				const auto digits	= val > 0xFFFFu ? 8u : 4u;
 				constexpr auto mask = uint_least32_t{ 0xFu };
 				char buf[10]		= { '\\', digits > 4 ? 'U' : 'u' };
@@ -1063,9 +1050,8 @@ TOML_ANON_NAMESPACE_START
 
 		else
 		{
-			static_assert(
-				impl::always_false<T>,
-				"concatenate() inputs are limited to std::string_views, 64-bit integers and escaped_codepoint");
+			static_assert(impl::always_false<T>,
+						  "concatenate() inputs are limited to std::string_views, 64-bit integers and code points");
 		}
 	}
 
@@ -1092,15 +1078,17 @@ TOML_ANON_NAMESPACE_START
 		using arg_type = impl::remove_cvref<T>;
 		if constexpr (std::is_same_v<arg_type, std::string_view>)
 			return { arg.data(), static_cast<uint64_t>(arg.length()), error_arg::kinds::string };
-		else if constexpr (std::is_same_v<arg_type, escaped_codepoint>)
-			return { &arg.cp, {}, error_arg::kinds::codepoint };
+		else if constexpr (std::is_same_v<arg_type, utf8_codepoint>)
+			return { &arg, {}, error_arg::kinds::codepoint };
+		else if constexpr (std::is_same_v<arg_type, const utf8_codepoint*>)
+			return { arg, {}, error_arg::kinds::codepoint };
 		else if constexpr (std::is_integral_v<arg_type> && std::is_signed_v<arg_type>)
 			return { {}, static_cast<uint64_t>(static_cast<int64_t>(arg)), error_arg::kinds::signed_integer };
 		else if constexpr (std::is_integral_v<arg_type>)
 			return { {}, static_cast<uint64_t>(arg), error_arg::kinds::unsigned_integer };
 		else
 			static_assert(impl::always_false<T>,
-						  "error inputs are limited to std::string_views, integers and escaped_codepoint");
+						  "error inputs are limited to std::string_views, integers and code points");
 	}
 
 	struct error_builder
@@ -1132,9 +1120,8 @@ TOML_ANON_NAMESPACE_START
 					break;
 				case error_arg::kinds::unsigned_integer: concatenate(write_pos, max_write_pos, arg.val); break;
 				case error_arg::kinds::codepoint:
-					concatenate(write_pos,
-								max_write_pos,
-								escaped_codepoint{ *static_cast<const utf8_codepoint*>(arg.ptr) });
+					if (arg.ptr)
+						concatenate(write_pos, max_write_pos, *static_cast<const utf8_codepoint*>(arg.ptr));
 					break;
 			}
 		}
@@ -1741,7 +1728,7 @@ TOML_IMPL_NAMESPACE_START
 			while (!is_eof() && is_horizontal_whitespace(*cp))
 			{
 				if TOML_UNLIKELY(!is_ascii_horizontal_whitespace(*cp))
-					set_error_and_return_default("expected space or tab, saw '"sv, escaped_codepoint{ *cp }, "'"sv);
+					set_error_and_return_default("expected space or tab, saw '"sv, *cp, "'"sv);
 
 				consumed = true;
 				advance_and_return_if_error({});
@@ -1765,9 +1752,7 @@ TOML_IMPL_NAMESPACE_START
 					set_error_and_return_default("expected '\\n' after '\\r', saw EOF"sv);
 
 				if TOML_UNLIKELY(*cp != U'\n')
-					set_error_and_return_default("expected '\\n' after '\\r', saw '"sv,
-												 escaped_codepoint{ *cp },
-												 "'"sv);
+					set_error_and_return_default("expected '\\n' after '\\r', saw '"sv, *cp, "'"sv);
 			}
 			else if (*cp != U'\n')
 				return false;
@@ -1946,7 +1931,7 @@ TOML_IMPL_NAMESPACE_START
 								set_error_and_return_if_eof({});
 
 								if TOML_UNLIKELY(!is_hexadecimal_digit(*cp))
-									set_error_and_return_default("expected hex digit, saw '"sv, to_sv(*cp), "'"sv);
+									set_error_and_return_default("expected hex digit, saw '"sv, *cp, "'"sv);
 
 								sequence_value += place_value * hex_to_dec(*cp);
 								place_value /= 16u;
@@ -1992,7 +1977,7 @@ TOML_IMPL_NAMESPACE_START
 
 							// ???
 							TOML_UNLIKELY_CASE
-						default: set_error_and_return_default("unknown escape sequence '\\"sv, to_sv(*cp), "'"sv);
+						default: set_error_and_return_default("unknown escape sequence '\\"sv, *cp, "'"sv);
 					}
 
 					if (skip_escaped_codepoint)
@@ -2086,7 +2071,7 @@ TOML_IMPL_NAMESPACE_START
 							"unescaped unicode surrogates (U+D800 to U+DFFF) are explicitly prohibited"sv);
 #endif
 
-					if (skipping_whitespace && is_horizontal_whitespace(*cp))
+					if (skipping_whitespace && is_ascii_horizontal_whitespace(*cp))
 					{
 						advance_and_return_if_error({});
 						continue;
@@ -2291,7 +2276,7 @@ TOML_IMPL_NAMESPACE_START
 			stop_recording();
 
 			if (cp && !is_value_terminator(*cp))
-				set_error_and_return_default("expected end of value, saw '"sv, to_sv(*cp), "'"sv);
+				set_error_and_return_default("expected end of value, saw '"sv, *cp, "'"sv);
 
 			return result;
 		}
@@ -2320,7 +2305,7 @@ TOML_IMPL_NAMESPACE_START
 			stop_recording();
 
 			if (cp && !is_value_terminator(*cp))
-				set_error_and_return_default("expected end of value, saw '"sv, to_sv(*cp), "'"sv);
+				set_error_and_return_default("expected end of value, saw '"sv, *cp, "'"sv);
 
 			return inf ? (negative ? -std::numeric_limits<double>::infinity() : std::numeric_limits<double>::infinity())
 					   : std::numeric_limits<double>::quiet_NaN();
@@ -2394,7 +2379,7 @@ TOML_IMPL_NAMESPACE_START
 				{
 					if (!is_decimal_digit(prev) // +e5, 1.e5
 						|| seen_exponent)		// 1.0ee+10 (multiple 'e')
-						set_error_and_return_default("expected decimal digit, saw '"sv, to_sv(*cp), "'"sv);
+						set_error_and_return_default("expected decimal digit, saw '"sv, *cp, "'"sv);
 
 					seen_decimal  = true; // implied
 					seen_exponent = true;
@@ -2403,11 +2388,11 @@ TOML_IMPL_NAMESPACE_START
 				{
 					// 1.-0 (sign in mantissa)
 					if (!seen_exponent)
-						set_error_and_return_default("expected decimal digit or '.', saw '"sv, to_sv(*cp), "'"sv);
+						set_error_and_return_default("expected decimal digit or '.', saw '"sv, *cp, "'"sv);
 
 					// 1.0e1-0 (misplaced exponent sign)
 					else if (!is_match(prev, U'e', U'E'))
-						set_error_and_return_default("expected exponent digit, saw '"sv, to_sv(*cp), "'"sv);
+						set_error_and_return_default("expected exponent digit, saw '"sv, *cp, "'"sv);
 				}
 				else if (is_decimal_digit(*cp))
 				{
@@ -2426,7 +2411,7 @@ TOML_IMPL_NAMESPACE_START
 					}
 				}
 				else
-					set_error_and_return_default("expected decimal digit, saw '"sv, to_sv(*cp), "'"sv);
+					set_error_and_return_default("expected decimal digit, saw '"sv, *cp, "'"sv);
 
 				chars[length++] = static_cast<char>(cp->bytes[0]);
 				prev			= *cp;
@@ -2441,7 +2426,7 @@ TOML_IMPL_NAMESPACE_START
 				else if (is_match(prev, U'e', U'E', U'+', U'-', U'.'))
 				{
 					set_error_and_return_if_eof({});
-					set_error_and_return_default("expected decimal digit, saw '"sv, to_sv(*cp), "'"sv);
+					set_error_and_return_default("expected decimal digit, saw '"sv, *cp, "'"sv);
 				}
 			}
 
@@ -2487,13 +2472,13 @@ TOML_IMPL_NAMESPACE_START
 
 			// '0'
 			if (*cp != U'0')
-				set_error_and_return_default(" expected '0', saw '"sv, to_sv(*cp), "'"sv);
+				set_error_and_return_default(" expected '0', saw '"sv, *cp, "'"sv);
 			text[text_length++] = '0';
 			advance_and_return_if_error_or_eof({});
 
 			// 'x' or 'X'
 			if (!is_match(*cp, U'x', U'X'))
-				set_error_and_return_default("expected 'x' or 'X', saw '"sv, to_sv(*cp), "'"sv);
+				set_error_and_return_default("expected 'x' or 'X', saw '"sv, *cp, "'"sv);
 			text[text_length++] = static_cast<char>(cp->bytes[0]);
 			advance_and_return_if_error_or_eof({});
 
@@ -2548,11 +2533,11 @@ TOML_IMPL_NAMESPACE_START
 				{
 					// 0x10.0pp-0 (multiple 'p')
 					if (current_fragment == fragments + 2)
-						set_error_and_return_default(expected_exponent(), to_sv(*cp), "'"sv);
+						set_error_and_return_default(expected_exponent(), *cp, "'"sv);
 
 					// 0x.p-0 (mantissa is just '.')
 					else if (fragments[0].length == 0u && fragments[1].length == 0u)
-						set_error_and_return_default("expected hexadecimal digit, saw '"sv, to_sv(*cp), "'"sv);
+						set_error_and_return_default("expected hexadecimal digit, saw '"sv, *cp, "'"sv);
 
 					else
 						current_fragment = fragments + 2;
@@ -2561,19 +2546,19 @@ TOML_IMPL_NAMESPACE_START
 				{
 					// 0x-10.0p-0 (sign in mantissa)
 					if (current_fragment != fragments + 2)
-						set_error_and_return_default("expected hexadecimal digit or '.', saw '"sv, to_sv(*cp), "'"sv);
+						set_error_and_return_default("expected hexadecimal digit or '.', saw '"sv, *cp, "'"sv);
 
 					// 0x10.0p0- (misplaced exponent sign)
 					else if (!is_match(prev, U'p', U'P'))
-						set_error_and_return_default("expected exponent digit, saw '"sv, to_sv(*cp), "'"sv);
+						set_error_and_return_default("expected exponent digit, saw '"sv, *cp, "'"sv);
 
 					else
 						exponent_sign = *cp == U'-' ? -1 : 1;
 				}
 				else if (current_fragment < fragments + 2 && !is_hexadecimal_digit(*cp))
-					set_error_and_return_default("expected hexadecimal digit or '.', saw '"sv, to_sv(*cp), "'"sv);
+					set_error_and_return_default("expected hexadecimal digit or '.', saw '"sv, *cp, "'"sv);
 				else if (current_fragment == fragments + 2 && !is_decimal_digit(*cp))
-					set_error_and_return_default(expected_exponent(), to_sv(*cp), "'"sv);
+					set_error_and_return_default(expected_exponent(), *cp, "'"sv);
 				else if (current_fragment->length == sizeof(fragment::chars))
 					set_error_and_return_default("fragment exceeds maximum length of "sv,
 												 sizeof(fragment::chars),
@@ -2695,22 +2680,22 @@ TOML_IMPL_NAMESPACE_START
 			if constexpr (Base == 10)
 			{
 				if (!traits::is_digit(*cp))
-					set_error_and_return_default("expected "sv, traits::digit_name, ", saw '"sv, to_sv(*cp), "'"sv);
+					set_error_and_return_default("expected "sv, traits::digit_name, ", saw '"sv, *cp, "'"sv);
 			}
 			else
 			{
 				// '0'
 				if (*cp != U'0')
-					set_error_and_return_default("expected '0', saw '"sv, to_sv(*cp), "'"sv);
+					set_error_and_return_default("expected '0', saw '"sv, *cp, "'"sv);
 				advance_and_return_if_error_or_eof({});
 
 				// 'b', 'o', 'x'
 				if (*cp != traits::prefix_codepoint)
-					set_error_and_return_default("expected '"sv, traits::prefix, "', saw '"sv, to_sv(*cp), "'"sv);
+					set_error_and_return_default("expected '"sv, traits::prefix, "', saw '"sv, *cp, "'"sv);
 				advance_and_return_if_error_or_eof({});
 
 				if (!traits::is_digit(*cp))
-					set_error_and_return_default("expected "sv, traits::digit_name, ", saw '"sv, to_sv(*cp), "'"sv);
+					set_error_and_return_default("expected "sv, traits::digit_name, ", saw '"sv, *cp, "'"sv);
 			}
 
 			// consume digits
@@ -2731,7 +2716,7 @@ TOML_IMPL_NAMESPACE_START
 				if TOML_UNLIKELY(prev == U'_' && !traits::is_digit(*cp))
 					set_error_and_return_default("underscores must be followed by digits"sv);
 				else if TOML_UNLIKELY(!traits::is_digit(*cp))
-					set_error_and_return_default("expected "sv, traits::digit_name, ", saw '"sv, to_sv(*cp), "'"sv);
+					set_error_and_return_default("expected "sv, traits::digit_name, ", saw '"sv, *cp, "'"sv);
 				else if TOML_UNLIKELY(length == sizeof(digits))
 					set_error_and_return_default("exceeds length limit of "sv, sizeof(digits), " digits"sv);
 				else
@@ -2848,20 +2833,20 @@ TOML_IMPL_NAMESPACE_START
 			// "YYYY"
 			uint32_t digits[4];
 			if (!consume_digit_sequence(digits, 4u))
-				set_error_and_return_default("expected 4-digit year, saw '"sv, to_sv(cp), "'"sv);
+				set_error_and_return_default("expected 4-digit year, saw '"sv, cp, "'"sv);
 			const auto year			= digits[3] + (digits[2] * 10u) + (digits[1] * 100u) + (digits[0] * 1000u);
 			const auto is_leap_year = (year % 4u == 0u) && ((year % 100u != 0u) || (year % 400u == 0u));
 			set_error_and_return_if_eof({});
 
 			// '-'
 			if (*cp != U'-')
-				set_error_and_return_default("expected '-', saw '"sv, to_sv(*cp), "'"sv);
+				set_error_and_return_default("expected '-', saw '"sv, *cp, "'"sv);
 			advance_and_return_if_error_or_eof({});
 
 			// "MM"
 			const auto month_pos = current_position();
 			if (!consume_digit_sequence(digits, 2u))
-				set_error_and_return_default("expected 2-digit month, saw '"sv, to_sv(cp), "'"sv);
+				set_error_and_return_default("expected 2-digit month, saw '"sv, cp, "'"sv);
 			const auto month = digits[1] + (digits[0] * 10u);
 			if (month == 0u || month > 12u)
 			{
@@ -2875,13 +2860,13 @@ TOML_IMPL_NAMESPACE_START
 
 			// '-'
 			if (*cp != U'-')
-				set_error_and_return_default("expected '-', saw '"sv, to_sv(*cp), "'"sv);
+				set_error_and_return_default("expected '-', saw '"sv, *cp, "'"sv);
 			advance_and_return_if_error_or_eof({});
 
 			// "DD"
 			const auto day_pos = current_position();
 			if (!consume_digit_sequence(digits, 2u))
-				set_error_and_return_default("expected 2-digit day, saw '"sv, to_sv(cp), "'"sv);
+				set_error_and_return_default("expected 2-digit day, saw '"sv, cp, "'"sv);
 			const auto day = digits[1] + (digits[0] * 10u);
 			if (day == 0u || day > max_days_in_month)
 			{
@@ -2890,7 +2875,7 @@ TOML_IMPL_NAMESPACE_START
 			}
 
 			if (!part_of_datetime && !is_eof() && !is_value_terminator(*cp))
-				set_error_and_return_default("expected end of value, saw '"sv, to_sv(*cp), "'"sv);
+				set_error_and_return_default("expected end of value, saw '"sv, *cp, "'"sv);
 
 			return { year, month, day };
 		}
@@ -2910,7 +2895,7 @@ TOML_IMPL_NAMESPACE_START
 			// "HH"
 			const auto hour_pos = current_position();
 			if (!consume_digit_sequence(digits, 2u))
-				set_error_and_return_default("expected 2-digit hour, saw '"sv, to_sv(cp), "'"sv);
+				set_error_and_return_default("expected 2-digit hour, saw '"sv, cp, "'"sv);
 			const auto hour = digits[1] + (digits[0] * 10u);
 			if (hour > 23u)
 			{
@@ -2921,13 +2906,13 @@ TOML_IMPL_NAMESPACE_START
 
 			// ':'
 			if (*cp != U':')
-				set_error_and_return_default("expected ':', saw '"sv, to_sv(*cp), "'"sv);
+				set_error_and_return_default("expected ':', saw '"sv, *cp, "'"sv);
 			advance_and_return_if_error_or_eof({});
 
 			// "MM"
 			const auto minute_pos = current_position();
 			if (!consume_digit_sequence(digits, 2u))
-				set_error_and_return_default("expected 2-digit minute, saw '"sv, to_sv(cp), "'"sv);
+				set_error_and_return_default("expected 2-digit minute, saw '"sv, cp, "'"sv);
 			const auto minute = digits[1] + (digits[0] * 10u);
 			if (minute > 59u)
 			{
@@ -2940,13 +2925,13 @@ TOML_IMPL_NAMESPACE_START
 			if (is_eof() || is_value_terminator(*cp) || (part_of_datetime && is_match(*cp, U'+', U'-', U'Z', U'z')))
 				return time;
 			if (*cp != U':')
-				set_error_and_return_default("expected ':', saw '"sv, to_sv(*cp), "'"sv);
+				set_error_and_return_default("expected ':', saw '"sv, *cp, "'"sv);
 			advance_and_return_if_error_or_eof({});
 
 			// "SS"
 			const auto second_pos = current_position();
 			if (!consume_digit_sequence(digits, 2u))
-				set_error_and_return_default("expected 2-digit second, saw '"sv, to_sv(cp), "'"sv);
+				set_error_and_return_default("expected 2-digit second, saw '"sv, cp, "'"sv);
 			const auto second = digits[1] + (digits[0] * 10u);
 			if (second > 60u)
 			{
@@ -2964,7 +2949,7 @@ TOML_IMPL_NAMESPACE_START
 			if (is_eof() || is_value_terminator(*cp) || (part_of_datetime && is_match(*cp, U'+', U'-', U'Z', U'z')))
 				return time;
 			if (*cp != U'.')
-				set_error_and_return_default("expected '.', saw '"sv, to_sv(*cp), "'"sv);
+				set_error_and_return_default("expected '.', saw '"sv, *cp, "'"sv);
 			advance_and_return_if_error_or_eof({});
 
 			// "FFFFFFFFF"
@@ -2972,12 +2957,12 @@ TOML_IMPL_NAMESPACE_START
 			if (!digit_count)
 			{
 				set_error_and_return_if_eof({});
-				set_error_and_return_default("expected fractional digits, saw '"sv, to_sv(*cp), "'"sv);
+				set_error_and_return_default("expected fractional digits, saw '"sv, *cp, "'"sv);
 			}
 			while (!is_eof() && is_decimal_digit(*cp))
 				advance_and_return_if_error({});
 			if (!is_eof() && !part_of_datetime && !is_value_terminator(*cp))
-				set_error_and_return_default("expected end of value, saw '"sv, to_sv(*cp), "'"sv);
+				set_error_and_return_default("expected end of value, saw '"sv, *cp, "'"sv);
 			uint32_t value = 0u;
 			uint32_t place = 1u;
 			for (auto i = digit_count; i-- > 0u;)
@@ -3006,12 +2991,12 @@ TOML_IMPL_NAMESPACE_START
 
 			// ' ', 'T' or 't'
 			if (!is_match(*cp, U' ', U'T', U't'))
-				set_error_and_return_default("expected space, 'T' or 't', saw '"sv, to_sv(*cp), "'"sv);
+				set_error_and_return_default("expected space, 'T' or 't', saw '"sv, *cp, "'"sv);
 			advance_and_return_if_error_or_eof({});
 
 			// "HH:MM:SS.FFFFFFFFF"
 			if TOML_UNLIKELY(!is_decimal_digit(*cp))
-				set_error_and_return_default("expected 2-digit hour, saw '"sv, to_sv(*cp), "'"sv);
+				set_error_and_return_default("expected 2-digit hour, saw '"sv, *cp, "'"sv);
 			const auto time_pos = current_position();
 			auto time			= parse_time(true);
 			return_if_error({});
@@ -3048,7 +3033,7 @@ TOML_IMPL_NAMESPACE_START
 				int digits[2];
 				const auto hour_pos = current_position();
 				if (!consume_digit_sequence(digits, 2u))
-					set_error_and_return_default("expected 2-digit hour, saw '"sv, to_sv(cp), "'"sv);
+					set_error_and_return_default("expected 2-digit hour, saw '"sv, cp, "'"sv);
 				const auto hour = digits[1] + (digits[0] * 10);
 				if (hour > 23)
 				{
@@ -3059,13 +3044,13 @@ TOML_IMPL_NAMESPACE_START
 
 				// ':'
 				if (*cp != U':')
-					set_error_and_return_default("expected ':', saw '"sv, to_sv(*cp), "'"sv);
+					set_error_and_return_default("expected ':', saw '"sv, *cp, "'"sv);
 				advance_and_return_if_error_or_eof({});
 
 				// "MM"
 				const auto minute_pos = current_position();
 				if (!consume_digit_sequence(digits, 2u))
-					set_error_and_return_default("expected 2-digit minute, saw '"sv, to_sv(cp), "'"sv);
+					set_error_and_return_default("expected 2-digit minute, saw '"sv, cp, "'"sv);
 				const auto minute = digits[1] + (digits[0] * 10);
 				if (minute > 59)
 				{
@@ -3076,7 +3061,7 @@ TOML_IMPL_NAMESPACE_START
 			}
 
 			if (!is_eof() && !is_value_terminator(*cp))
-				set_error_and_return_default("expected end of value, saw '"sv, to_sv(*cp), "'"sv);
+				set_error_and_return_default("expected end of value, saw '"sv, *cp, "'"sv);
 
 			if (time.second == 60u)
 			{
@@ -3706,7 +3691,7 @@ TOML_IMPL_NAMESPACE_START
 				// ???
 				else
 					set_error_and_return_default("expected bare key starting character or string delimiter, saw '"sv,
-												 to_sv(*cp),
+												 *cp,
 												 "'"sv);
 
 				const auto key_end = current_position();
@@ -3790,7 +3775,7 @@ TOML_IMPL_NAMESPACE_START
 
 				if (!is_bare_key_character(*cp) && !is_string_delimiter(*cp))
 					set_error_and_return_default("expected bare key starting character or string delimiter, saw '"sv,
-												 to_sv(*cp),
+												 *cp,
 												 "'"sv);
 
 				// get the actual key
@@ -3806,12 +3791,12 @@ TOML_IMPL_NAMESPACE_START
 
 				// consume the closing ']'
 				if (*cp != U']')
-					set_error_and_return_default("expected ']', saw '"sv, to_sv(*cp), "'"sv);
+					set_error_and_return_default("expected ']', saw '"sv, *cp, "'"sv);
 				if (is_arr)
 				{
 					advance_and_return_if_error_or_eof({});
 					if (*cp != U']')
-						set_error_and_return_default("expected ']', saw '"sv, to_sv(*cp), "'"sv);
+						set_error_and_return_default("expected ']', saw '"sv, *cp, "'"sv);
 				}
 				advance_and_return_if_error({});
 				header_end_pos = current_position(1);
@@ -3819,7 +3804,7 @@ TOML_IMPL_NAMESPACE_START
 				// handle the rest of the line after the header
 				consume_leading_whitespace();
 				if (!is_eof() && !consume_comment() && !consume_line_break())
-					set_error_and_return_default("expected a comment or whitespace, saw '"sv, to_sv(cp), "'"sv);
+					set_error_and_return_default("expected a comment or whitespace, saw '"sv, cp, "'"sv);
 			}
 			TOML_ASSERT(!key_buffer.empty());
 
@@ -3991,7 +3976,7 @@ TOML_IMPL_NAMESPACE_START
 
 			// '='
 			if (*cp != U'=')
-				set_error_and_return_default("expected '=', saw '"sv, to_sv(*cp), "'"sv);
+				set_error_and_return_default("expected '=', saw '"sv, *cp, "'"sv);
 			advance_and_return_if_error_or_eof({});
 
 			// skip past any whitespace that followed the '='
@@ -4001,7 +3986,7 @@ TOML_IMPL_NAMESPACE_START
 
 			// check that the next character could actually be a value
 			if (is_value_terminator(*cp))
-				set_error_and_return_default("expected value, saw '"sv, to_sv(*cp), "'"sv);
+				set_error_and_return_default("expected value, saw '"sv, *cp, "'"sv);
 
 			// if it's a dotted kvp we need to spawn the parent sub-tables if necessary,
 			// and set the target table to the second-to-last one in the chain
@@ -4105,11 +4090,11 @@ TOML_IMPL_NAMESPACE_START
 					consume_leading_whitespace();
 					return_if_error();
 					if (!is_eof() && !consume_comment() && !consume_line_break())
-						set_error("expected a comment or whitespace, saw '"sv, to_sv(cp), "'"sv);
+						set_error("expected a comment or whitespace, saw '"sv, cp, "'"sv);
 				}
 
 				else // ??
-					set_error("expected keys, tables, whitespace or comments, saw '"sv, to_sv(cp), "'"sv);
+					set_error("expected keys, tables, whitespace or comments, saw '"sv, cp, "'"sv);
 			}
 			while (!is_eof());
 
@@ -4236,14 +4221,12 @@ TOML_IMPL_NAMESPACE_START
 			else
 			{
 				if (prev == parse_type::val)
-					set_error_and_return_default("expected comma or closing ']', saw '"sv, to_sv(*cp), "'"sv);
+					set_error_and_return_default("expected comma or closing ']', saw '"sv, *cp, "'"sv);
 				prev = parse_type::val;
 
 				// e.g. '}' or a non-ASCII line break; parse_value() requires a value to start here
 				if TOML_UNLIKELY(is_value_terminator(*cp))
-					set_error_and_return_default("expected value or closing ']', saw '"sv,
-												 escaped_codepoint{ *cp },
-												 "'"sv);
+					set_error_and_return_default("expected value or closing ']', saw '"sv, *cp, "'"sv);
 
 				auto val = parse_value();
 				return_if_error({});
@@ -4311,7 +4294,7 @@ TOML_IMPL_NAMESPACE_START
 			else if (is_string_delimiter(*cp) || is_bare_key_character(*cp))
 			{
 				if (prev == parse_type::kvp)
-					set_error_and_return_default("expected comma or closing '}', saw '"sv, to_sv(*cp), "'"sv);
+					set_error_and_return_default("expected comma or closing '}', saw '"sv, *cp, "'"sv);
 				else
 				{
 					prev = parse_type::kvp;
@@ -4321,7 +4304,7 @@ TOML_IMPL_NAMESPACE_START
 
 			/// ???
 			else
-				set_error_and_return_default("expected key or closing '}', saw '"sv, to_sv(*cp), "'"sv);
+				set_error_and_return_default("expected key or closing '}', saw '"sv, *cp, "'"sv);
 		}
 
 		return_if_error({});

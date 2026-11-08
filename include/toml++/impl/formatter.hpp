@@ -9,6 +9,7 @@
 
 #include "forward_declarations.hpp"
 #include "print_to_stream.hpp"
+#include "unicode.hpp"
 #include "header_start.hpp"
 /// \cond
 
@@ -41,9 +42,10 @@ TOML_IMPL_NAMESPACE_START
 	};
 
 	TOML_CONST_GETTER
-	constexpr bool is_yaml_unprintable(char32_t c) noexcept
+	constexpr bool is_non_ascii_unprintable(char32_t c, string_dialect dialect) noexcept
 	{
-		return (c >= U'\x80' && c <= U'\x9F' && c != U'\x85') || c == U'\xFFFE' || c == U'\xFFFF';
+		return (c >= U'\x80' && c <= U'\x9F') || is_non_ascii_vertical_whitespace(c)
+			|| (dialect == string_dialect::yaml && (c == U'\xFEFF' || c == U'\xFFFE' || c == U'\xFFFF'));
 	}
 
 	class formatter_buffer;

@@ -175,7 +175,7 @@ inline bool parse_expected_value(std::string_view test_file,
 				if (decoder.codepoint == U'\n')
 				{
 					pos.line++;
-					pos.column = source_index{ 1 };
+					pos.column = {};
 				}
 				continue;
 			}

@@ -31,6 +31,7 @@
 - fixed incorrect source positions and misleading messages in a number of parse errors
 - fixed times with more than 64 digits of fractional seconds failing to parse
 - fixed leap seconds failing to parse
+- fixed line-ending backslashes trimming non-ASCII spaces
 - fixed very small floats, such as subnormals and `1e-999` (which rounds to zero), failing to parse with MSVC or libc++
 - fixed floats not printing consistently across different compilers (#179) (@aborisovich)
 - fixed `yaml_formatter` writing floats such as `1e+16` that YAML 1.1 loaders read as strings
@@ -61,7 +62,8 @@
 - fixed formatters dropping an incomplete UTF-8 sequence at the end of a string
 - fixed undefined behaviour in `toml_formatter` with arrays containing `INT64_MIN`, infinities or NaNs
 - fixed `toml_formatter` emitting leading blank lines when printed more than once
-- fixed keys containing U+1680, U+180E or U+FEFF incorrectly formatting as bare keys (`TOML_ENABLE_UNRELEASED_FEATURES`)
+- fixed keys containing U+1680 or U+FEFF formatting as bare keys (`TOML_ENABLE_UNRELEASED_FEATURES`)
+- fixed bare keys starting with U+180E or U+FEFF failing to parse (`TOML_ENABLE_UNRELEASED_FEATURES`)
 - fixed `json_formatter` emitting invalid JSON with some format flags
 - fixed `yaml_formatter` emitting incorrect YAML for some strings, keys and format flags
 - fixed `for_each()` not compiling with MSVC in C++17 mode (#219) (@KevDi)
@@ -70,6 +72,7 @@
 - fixed linker errors when using `json_formatter` or `yaml_formatter` from a DLL built with MinGW
 - fixed `TOML_INCLUDE_WINDOWS_H` failing to compile with MinGW on case-sensitive filesystems
 - fixed a Clang `-Wabsolute-value` warning when building the library with MinGW
+- fixed `toml_formatter`, `json_formatter` and `yaml_formatter` not escaping some control characters
 
 #### Additions
 
@@ -89,9 +92,9 @@
 #### Changes
 
 - `operator<<` for `source_region` also prints the end of the region when it differs from the start (#244) (@N-Dekker)
-- parsing speed improved, particularly for documents containing mostly strings
-- improvements to text formatting speed (`json_formatter` in particular)
+- improvements to general parsing speed, particularly for documents containing mostly strings
 - improvements to float parsing, using `<charconv>` in more places where it is supported
+- improvements to text formatting speed (`json_formatter` in particular)
 - improvements to compile speed and binary size
 
 #### Removals

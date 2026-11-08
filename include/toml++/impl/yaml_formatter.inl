@@ -46,7 +46,7 @@ TOML_ANON_NAMESPACE_START
 				continue;
 			}
 			if ((cp == U' ' && !seen_content) || impl::is_nontab_control_character(cp)
-				|| impl::is_non_ascii_vertical_whitespace(cp) || impl::is_yaml_unprintable(cp))
+				|| impl::is_non_ascii_unprintable(cp, impl::string_dialect::yaml))
 				return false;
 			seen_content = true;
 		}
@@ -65,7 +65,10 @@ TOML_ANON_NAMESPACE_START
 		for (size_t i = 0; i < str.length(); i++)
 			lower[i] = str[i] >= 'A' && str[i] <= 'Z' ? static_cast<char>(str[i] - 'A' + 'a') : str[i];
 		const auto word = std::string_view{ lower, str.length() };
-		for (auto keyword : { "y"sv, "n"sv, "yes"sv, "no"sv, "on"sv, "off"sv, "true"sv, "false"sv, "null"sv })
+
+		static constexpr std::string_view keywords[] = { "y"sv,	  "n"sv,	"yes"sv,   "no"sv,	"on"sv,
+														 "off"sv, "true"sv, "false"sv, "null"sv };
+		for (auto keyword : keywords)
 			if (word == keyword)
 				return false;
 		return true;

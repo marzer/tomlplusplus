@@ -321,6 +321,9 @@ TOML_NAMESPACE_START // abi namespace
 		allow_real_tabs_in_strings = (1ull << 4),
 
 		/// \brief Allow non-ASCII characters in strings (as opposed to their escaped form, e.g. `\u00DA`).
+		///
+		/// \detail C1 control characters, U+2028 and U+2029 are always escaped, as are U+FEFF, U+FFFE and U+FFFF
+		/// in YAML.
 		allow_unicode_strings = (1ull << 5),
 
 		/// \brief Allow integers with #value_flags::format_as_binary to be emitted as binary.

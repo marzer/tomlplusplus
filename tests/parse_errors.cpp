@@ -170,6 +170,69 @@ TEST_CASE("parse errors - positions after multi-byte code points")
 						"2:5: Error while parsing value: could not determine value type"sv);
 }
 
+TEST_CASE("parse errors - code points")
+{
+	SECTION("non-ASCII whitespace is escaped")
+	{
+		parsing_should_fail(FILE_LINE_ARGS,
+							"a =\xE2\x80\xA8"
+							"1"sv,
+							R"(1:4: Error while parsing key-value pair: expected value, saw '\u2028')"sv);
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			"a = 1\xC2\x85"sv,
+			R"(1:6: Error while parsing key-value pair: expected a comment or whitespace, saw '\u0085')"sv);
+		parsing_should_fail(FILE_LINE_ARGS,
+							"a\xE2\x80\xA9 = 1"sv,
+							R"(1:2: Error while parsing key-value pair: expected '=', saw '\u2029')"sv);
+		parsing_should_fail(FILE_LINE_ARGS,
+							"a = 1\r\xC2\xA0"sv,
+							R"(1:7: Error while parsing key-value pair: expected '\n' after '\r', saw '\u00A0')"sv);
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			"a = 0x\xE3\x80\x80"sv,
+			R"(1:7: Error while parsing hexadecimal integer: expected hexadecimal digit, saw '\u3000')"sv);
+		parsing_should_fail(FILE_LINE_ARGS,
+							"a = 07:\xE2\x80\x80"sv,
+							R"(1:8: Error while parsing time: expected 2-digit minute, saw '\u2000')"sv);
+	}
+
+	SECTION("C1 controls and default-ignorable code points are escaped")
+	{
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			"a = 0x\xC2\x80"sv,
+			R"(1:7: Error while parsing hexadecimal integer: expected hexadecimal digit, saw '\u0080')"sv);
+		parsing_should_fail(FILE_LINE_ARGS,
+							"a = 1\xC2\x9B"sv,
+							R"(1:6: Error while parsing decimal integer: expected digit, saw '\u009B')"sv);
+		parsing_should_fail(FILE_LINE_ARGS,
+							"a = 1\xE2\x80\x8D"sv,
+							R"(1:6: Error while parsing decimal integer: expected digit, saw '\u200D')"sv);
+		parsing_should_fail(FILE_LINE_ARGS,
+							"a = 1\xE2\x80\xAE"sv,
+							R"(1:6: Error while parsing decimal integer: expected digit, saw '\u202E')"sv);
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			"a = 0x\xC2\xAD"sv,
+			R"(1:7: Error while parsing hexadecimal integer: expected hexadecimal digit, saw '\u00AD')"sv);
+		parsing_should_fail(FILE_LINE_ARGS,
+							"a = 1\xF3\xA0\x80\x81"sv,
+							R"(1:6: Error while parsing decimal integer: expected digit, saw '\U000E0001')"sv);
+	}
+
+	SECTION("other non-ASCII code points are printed raw")
+	{
+		parsing_should_fail(FILE_LINE_ARGS,
+							"a = 1\r\xC3\xA9"sv,
+							"1:7: Error while parsing key-value pair: expected '\\n' after '\\r', saw '\xC3\xA9'"sv);
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			"a = 0x\xF0\x9F\x98\x82"sv,
+			"1:7: Error while parsing hexadecimal integer: expected hexadecimal digit, saw '\xF0\x9F\x98\x82'"sv);
+	}
+}
+
 TEST_CASE("parse errors - positions after a byte order mark")
 {
 	parsing_should_fail(FILE_LINE_ARGS,
@@ -182,9 +245,16 @@ TEST_CASE("parse errors - positions after a byte order mark")
 	parsing_should_fail(FILE_LINE_ARGS,
 						BOM_PREFIX "a = 1\nb = x"sv,
 						"2:5: Error while parsing value: could not determine value type"sv);
-	parsing_should_fail(FILE_LINE_ARGS,
-						BOM_PREFIX BOM_PREFIX "a = 1"sv,
-						R"(1:1: Error while parsing root table: expected space or tab, saw '\uFEFF')"sv);
+#if TOML_LANG_UNRELEASED
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   BOM_PREFIX BOM_PREFIX "a = 1"sv,
+						   [](table&& tbl) { CHECK(tbl[BOM_PREFIX "a"] == 1); });
+#else
+	parsing_should_fail(
+		FILE_LINE_ARGS,
+		BOM_PREFIX BOM_PREFIX "a = 1"sv,
+		R"(1:1: Error while parsing root table: expected keys, tables, whitespace or comments, saw '\uFEFF')"sv);
+#endif
 	parsing_should_fail(FILE_LINE_ARGS,
 						"\xEF\xBB"
 						"a = 1"sv,
