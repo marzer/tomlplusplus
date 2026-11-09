@@ -13,6 +13,9 @@
 #if TOML_ENABLE_FORMATTERS
 
 #include "formatter.hpp"
+#include "toml_formatter.hpp"
+#include "json_formatter.hpp"
+#include "yaml_formatter.hpp"
 #include "print_to_stream.hpp"
 #include "value.hpp"
 #include "table.hpp"
@@ -21,6 +24,7 @@
 #include "parse_result.hpp"
 TOML_DISABLE_WARNINGS;
 #include <ostream>
+#include <sstream>
 #include <streambuf>
 TOML_ENABLE_WARNINGS;
 #include "header_start.hpp"
@@ -106,6 +110,35 @@ TOML_IMPL_NAMESPACE_START
 			chunks_.flush();
 		}
 	};
+	TOML_EXTERNAL_LINKAGE
+	TOML_EXPORTED_FREE_FUNCTION
+	std::string format_node_to_string(const node& value, toml_format_style style)
+	{
+		std::ostringstream stream;
+		switch (style)
+		{
+			case toml_format_style::toml: stream << toml::toml_formatter{ value }; break;
+			case toml_format_style::json: stream << toml::json_formatter{ value }; break;
+			case toml_format_style::yaml: stream << toml::yaml_formatter{ value }; break;
+		}
+		return std::move(stream).str();
+	}
+
+#if !TOML_EXCEPTIONS
+	TOML_EXTERNAL_LINKAGE
+	TOML_EXPORTED_FREE_FUNCTION
+	std::string format_parse_result_to_string(const parse_result& value, toml_format_style style)
+	{
+		std::ostringstream stream;
+		switch (style)
+		{
+			case toml_format_style::toml: stream << toml::toml_formatter{ value }; break;
+			case toml_format_style::json: stream << toml::json_formatter{ value }; break;
+			case toml_format_style::yaml: stream << toml::yaml_formatter{ value }; break;
+		}
+		return std::move(stream).str();
+	}
+#endif
 
 	enum class TOML_CLOSED_FLAGS_ENUM formatted_string_traits : unsigned
 	{
