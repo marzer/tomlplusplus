@@ -112,20 +112,32 @@ merge them the same way.
 
 ## Fuzzing
 
-[OSS-Fuzz] fuzzes toml++ continuously, and CIFuzz runs the same fuzzer on every PR. Both build
-`fuzzing/toml_fuzzer.cpp` with `fuzzing/build.sh`. OSS-Fuzz takes `build.sh` from `master`, so a change to it only takes
-effect after merge.
+[OSS-Fuzz] fuzzes toml++ continuously, and CIFuzz runs the same fuzzers on every PR. Both build the fuzzers in
+`fuzzing/` with `fuzzing/build.sh`. OSS-Fuzz takes `build.sh` from `master`, so a change to it only takes effect after
+merge.
 
-To run the fuzzer locally with Clang and libFuzzer:
+There are three fuzzers:
+
+- `toml_fuzzer` parses its input from a string and from two kinds of stream, and checks that all three give the same
+  result. It then prints each document that parses, and checks that the printed text parses to an equal table.
+- `toml_no_exceptions_fuzzer` is the same code, built without exceptions and with assertions and unreleased TOML
+  features on. It needs toml++ to be header-only.
+- `toml_float_fuzzer` checks the exact text that floats print as: the shortest digits that read back as the same value,
+  in the layout the formatters use.
+
+The input to the first two is a TOML document and nothing else, so a crash file is the document that failed. They skip
+documents over 4 KiB, because a document's printed size can grow with the square of its size.
+
+To run one locally with Clang and libFuzzer:
 
 ```bash
 CXX=clang++ CXXFLAGS="-fsanitize=address,fuzzer-no-link" LIB_FUZZING_ENGINE=-fsanitize=fuzzer \
     cmake -S . -B build-fuzz -DCMAKE_BUILD_TYPE=Release -DBUILD_FUZZER=ON
 cmake --build build-fuzz --target toml_fuzzer
-build-fuzz/fuzzing/toml_fuzzer
+build-fuzz/fuzzing/toml_fuzzer -dict=fuzzing/toml.dict
 ```
 
-CMake warns that it can't install the fuzzer without `$OUT`. That only matters to OSS-Fuzz.
+CMake warns that it can't install the fuzzers without `$OUT`. That only matters to OSS-Fuzz.
 
 <br>
 

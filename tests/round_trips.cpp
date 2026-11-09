@@ -404,6 +404,7 @@ TEST_CASE("round trips - floats")
 			values.push_back(val);
 	}
 
+	// NOLINTNEXTLINE(bugprone-suspicious-memory-comparison)
 	const auto bitwise_equal = [](double a, double b) { return std::memcmp(&a, &b, sizeof(double)) == 0; };
 
 	SECTION("finite")

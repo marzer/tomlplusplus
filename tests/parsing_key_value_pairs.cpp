@@ -565,16 +565,113 @@ TEST_CASE("parsing - key-value pairs (malformed)")
 	parsing_should_fail(FILE_LINE_ARGS, "a = \x01"sv, "1:5: Error while parsing value: unexpected control character"sv);
 }
 
-TEST_CASE("parsing - key-value pairs (implementation limits)")
+TEST_CASE("parsing - nesting depth limit")
 {
-	std::string deep_key = "a";
-	for (size_t i = 0; i < 1100u; i++)
-		deep_key += ".a";
-	deep_key += " = 1";
-	parsing_should_fail(
-		FILE_LINE_ARGS,
-		deep_key,
-		"1:2050: Error while parsing key: exceeded maximum dotted keys depth of 1024 (TOML_MAX_DOTTED_KEYS_DEPTH)"sv);
+	const auto dotted = [](size_t parts)
+	{
+		std::string key = "a";
+		for (size_t i = 1; i < parts; i++)
+			key += ".a";
+		return key;
+	};
+
+	const auto depth_of = [](const table& tbl)
+	{
+		size_t depth	  = {};
+		const node* child = &tbl;
+		for (;;)
+		{
+			if (const auto* inner_table = child->as_table(); inner_table && !inner_table->empty())
+				child = &inner_table->begin()->second;
+			else if (const auto* inner_array = child->as_array(); inner_array && !inner_array->empty())
+				child = &inner_array->back();
+			else
+				return depth;
+			depth++;
+		}
+	};
+
+	const auto parses_and_round_trips = [&](std::string_view doc, size_t expected_depth)
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   doc,
+							   [&](table&& tbl)
+							   {
+								   CHECK(depth_of(tbl) == expected_depth);
+
+								   std::ostringstream printed;
+								   printed << tbl;
+								   parsing_should_succeed(FILE_LINE_ARGS,
+														  printed.str(),
+														  [&](table&& reparsed) { CHECK(reparsed == tbl); });
+							   });
+	};
+
+	SECTION("dotted keys")
+	{
+		parses_and_round_trips(dotted(128) + " = 1", 128);
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			dotted(200) + " = 1",
+			"1:258: Error while parsing key: exceeded maximum nested value depth of 128 (TOML_MAX_NESTED_VALUES)"sv);
+	}
+
+	SECTION("table headers")
+	{
+		parses_and_round_trips("[" + dotted(128) + "]", 128);
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			"[" + dotted(200) + "]",
+			"1:259: Error while parsing key: exceeded maximum nested value depth of 128 (TOML_MAX_NESTED_VALUES)"sv);
+	}
+
+	SECTION("a dotted key under a table header")
+	{
+		parses_and_round_trips("[" + dotted(100) + "]\n" + dotted(28) + " = 1", 128);
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			"[" + dotted(100) + "]\n" + dotted(60) + " = 1",
+			"2:58: Error while parsing key: exceeded maximum nested value depth of 128 (TOML_MAX_NESTED_VALUES)"sv);
+	}
+
+	SECTION("dotted keys in nested inline tables")
+	{
+		parses_and_round_trips("x = { " + dotted(64) + " = { " + dotted(63) + " = 1 } }", 128);
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			"x = { " + dotted(64) + " = { " + dotted(100) + " = 1 } }",
+			"1:266: Error while parsing key: exceeded maximum nested value depth of 128 (TOML_MAX_NESTED_VALUES)"sv);
+	}
+
+	SECTION("sixteen inline tables that each hold a 1024-part key")
+	{
+		std::string doc = "x = ";
+		for (size_t i = 0; i < 16; i++)
+			doc += "{ " + dotted(1024) + " = ";
+		doc += "1";
+		for (size_t i = 0; i < 16; i++)
+			doc += " }";
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			doc,
+			"1:262: Error while parsing key: exceeded maximum nested value depth of 128 (TOML_MAX_NESTED_VALUES)"sv);
+	}
+
+	SECTION("an array of tables is two levels")
+	{
+		std::string doc;
+		for (size_t i = 1; i <= 64; i++)
+			doc += "[[" + dotted(i) + "]]\n";
+		parses_and_round_trips(doc, 128);
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			doc + "[[" + dotted(65) + "]]",
+			"65:1: Error while parsing table header: exceeded maximum nested value depth of 128 (TOML_MAX_NESTED_VALUES)"sv);
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			doc + "k = 1",
+			"65:3: Error while parsing key: exceeded maximum nested value depth of 128 (TOML_MAX_NESTED_VALUES)"sv);
+	}
 }
 
 TEST_CASE("parsing - key-value pairs (bytes after long keys and whitespace)")

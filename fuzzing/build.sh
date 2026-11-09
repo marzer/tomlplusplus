@@ -7,6 +7,7 @@ cmake -S . -B build -DBUILD_FUZZER=ON && cmake --build build --target install
 mkdir -p corpus
 find "$SRC/tomlplusplus" -name "*.toml" -exec cp {} corpus \;
 zip -q -j "$OUT/toml_fuzzer_seed_corpus.zip" corpus/*
+cp "$OUT/toml_fuzzer_seed_corpus.zip" "$OUT/toml_no_exceptions_fuzzer_seed_corpus.zip"
 
 # Build unit test
 mapfile -t test_sources < <(sed 's#^#tests/#' tests/sources.txt)

@@ -94,7 +94,7 @@ class function_view<R(P...)> final
   public:
 	function_view() noexcept = default;
 
-	template <typename T>
+	template <typename T, typename = std::enable_if_t<!std::is_same_v<std::decay_t<T>, function_view>>>
 	function_view(T&& x) noexcept : ptr_{ reinterpret_cast<void*>(std::addressof(x)) }
 	{
 		eraser = [](void* ptr, P&&... xs) -> R

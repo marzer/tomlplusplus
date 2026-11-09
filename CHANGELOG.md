@@ -74,6 +74,7 @@
 - fixed a Clang `-Wabsolute-value` warning when building the library with MinGW
 - fixed `toml_formatter`, `json_formatter` and `yaml_formatter` not escaping some control characters
 - fixed crashes when parsing with mixed `TOML_EXCEPTIONS` settings
+- fixed stack overflow when destroying deeply nested tables
 
 #### Additions
 
@@ -83,7 +84,6 @@
 - added support for user-defined string types, which `toml::is_string_like` detects automatically (#306) (@mikomikotaishi)
 - added support for C++20 `std::chrono` types (#291, #322) (@mikomikotaishi)
 - added C++20 module support with `import tomlplusplus;` (#266, #267, #273, #303) (@mikomikotaishi, @N-Dekker, @davidstone)
-- added `TOML_MAX_DOTTED_KEYS_DEPTH` config (default `1024`) (#242) (@tyler92)
 - added `TOML_ENABLE_CHRONO` config (default `1`) to turn off the C++20 `std::chrono` support where it is not needed
 - added `TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA` config to work around MSVC's legacy lambda processor (on by default for MSVC before C++20) (#247) (@N-Dekker)
 - added `TOML_DISABLE_NOEXCEPT_NOEXCEPT` config to work around an MSVC bug (on by default for VS 2022 17.13 and older) (#271) (@N-Dekker)
@@ -97,6 +97,7 @@
 - improvements to float parsing, using `<charconv>` in more places where it is supported
 - improvements to text formatting speed (`json_formatter` in particular)
 - improvements to compile speed and binary size
+- `TOML_MAX_NESTED_VALUES` now limits the nesting depth of tables too
 
 #### Removals
 

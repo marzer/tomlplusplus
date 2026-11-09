@@ -146,7 +146,7 @@ TEST_CASE("user feedback")
 	SECTION("tomlplusplus/issues/69") // https://github.com/marzer/tomlplusplus/issues/69
 	{
 		using namespace toml::literals; // should compile without namespace ambiguity
-		auto table = "[table]\nkey=\"value\""_toml;
+		[[maybe_unused]] auto table = "[table]\nkey=\"value\""_toml;
 	}
 
 	SECTION("tomlplusplus/pull/80") // https://github.com/marzer/tomlplusplus/pull/80
@@ -200,7 +200,7 @@ b = []
 			parsing_should_fail(
 				FILE_LINE_ARGS,
 				std::string_view{ nested_tables },
-				"1:390: Error while parsing value: exceeded maximum nested value depth of 128 (TOML_MAX_NESTED_VALUES)"sv);
+				"1:389: Error while parsing key: exceeded maximum nested value depth of 128 (TOML_MAX_NESTED_VALUES)"sv);
 		}
 	}
 

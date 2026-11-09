@@ -1,0 +1,20 @@
+InheritParentConfig: true
+
+Checks: >-
+    -clang-analyzer-*,
+    -concurrency-*,
+    -cppcoreguidelines-*,
+    -modernize-*,
+    -performance-*,
+    -readability-*,
+    -bugprone-empty-catch,
+    -bugprone-exception-escape,
+    -bugprone-move-forwarding-reference,
+    -bugprone-random-generator-seed,
+    -bugprone-unchecked-optional-access,
+    -bugprone-use-after-move,
+    -misc-const-correctness,
+    -misc-misleading-bidirectional,
+    -misc-use-internal-linkage
+
+HeaderFilterRegex: '^.*/(include/toml\+\+|tests)/.*$'

@@ -1127,6 +1127,9 @@ TOML_ANON_NAMESPACE_START
 		}
 
 		TOML_RETURNS_BY_THROWING
+#if !TOML_EXCEPTIONS
+		TOML_NODISCARD
+#endif
 		auto finish(const source_position& pos, const source_path_ptr& source_path) const
 		{
 			*write_pos = '\0';
@@ -1523,9 +1526,8 @@ TOML_IMPL_NAMESPACE_START
 	class parser
 	{
 	  private:
-		static constexpr size_t max_nested_values	  = TOML_MAX_NESTED_VALUES;
-		static constexpr size_t max_dotted_keys_depth = TOML_MAX_DOTTED_KEYS_DEPTH;
-		static constexpr size_t max_value_length	  = 128;
+		static constexpr size_t max_nested_values = TOML_MAX_NESTED_VALUES;
+		static constexpr size_t max_value_length  = 128;
 
 		// NOLINTBEGIN(readability-identifier-naming)
 		source_reader reader;
@@ -2494,7 +2496,7 @@ TOML_IMPL_NAMESPACE_START
 					advance_and_return_if_error({});
 					continue;
 				}
-				else if (prev == U'_' && !is_hexadecimal_digit(*cp))
+				if (prev == U'_' && !is_hexadecimal_digit(*cp))
 					set_error_and_return_default("underscores must be followed by digits"sv);
 				else if (*cp == U'.')
 				{
@@ -2585,7 +2587,7 @@ TOML_IMPL_NAMESPACE_START
 
 			int exponent = {};
 			for (size_t i = 0; i < fragments[2].length && exponent < 100000; i++)
-				exponent = exponent * 10 + (fragments[2].chars[i] - '0');
+				exponent = (exponent * 10) + (fragments[2].chars[i] - '0');
 			binary_exponent += exponent * exponent_sign;
 
 			// round once, to 53 bits or the subnormal grid, so the ldexp below is exact;
@@ -3664,8 +3666,7 @@ TOML_IMPL_NAMESPACE_START
 									 "keys"sv);
 						return_after_error({});
 					}
-					else
-						key_segment = str.value;
+					key_segment = str.value;
 				}
 
 				// ???
@@ -3682,10 +3683,10 @@ TOML_IMPL_NAMESPACE_START
 				// store segment
 				key_buffer.push_back(key_segment, key_begin, key_end);
 
-				if TOML_UNLIKELY(key_buffer.size() > max_dotted_keys_depth)
-					set_error_and_return_default("exceeded maximum dotted keys depth of "sv,
-												 max_dotted_keys_depth,
-												 " (TOML_MAX_DOTTED_KEYS_DEPTH)"sv);
+				if TOML_UNLIKELY(nested_values + key_buffer.size() > max_nested_values)
+					set_error_and_return_default("exceeded maximum nested value depth of "sv,
+												 max_nested_values,
+												 " (TOML_MAX_NESTED_VALUES)"sv);
 
 				// eof or no more key to come
 				if (is_eof() || *cp != U'.')
@@ -3759,6 +3760,7 @@ TOML_IMPL_NAMESPACE_START
 												 "'"sv);
 
 				// get the actual key
+				nested_values = {};
 				start_recording();
 				parse_key();
 				stop_recording_key();
@@ -3813,6 +3815,7 @@ TOML_IMPL_NAMESPACE_START
 						}
 
 						parent = tbl;
+						nested_values++;
 					}
 					else if (auto arr = p.as_array(); arr && table_arrays.contains(arr))
 					{
@@ -3821,6 +3824,7 @@ TOML_IMPL_NAMESPACE_START
 						TOML_ASSERT(!arr->empty());
 						TOML_ASSERT(arr->back().is_table());
 						parent = &arr->back().ref_cast<table>();
+						nested_values += 2u; // the array and its element
 					}
 					else
 					{
@@ -3841,7 +3845,18 @@ TOML_IMPL_NAMESPACE_START
 
 					implicit_tables.insert(&p);
 					parent = &p;
+					nested_values++;
 				}
+			}
+
+			nested_values += is_arr ? 2u : 1u;
+			if TOML_UNLIKELY(nested_values > max_nested_values)
+			{
+				set_error_at(header_begin_pos,
+							 "exceeded maximum nested value depth of "sv,
+							 max_nested_values,
+							 " (TOML_MAX_NESTED_VALUES)"sv);
+				return_after_error({});
 			}
 
 			const auto last_segment = key_buffer.back();
@@ -3894,45 +3909,40 @@ TOML_IMPL_NAMESPACE_START
 								 "'"sv);
 					return_after_error({});
 				}
-				else
-				{
-					set_error_at(header_begin_pos,
-								 "cannot redefine existing "sv,
-								 to_sv(matching_node.type()),
-								 " '"sv,
-								 to_sv(recording_buffer),
-								 "' as "sv,
-								 is_arr ? "array-of-tables"sv : "table"sv);
-					return_after_error({});
-				}
+
+				set_error_at(header_begin_pos,
+							 "cannot redefine existing "sv,
+							 to_sv(matching_node.type()),
+							 " '"sv,
+							 to_sv(recording_buffer),
+							 "' as "sv,
+							 is_arr ? "array-of-tables"sv : "table"sv);
+				return_after_error({});
 			}
 
 			// there was no matching node, sweet - we can freely instantiate a new table/table array.
-			else
+			auto last_key = make_key(key_buffer.size() - 1u);
+
+			// if it's an array we need to make the array and it's first table element,
+			// set the starting regions, and return the table element
+			if (is_arr)
 			{
-				auto last_key = make_key(key_buffer.size() - 1u);
+				it			   = parent->emplace_hint<array>(it, std::move(last_key));
+				array& tbl_arr = it->second.ref_cast<array>();
+				table_arrays.insert(&tbl_arr);
+				tbl_arr.source_ = { header_begin_pos, header_end_pos, reader.source_path() };
 
-				// if it's an array we need to make the array and it's first table element,
-				// set the starting regions, and return the table element
-				if (is_arr)
-				{
-					it			   = parent->emplace_hint<array>(it, std::move(last_key));
-					array& tbl_arr = it->second.ref_cast<array>();
-					table_arrays.insert(&tbl_arr);
-					tbl_arr.source_ = { header_begin_pos, header_end_pos, reader.source_path() };
-
-					table& tbl	= tbl_arr.emplace_back<table>();
-					tbl.source_ = { header_begin_pos, header_end_pos, reader.source_path() };
-					return &tbl;
-				}
-
-				// otherwise we're just making a table
-
-				it			= parent->emplace_hint<table>(it, std::move(last_key));
-				table& tbl	= it->second.ref_cast<table>();
+				table& tbl	= tbl_arr.emplace_back<table>();
 				tbl.source_ = { header_begin_pos, header_end_pos, reader.source_path() };
 				return &tbl;
 			}
+
+			// otherwise we're just making a table
+
+			it			= parent->emplace_hint<table>(it, std::move(last_key));
+			table& tbl	= it->second.ref_cast<table>();
+			tbl.source_ = { header_begin_pos, header_end_pos, reader.source_path() };
+			return &tbl;
 		}
 
 		TOML_NEVER_INLINE
@@ -4027,7 +4037,10 @@ TOML_IMPL_NAMESPACE_START
 			auto last_key = make_key(key_buffer.size() - 1u);
 
 			// now we can actually parse the value
-			node_ptr val = parse_value();
+			const auto table_depth = nested_values;
+			nested_values += key_buffer.size() - 1u;
+			node_ptr val  = parse_value();
+			nested_values = table_depth;
 			return_if_error({});
 
 			tbl->emplace_hint<node_ptr>(it, std::move(last_key), std::move(val));
@@ -4144,8 +4157,7 @@ TOML_IMPL_NAMESPACE_START
 
 			if (err)
 				return parse_result{ *std::move(err) };
-			else
-				return parse_result{ std::move(root) };
+			return parse_result{ std::move(root) };
 
 #endif
 		}

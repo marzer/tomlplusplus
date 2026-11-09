@@ -129,14 +129,21 @@ jobs:
                   clang-tidy --version
                   clang-tidier --version
 
-            - name: Configure
-              run: >-
-                  cmake -S . -B build -G Ninja -DCMAKE_CXX_COMPILER=clang++-22 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-                  -Dtomlplusplus_BUILD_LIB=ON -DBUILD_EXAMPLES=ON -Dtomlplusplus_BUILD_TOML_TEST=ON
-                  -Dtomlplusplus_BUILD_BENCHMARKS=ON
+            - name: Check regular configuration
+              run: |
+                  cmake -S . -B build -G Ninja -DCMAKE_CXX_COMPILER=clang++-22 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+                    -Dtomlplusplus_BUILD_LIB=ON -DBUILD_EXAMPLES=ON -Dtomlplusplus_BUILD_TOML_TEST=ON \
+                    -Dtomlplusplus_BUILD_BENCHMARKS=ON -Dtomlplusplus_BUILD_TESTS=ON
+                  clang-tidier build --werror
+                  rm -rf build
 
-            - name: Run clang-tidy
-              run: clang-tidier build --werror
+            - name: Check configuration no exceptions, no charconv, with unreleased features
+              run: |
+                  cmake -S . -B build -G Ninja -DCMAKE_CXX_COMPILER=clang++-22 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+                    -Dtomlplusplus_BUILD_LIB=ON -Dtomlplusplus_EXCEPTIONS=OFF -Dtomlplusplus_UNRELEASED_FEATURES=ON \
+                    -DCMAKE_CXX_FLAGS="-DTOML_FLOAT_CHARCONV=0 -DTOML_INT_CHARCONV=0"
+                  clang-tidier build --werror
+                  rm -rf build
 
     linux-cmake:
         name: ${{ matrix.name }}
