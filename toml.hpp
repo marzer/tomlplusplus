@@ -1370,8 +1370,14 @@ TOML_ENABLE_WARNINGS;
 #define TOML_IMPL_NAMESPACE_START				TOML_NAMESPACE_START { namespace impl
 #define TOML_IMPL_NAMESPACE_END					} TOML_NAMESPACE_END
 #if TOML_HEADER_ONLY
-	#define TOML_ANON_NAMESPACE_START			static_assert(TOML_IMPLEMENTATION); TOML_IMPL_NAMESPACE_START
-	#define TOML_ANON_NAMESPACE_END				TOML_IMPL_NAMESPACE_END
+	#if TOML_ABI_NAMESPACES
+		#define TOML_ANON_NAMESPACE_START		static_assert(TOML_IMPLEMENTATION); TOML_IMPL_NAMESPACE_START {	\
+												inline namespace TOML_CONCAT(TOML_EVAL_BOOL_, TOML_EXCEPTIONS)(impl_ex, impl_noex)
+		#define TOML_ANON_NAMESPACE_END			} TOML_IMPL_NAMESPACE_END
+	#else
+		#define TOML_ANON_NAMESPACE_START		static_assert(TOML_IMPLEMENTATION); TOML_IMPL_NAMESPACE_START
+		#define TOML_ANON_NAMESPACE_END			TOML_IMPL_NAMESPACE_END
+	#endif
 	#define TOML_ANON_NAMESPACE					TOML_NAMESPACE::impl
 	#define TOML_EXTERNAL_LINKAGE				inline
 	#define TOML_INTERNAL_LINKAGE				inline
@@ -2734,20 +2740,9 @@ TOML_IMPL_NAMESPACE_START
 	};
 #endif
 
-	// Q: "why not use std::find and std::min?"
-	// A: Because <algorithm> is _huge_ and these would be the only things I used from it.
+	// Q: "why not use std::min?"
+	// A: Because <algorithm> is _huge_ and this would be the only thing I used from it.
 	//    I don't want to impose such a heavy compile-time burden on users.
-
-	template <typename Iterator, typename T>
-	TOML_PURE_GETTER
-	inline auto find(Iterator start, Iterator end, const T& needle) noexcept //
-		-> decltype(&(*start))
-	{
-		for (; start != end; start++)
-			if (*start == needle)
-				return &(*start);
-		return nullptr;
-	}
 
 	template <typename T>
 	TOML_PURE_INLINE_GETTER
@@ -14587,25 +14582,6 @@ TOML_ANON_NAMESPACE_START
 		bool was_multi_line;
 	};
 
-	struct table_vector_scope
-	{
-		std::vector<table*>& tables;
-
-		TOML_NODISCARD_CTOR
-		explicit table_vector_scope(std::vector<table*>& vec, table& tbl) //
-			: tables{ vec }
-		{
-			tables.push_back(&tbl);
-		}
-
-		~table_vector_scope() noexcept
-		{
-			tables.pop_back();
-		}
-
-		TOML_DELETE_DEFAULTS(table_vector_scope);
-	};
-
 	class node_set
 	{
 		static constexpr size_t max_pending	   = 16;
@@ -14898,7 +14874,6 @@ TOML_IMPL_NAMESPACE_START
 		const utf8_codepoint* cp = {};
 		node_set implicit_tables;
 		node_set dotted_key_tables;
-		std::vector<table*> open_inline_tables;
 		node_set table_arrays;
 		parse_key_buffer key_buffer;
 		std::string string_buffer;
@@ -17168,7 +17143,7 @@ TOML_IMPL_NAMESPACE_START
 					if (auto tbl = p.as_table())
 					{
 						// adding to closed inline tables is illegal
-						if (tbl->is_inline() && !impl::find(open_inline_tables.begin(), open_inline_tables.end(), tbl))
+						if (tbl->is_inline())
 						{
 							set_error_at(header_begin_pos,
 										 "cannot insert '"sv,
@@ -17600,7 +17575,6 @@ TOML_IMPL_NAMESPACE_START
 		node_ptr tbl_ptr{ new table{} };
 		table& tbl = tbl_ptr->ref_cast<table>();
 		tbl.is_inline(true);
-		const table_vector_scope table_scope{ open_inline_tables, tbl };
 
 		enum class TOML_CLOSED_ENUM parse_type : int
 		{

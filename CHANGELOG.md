@@ -73,6 +73,7 @@
 - fixed `TOML_INCLUDE_WINDOWS_H` failing to compile with MinGW on case-sensitive filesystems
 - fixed a Clang `-Wabsolute-value` warning when building the library with MinGW
 - fixed `toml_formatter`, `json_formatter` and `yaml_formatter` not escaping some control characters
+- fixed crashes when parsing with mixed `TOML_EXCEPTIONS` settings
 
 #### Additions
 

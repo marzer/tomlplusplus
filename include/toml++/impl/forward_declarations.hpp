@@ -1340,20 +1340,9 @@ TOML_IMPL_NAMESPACE_START
 	};
 #endif
 
-	// Q: "why not use std::find and std::min?"
-	// A: Because <algorithm> is _huge_ and these would be the only things I used from it.
+	// Q: "why not use std::min?"
+	// A: Because <algorithm> is _huge_ and this would be the only thing I used from it.
 	//    I don't want to impose such a heavy compile-time burden on users.
-
-	template <typename Iterator, typename T>
-	TOML_PURE_GETTER
-	inline auto find(Iterator start, Iterator end, const T& needle) noexcept //
-		-> decltype(&(*start))
-	{
-		for (; start != end; start++)
-			if (*start == needle)
-				return &(*start);
-		return nullptr;
-	}
 
 	template <typename T>
 	TOML_PURE_INLINE_GETTER

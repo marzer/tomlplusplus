@@ -1241,25 +1241,6 @@ TOML_ANON_NAMESPACE_START
 		bool was_multi_line;
 	};
 
-	struct table_vector_scope
-	{
-		std::vector<table*>& tables;
-
-		TOML_NODISCARD_CTOR
-		explicit table_vector_scope(std::vector<table*>& vec, table& tbl) //
-			: tables{ vec }
-		{
-			tables.push_back(&tbl);
-		}
-
-		~table_vector_scope() noexcept
-		{
-			tables.pop_back();
-		}
-
-		TOML_DELETE_DEFAULTS(table_vector_scope);
-	};
-
 	class node_set
 	{
 		static constexpr size_t max_pending	   = 16;
@@ -1552,7 +1533,6 @@ TOML_IMPL_NAMESPACE_START
 		const utf8_codepoint* cp = {};
 		node_set implicit_tables;
 		node_set dotted_key_tables;
-		std::vector<table*> open_inline_tables;
 		node_set table_arrays;
 		parse_key_buffer key_buffer;
 		std::string string_buffer;
@@ -3823,7 +3803,7 @@ TOML_IMPL_NAMESPACE_START
 					if (auto tbl = p.as_table())
 					{
 						// adding to closed inline tables is illegal
-						if (tbl->is_inline() && !impl::find(open_inline_tables.begin(), open_inline_tables.end(), tbl))
+						if (tbl->is_inline())
 						{
 							set_error_at(header_begin_pos,
 										 "cannot insert '"sv,
@@ -4255,7 +4235,6 @@ TOML_IMPL_NAMESPACE_START
 		node_ptr tbl_ptr{ new table{} };
 		table& tbl = tbl_ptr->ref_cast<table>();
 		tbl.is_inline(true);
-		const table_vector_scope table_scope{ open_inline_tables, tbl };
 
 		enum class TOML_CLOSED_ENUM parse_type : int
 		{

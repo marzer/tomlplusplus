@@ -11,6 +11,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <utility>
 
 namespace
 {
@@ -18,7 +19,7 @@ namespace
 	size_t failing_allocation = {};
 }
 
-// gcc's -Wmismatched-new-delete fires if it inlines these deletes into code that called operator new
+// gcc's -Wmismatched-new-delete fires if inlining these pairs operator new with delete[] or free
 #if defined(__GNUC__) && !defined(__clang__)
 #define NOINLINE __attribute__((noinline))
 #else
@@ -34,7 +35,7 @@ void* operator new(std::size_t size)
 	throw std::bad_alloc{};
 }
 
-void* operator new[](std::size_t size)
+NOINLINE void* operator new[](std::size_t size)
 {
 	return ::operator new(size);
 }
@@ -176,18 +177,34 @@ namespace
 		}
 	};
 
+	std::string describe(const toml::parse_result& result)
+	{
+		if (result)
+			return "parsed";
+		const auto& err = result.error();
+		return std::to_string(err.source().begin.line) + ":" + std::to_string(err.source().begin.column) + ": "
+			 + std::string{ err.description() };
+	}
+
+	std::string parse_returning(std::string_view source, bool from_file)
+	{
+		try
+		{
+			return describe(from_file ? toml::parse_file(source) : toml::parse(source));
+		}
+		catch (...)
+		{
+			return "threw";
+		}
+	}
+
 	std::string describe_parse(std::streambuf& buf, std::ios::iostate mask)
 	{
 		std::istream stream{ &buf };
 		stream.exceptions(mask);
 		try
 		{
-			const auto result = toml::parse(stream);
-			if (result)
-				return "parsed";
-			const auto& err = result.error();
-			return std::to_string(err.source().begin.line) + ":" + std::to_string(err.source().begin.column) + ": "
-				 + std::string{ err.description() };
+			return describe(toml::parse(stream));
 		}
 		catch (const pipe_broke& exc)
 		{
@@ -382,6 +399,8 @@ namespace
 #endif
 }
 
+std::string parse_throwing(std::string_view source, bool from_file);
+
 int main()
 {
 	int failures = {};
@@ -477,6 +496,21 @@ int main()
 	failures += parse_with_failing_allocations(
 		"a = 1.5\nb = 0.1000000000000000055511151231257827021181583404541015625\nc = 1e-400\n");
 #endif
+
+	const auto expect_both = [&](std::string_view source, bool from_file, std::string_view expected)
+	{
+		for (const auto& [setting, actual] : { std::pair{ "TOML_EXCEPTIONS=0", parse_returning(source, from_file) },
+											   std::pair{ "TOML_EXCEPTIONS=1", parse_throwing(source, from_file) } })
+		{
+			if (actual == expected)
+				continue;
+			std::cerr << setting << ", " << (from_file ? "parse_file" : "parse") << "(\"" << source
+					  << "\")\nexpected: " << expected << "\n  actual: " << actual << "\n\n";
+			failures++;
+		}
+	};
+	expect_both(after_error, false, underscores);
+	expect_both("does/not/exist.toml", true, "0:0: File could not be opened for reading");
 
 	return failures ? EXIT_FAILURE : EXIT_SUCCESS;
 }

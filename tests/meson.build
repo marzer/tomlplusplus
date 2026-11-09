@@ -84,7 +84,7 @@ if has_exceptions
 		'mixed exceptions',
 		executable(
 			'tomlplusplus_mixed_exceptions_test',
-			files('mixed_exceptions.cpp'),
+			files('mixed_exceptions.cpp', 'mixed_exceptions_throwing.cpp'),
 			cpp_args: global_args,
 			include_directories: include_dir,
 			override_options: global_overrides

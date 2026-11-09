@@ -72,7 +72,7 @@ endif()
 # ---- TOML_EXCEPTIONS=0 with compiler exceptions ----
 
 if(tomlplusplus_EXCEPTIONS)
-  add_executable(tomlplusplus_mixed_exceptions_test mixed_exceptions.cpp)
+  add_executable(tomlplusplus_mixed_exceptions_test mixed_exceptions.cpp mixed_exceptions_throwing.cpp)
   tomlplusplus_set_compile_options(tomlplusplus_mixed_exceptions_test)
   # header-only, since a compiled library is built with TOML_EXCEPTIONS=1
   target_include_directories(tomlplusplus_mixed_exceptions_test PRIVATE "${PROJECT_SOURCE_DIR}/include")
