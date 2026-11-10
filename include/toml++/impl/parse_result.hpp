@@ -87,7 +87,7 @@ TOML_NAMESPACE_START
 		parse_result() noexcept //
 			: err_{ true }
 		{
-			::new (static_cast<void*>(storage_.bytes)) parse_error{ std::string{}, source_region{} };
+			::new (static_cast<void*>(storage_.bytes)) parse_error{ ""s, source_region{} };
 		}
 
 		TOML_NODISCARD_CTOR

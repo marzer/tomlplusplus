@@ -1138,6 +1138,13 @@
 #if !defined(TOML_ENABLE_FORMATTERS) || (defined(TOML_ENABLE_FORMATTERS) && TOML_ENABLE_FORMATTERS) || TOML_INTELLISENSE
 #undef TOML_ENABLE_FORMATTERS
 #define TOML_ENABLE_FORMATTERS 1
+
+#undef TOML_STD_FORMATTER
+#define TOML_STD_FORMATTER 0
+#if TOML_CPP >= 20 && TOML_HAS_INCLUDE(<format>)
+#undef TOML_STD_FORMATTER
+#define TOML_STD_FORMATTER 1
+#endif
 #endif
 /// \def		TOML_ENABLE_FORMATTERS
 /// \brief		Sets whether the various formatter classes are enabled.

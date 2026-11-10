@@ -8,9 +8,16 @@
 #if TOML_ENABLE_FORMATTERS
 
 #include "forward_declarations.hpp"
+#include "parse_error.hpp"
 #include "print_to_stream.hpp"
 #include "unicode.hpp"
+#include "std_format.hpp"
 #include "header_start.hpp"
+#if TOML_STD_FORMATTER
+TOML_DISABLE_WARNINGS;
+#include <sstream>
+TOML_ENABLE_WARNINGS;
+#endif
 /// \cond
 
 TOML_IMPL_NAMESPACE_START
@@ -223,8 +230,116 @@ TOML_IMPL_NAMESPACE_START
 		TOML_EXPORTED_MEMBER_FUNCTION
 		formatter(const node*, const parse_result*, const formatter_constants&, const formatter_config&) noexcept;
 	};
+
+	enum class toml_format_style : uint8_t
+	{
+		toml,
+		json,
+		yaml
+	};
+
+	template <typename T>
+	inline constexpr bool toml_std_formatter_supported =
+		toml::is_node<T> || toml::is_node_view<T> || std::is_same_v<impl::remove_cvref<T>, toml::key>
+		|| std::is_same_v<impl::remove_cvref<T>, toml::path> || std::is_same_v<impl::remove_cvref<T>, toml::date>
+		|| std::is_same_v<impl::remove_cvref<T>, toml::time> || std::is_same_v<impl::remove_cvref<T>, toml::time_offset>
+		|| std::is_same_v<impl::remove_cvref<T>, toml::date_time>
+#if TOML_ENABLE_PARSER
+		|| std::is_same_v<impl::remove_cvref<T>, toml::parse_error>
+#endif
+		|| std::is_same_v<impl::remove_cvref<T>, toml::parse_result>;
+
+	TOML_EXPORTED_FREE_FUNCTION
+	std::string format_node_to_string(const node&, toml_format_style);
+
+#if !TOML_EXCEPTIONS
+	TOML_EXPORTED_FREE_FUNCTION
+	std::string format_parse_result_to_string(const parse_result&, toml_format_style);
+#endif
+
+#if TOML_STD_FORMATTER
+	template <typename T>
+	std::string format_to_string(const T& value, toml_format_style style)
+	{
+		if constexpr (toml::is_node<T>)
+			return format_node_to_string(value, style);
+		else if constexpr (toml::is_node_view<T>)
+			return value ? format_node_to_string(*value.node(), style) : ""s;
+#if !TOML_EXCEPTIONS
+		else if constexpr (std::is_same_v<impl::remove_cvref<T>, toml::parse_result>)
+			return format_parse_result_to_string(value, style);
+#endif
+		else
+		{
+			std::ostringstream stream;
+			stream << value;
+			return std::move(stream).str();
+		}
+	}
+#endif
 }
 TOML_IMPL_NAMESPACE_END;
+
+#if TOML_STD_FORMATTER
+namespace std
+{
+	template <typename T>
+	requires(toml::impl::toml_std_formatter_supported<T>)
+	struct formatter<T, char>
+	{
+		toml::impl::toml_format_style style = toml::impl::toml_format_style::toml;
+
+		constexpr auto parse(format_parse_context& ctx)
+		{
+			auto it		   = ctx.begin();
+			const auto end = ctx.end();
+			if (it == end || *it == '}')
+				return it;
+
+			const auto starts_with = [&it, end](std::string_view text) constexpr
+			{
+				for (const auto c : text)
+				{
+					if (it == end || *it != c)
+						return false;
+					++it;
+				}
+				return true;
+			};
+
+			if (starts_with("toml"sv))
+				style = toml::impl::toml_format_style::toml;
+			else if (starts_with("json"sv))
+				style = toml::impl::toml_format_style::json;
+			else if (starts_with("yaml"sv))
+				style = toml::impl::toml_format_style::yaml;
+			else
+#if TOML_EXCEPTIONS
+				throw format_error{ "toml++ format must be toml, json or yaml" };
+#else
+				TOML_ASSERT(false);
+#endif
+
+			if (it != end && *it != '}')
+#if TOML_EXCEPTIONS
+				throw format_error{ "toml++ format does not accept additional specifiers" };
+#else
+				TOML_ASSERT(false);
+#endif
+			return it;
+		}
+
+		auto format(const T& value, format_context& ctx) const
+		{
+			const auto output = toml::impl::format_to_string(value, style);
+			auto out		  = ctx.out();
+			for (const auto c : output)
+				*out++ = c;
+			return out;
+		}
+	};
+}
+#endif
 
 /// \endcond
 #include "header_end.hpp"

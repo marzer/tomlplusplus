@@ -8,6 +8,9 @@ TOML_DISABLE_WARNINGS;
 #include <cmath>
 #include <stdexcept>
 #include <streambuf>
+#if TOML_STD_FORMATTER
+#include <format>
+#endif
 TOML_ENABLE_WARNINGS;
 
 namespace
@@ -584,6 +587,21 @@ unicode = "café 😀")"sv);
 it's""")"sv);
 	}
 }
+
+#if TOML_STD_FORMATTER
+TEST_CASE("std::formatter")
+{
+	const auto data = toml::table{ { "answer", 42 } };
+	CHECK(std::format("{}", data) == "answer = 42"sv);
+	CHECK(std::format("{}", toml::array{ 1, 2, 3 }) == "[ 1, 2, 3 ]"sv);
+	CHECK(std::format("{:toml}", data) == "answer = 42"sv);
+	CHECK(std::format("{:json}", data) == "{\n    \"answer\" : 42\n}"sv);
+	CHECK(std::format("{:yaml}", data) == "answer: 42"sv);
+	CHECK(std::format("{}", toml::date_time{ { 2021, 11, 2 }, { 20, 33, 0 } }) == "2021-11-02T20:33:00"sv);
+	CHECK(std::format("{}", toml::key{ "answer" }) == "answer"sv);
+	CHECK(std::format("{}", toml::path{ "answer.value" }) == "answer.value"sv);
+}
+#endif
 
 TEST_CASE("formatters - toml_formatter string escapes")
 {

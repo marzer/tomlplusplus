@@ -29,6 +29,7 @@ toml::v3::impl::formatter::print_indent
 toml::v3::impl::formatter::print_newline
 toml::v3::impl::formatter::print_string
 toml::v3::impl::formatter::print_unformatted
+toml::v3::impl::format_node_to_string
 toml::v3::impl::formatter::print_value
 toml::v3::impl::node_deep_equality
 toml::v3::impl::print_to_stream

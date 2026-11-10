@@ -1093,6 +1093,13 @@
 #if !defined(TOML_ENABLE_FORMATTERS) || (defined(TOML_ENABLE_FORMATTERS) && TOML_ENABLE_FORMATTERS) || TOML_INTELLISENSE
 #undef TOML_ENABLE_FORMATTERS
 #define TOML_ENABLE_FORMATTERS 1
+
+#undef TOML_STD_FORMATTER
+#define TOML_STD_FORMATTER 0
+#if TOML_CPP >= 20 && TOML_HAS_INCLUDE(<format>)
+#undef TOML_STD_FORMATTER
+#define TOML_STD_FORMATTER 1
+#endif
 #endif
 
 // std::chrono
@@ -9854,7 +9861,7 @@ TOML_NAMESPACE_START
 		parse_result() noexcept //
 			: err_{ true }
 		{
-			::new (static_cast<void*>(storage_.bytes)) parse_error{ std::string{}, source_region{} };
+			::new (static_cast<void*>(storage_.bytes)) parse_error{ ""s, source_region{} };
 		}
 
 		TOML_NODISCARD_CTOR
@@ -10292,6 +10299,18 @@ TOML_POP_WARNINGS;
 
 #if TOML_ENABLE_FORMATTERS
 
+//********  impl/std_format.hpp  ***************************************************************************************
+
+#if TOML_STD_FORMATTER
+
+TOML_DISABLE_WARNINGS;
+#include <format>
+TOML_ENABLE_WARNINGS;
+
+#endif
+
+//********  impl/formatter.hpp  ****************************************************************************************
+
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
 #ifndef __clang__
@@ -10301,6 +10320,12 @@ TOML_PUSH_WARNINGS;
 #pragma push_macro("max")
 #undef min
 #undef max
+#endif
+
+#if TOML_STD_FORMATTER
+TOML_DISABLE_WARNINGS;
+#include <sstream>
+TOML_ENABLE_WARNINGS;
 #endif
 
 TOML_IMPL_NAMESPACE_START
@@ -10513,8 +10538,117 @@ TOML_IMPL_NAMESPACE_START
 		TOML_EXPORTED_MEMBER_FUNCTION
 		formatter(const node*, const parse_result*, const formatter_constants&, const formatter_config&) noexcept;
 	};
+
+	enum class toml_format_style : uint8_t
+	{
+		toml,
+		json,
+		yaml
+	};
+
+	template <typename T>
+	inline constexpr bool toml_std_formatter_supported =
+		toml::is_node<T> || toml::is_node_view<T> || std::is_same_v<impl::remove_cvref<T>, toml::key>
+		|| std::is_same_v<impl::remove_cvref<T>, toml::path> || std::is_same_v<impl::remove_cvref<T>, toml::date>
+		|| std::is_same_v<impl::remove_cvref<T>, toml::time> || std::is_same_v<impl::remove_cvref<T>, toml::time_offset>
+		|| std::is_same_v<impl::remove_cvref<T>, toml::date_time>
+#if TOML_ENABLE_PARSER
+		|| std::is_same_v<impl::remove_cvref<T>, toml::parse_error>
+#endif
+		|| std::is_same_v<impl::remove_cvref<T>, toml::parse_result>;
+
+	TOML_EXPORTED_FREE_FUNCTION
+	std::string format_node_to_string(const node&, toml_format_style);
+
+#if !TOML_EXCEPTIONS
+	TOML_EXPORTED_FREE_FUNCTION
+	std::string format_parse_result_to_string(const parse_result&, toml_format_style);
+#endif
+
+#if TOML_STD_FORMATTER
+	template <typename T>
+	std::string format_to_string(const T& value, toml_format_style style)
+	{
+		if constexpr (toml::is_node<T>)
+			return format_node_to_string(value, style);
+		else if constexpr (toml::is_node_view<T>)
+			return value ? format_node_to_string(*value.node(), style) : ""s;
+#if !TOML_EXCEPTIONS
+		else if constexpr (std::is_same_v<impl::remove_cvref<T>, toml::parse_result>)
+			return format_parse_result_to_string(value, style);
+#endif
+		else
+		{
+			std::ostringstream stream;
+			stream << value;
+			return std::move(stream).str();
+		}
+	}
+#endif
 }
 TOML_IMPL_NAMESPACE_END;
+
+#if TOML_STD_FORMATTER
+namespace std
+{
+	template <typename T>
+	requires(toml::impl::toml_std_formatter_supported<T>)
+	struct formatter<T, char>
+	{
+		toml::impl::toml_format_style style = toml::impl::toml_format_style::toml;
+
+		constexpr auto parse(format_parse_context& ctx)
+		{
+			auto it		   = ctx.begin();
+			const auto end = ctx.end();
+			if (it == end || *it == '}')
+				return it;
+
+			const auto starts_with = [&it, end](std::string_view text) constexpr
+			{
+				for (const auto c : text)
+				{
+					if (it == end || *it != c)
+						return false;
+					++it;
+				}
+				return true;
+			};
+
+			if (starts_with("toml"sv))
+				style = toml::impl::toml_format_style::toml;
+			else if (starts_with("json"sv))
+				style = toml::impl::toml_format_style::json;
+			else if (starts_with("yaml"sv))
+				style = toml::impl::toml_format_style::yaml;
+			else
+#if TOML_EXCEPTIONS
+				throw format_error{ "toml++ format must be toml, json or yaml" };
+#else
+				TOML_ASSERT(false);
+#endif
+
+			if (it != end && *it != '}')
+#if TOML_EXCEPTIONS
+				throw format_error{ "toml++ format does not accept additional specifiers" };
+#else
+				TOML_ASSERT(false);
+#endif
+			return it;
+		}
+
+		auto format(const T& value, format_context& ctx) const
+		{
+			const auto output = toml::impl::format_to_string(value, style);
+			auto out		  = ctx.out();
+			for (const auto c : output)
+				*out++ = c;
+			return out;
+		}
+	};
+}
+
+#endif
 
 #ifdef _MSC_VER
 #pragma pop_macro("min")
@@ -17843,6 +17977,7 @@ TOML_POP_WARNINGS;
 
 TOML_DISABLE_WARNINGS;
 #include <ostream>
+#include <sstream>
 #include <streambuf>
 TOML_ENABLE_WARNINGS;
 TOML_PUSH_WARNINGS;
@@ -17937,6 +18072,35 @@ TOML_IMPL_NAMESPACE_START
 			chunks_.flush();
 		}
 	};
+	TOML_EXTERNAL_LINKAGE
+	TOML_EXPORTED_FREE_FUNCTION
+	std::string format_node_to_string(const node& value, toml_format_style style)
+	{
+		std::ostringstream stream;
+		switch (style)
+		{
+			case toml_format_style::toml: stream << toml::toml_formatter{ value }; break;
+			case toml_format_style::json: stream << toml::json_formatter{ value }; break;
+			case toml_format_style::yaml: stream << toml::yaml_formatter{ value }; break;
+		}
+		return std::move(stream).str();
+	}
+
+#if !TOML_EXCEPTIONS
+	TOML_EXTERNAL_LINKAGE
+	TOML_EXPORTED_FREE_FUNCTION
+	std::string format_parse_result_to_string(const parse_result& value, toml_format_style style)
+	{
+		std::ostringstream stream;
+		switch (style)
+		{
+			case toml_format_style::toml: stream << toml::toml_formatter{ value }; break;
+			case toml_format_style::json: stream << toml::json_formatter{ value }; break;
+			case toml_format_style::yaml: stream << toml::yaml_formatter{ value }; break;
+		}
+		return std::move(stream).str();
+	}
+#endif
 
 	enum class TOML_CLOSED_FLAGS_ENUM formatted_string_traits : unsigned
 	{
@@ -19491,6 +19655,7 @@ TOML_POP_WARNINGS;
 #undef TOML_SA_VALUE_MESSAGE_U8STRING_VIEW
 #undef TOML_SA_VALUE_MESSAGE_WSTRING
 #undef TOML_SIMPLE_STATIC_ASSERT_MESSAGES
+#undef TOML_STD_FORMATTER
 #undef TOML_TRIVIAL_ABI
 #undef TOML_UINT128
 #undef TOML_UNIX
