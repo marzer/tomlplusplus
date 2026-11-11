@@ -37,7 +37,7 @@ TEST_CASE("parsing - integers (decimal, underscores)")
 						"1:10: Error while parsing decimal integer: underscores may only follow digits"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"int5 = _1_000"sv,
-						"1:8: Error while parsing value: values may not begin with underscores"sv);
+						"1:8: Error while parsing value: leading underscores are prohibited"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"int5 = 1_000_"sv,
 						"1:14: Error while parsing decimal integer: underscores must be followed by digits"sv);
@@ -110,34 +110,34 @@ TEST_CASE("parsing - integers (decimal, misplaced signs)")
 {
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = +-1"sv,
-						"1:8: Error while parsing decimal integer: expected digit, saw '-'"sv);
+						"1:8: Error while parsing decimal integer: expected decimal digit, saw '-'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = -+1"sv,
-						"1:8: Error while parsing decimal integer: expected digit, saw '+'"sv);
+						"1:8: Error while parsing decimal integer: expected decimal digit, saw '+'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = ++1"sv,
-						"1:8: Error while parsing decimal integer: expected digit, saw '+'"sv);
+						"1:8: Error while parsing decimal integer: expected decimal digit, saw '+'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = --1"sv,
-						"1:8: Error while parsing decimal integer: expected digit, saw '-'"sv);
+						"1:8: Error while parsing decimal integer: expected decimal digit, saw '-'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = 1-"sv,
 						"1:8: Error while parsing date: expected 4-digit year, saw '-'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = 1+"sv,
-						"1:8: Error while parsing decimal integer: expected digit, saw '+'"sv);
+						"1:8: Error while parsing decimal integer: expected decimal digit, saw '+'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = -1+"sv,
-						"1:9: Error while parsing decimal integer: expected digit, saw '+'"sv);
+						"1:9: Error while parsing decimal integer: expected decimal digit, saw '+'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = +1-"sv,
-						"1:9: Error while parsing decimal integer: expected digit, saw '-'"sv);
+						"1:9: Error while parsing decimal integer: expected decimal digit, saw '-'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = + 1"sv,
-						"1:8: Error while parsing decimal integer: expected digit, saw ' '"sv);
+						"1:8: Error while parsing decimal integer: expected decimal digit, saw ' '"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = 12t"sv,
-						"1:9: Error while parsing decimal integer: expected digit, saw 't'"sv);
+						"1:9: Error while parsing decimal integer: expected decimal digit, saw 't'"sv);
 }
 
 TEST_CASE("parsing - integers (decimal, values)")
@@ -187,22 +187,22 @@ TEST_CASE("parsing - integers (hex, bin, oct, signs)")
 	// "leading + is not allowed"
 	parsing_should_fail(FILE_LINE_ARGS,
 						"hex1 = +0xDEADBEEF"sv,
-						"1:8: Error while parsing value: signs are not allowed on hexadecimal integers"sv);
+						"1:8: Error while parsing value: signs are prohibited on hexadecimal integers"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"hex2 = +0xdeadbeef"sv,
-						"1:8: Error while parsing value: signs are not allowed on hexadecimal integers"sv);
+						"1:8: Error while parsing value: signs are prohibited on hexadecimal integers"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"hex3 = +0xdead_beef"sv,
-						"1:8: Error while parsing value: signs are not allowed on hexadecimal integers"sv);
+						"1:8: Error while parsing value: signs are prohibited on hexadecimal integers"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"oct1 = +0o01234567"sv,
-						"1:8: Error while parsing value: signs are not allowed on octal integers"sv);
+						"1:8: Error while parsing value: signs are prohibited on octal integers"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"oct2 = +0o7550"sv,
-						"1:8: Error while parsing value: signs are not allowed on octal integers"sv);
+						"1:8: Error while parsing value: signs are prohibited on octal integers"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"bin1 = +0b11010110"sv,
-						"1:8: Error while parsing value: signs are not allowed on binary integers"sv);
+						"1:8: Error while parsing value: signs are prohibited on binary integers"sv);
 }
 
 TEST_CASE("parsing - integers (hex, bin, oct, leading zeroes)")
@@ -233,22 +233,22 @@ TEST_CASE("parsing - integers (hex, bin, oct, negative values)")
 	// "***Non-negative*** integer values may also be expressed in hexadecimal, octal, or binary"
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = -0x1"sv,
-						"1:7: Error while parsing value: signs are not allowed on hexadecimal integers"sv);
+						"1:7: Error while parsing value: signs are prohibited on hexadecimal integers"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = -0o1"sv,
-						"1:7: Error while parsing value: signs are not allowed on octal integers"sv);
+						"1:7: Error while parsing value: signs are prohibited on octal integers"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = -0b1"sv,
-						"1:7: Error while parsing value: signs are not allowed on binary integers"sv);
+						"1:7: Error while parsing value: signs are prohibited on binary integers"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = +0X1"sv,
-						"1:7: Error while parsing value: signs are not allowed on hexadecimal integers"sv);
+						"1:7: Error while parsing value: signs are prohibited on hexadecimal integers"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = -0O7"sv,
-						"1:7: Error while parsing value: signs are not allowed on octal integers"sv);
+						"1:7: Error while parsing value: signs are prohibited on octal integers"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = -0B1"sv,
-						"1:7: Error while parsing value: signs are not allowed on binary integers"sv);
+						"1:7: Error while parsing value: signs are prohibited on binary integers"sv);
 }
 
 TEST_CASE("parsing - integers (hex, bin, oct, range)")

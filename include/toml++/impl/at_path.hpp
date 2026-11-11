@@ -17,6 +17,15 @@ TOML_IMPL_NAMESPACE_START
 								  void*,
 								  parse_path_callback<std::string_view>,
 								  parse_path_callback<size_t>);
+
+	TOML_NODISCARD
+	bool TOML_CALLCONV has_children(const node&) noexcept;
+
+	TOML_NODISCARD
+	node* TOML_CALLCONV child_at(node&, std::string_view) noexcept;
+
+	TOML_NODISCARD
+	node* TOML_CALLCONV child_at(node&, size_t) noexcept;
 }
 TOML_IMPL_NAMESPACE_END;
 /// \endcond

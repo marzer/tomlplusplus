@@ -7,6 +7,7 @@
 
 #include "examples.hpp"
 #include <toml++/toml.hpp>
+#include <random>
 
 using namespace std::string_view_literals;
 
@@ -14,7 +15,7 @@ namespace
 {
 	namespace random
 	{
-		inline constexpr std::string_view words[] = {
+		constexpr std::string_view words[] = {
 			"acceptable"sv, "contain"sv,	  "ghost"sv,		 "mark"sv,		  "respect"sv,		 "taboo"sv,
 			"actually"sv,	"cream"sv,		  "gleaming"sv,		 "meaty"sv,		  "rest"sv,			 "tacky"sv,
 			"addition"sv,	"creature"sv,	  "glorious"sv,		 "memory"sv,	  "rice"sv,			 "tank"sv,
@@ -51,37 +52,43 @@ namespace
 			"consist"sv,	"geese"sv
 		};
 
-		[[nodiscard]] static bool boolean() noexcept
+		[[nodiscard]] std::mt19937& engine()
 		{
-			return std::rand() % 2 == 0; // NOLINT(misc-predictable-rand)
+			static std::mt19937 instance{ std::random_device{}() };
+			return instance;
 		}
 
 		template <typename T>
-		[[nodiscard]] static T integer(T excl_max) noexcept
+		[[nodiscard]] T integer(T excl_max)
 		{
-			return static_cast<T>(static_cast<T>(std::rand()) % excl_max); // NOLINT(misc-predictable-rand)
+			return std::uniform_int_distribution<T>{ T{}, static_cast<T>(excl_max - 1) }(engine());
 		}
 
 		template <typename T>
-		[[nodiscard]] static T integer(T incl_min, T excl_max) noexcept
+		[[nodiscard]] T integer(T incl_min, T excl_max)
 		{
 			return static_cast<T>(incl_min + integer(excl_max - incl_min));
 		}
 
-		[[nodiscard]] static bool chance(float val) noexcept
+		[[nodiscard]] bool boolean()
 		{
-			val = (val < 0.0f ? 0.0f : (val > 1.0f ? 1.0f : val)) * 1000.0f;
-			return static_cast<float>(integer(0, 1000)) <= val;
+			return integer(2) == 0;
 		}
 
-		[[nodiscard]] static toml::date date() noexcept
+		[[nodiscard]] bool chance(float val)
+		{
+			val = (val < 0.0f ? 0.0f : (val > 1.0f ? 1.0f : val)) * 1000.0f;
+			return static_cast<float>(integer(0, 1000)) < val;
+		}
+
+		[[nodiscard]] toml::date date()
 		{
 			return toml::date{ integer(1900, 2021), //
 							   integer(1, 13),
 							   integer(1, 29) };
 		}
 
-		[[nodiscard]] static toml::time time() noexcept
+		[[nodiscard]] toml::time time()
 		{
 			return toml::time{ integer(24), //
 							   integer(60),
@@ -89,23 +96,23 @@ namespace
 							   boolean() ? integer(1000000000u) : 0u };
 		}
 
-		[[nodiscard]] static toml::time_offset time_offset() noexcept
+		[[nodiscard]] toml::time_offset time_offset()
 		{
 			return toml::time_offset{ integer(-11, 12), integer(-45, +46) };
 		}
 
-		[[nodiscard]] static toml::date_time date_time() noexcept
+		[[nodiscard]] toml::date_time date_time()
 		{
 			return boolean() ? toml::date_time{ date(), time() } //
 							 : toml::date_time{ date(), time(), time_offset() };
 		}
 
-		[[nodiscard]] static std::string_view word() noexcept
+		[[nodiscard]] std::string_view word()
 		{
 			return words[integer(std::size(words))];
 		}
 
-		[[nodiscard]] static std::string string(size_t word_count, char sep = ' ')
+		[[nodiscard]] std::string string(size_t word_count, char sep = ' ')
 		{
 			std::string val;
 			while (word_count-- > 0u)
@@ -117,7 +124,7 @@ namespace
 			return val;
 		}
 
-		[[nodiscard]] static std::string key()
+		[[nodiscard]] std::string key()
 		{
 			return random::string(random::integer(1u, 4u), '-');
 		}
@@ -125,7 +132,7 @@ namespace
 	}
 
 	template <typename T>
-	static auto add_to(toml::table& tbl, T&& val) -> toml::inserted_type_of<T&&>&
+	auto add_to(toml::table& tbl, T&& val) -> toml::inserted_type_of<T&&>&
 	{
 		while (true)
 		{
@@ -133,20 +140,20 @@ namespace
 			auto it	 = std::as_const(tbl).lower_bound(key);
 			if (it == tbl.cend() || it->first != key)
 			{
-				return *tbl.emplace_hint(it, std::move(key), static_cast<T&&>(val))
+				return *tbl.emplace_hint(it, std::move(key), std::forward<T>(val))
 							->second.template as<toml::inserted_type_of<T&&>>();
 			}
 		}
 	}
 
 	template <typename T>
-	static auto add_to(toml::array& arr, T&& val) -> toml::inserted_type_of<T&&>&
+	auto add_to(toml::array& arr, T&& val) -> toml::inserted_type_of<T&&>&
 	{
-		return arr.emplace_back(static_cast<T&&>(val));
+		return arr.emplace_back(std::forward<T>(val));
 	}
 
 	template <typename Container>
-	static void add_value_to(Container& container)
+	void add_value_to(Container& container)
 	{
 		static_assert(toml::is_container<Container>);
 
@@ -163,14 +170,11 @@ namespace
 		}
 	}
 
-	static constexpr int max_inline_nesting		   = 2;
-	static constexpr int default_max_inline_values = 4;
+	constexpr int max_inline_nesting		= 2;
+	constexpr int default_max_inline_values = 4;
 
 	template <typename Container>
-	static void populate_inline_container(Container& container,
-										  int& budget,
-										  int inline_nesting = 0,
-										  int max_values	 = default_max_inline_values)
+	void populate_inline_container(Container& container, int& budget, int inline_nesting, int max_values)
 	{
 		static_assert(toml::is_container<Container>);
 
@@ -207,16 +211,17 @@ namespace
 		}
 	}
 
-	static constexpr int max_top_level_nesting		  = 5;
-	static constexpr int max_array_of_tables_children = 4;
-	static constexpr int max_table_children			  = 4;
+	constexpr int max_top_level_nesting		   = 5;
+	constexpr int max_array_of_tables_children = 4;
+	constexpr int max_table_children		   = 4;
+	constexpr int max_table_values			   = 10;
 
-	static void populate_table(toml::table& tbl, int& budget, int nesting = 0)
+	void populate_table(toml::table& tbl, int& budget, int nesting = 0)
 	{
 		assert(!tbl.is_inline());
 
 		// do simple values + inline tables/arrays first
-		populate_inline_container(tbl, budget, 0, 10);
+		populate_inline_container(tbl, budget, 0, max_table_values);
 
 		// add a nested array-of-tables
 		if (budget && nesting < max_top_level_nesting && random::chance(0.33f))

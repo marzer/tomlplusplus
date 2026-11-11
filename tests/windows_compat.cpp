@@ -63,6 +63,22 @@ TEST_CASE("windows compat")
 	CHECK(tbl[L"library"][L"name"] == L"toml++"s);
 	CHECK(tbl[L"library"][L"name"] == L"toml++");
 
+	// narrowing a wide string allocates, so no comparison with one is noexcept
+	{
+		const auto name = tbl[L"library"][L"name"];
+		CHECK(name != L"toml--"sv);
+		CHECK(L"toml++"sv == name);
+		CHECK(L"toml--"sv != name);
+#if !TOML_DISABLE_NOEXCEPT_NOEXCEPT
+		static_assert(!noexcept(name == L""sv));
+		static_assert(!noexcept(name != L""sv));
+		static_assert(!noexcept(L""sv == name));
+		static_assert(!noexcept(L""sv != name));
+#endif
+		static_assert(noexcept(name == ""sv));
+		static_assert(noexcept(name != ""sv));
+	}
+
 	// table manipulation
 	tbl.insert(L"foo", L"bar");
 	REQUIRE(tbl.contains("foo"));

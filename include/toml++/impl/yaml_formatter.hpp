@@ -16,7 +16,9 @@ TOML_NAMESPACE_START
 	///
 	/// \availability This class is only available when #TOML_ENABLE_FORMATTERS is enabled.
 	///
-	/// \remarks Flags that would make YAML read a value back as something else are ignored.
+	/// \remarks The output is meant to read back as the same values under YAML 1.1 and YAML 1.2. Flags that would make
+	/// 		 either read a value as something else are ignored, format_flags::allow_binary_integers and
+	/// 		 format_flags::allow_octal_integers among them.
 	///
 	/// \detail \cpp
 	/// auto some_toml = toml::parse(R"(
@@ -47,10 +49,16 @@ TOML_NAMESPACE_START
 		using base = impl::formatter;
 
 		TOML_EXPORTED_MEMBER_FUNCTION
+		void print_yaml_scalar(std::string_view);
+
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print_yaml_string(const value<std::string>&);
 
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void print_yaml_float(const value<double>&);
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		void print_node(const toml::node&, bool = false);
 
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const toml::table&, bool = false);
@@ -64,9 +72,9 @@ TOML_NAMESPACE_START
 		TOML_EXPORTED_CONSTANT
 		static constexpr impl::formatter_constants constants = {
 			//
-			format_flags::quote_dates_and_times | format_flags::indentation,			 // mandatory
-			format_flags::allow_multi_line_strings | format_flags::terse_key_value_pairs //
-				| format_flags::allow_binary_integers,									 // ignored
+			format_flags::quote_dates_and_times | format_flags::indentation,				// mandatory
+			format_flags::allow_multi_line_strings | format_flags::terse_key_value_pairs	//
+				| format_flags::allow_binary_integers | format_flags::allow_octal_integers, // ignored
 			".inf"sv,
 			"-.inf"sv,
 			".NAN"sv,
@@ -81,7 +89,6 @@ TOML_NAMESPACE_START
 		static constexpr format_flags default_flags = constants.mandatory_flags			  //
 													| format_flags::allow_literal_strings //
 													| format_flags::allow_unicode_strings //
-													| format_flags::allow_octal_integers  //
 													| format_flags::allow_hexadecimal_integers;
 
 		/// \brief	Constructs a YAML formatter and binds it to a TOML object.
@@ -125,16 +132,15 @@ TOML_NAMESPACE_START
 #endif
 
 		/// \brief	Prints the bound TOML object out to the stream as YAML.
-		friend std::ostream& TOML_CALLCONV operator<<(std::ostream& lhs, yaml_formatter& rhs)
+		friend std::ostream& operator<<(std::ostream& lhs, yaml_formatter& rhs)
 		{
-			rhs.attach(lhs);
+			const attach_scope attached{ rhs, lhs };
 			rhs.print();
-			rhs.detach();
 			return lhs;
 		}
 
 		/// \brief	Prints the bound TOML object out to the stream as YAML (rvalue overload).
-		friend std::ostream& TOML_CALLCONV operator<<(std::ostream& lhs, yaml_formatter&& rhs)
+		friend std::ostream& operator<<(std::ostream& lhs, yaml_formatter&& rhs)
 		{
 			return lhs << rhs; // as lvalue
 		}

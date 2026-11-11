@@ -32,6 +32,7 @@
 
 TOML_DISABLE_SPAM_WARNINGS;
 TOML_DISABLE_ARITHMETIC_WARNINGS;
+TOML_DISABLE_ANALYSIS_WARNINGS;
 #if TOML_CLANG == 13
 #pragma clang diagnostic ignored "-Wreserved-identifier" // false-positive
 #endif
@@ -128,6 +129,10 @@ bool parsing_should_fail(std::string_view test_file,
 
 bool parsing_should_fail(std::string_view test_file, uint32_t test_line, std::string_view toml_str);
 
+// a control character as a parse error quotes it
+TOML_NODISCARD
+std::string quoted_control_character(char c);
+
 TOML_PURE_GETTER
 constexpr std::string_view trim_file_path(std::string_view sv) noexcept
 {
@@ -167,7 +172,7 @@ inline bool parse_expected_value(std::string_view test_file,
 		for (auto c : value_str)
 		{
 			decoder(static_cast<uint8_t>(c));
-			if (!decoder.has_code_point())
+			if (!decoder.has_codepoint())
 				continue;
 
 			if (impl::is_ascii_vertical_whitespace(decoder.codepoint))

@@ -62,7 +62,7 @@ TOML_NAMESPACE_START
 			alignas(align) unsigned char bytes[size];
 		};
 
-		alignas(storage_t::align) mutable storage_t storage_;
+		storage_t storage_;
 		bool err_;
 
 		template <typename Type>
@@ -71,6 +71,14 @@ TOML_NAMESPACE_START
 		static Type* get_as(storage_t& s) noexcept
 		{
 			return TOML_LAUNDER(reinterpret_cast<Type*>(s.bytes));
+		}
+
+		template <typename Type>
+		TOML_NODISCARD
+		TOML_ALWAYS_INLINE
+		static const Type* get_as(const storage_t& s) noexcept
+		{
+			return TOML_LAUNDER(reinterpret_cast<const Type*>(s.bytes));
 		}
 
 		void destroy() noexcept
@@ -146,7 +154,7 @@ TOML_NAMESPACE_START
 		/// \name Result state
 		/// @{
 
-		/// \brief	Returns true if parsing succeeeded.
+		/// \brief	Returns true if parsing succeeded.
 		TOML_NODISCARD
 		bool succeeded() const noexcept
 		{
@@ -170,8 +178,8 @@ TOML_NAMESPACE_START
 		/// @}
 
 		/// \name Successful parses
-		/// \warning It is undefined behaviour to call these functions when the result respresents a failed parse.
-		/// Check #failed(), #succeeded or #operator bool() to determine the result's state.
+		/// \warning It is undefined behaviour to call these functions when the result represents a failed parse.
+		/// Check #failed(), #succeeded() or #operator bool() to determine the result's state.
 		/// @{
 
 		/// \brief	Returns the internal toml::table.
@@ -222,8 +230,8 @@ TOML_NAMESPACE_START
 		/// @}
 
 		/// \name Failed parses
-		/// \warning It is undefined behaviour to call these functions when the result respresents a successful parse.
-		/// Check #failed(), #succeeded or #operator bool() to determine the result's state.
+		/// \warning It is undefined behaviour to call these functions when the result represents a successful parse.
+		/// Check #failed(), #succeeded() or #operator bool() to determine the result's state.
 		/// @{
 
 		/// \brief	Returns the internal toml::parse_error.
@@ -483,9 +491,9 @@ TOML_NAMESPACE_START
 		/// \brief Prints the held error or table object out to a text stream.
 		///
 		/// \availability This operator is only available when #TOML_ENABLE_FORMATTERS is enabled.
-		friend std::ostream& operator<<(std::ostream& os, const parse_result& result)
+		friend std::ostream& operator<<(std::ostream& lhs, const parse_result& rhs)
 		{
-			return result.err_ ? (os << result.error()) : (os << result.table());
+			return rhs.err_ ? (lhs << rhs.error()) : (lhs << rhs.table());
 		}
 
 #endif

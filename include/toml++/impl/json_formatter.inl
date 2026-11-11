@@ -14,13 +14,32 @@
 
 #include "json_formatter.hpp"
 #include "formatter.inl"
-#include "print_to_stream.hpp"
 #include "table.hpp"
 #include "array.hpp"
 #include "header_start.hpp"
 
 TOML_NAMESPACE_START
 {
+	TOML_EXTERNAL_LINKAGE
+	void json_formatter::print_json_string(std::string_view str)
+	{
+		print_string(str, false, false, true, impl::string_dialect::json);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	void json_formatter::print_node(const toml::node& n)
+	{
+		const auto type = n.type();
+		TOML_ASSUME(type != node_type::none);
+		switch (type)
+		{
+			case node_type::table: print(static_cast<const table&>(n)); break;
+			case node_type::array: print(static_cast<const array&>(n)); break;
+			case node_type::string: print_json_string(static_cast<const value<std::string>&>(n).get()); break;
+			default: print_value(n, type);
+		}
+	}
+
 	TOML_EXTERNAL_LINKAGE
 	void json_formatter::print(const toml::table& tbl)
 	{
@@ -31,45 +50,26 @@ TOML_NAMESPACE_START
 		}
 
 		print_unformatted('{');
-
-		if (indent_sub_tables())
-			increase_indent();
-		bool first = false;
-		for (auto&& [k, v] : tbl)
 		{
-			if (first)
-				print_unformatted(',');
-			first = true;
-			print_newline(true);
-			print_indent();
+			const indent_scope indented{ *this, indent_sub_tables() };
 
-			print_string(k.str(), false, false, true, impl::string_dialect::json);
-			if (terse_kvps())
-				print_unformatted(":"sv);
-			else
-				print_unformatted(" : "sv);
-
-			const auto type = v.type();
-			TOML_ASSUME(type != node_type::none);
-			switch (type)
+			bool first = true;
+			for (auto&& [k, v] : tbl)
 			{
-				case node_type::table: print(*static_cast<const table*>(&v)); break;
-				case node_type::array: print(*static_cast<const array*>(&v)); break;
-				case node_type::string:
-					print_string(static_cast<const value<std::string>*>(&v)->get(),
-								 false,
-								 false,
-								 true,
-								 impl::string_dialect::json);
-					break;
-				default: print_value(v, type);
+				if (!first)
+					print_unformatted(',');
+				first = false;
+				print_newline(true);
+				print_indent();
+
+				print_json_string(k.str());
+				print_unformatted(terse_kvps() ? ":"sv : " : "sv);
+
+				print_node(v);
 			}
 		}
-		if (indent_sub_tables())
-			decrease_indent();
 		print_newline(true);
 		print_indent();
-
 		print_unformatted('}');
 	}
 
@@ -83,34 +83,21 @@ TOML_NAMESPACE_START
 		}
 
 		print_unformatted('[');
-		if (indent_array_elements())
-			increase_indent();
-		for (size_t i = 0; i < arr.size(); i++)
 		{
-			if (i > 0u)
-				print_unformatted(',');
-			print_newline(true);
-			print_indent();
+			const indent_scope indented{ *this, indent_array_elements() };
 
-			auto& v			= arr[i];
-			const auto type = v.type();
-			TOML_ASSUME(type != node_type::none);
-			switch (type)
+			bool first = true;
+			for (auto& v : arr)
 			{
-				case node_type::table: print(*static_cast<const table*>(&v)); break;
-				case node_type::array: print(*static_cast<const array*>(&v)); break;
-				case node_type::string:
-					print_string(static_cast<const value<std::string>*>(&v)->get(),
-								 false,
-								 false,
-								 true,
-								 impl::string_dialect::json);
-					break;
-				default: print_value(v, type);
+				if (!first)
+					print_unformatted(',');
+				first = false;
+				print_newline(true);
+				print_indent();
+
+				print_node(v);
 			}
 		}
-		if (indent_array_elements())
-			decrease_indent();
 		print_newline(true);
 		print_indent();
 		print_unformatted(']');
@@ -122,33 +109,16 @@ TOML_NAMESPACE_START
 		if (dump_failed_parse_result())
 			return;
 
-		switch (auto source_type = source().type())
+		const auto type = source().type();
+		if (type != node_type::table && type != node_type::array)
 		{
-			case node_type::table:
-			{
-				impl::formatter_buffer buffer{ *this };
-				print(*static_cast<const table*>(&source()));
-				buffer.flush();
-				break;
-			}
-
-			case node_type::array:
-			{
-				impl::formatter_buffer buffer{ *this };
-				print(*static_cast<const array*>(&source()));
-				buffer.flush();
-				break;
-			}
-
-			case node_type::string:
-				print_string(static_cast<const value<std::string>*>(&source())->get(),
-							 false,
-							 false,
-							 true,
-							 impl::string_dialect::json);
-				break;
-			default: print_value(source(), source_type);
+			print_node(source());
+			return;
 		}
+
+		impl::formatter_buffer buffer{ *this };
+		print_node(source());
+		buffer.flush();
 	}
 }
 TOML_NAMESPACE_END;

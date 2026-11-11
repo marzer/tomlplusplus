@@ -1,6 +1,6 @@
-//# This file is a part of toml++ and is subject to the the terms of the MIT license.
-//# Copyright (c) 2019-2020 Mark Gillard <mark.gillard@outlook.com.au>
-//# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
+// This file is a part of toml++ and is subject to the the terms of the MIT license.
+// Copyright (c) Mark Gillard <mark.gillard@outlook.com.au>
+// See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
 
 // this file is for boilerplate unrelated to the toml++ example learning outcomes.
@@ -17,13 +17,11 @@
 #endif
 
 #include <cstdlib>
-#include <ctime>
 #include <cassert>
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <string_view>
-#include <vector>
 #include <array>
 #include <chrono>
 #include <fstream>
@@ -40,16 +38,13 @@ extern "C" __declspec(dllimport) int __stdcall SetConsoleOutputCP(unsigned int);
 namespace
 {
 	// NOLINTNEXTLINE(bugprone-throwing-static-initialization,cppcoreguidelines-interfaces-global-init)
-	static const auto initialize_environment_automagically = []() noexcept
+	const auto initialize_environment_automagically = []() noexcept
 	{
 #ifdef _WIN32
 		SetConsoleOutputCP(65001); // CP_UTF8
 #endif
 
 		std::ios_base::sync_with_stdio(false);
-		std::cout << std::boolalpha;
-
-		srand(static_cast<unsigned int>(time(nullptr))); // NOLINT(bugprone-random-generator-seed)
 
 		return true;
 	}();

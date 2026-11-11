@@ -44,7 +44,7 @@ TOML_IMPL_NAMESPACE_START
 			{
 				static_assert(!is_wide_string<T> || TOML_ENABLE_WINDOWS_COMPAT,
 							  "Instantiating values from wide-character strings is only "
-							  "supported on Windows with TOML_ENABLE_WINDOWS_COMPAT enabled.");
+							  "supported on Windows with TOML_ENABLE_WINDOWS_COMPAT enabled");
 
 				if constexpr (!is_losslessly_convertible_to_native<unwrapped_type>)
 				{
@@ -65,7 +65,7 @@ TOML_IMPL_NAMESPACE_START
 #if TOML_ENABLE_WINDOWS_COMPAT
 					out = new value_type{ narrow(static_cast<T&&>(val)) };
 #else
-					static_assert(always_false<T>, "Evaluated unreachable branch!");
+					static_assert(always_false<T>, "Evaluated unreachable branch");
 #endif
 				}
 				else
@@ -112,7 +112,7 @@ TOML_IMPL_NAMESPACE_START
 
 	template <typename T,
 			  bool = (is_node<T> || is_node_view<T> || is_value<T> || can_partially_represent_native<T>
-					  || is_string_like<T>)>
+					  || is_losslessly_convertible_to_native<T>)>
 	struct inserted_type_of_
 	{
 		using type = std::remove_pointer_t<decltype(make_node_impl(std::declval<T>()))>;
@@ -137,6 +137,26 @@ TOML_IMPL_NAMESPACE_START
 		return node_ptr{ make_node_impl(static_cast<T&&>(val), flags) };
 	}
 
+	// make_node() returns null for these
+	template <typename T>
+	TOML_NODISCARD
+	TOML_ALWAYS_INLINE
+	bool is_null_node_view([[maybe_unused]] const T& val) noexcept
+	{
+		if constexpr (is_node_view<T>)
+			return !val;
+		else
+			return false;
+	}
+
+	template <typename T>
+	TOML_NODISCARD
+	TOML_ALWAYS_INLINE
+	bool is_null_node_view(const inserter<T>& val) noexcept
+	{
+		return is_null_node_view(val.value);
+	}
+
 	template <typename... T>
 	struct emplaced_type_of_
 	{
@@ -146,7 +166,7 @@ TOML_IMPL_NAMESPACE_START
 	template <typename T>
 	struct emplaced_type_of_<T>
 	{
-		using type = std::conditional_t<is_one_of<T, node, node_view<node>, node_view<const node>>,
+		using type = std::conditional_t<std::is_same_v<T, node> || is_node_view<T>, //
 										void,
 										typename inserted_type_of_<T>::type>;
 	};
@@ -159,6 +179,11 @@ TOML_IMPL_NAMESPACE_START
 
 	template <typename... T>
 	using emplaced_type_of = typename emplaced_type_of_<remove_cvref<T>...>::type;
+
+	// the type an emplace function makes: the one it was given, or else the one its arguments imply
+	template <typename T, typename... Args>
+	using emplaced_type_or =
+		std::conditional_t<std::is_void_v<remove_cvref<T>>, emplaced_type_of<Args...>, remove_cvref<T>>;
 }
 TOML_IMPL_NAMESPACE_END;
 /// \endcond
@@ -169,10 +194,10 @@ TOML_NAMESPACE_START
 	///			if an object of this type was inserted into a toml::table or toml::array.
 	///
 	/// \detail \cpp
-	/// static_assert(std::is_same_v<toml::inserted_type_of<const char*>, toml::value<std::string>);
-	/// static_assert(std::is_same_v<toml::inserted_type_of<int>,         toml::value<int64_t>);
-	/// static_assert(std::is_same_v<toml::inserted_type_of<float>,       toml::value<double>);
-	/// static_assert(std::is_same_v<toml::inserted_type_of<bool>,        toml::value<bool>);
+	/// static_assert(std::is_same_v<toml::inserted_type_of<const char*>, toml::value<std::string>>);
+	/// static_assert(std::is_same_v<toml::inserted_type_of<int>,         toml::value<int64_t>>);
+	/// static_assert(std::is_same_v<toml::inserted_type_of<float>,       toml::value<double>>);
+	/// static_assert(std::is_same_v<toml::inserted_type_of<bool>,        toml::value<bool>>);
 	/// \ecpp
 	///
 	/// \note	This will return toml::node for nodes and node_views, even though a more specific node subclass

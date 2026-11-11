@@ -113,7 +113,10 @@ def main():
             print(f'## Coverage of include/\n\n{table}\n\n### Files with missed lines\n\n{files}\n', file=step_summary)
 
     for metric in failed:
-        print(rf'error: {metric} coverage {totals[metric]["percent"]:.2f}% is below the {floors[metric]:.2f}% floor')
+        print(
+            rf'error: {metric} coverage {totals[metric]["percent"]:.4f}% is below the {floors[metric]:.4f}% floor',
+            file=sys.stderr,
+        )
     return 1 if failed else 0
 
 

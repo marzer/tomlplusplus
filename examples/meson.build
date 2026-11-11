@@ -9,7 +9,6 @@ example_args += global_args
 examples = [
 	'toml_generator',
 	'error_printer',
-	'parse_benchmark',
 ]
 if has_exceptions
 	examples += [

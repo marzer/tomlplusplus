@@ -21,6 +21,10 @@ function(tomlplusplus_set_compile_options target)
     )
   endif()
 
+  if(tomlplusplus_PEDANTIC)
+    target_compile_definitions("${target}" PRIVATE TOML_PEDANTIC=1)
+  endif()
+
   if(MSVC)
     target_compile_options(
         "${target}" PRIVATE

@@ -141,7 +141,7 @@ jobs:
               run: |
                   cmake -S . -B build -G Ninja -DCMAKE_CXX_COMPILER=clang++-22 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
                     -Dtomlplusplus_BUILD_LIB=ON -Dtomlplusplus_EXCEPTIONS=OFF -Dtomlplusplus_UNRELEASED_FEATURES=ON \
-                    -DCMAKE_CXX_FLAGS="-DTOML_FLOAT_CHARCONV=0 -DTOML_INT_CHARCONV=0"
+                    -DCMAKE_CXX_FLAGS="-DTOML_FLOAT_CHARCONV=0"
                   clang-tidier build --werror
                   rm -rf build
 
@@ -172,7 +172,7 @@ jobs:
                           -DCMAKE_CXX_STANDARD=26 -DCMAKE_CXX_FLAGS=-stdlib=libc++ -DCMAKE_EXE_LINKER_FLAGS=-stdlib=libc++
                           -Dtomlplusplus_TESTS_LEAK=ON -Dtomlplusplus_COVERAGE=ON
                       coverage: true
-                      alt_cxx_flags: "-stdlib=libc++ -DTOML_FLOAT_CHARCONV=0 -DTOML_INT_CHARCONV=0 -DTOML_ENABLE_CHRONO=0"
+                      alt_cxx_flags: "-stdlib=libc++ -DTOML_FLOAT_CHARCONV=0 -DTOML_ENABLE_CHRONO=0"
                     - name: linux-clang-x64-static
                       compiler: "clang++"
                       type: "Release"

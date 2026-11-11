@@ -14,14 +14,48 @@
 #include "at_path.hpp"
 #include "array.hpp"
 #include "table.hpp"
-TOML_DISABLE_WARNINGS;
-#if TOML_INT_CHARCONV
-#include <charconv>
-#else
-#include <sstream>
-#endif
-TOML_ENABLE_WARNINGS;
 #include "header_start.hpp"
+
+TOML_ANON_NAMESPACE_START
+{
+	// reads the array indexer starting at path[pos] and moves pos past it
+	TOML_INTERNAL_LINKAGE
+	bool parse_path_array_indexer(std::string_view path, size_t& pos, size_t& index) noexcept
+	{
+		static constexpr auto whitespace = " \t"sv;
+		const auto end					 = path.length();
+
+		// find first digit in index
+		const auto index_start = path.find_first_not_of(whitespace, pos + 1u);
+		if (index_start == std::string_view::npos || path[index_start] < '0' || path[index_start] > '9')
+			return false;
+
+		// find end of index (first non-digit character)
+		const auto index_end = impl::min(path.find_first_not_of("0123456789"sv, index_start), end);
+
+		// move pos to after indexer (char after closing ']' or permissively EOL/subkey '.'/next opening '[')
+		pos = impl::min(path.find_first_not_of(whitespace, index_end), end);
+		if (pos < end)
+		{
+			if (path[pos] == ']')
+				pos++;
+			else if (path[pos] != '.' && path[pos] != '[')
+				return false;
+		}
+
+		static constexpr auto max_index = static_cast<size_t>(-1);
+		index							= {};
+		for (const auto digit : path.substr(index_start, index_end - index_start))
+		{
+			const auto value = static_cast<size_t>(digit - '0');
+			if (index > (max_index - value) / 10u)
+				return false;
+			index = (index * 10u) + value;
+		}
+		return true;
+	}
+}
+TOML_ANON_NAMESPACE_END;
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -35,102 +69,27 @@ TOML_IMPL_NAMESPACE_START
 		if (path.empty())
 			return on_key(data, ""sv);
 
-		size_t pos					= 0;
-		const auto end				= path.length();
-		bool prev_was_array_indexer = false;
-		bool prev_was_dot			= true; // invisible root 'dot'
+		enum class component
+		{
+			dot,
+			array_indexer,
+			key
+		};
+
+		size_t pos	   = 0;
+		const auto end = path.length();
+		auto prev	   = component::dot; // invisible root 'dot'
 
 		while (pos < end)
 		{
 			// start of an array indexer
 			if (path[pos] == '[')
 			{
-				// find first digit in index
-				size_t index_start = pos + 1u;
-				while (true)
-				{
-					if TOML_UNLIKELY(index_start >= path.length())
-						return false;
-
-					const auto c = path[index_start];
-					if TOML_LIKELY(c >= '0' && c <= '9')
-						break;
-					if (c == ' ' || c == '\t')
-						index_start++;
-					else
-						return false;
-				}
-				TOML_ASSERT(path[index_start] >= '0');
-				TOML_ASSERT(path[index_start] <= '9');
-
-				// find end of index (first non-digit character)
-				size_t index_end = index_start + 1u;
-				while (true)
-				{
-					// if an array indexer is missing the trailing ']' at the end of the string, permissively accept it
-					if TOML_UNLIKELY(index_end >= path.length())
-						break;
-
-					const auto c = path[index_end];
-					if (c >= '0' && c <= '9')
-						index_end++;
-					else if (c == ']' || c == ' ' || c == '\t' || c == '.' || c == '[')
-						break;
-					else
-						return false;
-				}
-				TOML_ASSERT(path[index_end - 1u] >= '0');
-				TOML_ASSERT(path[index_end - 1u] <= '9');
-
-				// move pos to after indexer (char after closing ']' or permissively EOL/subkey '.'/next opening '[')
-				pos = index_end;
-				while (true)
-				{
-					if TOML_UNLIKELY(pos >= path.length())
-						break;
-
-					const auto c = path[pos];
-					if (c == ']')
-					{
-						pos++;
-						break;
-					}
-					if TOML_UNLIKELY(c == '.' || c == '[')
-						break;
-					if (c == '\t' || c == ' ')
-						pos++;
-					else
-						return false;
-				}
-
-				// get array index substring
-				auto index_str = path.substr(index_start, index_end - index_start);
-
-				// parse the actual array index to an integer type
 				size_t index = {};
-				if (index_str.length() == 1u)
-					index = static_cast<size_t>(index_str[0] - '0');
-				else
-				{
-#if TOML_INT_CHARCONV
+				if (!TOML_ANON_NAMESPACE::parse_path_array_indexer(path, pos, index))
+					return false;
 
-					auto fc_result = std::from_chars(index_str.data(), index_str.data() + index_str.length(), index);
-					if (fc_result.ec != std::errc{})
-						return false;
-
-#else
-
-					std::stringstream ss;
-					ss.imbue(std::locale::classic());
-					ss.write(index_str.data(), static_cast<std::streamsize>(index_str.length()));
-					if (!(ss >> index))
-						return false;
-
-#endif
-				}
-
-				prev_was_dot		   = false;
-				prev_was_array_indexer = true;
+				prev = component::array_indexer;
 
 				if (!on_index(data, index))
 					return false;
@@ -148,12 +107,11 @@ TOML_IMPL_NAMESPACE_START
 				//
 				//     "foo".""."bar"
 				//
-				if (prev_was_dot && !on_key(data, ""sv))
+				if (prev == component::dot && !on_key(data, ""sv))
 					return false;
 
 				pos++;
-				prev_was_dot		   = true;
-				prev_was_array_indexer = false;
+				prev = component::dot;
 			}
 
 			// an errant closing ']'
@@ -164,32 +122,26 @@ TOML_IMPL_NAMESPACE_START
 			else
 			{
 				const auto subkey_start = pos;
-				const auto subkey_len =
-					impl::min(path.find_first_of(".[]"sv, subkey_start + 1u), path.length()) - subkey_start;
-				const auto subkey = path.substr(subkey_start, subkey_len);
+				const auto subkey_len	= impl::min(path.find_first_of(".[]"sv, subkey_start + 1u), end) - subkey_start;
+				const auto subkey		= path.substr(subkey_start, subkey_len);
+				pos += subkey_len;
 
 				// a regular subkey segment immediately after an array indexer is OK if it was all whitespace, e.g.:
 				//
 				//     "foo[0]  .bar"
 				//            ^^ skip this
 				//
-				// otherwise its an error (since it would have to be preceeded by a dot)
-				if (prev_was_array_indexer)
+				// otherwise its an error (since it would have to be preceded by a dot)
+				if (prev == component::array_indexer)
 				{
-					auto non_ws = subkey.find_first_not_of(" \t");
-					if (non_ws == std::string_view::npos)
-					{
-						pos += subkey_len;
-						prev_was_dot		   = false;
-						prev_was_array_indexer = false;
-						continue;
-					}
-					return false;
+					if (subkey.find_first_not_of(" \t"sv) != std::string_view::npos)
+						return false;
+
+					prev = component::key;
+					continue;
 				}
 
-				pos += subkey_len;
-				prev_was_dot		   = false;
-				prev_was_array_indexer = false;
+				prev = component::key;
 
 				if (!on_key(data, subkey))
 					return false;
@@ -197,10 +149,34 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		// Last character was a '.', which implies an empty string key at the end of the path
-		if (prev_was_dot && !on_key(data, ""sv))
+		if (prev == component::dot && !on_key(data, ""sv))
 			return false;
 
 		return true;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	bool TOML_CALLCONV has_children(const node& n) noexcept
+	{
+		if (const auto tbl = n.as_table())
+			return !tbl->empty();
+		if (const auto arr = n.as_array())
+			return !arr->empty();
+		return false;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	node* TOML_CALLCONV child_at(node & n, std::string_view key) noexcept
+	{
+		const auto tbl = n.as<table>();
+		return tbl ? tbl->get(key) : nullptr;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	node* TOML_CALLCONV child_at(node & n, size_t index) noexcept
+	{
+		const auto arr = n.as<array>();
+		return arr ? arr->get(index) : nullptr;
 	}
 }
 TOML_IMPL_NAMESPACE_END;
@@ -210,12 +186,7 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	node_view<node> TOML_CALLCONV at_path(node & root, std::string_view path) noexcept
 	{
-		// early-exit sanity-checks
-		if (root.is_value())
-			return {};
-		if (auto tbl = root.as_table(); tbl && tbl->empty())
-			return {};
-		if (auto arr = root.as_array(); arr && arr->empty())
+		if (!impl::has_children(root))
 			return {};
 
 		node* current = &root;
@@ -225,11 +196,7 @@ TOML_NAMESPACE_START
 			auto& curr = *static_cast<node**>(data);
 			TOML_ASSERT_ASSUME(curr);
 
-			const auto current_table = curr->as<table>();
-			if (!current_table)
-				return false;
-
-			curr = current_table->get(key);
+			curr = impl::child_at(*curr, key);
 			return curr != nullptr;
 		};
 
@@ -238,11 +205,7 @@ TOML_NAMESPACE_START
 			auto& curr = *static_cast<node**>(data);
 			TOML_ASSERT_ASSUME(curr);
 
-			const auto current_array = curr->as<array>();
-			if (!current_array)
-				return false;
-
-			curr = current_array->get(index);
+			curr = impl::child_at(*curr, index);
 			return curr != nullptr;
 		};
 
@@ -263,14 +226,10 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	node_view<node> TOML_CALLCONV at_path(node & root, std::wstring_view path)
 	{
-		// these are the same top-level checks from the narrow-string version;
-		// they're hoisted up here to avoid doing the wide -> narrow conversion where it would not be necessary
+		// the narrow-string version does this check too;
+		// it's hoisted up here to avoid doing the wide -> narrow conversion where it would not be necessary
 		// (avoids an allocation)
-		if (root.is_value())
-			return {};
-		if (auto tbl = root.as_table(); tbl && tbl->empty())
-			return {};
-		if (auto arr = root.as_array(); arr && arr->empty())
+		if (!impl::has_children(root))
 			return {};
 
 		return at_path(root, impl::narrow(path));

@@ -146,6 +146,17 @@ TEST_CASE("at_path")
 		CHECK(!at_path(tbl, "b[99999999999999999999999999]"));
 	}
 
+	SECTION("an index that would wrap around to zero")
+	{
+		CHECK(!at_path(tbl, "b[4294967296]"));
+		CHECK(!at_path(tbl, "b[18446744073709551616]"));
+	}
+
+	SECTION("an index with leading zeros")
+	{
+		CHECK(tbl["b"][1] == at_path(tbl, "b[001]"));
+	}
+
 	SECTION("mutable views")
 	{
 		auto mtbl = tbl;

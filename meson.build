@@ -84,6 +84,7 @@ else
 	global_args += cpp.get_supported_arguments('/permissive-')
 endif
 if is_pedantic
+	global_args += '-DTOML_PEDANTIC=1'
 	global_args += cpp.get_supported_arguments('-Weverything')
 	if is_gcc
 		global_args += cpp.get_supported_arguments(

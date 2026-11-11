@@ -53,3 +53,13 @@ TEST_CASE("parsing - booleans (trailing characters)")
 						"bool = false1"sv,
 						"1:13: Error while parsing boolean: expected end of value, saw '1'"sv);
 }
+
+TEST_CASE("parsing - booleans (cut short by a control character)")
+{
+	parsing_should_fail(FILE_LINE_ARGS,
+						"bool = t\n"sv,
+						"1:9: Error while parsing boolean: expected 'true', saw 't\\n'"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"bool = fal\tse"sv,
+						"1:11: Error while parsing boolean: expected 'false', saw 'fal\\t'"sv);
+}

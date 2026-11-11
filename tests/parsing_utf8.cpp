@@ -8,8 +8,8 @@
 namespace
 {
 	constexpr auto doc_prefix = "# \xC3\xA9\na = \""sv;
-	constexpr auto invalid	  = "2:6: Encountered invalid utf-8 sequence"sv;
-	constexpr auto cut_short  = "2:6: Encountered EOF during incomplete utf-8 code point sequence"sv;
+	constexpr auto invalid	  = "2:6: Encountered invalid UTF-8 sequence"sv;
+	constexpr auto cut_short  = "2:6: Encountered end-of-file during incomplete UTF-8 code point sequence"sv;
 
 	std::string bytes(std::initializer_list<unsigned> values)
 	{
@@ -139,22 +139,22 @@ TEST_CASE("parsing - utf-8 (the first error in the document wins)")
 		parsing_should_fail(
 			FILE_LINE_ARGS,
 			"a = 'x\x01\xFF'"sv,
-			"1:7: Error while parsing literal string: control characters other than TAB (U+0009) are explicitly prohibited"sv);
+			R"(1:7: Error while parsing literal string: control characters other than TAB (U+0009) are prohibited, saw '\u0001')"sv);
 		parsing_should_fail(FILE_LINE_ARGS,
 							"a = 2024-01-01 1\xFF"sv,
-							"1:16: Error while parsing key-value pair: expected a comment or whitespace, saw '1'"sv);
+							"1:16: Error while parsing key-value pair: expected a comment or line break, saw '1'"sv);
 	}
 
 	SECTION("an error found only after landing on an invalid sequence")
 	{
-		parsing_should_fail(FILE_LINE_ARGS, "a = 07\xFF"sv, "1:7: Encountered invalid utf-8 sequence"sv);
+		parsing_should_fail(FILE_LINE_ARGS, "a = 07\xFF"sv, "1:7: Encountered invalid UTF-8 sequence"sv);
 		parsing_should_fail(FILE_LINE_ARGS,
 							"a = 9223372036854775808\xFF"sv,
-							"1:24: Encountered invalid utf-8 sequence"sv);
+							"1:24: Encountered invalid UTF-8 sequence"sv);
 		parsing_should_fail(FILE_LINE_ARGS,
 							"t = 1979-05-27T07:32:60\xFF"sv,
-							"1:24: Encountered invalid utf-8 sequence"sv);
-		parsing_should_fail(FILE_LINE_ARGS, "[a]\n[a]\xFF"sv, "2:4: Encountered invalid utf-8 sequence"sv);
+							"1:24: Encountered invalid UTF-8 sequence"sv);
+		parsing_should_fail(FILE_LINE_ARGS, "[a]\n[a]\xFF"sv, "2:4: Encountered invalid UTF-8 sequence"sv);
 	}
 
 	SECTION("an error before a sequence cut short")
@@ -167,8 +167,14 @@ TEST_CASE("parsing - utf-8 (the first error in the document wins)")
 
 	SECTION("an invalid sequence before an error")
 	{
-		parsing_should_fail(FILE_LINE_ARGS, "a = '\xFF' ;"sv, "1:6: Encountered invalid utf-8 sequence"sv);
-		parsing_should_fail(FILE_LINE_ARGS, "a = ''\xFF ;"sv, "1:7: Encountered invalid utf-8 sequence"sv);
-		parsing_should_fail(FILE_LINE_ARGS, "a = 2024-01-01 \xFF ;"sv, "1:16: Encountered invalid utf-8 sequence"sv);
+		parsing_should_fail(FILE_LINE_ARGS, "a = '\xFF' ;"sv, "1:6: Encountered invalid UTF-8 sequence"sv);
+		parsing_should_fail(FILE_LINE_ARGS, "a = ''\xFF ;"sv, "1:7: Encountered invalid UTF-8 sequence"sv);
+		parsing_should_fail(FILE_LINE_ARGS, "a = 2024-01-01 \xFF ;"sv, "1:16: Encountered invalid UTF-8 sequence"sv);
+	}
+
+	SECTION("an invalid sequence in a comment at the end of a line")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, "a = 1 # \xFF"sv, "1:9: Encountered invalid UTF-8 sequence"sv);
+		parsing_should_fail(FILE_LINE_ARGS, "[a] # \xFF"sv, "1:7: Encountered invalid UTF-8 sequence"sv);
 	}
 }

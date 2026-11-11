@@ -190,6 +190,14 @@ TEMPLATE_TEST_CASE("printing - integers",
 			CHECK(printed(minus_ten, value_flags::format_as_octal) == "-10"sv);
 			CHECK(printed(minus_ten, value_flags::format_as_hexadecimal) == "-10"sv);
 		}
+
+		SECTION("minimum digits pad after the minus sign")
+		{
+			const auto minus_five = static_cast<TestType>(-5);
+			CHECK(printed(minus_five, value_flags::none, 4u) == "-0005"sv);
+			CHECK(printed(minus_five, value_flags::none, 1u) == "-5"sv);
+			CHECK(printed(minus_five, value_flags::none, 100u) == "-" + std::string(99u, '0') + "5");
+		}
 	}
 
 	SECTION("minimum digits")

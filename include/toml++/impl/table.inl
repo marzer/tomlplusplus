@@ -80,32 +80,34 @@ TOML_NAMESPACE_START
 		TOML_TABLE_CREATED;
 #endif
 	}
+	// NOLINTEND(bugprone-use-after-move)
 
 	TOML_EXTERNAL_LINKAGE
 	table& table::operator=(const table& rhs)
 	{
-		if (&rhs != this)
-		{
-			map_type copy;
-			for (auto&& [k, v] : rhs.map_)
-				copy.emplace_hint(copy.end(), k, impl::make_node(std::as_const(*v)));
-			node::operator=(rhs);
-			inline_ = rhs.inline_;
-			map_.swap(copy);
-		}
+		if (&rhs == this)
+			return *this;
+
+		map_type copy;
+		for (auto&& [k, v] : rhs.map_)
+			copy.emplace_hint(copy.end(), k, impl::make_node(std::as_const(*v)));
+		node::operator=(rhs);
+		inline_ = rhs.inline_;
+		map_.swap(copy);
 		return *this;
 	}
 
+	// NOLINTBEGIN(bugprone-use-after-move)
 	TOML_EXTERNAL_LINKAGE
 	table& table::operator=(table&& rhs) noexcept
 	{
-		if (&rhs != this)
-		{
-			node::operator=(std::move(rhs));
-			inline_			= rhs.inline_;
-			map_type stolen = std::move(rhs.map_);
-			map_.swap(stolen);
-		}
+		if (&rhs == this)
+			return *this;
+
+		node::operator=(std::move(rhs));
+		inline_			= rhs.inline_;
+		map_type stolen = std::move(rhs.map_);
+		map_.swap(stolen);
 		return *this;
 	}
 	// NOLINTEND(bugprone-use-after-move)
@@ -114,20 +116,8 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	bool table::is_homogeneous(node_type ntype) const noexcept
 	{
-		if (map_.empty())
-			return false;
-
-		if (ntype == node_type::none)
-			ntype = map_.cbegin()->second->type();
-
-		for (auto&& [k, v] : map_)
-		{
-			TOML_UNUSED(k);
-			if (v->type() != ntype)
-				return false;
-		}
-
-		return true;
+		const node* first_nonmatch = {};
+		return is_homogeneous(ntype, first_nonmatch);
 	}
 
 	TOML_NODISCARD
@@ -157,9 +147,9 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	bool table::is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept
 	{
-		node* fnm		  = nullptr;
-		const auto result = const_cast<table&>(*this).is_homogeneous(ntype, fnm);
-		first_nonmatch	  = fnm;
+		node* nonmatch	  = {};
+		const auto result = const_cast<table&>(*this).is_homogeneous(ntype, nonmatch);
+		first_nonmatch	  = nonmatch;
 		return result;
 	}
 
@@ -175,7 +165,7 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	node& table::at(std::string_view key)
 	{
-		auto n = get(key);
+		const auto n = get(key);
 
 #if TOML_COMPILER_HAS_EXCEPTIONS
 
@@ -189,7 +179,7 @@ TOML_NAMESPACE_START
 
 #else
 
-		TOML_ASSERT_ASSUME(n && "key not found in table!");
+		TOML_ASSERT_ASSUME(n && "key not found in table");
 
 #endif
 
@@ -243,9 +233,6 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	table& table::prune(bool recursive) & noexcept
 	{
-		if (map_.empty())
-			return *this;
-
 		for (auto it = map_.begin(); it != map_.end();)
 		{
 			if (auto arr = it->second->as_array())

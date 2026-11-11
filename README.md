@@ -195,7 +195,7 @@ won't need to mess with these at all, but if you do, set them before including t
 
 | Option                            |      Type      | Description                                                                                               | Default               |
 | --------------------------------- | :------------: | --------------------------------------------------------------------------------------------------------- | --------------------- |
-| `TOML_ASSERT(expr)`               | function macro | Sets the assert function used by the library.                                                             | `assert()`            |
+| `TOML_ASSERT(expr)`               | function macro | Sets the assert function used by the library. Ignored when `NDEBUG` is defined.                           | `assert()`            |
 | `TOML_CALLCONV`                   |     define     | Calling convention to apply to exported free/static functions.                                            | undefined             |
 | `TOML_CONFIG_HEADER`              | string literal | Includes the given header file before the rest of the library.                                            | undefined             |
 | `TOML_ENABLE_CHRONO`              |    boolean     | Enables support for C++20 `std::chrono` types. Set to `0` if you don't need it to improve compile times.  | `1` from C++20        |

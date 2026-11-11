@@ -219,6 +219,22 @@ TEST_CASE("values - construction")
 #endif
 }
 
+TEST_CASE("values - self-assignment keeps the source region")
+{
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   "a = 1"sv,
+						   [](table&& tbl)
+						   {
+							   auto val = tbl["a"].as_integer();
+							   REQUIRE(val);
+							   const auto& same = *val;
+							   *val				= same;
+							   CHECK(val->get() == 1);
+							   CHECK(val->source().begin == source_position{ 1, 5 });
+							   CHECK(val->source().end == source_position{ 1, 6 });
+						   });
+}
+
 TEST_CASE("values - toml_formatter")
 {
 	static constexpr auto print_value = [](auto&& raw)
@@ -260,6 +276,103 @@ TEST_CASE("values - toml_formatter")
 	// large floats might get output as scientific notation and that's fine
 	CHECK(print_value(10000000000) == "10000000000");
 	CHECK(print_value(100000000000000) == "100000000000000");
+}
+
+TEST_CASE("values - an integer compares with a floating-point number as numbers")
+{
+	const value<int64_t> one{ 1 };
+
+	SECTION("a fraction is not truncated")
+	{
+		CHECK(!(one == 1.5));
+		CHECK(!(1.5 == one));
+		CHECK(one != 1.5);
+		CHECK(1.5 != one);
+
+		CHECK(one < 1.5);
+		CHECK(one <= 1.5);
+		CHECK(!(one > 1.5));
+		CHECK(!(one >= 1.5));
+		CHECK(1.5 > one);
+		CHECK(1.5 >= one);
+		CHECK(!(1.5 < one));
+		CHECK(!(1.5 <= one));
+
+		CHECK(one > 0.5);
+		CHECK(one >= 0.5);
+		CHECK(!(one < 0.5));
+		CHECK(!(one <= 0.5));
+		CHECK(0.5 < one);
+		CHECK(0.5 <= one);
+		CHECK(!(0.5 > one));
+		CHECK(!(0.5 >= one));
+
+		const value<int64_t> minus_two{ -2 };
+		CHECK(minus_two > -2.5);
+		CHECK(minus_two < -1.5);
+		CHECK(minus_two != -2.5);
+		CHECK(one < 1.5f);
+		CHECK(one != 1.5f);
+	}
+
+	SECTION("whole numbers")
+	{
+		CHECK(one == 1.0);
+		CHECK(1.0 == one);
+		CHECK(!(one != 1.0));
+		CHECK(!(1.0 != one));
+		CHECK(one <= 1.0);
+		CHECK(one >= 1.0);
+		CHECK(1.0 <= one);
+		CHECK(1.0 >= one);
+		CHECK(!(one < 1.0));
+		CHECK(!(one > 1.0));
+		CHECK(one == 1.0f);
+	}
+
+	SECTION("integers that double cannot represent")
+	{
+		const value<int64_t> odd{ 9007199254740993 };
+		CHECK(odd != 9007199254740992.0);
+		CHECK(odd > 9007199254740992.0);
+		CHECK(odd < 9007199254740994.0);
+		CHECK(9007199254740992.0 < odd);
+
+		const value<int64_t> highest{ (std::numeric_limits<int64_t>::max)() };
+		const value<int64_t> lowest{ (std::numeric_limits<int64_t>::min)() };
+		CHECK(highest != 9223372036854775808.0);
+		CHECK(highest < 9223372036854775808.0);
+		CHECK(lowest == -9223372036854775808.0);
+		CHECK(lowest >= -9223372036854775808.0);
+		CHECK(lowest > -1e300);
+		CHECK(highest < 1e300);
+	}
+
+	SECTION("infinities and NaN")
+	{
+		const auto inf = std::numeric_limits<double>::infinity();
+		const auto nan = std::numeric_limits<double>::quiet_NaN();
+		CHECK(one < inf);
+		CHECK(one > -inf);
+		CHECK(one != inf);
+		CHECK(one != nan);
+		CHECK(nan != one);
+		CHECK(!(one == nan));
+		CHECK(!(one < nan));
+		CHECK(!(one <= nan));
+		CHECK(!(one > nan));
+		CHECK(!(one >= nan));
+		CHECK(!(nan < one));
+		CHECK(!(nan >= one));
+	}
+
+	SECTION("integers still compare as integers")
+	{
+		CHECK(one == 1);
+		CHECK(one != 2);
+		CHECK(one < 2);
+		CHECK(2 > one);
+	}
 }
 
 TEST_CASE("nodes - value() int/float/bool conversions")
@@ -594,6 +707,56 @@ TEST_CASE("nodes - value() int/float/bool conversions")
 	}
 }
 
+TEST_CASE("nodes - value() and value_or() with scoped enums")
+{
+	enum class u8 : uint8_t
+	{
+		zero
+	};
+	enum class u16 : uint16_t
+	{
+		zero
+	};
+	enum class u32 : uint32_t
+	{
+		zero
+	};
+	enum class u64 : uint64_t
+	{
+		zero
+	};
+	enum class i8 : int8_t
+	{
+		zero
+	};
+
+	const value<int64_t> small{ 200 };
+	const value<int64_t> large{ 70000 };
+	const value<int64_t> negative{ -1 };
+	const node& small_node	  = small;
+	const node& large_node	  = large;
+	const node& negative_node = negative;
+
+	CHECK(small_node.value<u8>() == u8{ 200 });
+	CHECK(!large_node.value<u8>());
+	CHECK(!negative_node.value<u8>());
+	CHECK(large_node.value_or(u8::zero) == u8::zero);
+
+	CHECK(small_node.value<u16>() == u16{ 200 });
+	CHECK(!large_node.value<u16>());
+	CHECK(!negative_node.value<u16>());
+
+	CHECK(large_node.value<u32>() == u32{ 70000 });
+	CHECK(!negative_node.value<u32>());
+	CHECK(negative_node.value_or(u32::zero) == u32::zero);
+
+	CHECK(large_node.value<u64>() == u64{ 70000 });
+	CHECK(!negative_node.value<u64>());
+
+	CHECK(negative_node.value<i8>() == i8{ -1 });
+	CHECK(!small_node.value<i8>());
+}
+
 namespace string_like_types
 {
 	struct code_point_counted_string
@@ -639,16 +802,6 @@ namespace string_like_types
 		}
 	};
 
-	struct convertible_to_c_string : code_point_counted_string
-	{
-		using code_point_counted_string::code_point_counted_string;
-
-		operator const char*() const noexcept
-		{
-			return text.c_str();
-		}
-	};
-
 	struct derived_from_string : std::string
 	{
 		using std::string::string;
@@ -670,6 +823,16 @@ namespace string_like_types
 		size_t length() const noexcept
 		{
 			return text.length();
+		}
+	};
+
+	struct convertible_to_c_string : retrievable_string
+	{
+		using retrievable_string::retrievable_string;
+
+		operator const char*() const noexcept
+		{
+			return text.c_str();
 		}
 	};
 
@@ -743,7 +906,27 @@ TEST_CASE("string-like types - construction uses existing conversions to std::st
 {
 	check_existing_conversion_is_used<convertible_to_string>();
 	check_existing_conversion_is_used<convertible_to_string_view>();
-	check_existing_conversion_is_used<convertible_to_c_string>();
+}
+
+TEST_CASE("string-like types - construction keeps embedded NULs when the type converts to const char*")
+{
+	static constexpr auto text = "a\0b"sv;
+	const convertible_to_c_string str{ text };
+
+	CHECK(value<std::string>{ str }.get() == text);
+	CHECK(value<std::string>{ convertible_to_c_string{ text } }.get() == text);
+
+	array arr;
+	arr.emplace_back<std::string>(str);
+	arr.push_back(convertible_to_c_string{ text });
+	CHECK(*arr.get_as<std::string>(0) == text);
+	CHECK(*arr.get_as<std::string>(1) == text);
+
+	table tbl;
+	tbl.emplace<std::string>("k", str);
+	tbl.insert("inserted", convertible_to_c_string{ text });
+	CHECK(tbl["k"] == text);
+	CHECK(tbl["inserted"] == text);
 }
 
 TEST_CASE("string-like types - construction moves from types derived from std::string when std::string does")
@@ -848,10 +1031,12 @@ TEST_CASE("chrono types - retrieval")
 		CHECK(tbl["missing"].value_or(local_time<seconds>{}) == local_time<seconds>{});
 	}
 
-	SECTION("local_time from an offset date-time")
+	SECTION("local_time is refused for an offset date-time")
 	{
-		CHECK(tbl["odt"].value<local_time<nanoseconds>>() == local);
+		CHECK(!tbl["odt"].value<local_time<nanoseconds>>());
 		CHECK(!tbl["odt"].value_exact<local_time<nanoseconds>>());
+		CHECK(tbl["odt"].value_or(local_time<seconds>{}) == local_time<seconds>{});
+		CHECK(tbl["odt"].value<date_time>()->to_chrono() == local);
 	}
 
 	SECTION("year_month_day")

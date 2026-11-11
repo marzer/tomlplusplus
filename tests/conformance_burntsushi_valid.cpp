@@ -459,41 +459,20 @@ b1 = 0b0
 b2 = 0b00
 b3 = 0b00000)"sv;
 
-#if UNICODE_LITERALS_OK
+	static constexpr auto key_alphanum		 = R"(alpha = "a"
+123 = "num"
+000111 = "leading"
+10e3 = "false float"
+one1two2 = "mixed"
+with-dash = "dashed"
+under_score = "___"
+34-11 = 23
 
-	static constexpr auto key_case_sensitive = R"(sectioN = "NN"
+[2018_10]
+001 = 1
 
-[section]
-name = "lower"
-NAME = "upper"
-Name = "capitalized"
-
-[Section]
-name = "different section!!"
-"μ" = "greek small letter mu"
-"Μ" = "greek capital letter MU"
-M = "latin letter M")"sv;
-	static constexpr auto key_escapes		 = R"("\n" = "newline"
-"\b" = "bell"
-"\u00c0" = "latin capital letter A with grave"
-"\"" = "just a quote"
-
-["backsp\b\b"]
-
-["\"quoted\""]
-quote = true
-
-["a.b"."\u00c0"])"sv;
-	static constexpr auto key_quoted_unicode = R"(
-"\u0000" = "null"
-'\u0000' = "different key"
-"\u0008 \u000c \U00000041 \u007f \u0080 \u00ff \ud7ff \ue000 \uffff \U00010000 \U0010ffff" = "escaped key"
-
-"~  ÿ ퟿  ￿ 𐀀 􏿿" = "basic key"
-'l ~  ÿ ퟿  ￿ 𐀀 􏿿' = "literal key")"sv;
-
-#endif // UNICODE_LITERALS_OK
-
+[a-a-a]
+_ = false)"sv;
 	static constexpr auto key_dotted_01		 = R"(name.first = "Arthur"
 "name".'last' = "Dent"
 
@@ -629,6 +608,41 @@ ___ = 8
 [inline]
 --- = {--- = 10, ___ = 11, 111 = 12})"sv;
 	static constexpr auto key_zero = R"(0=0)"sv;
+
+#if UNICODE_LITERALS_OK
+
+	static constexpr auto key_case_sensitive = R"(sectioN = "NN"
+
+[section]
+name = "lower"
+NAME = "upper"
+Name = "capitalized"
+
+[Section]
+name = "different section!!"
+"μ" = "greek small letter mu"
+"Μ" = "greek capital letter MU"
+M = "latin letter M")"sv;
+	static constexpr auto key_escapes		 = R"("\n" = "newline"
+"\b" = "bell"
+"\u00c0" = "latin capital letter A with grave"
+"\"" = "just a quote"
+
+["backsp\b\b"]
+
+["\"quoted\""]
+quote = true
+
+["a.b"."\u00c0"])"sv;
+	static constexpr auto key_quoted_unicode = R"(
+"\u0000" = "null"
+'\u0000' = "different key"
+"\u0008 \u000c \U00000041 \u007f \u0080 \u00ff \ud7ff \ue000 \uffff \U00010000 \U0010ffff" = "escaped key"
+
+"~  ÿ ퟿  ￿ 𐀀 􏿿" = "basic key"
+'l ~  ÿ ퟿  ￿ 𐀀 􏿿' = "literal key")"sv;
+
+#endif // UNICODE_LITERALS_OK
 
 #if UNICODE_LITERALS_OK
 
@@ -1432,7 +1446,7 @@ TEST_CASE("conformance - burntsushi/valid")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   array_array_subtables,
-							   [](toml::table&& tbl) // array-array-subtables
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(arr)"sv,
@@ -1459,7 +1473,7 @@ TEST_CASE("conformance - burntsushi/valid")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   array_array,
-							   [](toml::table&& tbl) // array-array
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(comments)"sv,
@@ -1501,7 +1515,7 @@ TEST_CASE("conformance - burntsushi/valid")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   array_bool,
-							   [](toml::table&& tbl) // array-bool
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(a)"sv,
@@ -1518,7 +1532,7 @@ TEST_CASE("conformance - burntsushi/valid")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   array_empty,
-							   [](toml::table&& tbl) // array-empty
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(thevoid)"sv,
@@ -1540,7 +1554,7 @@ TEST_CASE("conformance - burntsushi/valid")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   array_hetergeneous,
-							   [](toml::table&& tbl) // array-hetergeneous
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(mixed)"sv,
@@ -1567,7 +1581,7 @@ TEST_CASE("conformance - burntsushi/valid")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   array_mixed_int_array,
-							   [](toml::table&& tbl) // array-mixed-int-array
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(arrays-and-ints)"sv,
@@ -1586,7 +1600,7 @@ TEST_CASE("conformance - burntsushi/valid")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   array_mixed_int_float,
-							   [](toml::table&& tbl) // array-mixed-int-float
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(ints-and-floats)"sv,
@@ -1603,7 +1617,7 @@ TEST_CASE("conformance - burntsushi/valid")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   array_mixed_int_string,
-							   [](toml::table&& tbl) // array-mixed-int-string
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(strings-and-ints)"sv,
@@ -1620,7 +1634,7 @@ TEST_CASE("conformance - burntsushi/valid")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   array_mixed_string_table,
-							   [](toml::table&& tbl) // array-mixed-string-table
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(contributors)"sv,
@@ -1649,7 +1663,7 @@ TEST_CASE("conformance - burntsushi/valid")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   array_nested_double,
-							   [](toml::table&& tbl) // array-nested-double
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(nest)"sv,
@@ -1676,7 +1690,7 @@ TEST_CASE("conformance - burntsushi/valid")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   array_nested_inline_table,
-							   [](toml::table&& tbl) // array-nested-inline-table
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(a)"sv,
@@ -1694,7 +1708,7 @@ TEST_CASE("conformance - burntsushi/valid")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   array_nested,
-							   [](toml::table&& tbl) // array-nested
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(nest)"sv,
@@ -1715,7 +1729,7 @@ TEST_CASE("conformance - burntsushi/valid")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   array_nospaces,
-							   [](toml::table&& tbl) // array-nospaces
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(ints)"sv,
@@ -1733,7 +1747,7 @@ TEST_CASE("conformance - burntsushi/valid")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   array_open_parent_table,
-							   [](toml::table&& tbl) // array-open-parent-table
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(parent-table)"sv,
@@ -1754,7 +1768,7 @@ TEST_CASE("conformance - burntsushi/valid")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   array_string_quote_comma_01,
-							   [](toml::table&& tbl) // array-string-quote-comma-01
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(title)"sv,
@@ -1771,7 +1785,7 @@ TEST_CASE("conformance - burntsushi/valid")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   array_string_quote_comma_02,
-							   [](toml::table&& tbl) // array-string-quote-comma-02
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(title)"sv,
@@ -1787,7 +1801,7 @@ TEST_CASE("conformance - burntsushi/valid")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   array_string_with_comma_01,
-							   [](toml::table&& tbl) // array-string-with-comma-01
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(title)"sv,
@@ -1804,7 +1818,7 @@ TEST_CASE("conformance - burntsushi/valid")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   array_string_with_comma_02,
-							   [](toml::table&& tbl) // array-string-with-comma-02
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(title)"sv,
@@ -1822,7 +1836,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   array_strings,
-							   [](toml::table&& tbl) // array-strings
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(string_array)"sv,
@@ -1841,7 +1855,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   array_table_array_string_backslash,
-							   [](toml::table&& tbl) // array-table-array-string-backslash
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(foo)"sv,
@@ -1859,7 +1873,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   array_trailing_comma,
-							   [](toml::table&& tbl) // array-trailing-comma
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(arr-1)"sv,
@@ -1889,7 +1903,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   bool_bool,
-							   [](toml::table&& tbl) // bool-bool
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(f)"sv, false },
@@ -1903,7 +1917,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   comment_after_literal_no_ws,
-							   [](toml::table&& tbl) // comment-after-literal-no-ws
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(false)"sv, false },
@@ -1919,7 +1933,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   comment_at_eof,
-							   [](toml::table&& tbl) // comment-at-eof
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(key)"sv, R"(value)"sv },
@@ -1932,7 +1946,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   comment_at_eof2,
-							   [](toml::table&& tbl) // comment-at-eof2
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(key)"sv, R"(value)"sv },
@@ -1946,7 +1960,7 @@ Job: XXXX)"sv,
 		parsing_should_succeed(
 			FILE_LINE_ARGS,
 			comment_everywhere,
-			[](toml::table&& tbl) // comment-everywhere
+			[](toml::table&& tbl)
 			{
 				const auto expected = toml::table{
 					{ R"(aot)"sv,
@@ -1978,7 +1992,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   comment_noeol,
-							   [](toml::table&& tbl) // comment-noeol
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{};
 								   REQUIRE(tbl == expected);
@@ -1989,7 +2003,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   comment_tricky,
-							   [](toml::table&& tbl) // comment-tricky
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(hash#tag)"sv,
@@ -2050,7 +2064,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   comment_nonascii,
-							   [](toml::table&& tbl) // comment-nonascii
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{};
 								   REQUIRE(tbl == expected);
@@ -2063,7 +2077,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   datetime_datetime,
-							   [](toml::table&& tbl) // datetime-datetime
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(lower)"sv, toml::date_time{ { 1987, 7, 5 }, { 17, 45 }, { 0, 0 } } },
@@ -2078,7 +2092,7 @@ Job: XXXX)"sv,
 		parsing_should_succeed(
 			FILE_LINE_ARGS,
 			datetime_edge,
-			[](toml::table&& tbl) // datetime-edge
+			[](toml::table&& tbl)
 			{
 				const auto expected = toml::table{
 					{ R"(first-date)"sv, toml::date{ 1, 1, 1 } },
@@ -2096,7 +2110,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   datetime_invalid_date_in_string,
-							   [](toml::table&& tbl) // datetime-invalid-date-in-string
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(s)"sv, R"(2020-01-01x)"sv },
@@ -2110,7 +2124,7 @@ Job: XXXX)"sv,
 		parsing_should_succeed(
 			FILE_LINE_ARGS,
 			datetime_leap_year,
-			[](toml::table&& tbl) // datetime-leap-year
+			[](toml::table&& tbl)
 			{
 				const auto expected = toml::table{
 					{ R"(2000-date)"sv, toml::date{ 2000, 2, 29 } },
@@ -2128,7 +2142,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   datetime_local_date,
-							   [](toml::table&& tbl) // datetime-local-date
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(bestdayever)"sv, toml::date{ 1987, 7, 5 } },
@@ -2141,7 +2155,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   datetime_local_time,
-							   [](toml::table&& tbl) // datetime-local-time
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(besttimeever)"sv, toml::time{ 17, 45 } },
@@ -2155,7 +2169,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   datetime_local,
-							   [](toml::table&& tbl) // datetime-local
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(local)"sv, toml::date_time{ { 1987, 7, 5 }, { 17, 45 } } },
@@ -2171,7 +2185,7 @@ Job: XXXX)"sv,
 		parsing_should_succeed(
 			FILE_LINE_ARGS,
 			datetime_milliseconds,
-			[](toml::table&& tbl) // datetime-milliseconds
+			[](toml::table&& tbl)
 			{
 				const auto expected = toml::table{
 					{ R"(utc1)"sv, toml::date_time{ { 1987, 7, 5 }, { 17, 45, 56, 123000000 }, { 0, 0 } } },
@@ -2188,7 +2202,7 @@ Job: XXXX)"sv,
 		parsing_should_succeed(
 			FILE_LINE_ARGS,
 			datetime_no_seconds,
-			[](toml::table&& tbl) // datetime-no-seconds
+			[](toml::table&& tbl)
 			{
 				const auto expected = toml::table{
 					{ R"(without-seconds-1)"sv, toml::time{ 13, 37 } },
@@ -2204,7 +2218,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   datetime_timezone,
-							   [](toml::table&& tbl) // datetime-timezone
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(nzdt)"sv, toml::date_time{ { 1987, 7, 5 }, { 17, 45, 56 }, { 13, 0 } } },
@@ -2220,7 +2234,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   empty_crlf,
-							   [](toml::table&& tbl) // empty-crlf
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{};
 								   REQUIRE(tbl == expected);
@@ -2231,7 +2245,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   empty_lf,
-							   [](toml::table&& tbl) // empty-lf
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{};
 								   REQUIRE(tbl == expected);
@@ -2242,7 +2256,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   empty_nothing,
-							   [](toml::table&& tbl) // empty-nothing
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{};
 								   REQUIRE(tbl == expected);
@@ -2253,7 +2267,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   empty_space,
-							   [](toml::table&& tbl) // empty-space
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{};
 								   REQUIRE(tbl == expected);
@@ -2264,7 +2278,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   empty_tab,
-							   [](toml::table&& tbl) // empty-tab
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{};
 								   REQUIRE(tbl == expected);
@@ -2276,7 +2290,7 @@ Job: XXXX)"sv,
 		parsing_should_succeed(
 			FILE_LINE_ARGS,
 			example,
-			[](toml::table&& tbl) // example
+			[](toml::table&& tbl)
 			{
 				const auto expected = toml::table{
 					{ R"(best-day-ever)"sv, toml::date_time{ { 1987, 7, 5 }, { 17, 45 }, { 0, 0 } } },
@@ -2299,7 +2313,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   float_exponent,
-							   [](toml::table&& tbl) // float-exponent
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(lower)"sv, 300.0 },		 { R"(minustenth)"sv, -0.1 },
@@ -2315,7 +2329,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   float_float,
-							   [](toml::table&& tbl) // float-float
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(negpi)"sv, -3.14 },
@@ -2332,7 +2346,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   float_inf_and_nan,
-							   [](toml::table&& tbl) // float-inf-and-nan
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(infinity)"sv, std::numeric_limits<double>::infinity() },
@@ -2350,7 +2364,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   float_long,
-							   [](toml::table&& tbl) // float-long
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(longpi)"sv, 3.141592653589793 },
@@ -2364,7 +2378,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   float_max_int,
-							   [](toml::table&& tbl) // float-max-int
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(max_float)"sv, 9007199254740991.0 },
@@ -2378,7 +2392,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   float_underscore,
-							   [](toml::table&& tbl) // float-underscore
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(after)"sv, 3141.5927 },
@@ -2393,7 +2407,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   float_zero,
-							   [](toml::table&& tbl) // float-zero
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(exponent)"sv, 0.0 },
@@ -2412,7 +2426,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   implicit_and_explicit_after,
-							   [](toml::table&& tbl) // implicit-and-explicit-after
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(a)"sv,
@@ -2435,7 +2449,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   implicit_and_explicit_before,
-							   [](toml::table&& tbl) // implicit-and-explicit-before
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(a)"sv,
@@ -2458,7 +2472,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   implicit_groups,
-							   [](toml::table&& tbl) // implicit-groups
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(a)"sv,
@@ -2480,7 +2494,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   inline_table_array_01,
-							   [](toml::table&& tbl) // inline-table-array-01
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(arr)"sv,
@@ -2516,7 +2530,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   inline_table_array_02,
-							   [](toml::table&& tbl) // inline-table-array-02
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(a)"sv,
@@ -2532,7 +2546,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   inline_table_array_03,
-							   [](toml::table&& tbl) // inline-table-array-03
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(b)"sv,
@@ -2557,7 +2571,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   inline_table_bool,
-							   [](toml::table&& tbl) // inline-table-bool
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(a)"sv,
@@ -2574,7 +2588,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   inline_table_empty,
-							   [](toml::table&& tbl) // inline-table-empty
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(empty1)"sv, toml::table{} },
@@ -2613,7 +2627,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   inline_table_end_in_bool,
-							   [](toml::table&& tbl) // inline-table-end-in-bool
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(black)"sv,
@@ -2631,7 +2645,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   inline_table_inline_table,
-							   [](toml::table&& tbl) // inline-table-inline-table
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(name)"sv,
@@ -2670,7 +2684,7 @@ Job: XXXX)"sv,
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   inline_table_multiline,
-							   [](toml::table&& tbl) // inline-table-multiline
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(tbl_multiline)"sv,
@@ -2691,7 +2705,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   inline_table_nest,
-							   [](toml::table&& tbl) // inline-table-nest
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(arr_arr_tbl_empty)"sv,
@@ -2757,7 +2771,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   inline_table_newline_comment,
-							   [](toml::table&& tbl) // inline-table-newline-comment
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(tbl-1)"sv,
@@ -2797,7 +2811,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   inline_table_newline,
-							   [](toml::table&& tbl) // inline-table-newline
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(no-newline-before-brace)"sv,
@@ -2847,7 +2861,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   inline_table_spaces,
-							   [](toml::table&& tbl) // inline-table-spaces
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(clap-1)"sv,
@@ -2888,7 +2902,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   inline_table_key_dotted_01,
-							   [](toml::table&& tbl) // inline-table-key-dotted-01
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(a)"sv,
@@ -2935,7 +2949,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   inline_table_key_dotted_02,
-							   [](toml::table&& tbl) // inline-table-key-dotted-02
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(many)"sv,
@@ -2973,7 +2987,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   inline_table_key_dotted_03,
-							   [](toml::table&& tbl) // inline-table-key-dotted-03
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(tbl)"sv,
@@ -3017,7 +3031,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   inline_table_key_dotted_04,
-							   [](toml::table&& tbl) // inline-table-key-dotted-04
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(arr)"sv,
@@ -3064,7 +3078,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   inline_table_key_dotted_05,
-							   [](toml::table&& tbl) // inline-table-key-dotted-05
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(arr-1)"sv,
@@ -3126,7 +3140,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   inline_table_key_dotted_06,
-							   [](toml::table&& tbl) // inline-table-key-dotted-06
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(top)"sv,
@@ -3165,7 +3179,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   inline_table_key_dotted_07,
-							   [](toml::table&& tbl) // inline-table-key-dotted-07
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(arr)"sv,
@@ -3196,7 +3210,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   integer_float64_max,
-							   [](toml::table&& tbl) // integer-float64-max
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(max_int)"sv, 9007199254740991 },
@@ -3210,7 +3224,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   integer_integer,
-							   [](toml::table&& tbl) // integer-integer
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(answer)"sv, 42 },
@@ -3227,7 +3241,7 @@ another line)"sv },
 		parsing_should_succeed(
 			FILE_LINE_ARGS,
 			integer_literals,
-			[](toml::table&& tbl) // integer-literals
+			[](toml::table&& tbl)
 			{
 				const auto expected = toml::table{
 					{ R"(bin1)"sv, 214 },		 { R"(bin2)"sv, 5 },		  { R"(hex1)"sv, 3735928559 },
@@ -3242,7 +3256,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   integer_long,
-							   [](toml::table&& tbl) // integer-long
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(int64-max)"sv, std::numeric_limits<int64_t>::max() },
@@ -3256,7 +3270,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   integer_underscore,
-							   [](toml::table&& tbl) // integer-underscore
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(kilo)"sv, 1000 },
@@ -3270,7 +3284,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   integer_zero,
-							   [](toml::table&& tbl) // integer-zero
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(a2)"sv, 0 }, { R"(a3)"sv, 0 }, { R"(b1)"sv, 0 }, { R"(b2)"sv, 0 },
@@ -3281,85 +3295,39 @@ another line)"sv },
 							   });
 	}
 
-#if UNICODE_LITERALS_OK
-
-	SECTION("key-case-sensitive")
+	SECTION("key-alphanum")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
-							   key_case_sensitive,
-							   [](toml::table&& tbl) // key-case-sensitive
+							   key_alphanum,
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
-									   { R"(sectioN)"sv, R"(NN)"sv },
-									   { R"(Section)"sv,
+									   { R"(000111)"sv, R"(leading)"sv },
+									   { R"(10e3)"sv, R"(false float)"sv },
+									   { R"(123)"sv, R"(num)"sv },
+									   { R"(34-11)"sv, 23 },
+									   { R"(alpha)"sv, R"(a)"sv },
+									   { R"(one1two2)"sv, R"(mixed)"sv },
+									   { R"(under_score)"sv, R"(___)"sv },
+									   { R"(with-dash)"sv, R"(dashed)"sv },
+									   { R"(2018_10)"sv,
 										 toml::table{
-											 { R"(M)"sv, R"(latin letter M)"sv },
-											 { R"(name)"sv, R"(different section!!)"sv },
-											 { R"(Μ)"sv, R"(greek capital letter MU)"sv },
-											 { R"(μ)"sv, R"(greek small letter mu)"sv },
+											 { R"(001)"sv, 1 },
 										 } },
-									   { R"(section)"sv,
+									   { R"(a-a-a)"sv,
 										 toml::table{
-											 { R"(NAME)"sv, R"(upper)"sv },
-											 { R"(Name)"sv, R"(capitalized)"sv },
-											 { R"(name)"sv, R"(lower)"sv },
+											 { R"(_)"sv, false },
 										 } },
 								   };
 								   REQUIRE(tbl == expected);
 							   });
 	}
-
-	SECTION("key-escapes")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   key_escapes,
-							   [](toml::table&& tbl) // key-escapes
-							   {
-								   const auto expected = toml::table{
-									   { "\x08"sv, R"(bell)"sv },
-									   { R"(
-)"sv,
-										 R"(newline)"sv },
-									   { R"(")"sv, R"(just a quote)"sv },
-									   { "backsp\x08\x08"sv, toml::table{} },
-									   { R"(À)"sv, R"(latin capital letter A with grave)"sv },
-									   { R"("quoted")"sv,
-										 toml::table{
-											 { R"(quote)"sv, true },
-										 } },
-									   { R"(a.b)"sv,
-										 toml::table{
-											 { R"(À)"sv, toml::table{} },
-										 } },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-	SECTION("key-quoted-unicode")
-	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   key_quoted_unicode,
-							   [](toml::table&& tbl) // key-quoted-unicode
-							   {
-								   const auto expected = toml::table{
-									   { "\x00"sv, R"(null)"sv },
-									   { "\x08 \f A \x7F  ÿ ퟿  ￿ 𐀀 􏿿"sv, R"(escaped key)"sv },
-									   { R"(\u0000)"sv, R"(different key)"sv },
-									   { R"(l ~  ÿ ퟿  ￿ 𐀀 􏿿)"sv, R"(literal key)"sv },
-									   { R"(~  ÿ ퟿  ￿ 𐀀 􏿿)"sv, R"(basic key)"sv },
-								   };
-								   REQUIRE(tbl == expected);
-							   });
-	}
-
-#endif // UNICODE_LITERALS_OK
 
 	SECTION("key-dotted-01")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   key_dotted_01,
-							   [](toml::table&& tbl) // key-dotted-01
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(many)"sv,
@@ -3389,7 +3357,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   key_dotted_02,
-							   [](toml::table&& tbl) // key-dotted-02
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(count)"sv,
@@ -3416,7 +3384,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   key_dotted_03,
-							   [](toml::table&& tbl) // key-dotted-03
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(a)"sv,
@@ -3456,7 +3424,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   key_dotted_04,
-							   [](toml::table&& tbl) // key-dotted-04
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(arr)"sv,
@@ -3495,7 +3463,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   key_dotted_empty,
-							   [](toml::table&& tbl) // key-dotted-empty
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { ""sv,
@@ -3522,7 +3490,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   key_empty_01,
-							   [](toml::table&& tbl) // key-empty-01
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { ""sv, R"(blank)"sv },
@@ -3535,7 +3503,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   key_empty_02,
-							   [](toml::table&& tbl) // key-empty-02
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { ""sv, R"(blank)"sv },
@@ -3548,7 +3516,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   key_empty_03,
-							   [](toml::table&& tbl) // key-empty-03
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { ""sv, 0 },
@@ -3561,7 +3529,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   key_equals_nospace,
-							   [](toml::table&& tbl) // key-equals-nospace
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(answer)"sv, 42 },
@@ -3574,7 +3542,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   key_like_date,
-							   [](toml::table&& tbl) // key-like-date
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(15:16:17)"sv, 6 },
@@ -3621,7 +3589,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   key_numeric_01,
-							   [](toml::table&& tbl) // key-numeric-01
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(1)"sv, true },
@@ -3634,7 +3602,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   key_numeric_02,
-							   [](toml::table&& tbl) // key-numeric-02
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(1)"sv,
@@ -3650,7 +3618,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   key_numeric_03,
-							   [](toml::table&& tbl) // key-numeric-03
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(0123)"sv, true },
@@ -3663,7 +3631,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   key_numeric_04,
-							   [](toml::table&& tbl) // key-numeric-04
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(01)"sv,
@@ -3679,7 +3647,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   key_numeric_05,
-							   [](toml::table&& tbl) // key-numeric-05
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(23)"sv,
@@ -3695,7 +3663,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   key_numeric_06,
-							   [](toml::table&& tbl) // key-numeric-06
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(-1)"sv, true },
@@ -3708,7 +3676,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   key_numeric_07,
-							   [](toml::table&& tbl) // key-numeric-07
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(-01)"sv, true },
@@ -3721,7 +3689,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   key_numeric_08,
-							   [](toml::table&& tbl) // key-numeric-08
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(01)"sv, R"(zero one)"sv },
@@ -3735,7 +3703,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   key_quoted_dots,
-							   [](toml::table&& tbl) // key-quoted-dots
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(plain)"sv, 1 },
@@ -3763,7 +3731,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   key_space,
-							   [](toml::table&& tbl) // key-space
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { "  much 		  whitespace  	\n"
@@ -3785,7 +3753,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   key_special_chars,
-							   [](toml::table&& tbl) // key-special-chars
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(=~!@$^&*()_+-`1234567890[]|/?><.,;:'=)"sv, 1 },
@@ -3798,7 +3766,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   key_special_word,
-							   [](toml::table&& tbl) // key-special-word
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(false)"sv, false },
@@ -3814,7 +3782,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   key_start,
-							   [](toml::table&& tbl) // key-start
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(-)"sv,
@@ -3871,7 +3839,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   key_zero,
-							   [](toml::table&& tbl) // key-zero
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(0)"sv, 0 },
@@ -3882,12 +3850,86 @@ another line)"sv },
 
 #if UNICODE_LITERALS_OK
 
+	SECTION("key-case-sensitive")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   key_case_sensitive,
+							   [](toml::table&& tbl)
+							   {
+								   const auto expected = toml::table{
+									   { R"(sectioN)"sv, R"(NN)"sv },
+									   { R"(Section)"sv,
+										 toml::table{
+											 { R"(M)"sv, R"(latin letter M)"sv },
+											 { R"(name)"sv, R"(different section!!)"sv },
+											 { R"(Μ)"sv, R"(greek capital letter MU)"sv },
+											 { R"(μ)"sv, R"(greek small letter mu)"sv },
+										 } },
+									   { R"(section)"sv,
+										 toml::table{
+											 { R"(NAME)"sv, R"(upper)"sv },
+											 { R"(Name)"sv, R"(capitalized)"sv },
+											 { R"(name)"sv, R"(lower)"sv },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("key-escapes")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   key_escapes,
+							   [](toml::table&& tbl)
+							   {
+								   const auto expected = toml::table{
+									   { "\x08"sv, R"(bell)"sv },
+									   { R"(
+)"sv,
+										 R"(newline)"sv },
+									   { R"(")"sv, R"(just a quote)"sv },
+									   { "backsp\x08\x08"sv, toml::table{} },
+									   { R"(À)"sv, R"(latin capital letter A with grave)"sv },
+									   { R"("quoted")"sv,
+										 toml::table{
+											 { R"(quote)"sv, true },
+										 } },
+									   { R"(a.b)"sv,
+										 toml::table{
+											 { R"(À)"sv, toml::table{} },
+										 } },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+	SECTION("key-quoted-unicode")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   key_quoted_unicode,
+							   [](toml::table&& tbl)
+							   {
+								   const auto expected = toml::table{
+									   { "\x00"sv, R"(null)"sv },
+									   { "\x08 \f A \x7F  ÿ ퟿  ￿ 𐀀 􏿿"sv, R"(escaped key)"sv },
+									   { R"(\u0000)"sv, R"(different key)"sv },
+									   { R"(l ~  ÿ ퟿  ￿ 𐀀 􏿿)"sv, R"(literal key)"sv },
+									   { R"(~  ÿ ퟿  ￿ 𐀀 􏿿)"sv, R"(basic key)"sv },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
+#endif // UNICODE_LITERALS_OK
+
+#if UNICODE_LITERALS_OK
+
 	SECTION("multibyte")
 	{
 		parsing_should_succeed(
 			FILE_LINE_ARGS,
 			multibyte,
-			[](toml::table&& tbl) // multibyte
+			[](toml::table&& tbl)
 			{
 				const auto expected = toml::table{
 					{ R"(𝐭𝐛𝐥)"sv,
@@ -3928,7 +3970,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   newline_crlf,
-							   [](toml::table&& tbl) // newline-crlf
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(newline)"sv, R"(crlf)"sv },
@@ -3942,7 +3984,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   newline_lf,
-							   [](toml::table&& tbl) // newline-lf
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(newline)"sv, R"(lf)"sv },
@@ -3956,7 +3998,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_0,
-							   [](toml::table&& tbl) // spec-1.1.0-common-0
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(another)"sv, R"(# This is not a comment)"sv },
@@ -3970,7 +4012,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_1,
-							   [](toml::table&& tbl) // spec-1.1.0-common-1
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(key)"sv, R"(value)"sv },
@@ -3983,7 +4025,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_10,
-							   [](toml::table&& tbl) // spec-1.1.0-common-10
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(apple)"sv,
@@ -4007,7 +4049,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_11,
-							   [](toml::table&& tbl) // spec-1.1.0-common-11
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(3)"sv,
@@ -4023,7 +4065,7 @@ another line)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_13,
-							   [](toml::table&& tbl) // spec-1.1.0-common-13
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(str1)"sv, R"(Roses are red
@@ -4037,7 +4079,7 @@ Violets are blue)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_14,
-							   [](toml::table&& tbl) // spec-1.1.0-common-14
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(str2)"sv, R"(Roses are red
@@ -4054,7 +4096,7 @@ Violets are blue)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_15,
-							   [](toml::table&& tbl) // spec-1.1.0-common-15
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(str1)"sv, R"(The quick brown fox jumps over the lazy dog.)"sv },
@@ -4069,7 +4111,7 @@ Violets are blue)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_16,
-							   [](toml::table&& tbl) // spec-1.1.0-common-16
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(str4)"sv, R"(Here are two quotation marks: "". Simple enough.)"sv },
@@ -4085,7 +4127,7 @@ Violets are blue)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_17,
-							   [](toml::table&& tbl) // spec-1.1.0-common-17
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(quoted)"sv, R"(Tom "Dubs" Preston-Werner)"sv },
@@ -4101,7 +4143,7 @@ Violets are blue)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_18,
-							   [](toml::table&& tbl) // spec-1.1.0-common-18
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(lines)"sv, R"(The first newline is
@@ -4119,7 +4161,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_19,
-							   [](toml::table&& tbl) // spec-1.1.0-common-19
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(apos15)"sv, R"(Here are fifteen apostrophes: ''''''''''''''')"sv },
@@ -4134,7 +4176,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_20,
-							   [](toml::table&& tbl) // spec-1.1.0-common-20
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(int1)"sv, 99 },
@@ -4150,7 +4192,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_21,
-							   [](toml::table&& tbl) // spec-1.1.0-common-21
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(int5)"sv, 1000 },
@@ -4166,7 +4208,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_22,
-							   [](toml::table&& tbl) // spec-1.1.0-common-22
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(bin1)"sv, 214 },		{ R"(hex1)"sv, 3735928559 },
@@ -4181,7 +4223,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_23,
-							   [](toml::table&& tbl) // spec-1.1.0-common-23
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(flt1)"sv, 1.0 },	   { R"(flt2)"sv, 3.1415 },	   { R"(flt3)"sv, -0.01 },
@@ -4196,7 +4238,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_24,
-							   [](toml::table&& tbl) // spec-1.1.0-common-24
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(flt8)"sv, 224617.445991228 },
@@ -4209,7 +4251,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_25,
-							   [](toml::table&& tbl) // spec-1.1.0-common-25
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(sf1)"sv, std::numeric_limits<double>::infinity() },
@@ -4227,7 +4269,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_26,
-							   [](toml::table&& tbl) // spec-1.1.0-common-26
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(bool1)"sv, true },
@@ -4242,7 +4284,7 @@ trimmed in literal strings.
 		parsing_should_succeed(
 			FILE_LINE_ARGS,
 			spec_1_1_0_common_27,
-			[](toml::table&& tbl) // spec-1.1.0-common-27
+			[](toml::table&& tbl)
 			{
 				const auto expected = toml::table{
 					{ R"(odt1)"sv, toml::date_time{ { 1979, 5, 27 }, { 7, 32 }, { 0, 0 } } },
@@ -4258,7 +4300,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_28,
-							   [](toml::table&& tbl) // spec-1.1.0-common-28
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(odt4)"sv, toml::date_time{ { 1979, 5, 27 }, { 7, 32 }, { 0, 0 } } },
@@ -4271,7 +4313,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_29,
-							   [](toml::table&& tbl) // spec-1.1.0-common-29
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(odt5)"sv, toml::date_time{ { 1979, 5, 27 }, { 7, 32 }, { 0, 0 } } },
@@ -4285,7 +4327,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_3,
-							   [](toml::table&& tbl) // spec-1.1.0-common-3
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(1234)"sv, R"(value)"sv },
@@ -4301,7 +4343,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_30,
-							   [](toml::table&& tbl) // spec-1.1.0-common-30
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(ldt1)"sv, toml::date_time{ { 1979, 5, 27 }, { 7, 32 } } },
@@ -4316,7 +4358,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_31,
-							   [](toml::table&& tbl) // spec-1.1.0-common-31
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(ldt3)"sv, toml::date_time{ { 1979, 5, 27 }, { 7, 32 } } },
@@ -4329,7 +4371,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_32,
-							   [](toml::table&& tbl) // spec-1.1.0-common-32
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(ld1)"sv, toml::date{ 1979, 5, 27 } },
@@ -4342,7 +4384,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_33,
-							   [](toml::table&& tbl) // spec-1.1.0-common-33
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(lt1)"sv, toml::time{ 7, 32 } },
@@ -4357,7 +4399,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_34,
-							   [](toml::table&& tbl) // spec-1.1.0-common-34
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(lt3)"sv, toml::time{ 7, 32 } },
@@ -4370,7 +4412,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_35,
-							   [](toml::table&& tbl) // spec-1.1.0-common-35
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(colors)"sv,
@@ -4443,7 +4485,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_36,
-							   [](toml::table&& tbl) // spec-1.1.0-common-36
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(integers2)"sv,
@@ -4466,7 +4508,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_37,
-							   [](toml::table&& tbl) // spec-1.1.0-common-37
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(table)"sv, toml::table{} },
@@ -4479,7 +4521,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_38,
-							   [](toml::table&& tbl) // spec-1.1.0-common-38
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(table-1)"sv,
@@ -4501,7 +4543,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_39,
-							   [](toml::table&& tbl) // spec-1.1.0-common-39
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(dog)"sv,
@@ -4523,7 +4565,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_41,
-							   [](toml::table&& tbl) // spec-1.1.0-common-41
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(x)"sv,
@@ -4545,7 +4587,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_42,
-							   [](toml::table&& tbl) // spec-1.1.0-common-42
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(animal)"sv, toml::table{} },
@@ -4563,7 +4605,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_43,
-							   [](toml::table&& tbl) // spec-1.1.0-common-43
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(animal)"sv, toml::table{} },
@@ -4581,7 +4623,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_44,
-							   [](toml::table&& tbl) // spec-1.1.0-common-44
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(breed)"sv, R"(pug)"sv },
@@ -4600,7 +4642,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_45,
-							   [](toml::table&& tbl) // spec-1.1.0-common-45
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(fruit)"sv,
@@ -4623,7 +4665,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_46,
-							   [](toml::table&& tbl) // spec-1.1.0-common-46
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(fruit)"sv,
@@ -4650,7 +4692,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_47,
-							   [](toml::table&& tbl) // spec-1.1.0-common-47
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(animal)"sv,
@@ -4692,7 +4734,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_48,
-							   [](toml::table&& tbl) // spec-1.1.0-common-48
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(animal)"sv,
@@ -4734,7 +4776,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_49,
-							   [](toml::table&& tbl) // spec-1.1.0-common-49
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(product)"sv,
@@ -4753,7 +4795,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_50,
-							   [](toml::table&& tbl) // spec-1.1.0-common-50
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(product)"sv,
@@ -4772,7 +4814,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_51,
-							   [](toml::table&& tbl) // spec-1.1.0-common-51
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(product)"sv,
@@ -4797,7 +4839,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_52,
-							   [](toml::table&& tbl) // spec-1.1.0-common-52
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(fruits)"sv,
@@ -4838,7 +4880,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_53,
-							   [](toml::table&& tbl) // spec-1.1.0-common-53
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(points)"sv,
@@ -4868,7 +4910,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_6,
-							   [](toml::table&& tbl) // spec-1.1.0-common-6
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(name)"sv, R"(Orange)"sv },
@@ -4890,7 +4932,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_7,
-							   [](toml::table&& tbl) // spec-1.1.0-common-7
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(fruit)"sv,
@@ -4908,7 +4950,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_8,
-							   [](toml::table&& tbl) // spec-1.1.0-common-8
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(fruit)"sv,
@@ -4928,7 +4970,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_9,
-							   [](toml::table&& tbl) // spec-1.1.0-common-9
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(apple)"sv,
@@ -4952,7 +4994,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_example_1_compact,
-							   [](toml::table&& tbl) // spec-example-1-compact
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(title)"sv, R"(TOML Example)"sv },
@@ -5014,7 +5056,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_example_1,
-							   [](toml::table&& tbl) // spec-example-1
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(title)"sv, R"(TOML Example)"sv },
@@ -5078,7 +5120,7 @@ trimmed in literal strings.
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_12,
-							   [](toml::table&& tbl) // spec-1.1.0-common-12
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(str)"sv, R"(I'm a string. "You can quote me". Name	José
@@ -5092,7 +5134,7 @@ Location	SF.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_4,
-							   [](toml::table&& tbl) // spec-1.1.0-common-4
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(127.0.0.1)"sv, R"(value)"sv }, { R"(character encoding)"sv, R"(value)"sv },
@@ -5107,7 +5149,7 @@ Location	SF.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   spec_1_1_0_common_40,
-							   [](toml::table&& tbl) // spec-1.1.0-common-40
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(a)"sv,
@@ -5149,7 +5191,7 @@ Location	SF.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   string_basic_escape_01,
-							   [](toml::table&& tbl) // string-basic-escape-01
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(test)"sv, R"("one")"sv },
@@ -5162,7 +5204,7 @@ Location	SF.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   string_basic_escape_02,
-							   [](toml::table&& tbl) // string-basic-escape-02
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(test)"sv, R"(\"one)"sv },
@@ -5175,7 +5217,7 @@ Location	SF.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   string_basic_escape_03,
-							   [](toml::table&& tbl) // string-basic-escape-03
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(test)"sv, R"(\\\\"one)"sv },
@@ -5188,7 +5230,7 @@ Location	SF.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   string_empty,
-							   [](toml::table&& tbl) // string-empty
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(answer)"sv, ""sv },
@@ -5201,7 +5243,7 @@ Location	SF.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   string_ends_in_whitespace_escape,
-							   [](toml::table&& tbl) // string-ends-in-whitespace-escape
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(beee)"sv, R"(heeee
@@ -5215,7 +5257,7 @@ geeee)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   string_escape_esc,
-							   [](toml::table&& tbl) // string-escape-esc
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(esc)"sv, "\x1B There is no escape! \x1B"sv },
@@ -5228,7 +5270,7 @@ geeee)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   string_escaped_escape,
-							   [](toml::table&& tbl) // string-escaped-escape
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(answer)"sv, R"(\x64)"sv },
@@ -5241,7 +5283,7 @@ geeee)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   string_escapes,
-							   [](toml::table&& tbl) // string-escapes
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(backslash)"sv, R"(|\.)"sv },
@@ -5267,7 +5309,7 @@ geeee)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   string_multiline_empty,
-							   [](toml::table&& tbl) // string-multiline-empty
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(empty-1)"sv, ""sv },
@@ -5283,7 +5325,7 @@ geeee)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   string_multiline_escaped_crlf,
-							   [](toml::table&& tbl) // string-multiline-escaped-crlf
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(0)"sv, ""sv },
@@ -5296,7 +5338,7 @@ geeee)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   string_multiline_quotes,
-							   [](toml::table&& tbl) // string-multiline-quotes
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(escaped)"sv, R"(lol""")"sv },
@@ -5324,7 +5366,7 @@ geeee)"sv },
 		parsing_should_succeed(
 			FILE_LINE_ARGS,
 			string_multiline,
-			[](toml::table&& tbl) // string-multiline
+			[](toml::table&& tbl)
 			{
 				const auto expected = toml::table{
 					{ R"(equivalent_one)"sv, R"(The quick brown fox jumps over the lazy dog.)"sv },
@@ -5347,7 +5389,7 @@ b)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   string_nl,
-							   [](toml::table&& tbl) // string-nl
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(lit_nl_end)"sv, R"(value\n)"sv },
@@ -5366,7 +5408,7 @@ ue)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   string_raw_empty,
-							   [](toml::table&& tbl) // string-raw-empty
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(empty)"sv, ""sv },
@@ -5379,7 +5421,7 @@ ue)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   string_raw_multiline,
-							   [](toml::table&& tbl) // string-raw-multiline
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(firstnl)"sv, R"(This string has a ' quote character.)"sv },
@@ -5403,7 +5445,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   string_raw,
-							   [](toml::table&& tbl) // string-raw
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(backslash)"sv, R"(This string has a \\ backslash character.)"sv },
@@ -5423,7 +5465,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   string_simple,
-							   [](toml::table&& tbl) // string-simple
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(answer)"sv, R"(You are not drinking enough whisky.)"sv },
@@ -5436,7 +5478,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   string_with_pound,
-							   [](toml::table&& tbl) // string-with-pound
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(pound)"sv, R"(We see no # comments here.)"sv },
@@ -5452,7 +5494,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   string_escape_tricky,
-							   [](toml::table&& tbl) // string-escape-tricky
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(end_esc)"sv, R"(String does not end here" but ends here\)"sv },
@@ -5471,7 +5513,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   string_hex_escape,
-							   [](toml::table&& tbl) // string-hex-escape
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(bs)"sv, "\x7F"sv },
@@ -5503,7 +5545,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   string_multibyte_escape,
-							   [](toml::table&& tbl) // string-multibyte-escape
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(basic-1)"sv, R"(ɑ € 𐫱 ɑ€𐫱)"sv },
@@ -5519,7 +5561,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   string_multibyte,
-							   [](toml::table&& tbl) // string-multibyte
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(basic)"sv, R"(ɑ € 𐫱 ɑ€𐫱)"sv },
@@ -5536,7 +5578,7 @@ in it.)"sv },
 		parsing_should_succeed(
 			FILE_LINE_ARGS,
 			string_quoted_unicode,
-			[](toml::table&& tbl) // string-quoted-unicode
+			[](toml::table&& tbl)
 			{
 				const auto expected = toml::table{
 					{ R"(basic_string)"sv, R"(~  ÿ ퟿  ￿ 𐀀 􏿿)"sv },
@@ -5553,7 +5595,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   string_start_mb,
-							   [](toml::table&& tbl) // string-start-mb
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(s1)"sv, R"(§)"sv }, { R"(s2)"sv, R"(§)"sv }, { R"(s3)"sv, R"(§)"sv },
@@ -5569,7 +5611,7 @@ in it.)"sv },
 		parsing_should_succeed(
 			FILE_LINE_ARGS,
 			string_unicode_escape,
-			[](toml::table&& tbl) // string-unicode-escape
+			[](toml::table&& tbl)
 			{
 				const auto expected = toml::table{
 					{ R"(a)"sv, R"(a)"sv },			 { R"(b)"sv, R"(b)"sv },		 { R"(c)"sv, R"(c)"sv },
@@ -5588,7 +5630,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   table_array_empty_name,
-							   [](toml::table&& tbl) // table-array-empty-name
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { ""sv,
@@ -5609,7 +5651,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   table_array_empty,
-							   [](toml::table&& tbl) // table-array-empty
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(a)"sv,
@@ -5625,7 +5667,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   table_array_implicit_and_explicit_after,
-							   [](toml::table&& tbl) // table-array-implicit-and-explicit-after
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(a)"sv,
@@ -5647,7 +5689,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   table_array_implicit,
-							   [](toml::table&& tbl) // table-array-implicit
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(albums)"sv,
@@ -5668,7 +5710,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   table_array_many,
-							   [](toml::table&& tbl) // table-array-many
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(people)"sv,
@@ -5695,7 +5737,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   table_array_nest,
-							   [](toml::table&& tbl) // table-array-nest
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(albums)"sv,
@@ -5734,7 +5776,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   table_array_one,
-							   [](toml::table&& tbl) // table-array-one
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(people)"sv,
@@ -5753,7 +5795,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   table_array_table_array,
-							   [](toml::table&& tbl) // table-array-table-array
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(a)"sv,
@@ -5785,7 +5827,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   table_array_within_dotted,
-							   [](toml::table&& tbl) // table-array-within-dotted
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(fruit)"sv,
@@ -5810,7 +5852,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   table_empty_name,
-							   [](toml::table&& tbl) // table-empty-name
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { ""sv,
@@ -5837,7 +5879,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   table_empty,
-							   [](toml::table&& tbl) // table-empty
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(a)"sv, toml::table{} },
@@ -5850,7 +5892,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   table_keyword_with_values,
-							   [](toml::table&& tbl) // table-keyword-with-values
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(false)"sv,
@@ -5878,7 +5920,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   table_keyword,
-							   [](toml::table&& tbl) // table-keyword
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(false)"sv, toml::table{} },
@@ -5894,7 +5936,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   table_no_eol,
-							   [](toml::table&& tbl) // table-no-eol
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(table)"sv, toml::table{} },
@@ -5907,7 +5949,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   table_sub_empty,
-							   [](toml::table&& tbl) // table-sub-empty
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(a)"sv,
@@ -5923,7 +5965,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   table_sub,
-							   [](toml::table&& tbl) // table-sub
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(a)"sv,
@@ -5947,7 +5989,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   table_whitespace,
-							   [](toml::table&& tbl) // table-whitespace
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(valid key)"sv, toml::table{} },
@@ -5960,7 +6002,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   table_with_literal_string,
-							   [](toml::table&& tbl) // table-with-literal-string
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(a)"sv,
@@ -5982,7 +6024,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   table_with_pound,
-							   [](toml::table&& tbl) // table-with-pound
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(key#group)"sv,
@@ -5998,7 +6040,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   table_with_single_quotes,
-							   [](toml::table&& tbl) // table-with-single-quotes
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(a)"sv,
@@ -6020,7 +6062,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   table_without_super_with_values,
-							   [](toml::table&& tbl) // table-without-super-with-values
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(x)"sv,
@@ -6048,7 +6090,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   table_without_super,
-							   [](toml::table&& tbl) // table-without-super
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(x)"sv,
@@ -6072,7 +6114,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   table_names_with_values,
-							   [](toml::table&& tbl) // table-names-with-values
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(a)"sv,
@@ -6146,7 +6188,7 @@ in it.)"sv },
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   table_names,
-							   [](toml::table&& tbl) // table-names
+							   [](toml::table&& tbl)
 							   {
 								   const auto expected = toml::table{
 									   { R"(a)"sv,

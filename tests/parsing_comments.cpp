@@ -31,7 +31,8 @@ TEST_CASE("parsing - comments (control characters)")
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		"# \u0000 some trailing garbage"sv,
-		"1:3: Error while parsing comment: control characters other than TAB (U+0009) are explicitly prohibited in comments"sv);
+		"1:3: Error while parsing comment: control characters other than TAB (U+0009) are prohibited in comments, saw "
+			+ quoted_control_character('\0'));
 	for (unsigned cp = 0; cp <= 0x7Fu; cp++)
 	{
 		if ((cp >= 0x20u && cp < 0x7Fu) || cp == '\t' || cp == '\n' || cp == '\v' || cp == '\f' || cp == '\r')
@@ -39,10 +40,11 @@ TEST_CASE("parsing - comments (control characters)")
 
 		CAPTURE(cp);
 		const char input[] = { '#', ' ', static_cast<char>(cp) };
-		parsing_should_fail(
-			FILE_LINE_ARGS,
-			std::string_view{ input, sizeof(input) },
-			"1:3: Error while parsing comment: control characters other than TAB (U+0009) are explicitly prohibited in comments"sv);
+		parsing_should_fail(FILE_LINE_ARGS,
+							std::string_view{ input, sizeof(input) },
+							"1:3: Error while parsing comment: control characters other than TAB (U+0009) are "
+							"prohibited in comments, saw "
+								+ quoted_control_character(static_cast<char>(cp)));
 	}
 	parsing_should_fail(
 		FILE_LINE_ARGS,
@@ -52,6 +54,12 @@ TEST_CASE("parsing - comments (control characters)")
 		FILE_LINE_ARGS,
 		"# \f"sv,
 		R"(1:3: Error while parsing comment: vertical tabs '\v' and form-feeds '\f' are not legal line breaks in TOML)"sv);
+}
+
+TEST_CASE("parsing - comments (an encoded surrogate is invalid UTF-8)")
+{
+	// toml/pull/720 (disallow surrogates in comments)
+	parsing_should_fail(FILE_LINE_ARGS, "# \xED\xA0\x80"sv, "1:3: Encountered invalid UTF-8 sequence"sv);
 }
 
 TEST_CASE("parsing - comments (every ascii byte after a long comment)")
@@ -73,10 +81,11 @@ TEST_CASE("parsing - comments (every ascii byte after a long comment)")
 					doc,
 					R"(1:43: Error while parsing comment: vertical tabs '\v' and form-feeds '\f' are not legal line breaks in TOML)"sv);
 			else if (c != '\t' && c != '\n' && c != '\r' && (byte < 0x20u || byte == 0x7Fu))
-				parsing_should_fail(
-					FILE_LINE_ARGS,
-					doc,
-					"1:43: Error while parsing comment: control characters other than TAB (U+0009) are explicitly prohibited in comments"sv);
+				parsing_should_fail(FILE_LINE_ARGS,
+									doc,
+									"1:43: Error while parsing comment: control characters other than TAB (U+0009) are "
+									"prohibited in comments, saw "
+										+ quoted_control_character(c));
 			else
 				parsing_should_succeed(FILE_LINE_ARGS, doc, [](table&& tbl) { CHECK(tbl["a"] == 1); });
 		}
@@ -95,10 +104,10 @@ TEST_CASE("parsing - comments (bytes within a 16-byte block)")
 								doc,
 								at + R"(vertical tabs '\v' and form-feeds '\f' are not legal line breaks in TOML)");
 		else if (c != '\t' && c != '\n' && c != '\r' && (static_cast<unsigned char>(c) < 0x20u || c == '\x7F'))
-			parsing_should_fail(
-				FILE_LINE_ARGS,
-				doc,
-				at + "control characters other than TAB (U+0009) are explicitly prohibited in comments");
+			parsing_should_fail(FILE_LINE_ARGS,
+								doc,
+								at + "control characters other than TAB (U+0009) are prohibited in comments, saw "
+									+ quoted_control_character(c));
 		else
 			parsing_should_succeed(FILE_LINE_ARGS, doc, [](table&& tbl) { CHECK(tbl["a"] == 1); });
 	};

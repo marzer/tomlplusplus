@@ -15,15 +15,25 @@ from io import StringIO
 from pathlib import Path
 
 import dateutil.parser
-import utils
 import yaml
 
+ROOT = Path(__file__).resolve().parents[1]
 TOML_TEST = (r'https://github.com/toml-lang/toml-test.git', r'v2.2.0')
 TOML_SPEC_TESTS = (r'https://github.com/iarna/toml-spec-tests.git', r'1880b1a17849f6ad49a7a5e87d6a3ac3963172da')
 
 
+class YamlLoader(yaml.SafeLoader):
+    pass
+
+
+# YAML 1.1 reads a float that has an exponent and no decimal point, such as 1e3, as a string
+YamlLoader.add_implicit_resolver(
+    'tag:yaml.org,2002:float', re.compile(r'^[+-]?[0-9]+[eE][+-]?[0-9]+$'), list('+-0123456789')
+)
+
+
 def sanitize(s):
-    s = re.sub(r'[ _:;.\/-]+', '_', s, flags=re.I | re.M)
+    s = re.sub(r'[ _:;.\/-]+', '_', s)
     if s in ('bool', 'float', 'int', 'double', 'auto', 'array', 'table'):
         s = s + '_'
     return s
@@ -36,17 +46,11 @@ def is_problematic_control_char(val):
 
 
 def has_problematic_control_chars(val):
-    for c in val:
-        if is_problematic_control_char(c):
-            return True
-    return False
+    return any(is_problematic_control_char(c) for c in val)
 
 
 def requires_unicode(s):
-    for c in s:
-        if ord(c) > 127:
-            return True
-    return False
+    return any(ord(c) > 127 for c in s)
 
 
 def make_string_literal(val, escape_all=False, escape_any=False):
@@ -59,26 +63,24 @@ def make_string_literal(val, escape_all=False, escape_any=False):
                 if not line_len:
                     buf.write('\n\t\t"')
                     line_len += 1
-                if c_ord <= 0xFF:
-                    buf.write(rf'\x{c_ord:02X}')
-                    line_len += 4
-                elif c_ord <= 0xFFFF:
-                    buf.write(rf'\u{c_ord:04X}')
-                    line_len += 6
-                else:
-                    buf.write(rf'\U{c_ord:08X}')
-                    line_len += 10
+                buf.write(rf'\x{c_ord:02X}')
+                line_len += 4
                 if line_len >= 100:
                     buf.write('"')
                     line_len = 0
             if line_len:
                 buf.write('"')
             return buf.getvalue()
-    elif escape_any:
+    elif escape_any or ')"' in val:
         with StringIO() as buf:
             buf.write(r'"')
+            after_hex_escape = False
             for c in val:
                 c_ord = get_ord(c)
+                # a hex escape has no length limit, so a hex digit after one would become part of it
+                if after_hex_escape and chr(c_ord) in '0123456789abcdefABCDEF':
+                    buf.write('""')
+                after_hex_escape = False
                 if c_ord == 0x22:  # "
                     buf.write(r'\"')
                 elif c_ord == 0x5C:  # \
@@ -92,12 +94,8 @@ def make_string_literal(val, escape_all=False, escape_any=False):
                 elif c_ord == 0x0D:  # \r
                     buf.write(r'\r')
                 elif is_problematic_control_char(c_ord):
-                    if c_ord <= 0xFF:
-                        buf.write(rf'\x{c_ord:02X}')
-                    elif c_ord <= 0xFFFF:
-                        buf.write(rf'\u{c_ord:04X}')
-                    else:
-                        buf.write(rf'\U{c_ord:08X}')
+                    buf.write(rf'\x{c_ord:02X}')
+                    after_hex_escape = True
                 else:
                     buf.write(chr(c_ord))
             buf.write(r'"')
@@ -106,12 +104,10 @@ def make_string_literal(val, escape_all=False, escape_any=False):
         return rf'R"({val})"'
 
 
-def python_value_to_tomlpp(val):
+def python_value_to_tomlpp(val, indent=''):
     if isinstance(val, str):
         if not val:
             return r'""sv'
-        elif re.fullmatch(r'^[+-]?[0-9]+[eE][+-]?[0-9]+$', val, re.M):
-            return str(float(val))
         else:
             return rf'{make_string_literal(val, escape_any=has_problematic_control_chars(val))}sv'
     elif isinstance(val, bool):
@@ -130,8 +126,10 @@ def python_value_to_tomlpp(val):
             return 'std::numeric_limits<int64_t>::min()'
         else:
             return str(val)
-    elif isinstance(val, (TomlPPArray, TomlPPTable)):
-        return str(val)
+    elif isinstance(val, dict):
+        return render_table(val, indent)
+    elif isinstance(val, list):
+        return render_array(val, indent)
     elif isinstance(val, (date, time, datetime)):
         date_args = None
         if isinstance(val, (date, datetime)):
@@ -139,18 +137,18 @@ def python_value_to_tomlpp(val):
         time_args = None
         if isinstance(val, (time, datetime)):
             time_args = rf'{val.hour}, {val.minute}'
-            if val.second and val.microsecond:
-                time_args = rf'{time_args}, {val.second}, {val.microsecond * 1000}'
-            elif val.second:
+            if val.second or val.microsecond:
                 time_args = rf'{time_args}, {val.second}'
-            elif val.microsecond:
-                time_args = rf'{time_args}, 0, {val.microsecond * 1000}'
+            if val.microsecond:
+                time_args = rf'{time_args}, {val.microsecond * 1000}'
         if isinstance(val, datetime):
             offset_init = ''
             offset = val.utcoffset()
             if offset is not None:
-                mins = offset.total_seconds() / 60
-                offset_init = rf', {{ {int(mins / 60)}, {int(mins % 60)} }}'
+                mins = int(offset.total_seconds() // 60)
+                sign = -1 if mins < 0 else 1
+                hours, mins = divmod(abs(mins), 60)
+                offset_init = rf', {{ {sign * hours}, {sign * mins} }}'
             return rf'toml::date_time{{ {{ {date_args} }}, {{ {time_args} }}{offset_init} }}'
         elif isinstance(val, time):
             return rf'toml::time{{ {time_args} }}'
@@ -160,68 +158,36 @@ def python_value_to_tomlpp(val):
         raise ValueError(str(type(val)))
 
 
-class TomlPPArray:
-    def __init__(self, init_data=None):
-        self.values = init_data if init_data else list()
+def render_array(values, indent=''):
+    if not values:
+        return 'toml::array{}'
+    s = 'toml::array{'
+    for val in values:
+        only_child_is_array = isinstance(val, list) and len(values) == 1
+        s += '\n' + indent + '\t'
+        if only_child_is_array:
+            s += 'toml::inserter{'
+        s += python_value_to_tomlpp(val, indent + '\t')
+        if only_child_is_array:
+            s += '}'
+        s += ','
+    return s + '\n' + indent + '}'
 
-    def render(self, indent='', indent_declaration=False):
-        s = ''
-        if indent_declaration:
-            s += indent
-        if len(self.values) == 0:
-            s += 'toml::array{}'
+
+def render_table(values, indent=''):
+    if not values:
+        return 'toml::table{}'
+    s = 'toml::table{'
+    for key, val in values.items():
+        s += '\n' + indent + '\t{ '
+        if isinstance(val, (dict, list)) and val:
+            s += '\n' + indent + f'\t\t{python_value_to_tomlpp(str(key))},'
+            s += ' ' + python_value_to_tomlpp(val, indent + '\t\t')
+            s += '\n' + indent + '\t'
         else:
-            s += 'toml::array{'
-            for val in self.values:
-                s += '\n' + indent + '\t'
-                if isinstance(val, TomlPPArray) and len(self.values) == 1:
-                    s += 'toml::inserter{'
-                if isinstance(val, (TomlPPTable, TomlPPArray)) and len(val) > 0:
-                    s += val.render(indent + '\t')
-                else:
-                    s += python_value_to_tomlpp(val)
-                if isinstance(val, TomlPPArray) and len(self.values) == 1:
-                    s += '}'
-                s += ','
-            s += '\n' + indent + '}'
-        return s
-
-    def __str__(self):
-        return self.render()
-
-    def __len__(self):
-        return len(self.values)
-
-
-class TomlPPTable:
-    def __init__(self, init_data=None):
-        self.values = init_data if init_data else dict()
-
-    def render(self, indent='', indent_declaration=False):
-        s = ''
-        if indent_declaration:
-            s += indent
-        if len(self.values) == 0:
-            s += 'toml::table{}'
-        else:
-            s += 'toml::table{'
-            for key, val in self.values.items():
-                s += '\n' + indent + '\t{ '
-                if isinstance(val, (TomlPPTable, TomlPPArray)) and len(val) > 0:
-                    s += '\n' + indent + f'\t\t{python_value_to_tomlpp(str(key))},'
-                    s += ' ' + val.render(indent + '\t\t')
-                    s += '\n' + indent + '\t'
-                else:
-                    s += f'{python_value_to_tomlpp(str(key))}, {python_value_to_tomlpp(val)} '
-                s += '},'
-            s += '\n' + indent + '}'
-        return s
-
-    def __str__(self):
-        return self.render()
-
-    def __len__(self):
-        return len(self.values)
+            s += f'{python_value_to_tomlpp(str(key))}, {python_value_to_tomlpp(val)} '
+        s += '},'
+    return s + '\n' + indent + '}'
 
 
 def json_to_python(val):
@@ -236,7 +202,7 @@ def json_to_python(val):
             elif val_type == "string":
                 return str(val["value"])
             elif val_type == "bool":
-                return True if val["value"].lower() == "true" else False
+                return val["value"].lower() == "true"
             elif val_type == "array":
                 return json_to_python(val["value"])
             elif val_type in ("datetime", "date", "time", "datetime-local", "date-local", "time-local"):
@@ -250,34 +216,13 @@ def json_to_python(val):
             else:
                 raise ValueError(val_type)
         else:
-            vals = dict()
-            for k, v in val.items():
-                vals[k] = json_to_python(v)
-            return vals
+            return {k: json_to_python(v) for k, v in val.items()}
 
     elif isinstance(val, list):
-        vals = list()
-        for v in val:
-            vals.append(json_to_python(v))
-        return vals
+        return [json_to_python(v) for v in val]
 
     else:
         raise ValueError(str(type(val)))
-
-
-def python_to_tomlpp(node):
-    if isinstance(node, dict):
-        table = TomlPPTable()
-        for key, val in node.items():
-            table.values[key] = python_to_tomlpp(val)
-        return table
-    elif isinstance(node, (set, list, tuple)):
-        array = TomlPPArray()
-        for val in node:
-            array.values.append(python_to_tomlpp(val))
-        return array
-    else:
-        return node
 
 
 class TomlTest:
@@ -294,20 +239,12 @@ class TomlTest:
         self.__source = data
 
         # if we find a utf-16 or utf-32 BOM, treat the file as bytes
-        if len(data) >= 4:
-            prefix = data[:4]
-            if prefix == b'\x00\x00\xfe\xff' or prefix == b'\xff\xfe\x00\x00':
-                self.__bytes = True
-        if len(data) >= 2:
-            prefix = data[:2]
-            if prefix == b'\xff\xfe' or prefix == b'\xfe\xff':
-                self.__bytes = True
+        if data.startswith((b'\x00\x00\xfe\xff', b'\xff\xfe\x00\x00', b'\xff\xfe', b'\xfe\xff')):
+            self.__bytes = True
 
         # if we find a utf-8 BOM, treat it as a string but don't use a raw string literal
-        if not self.__bytes and len(data) >= 3:
-            prefix = data[:3]
-            if prefix == b'\xef\xbb\xbf':
-                self.__raw = False
+        if not self.__bytes and data.startswith(b'\xef\xbb\xbf'):
+            self.__raw = False
 
         # if we're not treating it as bytes, decode the bytes into a utf-8 string
         if not self.__bytes:
@@ -322,7 +259,7 @@ class TomlTest:
 
                 # disable raw literals if the string has trailing backslashes followed by whitespace on the same line
                 # (GCC doesn't like it and generates some noisy warnings)
-                if self.__raw and re.search(r'\\[ \t]+?\n', text, re.S):
+                if self.__raw and re.search(r'\\[ \t]+?\n', text):
                     self.__raw = False
 
                 # strip off trailing newlines (they're just noise)
@@ -337,18 +274,13 @@ class TomlTest:
         self.__conditions = []
         if is_valid_case:
             self.__expected = True
-            path_base = str(Path(file_path.parent, file_path.stem))
-            yaml_file = Path(path_base + r'.yaml')
+            yaml_file = file_path.with_suffix('.yaml')
             if yaml_file.exists():
-                self.__expected = python_to_tomlpp(
-                    yaml.load(yaml_file.read_text(encoding='utf-8'), Loader=yaml.FullLoader)
-                )
+                self.__expected = yaml.load(yaml_file.read_text(encoding='utf-8'), Loader=YamlLoader)
             else:
-                json_file = Path(path_base + r'.json')
+                json_file = file_path.with_suffix('.json')
                 if json_file.exists():
-                    self.__expected = python_to_tomlpp(
-                        json_to_python(json.loads(json_file.read_text(encoding='utf-8')))
-                    )
+                    self.__expected = json_to_python(json.loads(json_file.read_text(encoding='utf-8')))
 
         else:
             self.__expected = False
@@ -367,11 +299,7 @@ class TomlTest:
         return self
 
     def condition(self):
-        if not self.__conditions or not self.__conditions[0]:
-            return ''
-        if len(self.__conditions) == 1:
-            return rf'{self.__conditions[0]}'
-        return rf'{" && ".join([rf"{c}" for c in self.__conditions])}'
+        return ' && '.join(self.__conditions)
 
     def expected(self):
         return self.__expected
@@ -385,43 +313,30 @@ def load_tests(source_folder, is_valid_set, ignore_list=None, only=None):
     if not source_folder.is_dir():
         raise Exception(rf'{source_folder} was not an existing directory')
     files = sorted(f for f in source_folder.rglob('*.toml') if f.is_file() and (only is None or f in only))
-    strip_source_folder_len = len(str(source_folder))
-    files = [(f, str(f)[strip_source_folder_len + 1 : -5].replace('\\', '-').replace('/', '-').strip()) for f in files]
+    files = [(f, f.relative_to(source_folder).with_suffix('').as_posix().replace('/', '-')) for f in files]
     if ignore_list:
-        files_ = []
-        for f, n in files:
-            ignored = False
-            for ignore in ignore_list:
-                if ignore is None:
-                    continue
-                if isinstance(ignore, str):
-                    if n == ignore:
-                        ignored = True
-                        break
-                elif ignore.fullmatch(n) is not None:  # regex
-                    ignored = True
-                    break
-            if not ignored:
-                files_.append((f, n))
-        files = files_
-    tests = []
-    for f, n in files:
-        tests.append(TomlTest(f, n, is_valid_set))
-    return tests
+        ignored = matching_names([n for _, n in files], ignore_list)
+        files = [(f, n) for f, n in files if n not in ignored]
+    return [TomlTest(f, n, is_valid_set) for f, n in files]
+
+
+def matching_names(names, patterns):
+    matched = set()
+    for pattern in patterns:
+        if isinstance(pattern, str):
+            hits = {name for name in names if name == pattern}
+        else:
+            hits = {name for name in names if pattern.fullmatch(name) is not None}
+        if not hits:
+            raise ValueError(rf'no test is named {pattern if isinstance(pattern, str) else pattern.pattern}')
+        matched |= hits
+    return matched
 
 
 def add_condition(tests, condition, names):
+    matched = matching_names([test.name() for test in tests], names)
     for test in tests:
-        matched = False
-        for name in names:
-            if isinstance(name, str):
-                if test.name() == name:
-                    matched = True
-                    break
-            elif name.fullmatch(test.name()) is not None:  # regex
-                matched = True
-                break
-        if matched:
+        if test.name() in matched:
             test.add_condition(condition)
 
 
@@ -431,21 +346,13 @@ def fetch(url, ref, dest):
         subprocess.run(['git', '-c', 'core.autocrlf=false', '-C', str(dest), *args], check=True)
 
 
-def load_burnsushi_tests(tests, root_dir):
+def load_burntsushi_tests(tests, root_dir):
 
     root_dir = Path(root_dir, 'tests').resolve()
     listed = Path(root_dir, 'files-toml-1.1.0').read_text(encoding='utf-8').split()
     listed = {Path(root_dir, f).resolve() for f in listed}
 
-    tests['valid']['burntsushi'] = load_tests(
-        Path(root_dir, 'valid'),
-        True,
-        (
-            # broken by the json reader
-            'key-alphanum',
-        ),
-        listed,
-    )
+    tests['valid']['burntsushi'] = load_tests(Path(root_dir, 'valid'), True, only=listed)
     add_condition(
         tests['valid']['burntsushi'],
         '!TOML_MSVC',
@@ -497,7 +404,7 @@ def write_test_file(name, all_tests):
     for test in all_tests:
         unicode = requires_unicode(str(test))
         if not unicode and not isinstance(test.expected(), bool):
-            unicode = requires_unicode(test.expected().render())
+            unicode = requires_unicode(python_value_to_tomlpp(test.expected()))
         if unicode:
             test.add_condition(r'UNICODE_LITERALS_OK')
 
@@ -511,9 +418,7 @@ def write_test_file(name, all_tests):
         tests_by_group[test.group()][cond].append(test)
     all_tests = tests_by_group
 
-    test_file_path = Path(
-        utils.entry_script_dir(), '..', 'tests', rf'conformance_{sanitize(name.strip())}.cpp'
-    ).resolve()
+    test_file_path = ROOT / 'tests' / rf'conformance_{sanitize(name.strip())}.cpp'
     with StringIO() as test_file_buffer:
         write = lambda txt, end='\n': print(txt, file=test_file_buffer, end=end)
 
@@ -531,7 +436,7 @@ def write_test_file(name, all_tests):
         write(r'')
         write('namespace')
         write('{', end='')
-        for group, conditions in all_tests.items():
+        for conditions in all_tests.values():
             for condition, tests in conditions.items():
                 write('')
                 if condition != '':
@@ -548,7 +453,7 @@ def write_test_file(name, all_tests):
         write('')
         write(f'TEST_CASE("conformance - {name}")')
         write('{', end='')
-        for group, conditions in all_tests.items():
+        for conditions in all_tests.values():
             for condition, tests in conditions.items():
                 if condition != '':
                     write('')
@@ -560,14 +465,12 @@ def write_test_file(name, all_tests):
                     expected = test.expected()
                     if isinstance(expected, bool):
                         if expected:
-                            write(f'\tparsing_should_succeed(FILE_LINE_ARGS, {test.identifier()}); // {test.name()}')
+                            write(f'\tparsing_should_succeed(FILE_LINE_ARGS, {test.identifier()});')
                         else:
-                            write(f'\tparsing_should_fail(FILE_LINE_ARGS, {test.identifier()}); // {test.name()}')
+                            write(f'\tparsing_should_fail(FILE_LINE_ARGS, {test.identifier()});')
                     else:
-                        s = expected.render('\t\t')
-                        write(
-                            f'\tparsing_should_succeed(FILE_LINE_ARGS, {test.identifier()}, [](toml::table&& tbl) // {test.name()}'
-                        )
+                        s = python_value_to_tomlpp(expected, '\t\t')
+                        write(f'\tparsing_should_succeed(FILE_LINE_ARGS, {test.identifier()}, [](toml::table&& tbl)')
                         write('\t{')
                         write(f'\t\tconst auto expected = {s};')
                         write('\t\tREQUIRE(tbl == expected);')
@@ -583,13 +486,6 @@ def write_test_file(name, all_tests):
 
         test_file_content = test_file_buffer.getvalue()
 
-        # clang-format
-        print(f"Running clang-format for {test_file_path}")
-        try:
-            test_file_content = utils.apply_clang_format(test_file_content, cwd=test_file_path.parent)
-        except Exception as ex:
-            print(rf'Error running clang-format: {ex}', file=sys.stderr)
-
         # write to disk
         print(rf'Writing {test_file_path}')
         with open(test_file_path, 'w', encoding='utf-8', newline='\n') as test_file:
@@ -598,17 +494,17 @@ def write_test_file(name, all_tests):
 
 def main():
     all_tests = {'valid': dict(), 'invalid': dict()}
-    with tempfile.TemporaryDirectory() as sources:
-        toml_test = Path(sources, 'toml-test')
+    with tempfile.TemporaryDirectory() as checkouts:
+        toml_test = Path(checkouts, 'toml-test')
         fetch(*TOML_TEST, toml_test)
-        load_burnsushi_tests(all_tests, toml_test)
-        toml_spec_tests = Path(sources, 'toml-spec-tests')
+        load_burntsushi_tests(all_tests, toml_test)
+        toml_spec_tests = Path(checkouts, 'toml-spec-tests')
         fetch(*TOML_SPEC_TESTS, toml_spec_tests)
         load_iarna_tests(all_tests, toml_spec_tests)
-    for validity, sources in all_tests.items():
-        for source, tests in sources.items():
-            write_test_file(f'{source}/{validity}', tests)
+    for validity, suites in all_tests.items():
+        for suite, tests in suites.items():
+            write_test_file(f'{suite}/{validity}', tests)
 
 
 if __name__ == '__main__':
-    utils.run(main, verbose=True)
+    sys.exit(main())

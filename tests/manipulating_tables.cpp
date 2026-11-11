@@ -424,11 +424,11 @@ TEST_CASE("tables - is_homogeneous")
 			CHECK(ctbl.is_homogeneous(node_type::none));
 			CHECK(ctbl.is_homogeneous(sample.type()));
 
-			node* nonmatch{};
+			node* nonmatch = {};
 			CHECK(tbl.is_homogeneous(node_type::none, nonmatch));
 			CHECK(tbl.is_homogeneous(sample.type(), nonmatch));
 
-			const node* cnonmatch{};
+			const node* cnonmatch = {};
 			CHECK(ctbl.is_homogeneous(node_type::none, cnonmatch));
 			CHECK(ctbl.is_homogeneous(sample.type(), cnonmatch));
 
@@ -956,6 +956,52 @@ TEST_CASE("tables - insert_or_assign")
 		CHECK(tbl["b"] == 3);
 		CHECK(tbl["b"].as_integer()->flags() == value_flags::format_as_hexadecimal);
 	}
+
+	SECTION("an iterator that was already dereferenced sees the new node")
+	{
+		auto it			  = tbl.begin();
+		const table& ctbl = tbl;
+		auto cit		  = ctbl.begin();
+		CHECK(it->second.is_integer());
+		CHECK(cit->second.is_integer());
+
+		tbl.insert_or_assign("a", "replaced"sv);
+		CHECK(&it->second == tbl.get("a"));
+		CHECK(&(*it).second == tbl.get("a"));
+		CHECK(it->second.is_string());
+		CHECK(&cit->second == tbl.get("a"));
+		CHECK(&(*cit).second == tbl.get("a"));
+		CHECK(cit->second.is_string());
+	}
+}
+
+TEST_CASE("tables - an inserter holding a null node_view inserts nothing")
+{
+	table tbl{ { "a", 1 } };
+	node_view<node> null_view;
+
+	SECTION("insert")
+	{
+		const auto res = tbl.insert("b", inserter{ null_view });
+		CHECK(!res.second);
+		CHECK(res.first == tbl.end());
+	}
+
+	SECTION("insert_or_assign with a new key")
+	{
+		const auto res = tbl.insert_or_assign("b", inserter{ null_view });
+		CHECK(!res.second);
+		CHECK(res.first == tbl.end());
+	}
+
+	SECTION("insert_or_assign with an existing key")
+	{
+		const auto res = tbl.insert_or_assign("a", inserter{ null_view });
+		CHECK(!res.second);
+		CHECK(res.first == tbl.end());
+	}
+
+	CHECK(tbl == table{ { "a", 1 } });
 }
 
 TEST_CASE("tables - emplace")
@@ -978,6 +1024,14 @@ TEST_CASE("tables - emplace")
 		CHECK(tbl["b"] == 2.5);
 		CHECK(tbl["c"].is_string());
 		CHECK(tbl["c"] == "three"sv);
+	}
+
+	SECTION("deduces a string from a character array")
+	{
+		const auto [it, emplaced] = tbl.emplace("d", "four");
+		CHECK(emplaced);
+		CHECK(it->second.is_string());
+		CHECK(tbl["d"] == "four"sv);
 	}
 }
 
@@ -1449,7 +1503,7 @@ key5 = 'val'
         'i guess thats what tests are for'
     ])"sv;
 
-		CHECK(to_string(input, toml_formatter::default_flags | format_flags::force_multiline_arrays)
+		CHECK(to_string(input, toml_formatter::default_flags | format_flags::force_multi_line_arrays)
 			  == expected_forced_multiline);
 
 		// forcing multiline arrays without indenting array elements
@@ -1493,7 +1547,7 @@ key5 = 'val'
     ])"sv;
 
 		CHECK(to_string(input,
-						toml_formatter::default_flags | format_flags::force_multiline_arrays,
+						toml_formatter::default_flags | format_flags::force_multi_line_arrays,
 						format_flags::indent_array_elements)
 			  == expected_forced_without_indented_arrays);
 	}

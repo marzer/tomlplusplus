@@ -132,3 +132,12 @@ TEST_CASE("unicode - classifying every code point")
 						   impl::is_bare_key_character,
 						   [&](uint32_t cp) { return k[cp] != 0u; });
 }
+
+TEST_CASE("unicode - is_control_character() gives one answer for a byte, whatever the signedness of char")
+{
+	for (unsigned byte = 0; byte < 256u; byte++)
+	{
+		CAPTURE(byte);
+		CHECK(impl::is_control_character(static_cast<char>(byte)) == (byte <= 0x1Fu || byte == 0x7Fu));
+	}
+}

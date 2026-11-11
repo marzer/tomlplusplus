@@ -37,23 +37,24 @@ TOML_IMPL_NAMESPACE_START
 		using const_map_iterator   = std::map<toml::key, node_ptr, std::less<>>::const_iterator;
 		using map_iterator		   = std::conditional_t<IsConst, const_map_iterator, mutable_map_iterator>;
 
-		mutable map_iterator iter_;
+		map_iterator iter_;
 		alignas(proxy_type) mutable unsigned char proxy_[sizeof(proxy_type)];
-		mutable bool proxy_instantiated_ = false;
+		mutable bool proxy_instantiated_ = false; // unused, kept for the layout
 
 		TOML_NODISCARD
 		proxy_type* get_proxy() const noexcept
 		{
-			if (!proxy_instantiated_)
-			{
-				auto p = ::new (static_cast<void*>(proxy_)) proxy_type{ iter_->first, *iter_->second.get() };
-				proxy_instantiated_ = true;
-				return p;
-			}
-			return TOML_LAUNDER(reinterpret_cast<proxy_type*>(proxy_));
+			// rebuilt on every call: insert_or_assign() replaces a node without invalidating iterators
+			return ::new (static_cast<void*>(proxy_)) proxy_type{ iter_->first, *iter_->second.get() };
 		}
 
 	  public:
+		using value_type		= proxy_type;
+		using reference			= value_type&;
+		using pointer			= value_type*;
+		using difference_type	= typename std::iterator_traits<map_iterator>::difference_type;
+		using iterator_category = typename std::iterator_traits<map_iterator>::iterator_category;
+
 		TOML_NODISCARD_CTOR
 		table_iterator() noexcept = default;
 
@@ -82,21 +83,13 @@ TOML_IMPL_NAMESPACE_START
 		// NOLINTNEXTLINE(bugprone-unhandled-self-assignment)
 		table_iterator& operator=(const table_iterator& rhs) noexcept
 		{
-			iter_				= rhs.iter_;
-			proxy_instantiated_ = false;
+			iter_ = rhs.iter_;
 			return *this;
 		}
-
-		using value_type		= table_proxy_pair<IsConst>;
-		using reference			= value_type&;
-		using pointer			= value_type*;
-		using difference_type	= typename std::iterator_traits<map_iterator>::difference_type;
-		using iterator_category = typename std::iterator_traits<map_iterator>::iterator_category;
 
 		table_iterator& operator++() noexcept // ++pre
 		{
 			++iter_;
-			proxy_instantiated_ = false;
 			return *this;
 		}
 
@@ -104,14 +97,12 @@ TOML_IMPL_NAMESPACE_START
 		{
 			table_iterator out{ iter_ };
 			++iter_;
-			proxy_instantiated_ = false;
 			return out;
 		}
 
 		table_iterator& operator--() noexcept // --pre
 		{
 			--iter_;
-			proxy_instantiated_ = false;
 			return *this;
 		}
 
@@ -119,7 +110,6 @@ TOML_IMPL_NAMESPACE_START
 		{
 			table_iterator out{ iter_ };
 			--iter_;
-			proxy_instantiated_ = false;
 			return out;
 		}
 
@@ -211,10 +201,10 @@ TOML_NAMESPACE_START
 	/// \ecpp
 	///
 	/// \out
-	/// cats: ['tiger', 'lion', 'puma']
-	/// fish[1] : 'trout'
-	/// cats : ['tiger', 'lion', 'puma']
-	/// fish[1] : 'trout'
+	/// cats: [ 'tiger', 'lion', 'puma' ]
+	/// fish[1]: 'trout'
+	/// cats: [ 'tiger', 'lion', 'puma' ]
+	/// fish[1]: 'trout'
 	/// \eout
 	class TOML_EXPORTED_CLASS table : public node
 	{
@@ -232,6 +222,186 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD_CTOR
 		TOML_EXPORTED_MEMBER_FUNCTION
 		table(const impl::table_init_pair*, const impl::table_init_pair*);
+
+		TOML_PURE_GETTER
+		TOML_EXPORTED_MEMBER_FUNCTION
+		map_iterator get_lower_bound(std::string_view) noexcept;
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		map_iterator erase(const_map_iterator) noexcept;
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		map_iterator erase(const_map_iterator, const_map_iterator) noexcept;
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		map_iterator insert_with_hint(toml::const_table_iterator, key&&, impl::node_ptr&&);
+
+		template <typename KeyType>
+		TOML_NODISCARD
+		static decltype(auto) narrow_key(KeyType&& key)
+		{
+			static_assert(!impl::is_wide_string<KeyType> || TOML_ENABLE_WINDOWS_COMPAT,
+						  "Wide-character keys are only supported on Windows with "
+						  "TOML_ENABLE_WINDOWS_COMPAT enabled");
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+			if constexpr (impl::is_wide_string<KeyType>)
+				return impl::narrow(static_cast<KeyType&&>(key));
+			else
+#endif
+				return static_cast<KeyType&&>(key);
+		}
+
+		template <typename KeyType, typename MakeNode>
+		std::pair<map_iterator, bool> insert_if_absent(KeyType&& key, MakeNode&& make_node)
+		{
+			const auto key_view = std::string_view{ key };
+			const auto ipos		= get_lower_bound(key_view);
+			if (ipos != map_.end() && ipos->first == key_view)
+				return { ipos, false };
+
+			return { insert_with_hint(const_iterator{ ipos }, toml::key{ static_cast<KeyType&&>(key) }, make_node()),
+					 true };
+		}
+
+		TOML_PURE_GETTER
+		TOML_EXPORTED_STATIC_FUNCTION
+		static bool TOML_CALLCONV equal(const table&, const table&) noexcept;
+
+		template <typename Func, typename Table, typename T>
+		using can_for_each = std::disjunction<std::is_invocable<Func, const key&, impl::for_each_ref<T, Table>>, //
+											  std::is_invocable<Func, impl::for_each_ref<T, Table>>>;
+
+		template <typename Func, typename Table, typename T>
+		using can_for_each_nothrow = std::conditional_t<
+			// first form
+			std::is_invocable_v<Func, const key&, impl::for_each_ref<T, Table>>,
+			std::is_nothrow_invocable<Func, const key&, impl::for_each_ref<T, Table>>,
+			std::conditional_t<
+				// second form
+				std::is_invocable_v<Func, impl::for_each_ref<T, Table>>,
+				std::is_nothrow_invocable<Func, impl::for_each_ref<T, Table>>,
+				std::false_type>>;
+
+		template <typename Func, typename Table>
+		using can_for_each_any = std::disjunction<can_for_each<Func, Table, table>,
+												  can_for_each<Func, Table, array>,
+												  can_for_each<Func, Table, std::string>,
+												  can_for_each<Func, Table, int64_t>,
+												  can_for_each<Func, Table, double>,
+												  can_for_each<Func, Table, bool>,
+												  can_for_each<Func, Table, date>,
+												  can_for_each<Func, Table, time>,
+												  can_for_each<Func, Table, date_time>>;
+
+		template <typename Func, typename Table, typename T>
+		using for_each_is_nothrow_one = std::disjunction<std::negation<can_for_each<Func, Table, T>>, //
+														 can_for_each_nothrow<Func, Table, T>>;
+
+		template <typename Func, typename Table>
+		using for_each_is_nothrow = std::conjunction<for_each_is_nothrow_one<Func, Table, table>,
+													 for_each_is_nothrow_one<Func, Table, array>,
+													 for_each_is_nothrow_one<Func, Table, std::string>,
+													 for_each_is_nothrow_one<Func, Table, int64_t>,
+													 for_each_is_nothrow_one<Func, Table, double>,
+													 for_each_is_nothrow_one<Func, Table, bool>,
+													 for_each_is_nothrow_one<Func, Table, date>,
+													 for_each_is_nothrow_one<Func, Table, time>,
+													 for_each_is_nothrow_one<Func, Table, date_time>>;
+
+#if !TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN
+
+		// false stops the loop
+		template <typename Table, typename Func, typename Value>
+		TOML_NODISCARD
+		static bool for_each_visit([[maybe_unused]] Func&& visitor,
+								   [[maybe_unused]] const key& k,
+								   [[maybe_unused]] Value&& v) //
+			noexcept(for_each_is_nothrow_one<Func&&, Table, Value&&>::value)
+		{
+			using value_ref = impl::for_each_ref<Value&&, Table>;
+			static_assert(std::is_reference_v<value_ref>);
+
+			// func(key, val)
+			if constexpr (std::is_invocable_v<Func&&, const key&, value_ref>)
+				return impl::for_each_keep_going(static_cast<Func&&>(visitor), k, static_cast<value_ref>(v));
+
+			// func(val)
+			else if constexpr (std::is_invocable_v<Func&&, value_ref>)
+				return impl::for_each_keep_going(static_cast<Func&&>(visitor), static_cast<value_ref>(v));
+
+			// visitor not compatible with this particular type
+			else
+				return true;
+		}
+
+#endif
+
+		template <typename Func, typename Table>
+		static void do_for_each(Func&& visitor, Table&& tbl) //
+			noexcept(for_each_is_nothrow<Func&&, Table&&>::value)
+		{
+			static_assert(can_for_each_any<Func&&, Table&&>::value,
+						  "TOML table for_each visitors must be invocable for at least one of the toml::node "
+						  "types:" TOML_SA_NODE_TYPE_LIST);
+
+			using kvp_type = impl::copy_cv<map_pair, std::remove_reference_t<Table>>;
+
+			for (kvp_type& kvp : tbl.map_)
+			{
+				using node_ref = impl::copy_cvref<toml::node, Table&&>;
+				static_assert(std::is_reference_v<node_ref>);
+
+#if TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN
+
+#ifndef TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN_ACKNOWLEDGED
+				static_assert(impl::always_false<Func, Table, kvp_type, node_ref>, //
+							  TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN_MESSAGE);
+#endif
+
+				static_cast<node_ref>(*kvp.second)
+					.visit(
+						[&]([[maybe_unused]] auto&& v) //
+#if !TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA
+						noexcept(for_each_is_nothrow_one<Func&&, Table&&, decltype(v)>::value)
+#endif
+						{
+							using value_ref = impl::for_each_ref<decltype(v), Table&&>;
+							static_assert(std::is_reference_v<value_ref>);
+
+							// func(key, val)
+							if constexpr (std::is_invocable_v<Func&&, const key&, value_ref>)
+							{
+								static_cast<Func&&>(visitor)(static_cast<const key&>(kvp.first),
+															 static_cast<value_ref>(v));
+							}
+
+							// func(val)
+							else if constexpr (std::is_invocable_v<Func&&, value_ref>)
+							{
+								static_cast<Func&&>(visitor)(static_cast<value_ref>(v));
+							}
+						});
+
+#else
+				const auto keep_going = static_cast<node_ref>(*kvp.second)
+											.visit(
+												[&](auto&& v) //
+// left out for MSVC's "legacy lambda processor", which can't compile it
+#if !TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA
+												noexcept(for_each_is_nothrow_one<Func&&, Table&&, decltype(v)>::value)
+#endif
+												{
+													return table::for_each_visit<Table&&>(static_cast<Func&&>(visitor),
+																						  kvp.first,
+																						  static_cast<decltype(v)>(v));
+												});
+
+				if (!keep_going)
+					return;
+#endif
+			}
+		}
 
 		/// \endcond
 
@@ -267,7 +437,9 @@ TOML_NAMESPACE_START
 		/// \ecpp
 		///
 		/// \out
-		/// { foo = 1, bar = 2.0, kek = "three" }
+		/// bar = 2.0
+		/// foo = 1
+		/// kek = 'three'
 		/// \eout
 		///
 		/// \param 	kvps	A list of key-value pairs used to initialize the table.
@@ -311,17 +483,7 @@ TOML_NAMESPACE_START
 		bool is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept final;
 
 		/// \cond
-		template <typename ElemType = void>
-		TOML_PURE_GETTER
-		bool is_homogeneous() const noexcept
-		{
-			using type = impl::remove_cvref<impl::unwrap_node<ElemType>>;
-			static_assert(std::is_void_v<type> || toml::is_value<type> || toml::is_container<type>,
-						  "The template type argument of table::is_homogeneous() must be void or one "
-						  "of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
-
-			return is_homogeneous(impl::node_type_of<type>);
-		}
+		using node::is_homogeneous;
 		/// \endcond
 
 		/// \brief Returns `true`.
@@ -339,7 +501,7 @@ TOML_NAMESPACE_START
 		}
 
 		/// \brief Returns `false`.
-		TOML_PURE_GETTER
+		TOML_CONST_INLINE_GETTER
 		bool is_array_of_tables() const noexcept final
 		{
 			return false;
@@ -565,6 +727,7 @@ TOML_NAMESPACE_START
 		///		{ "c", 3 },
 		///		{ "d", toml::table{ { "e", 4 } } }
 		///	};
+		/// std::cout << std::boolalpha;
 		/// std::cout << "is inline? "sv << tbl.is_inline() << "\n";
 		/// std::cout << tbl << "\n\n";
 		///
@@ -582,12 +745,11 @@ TOML_NAMESPACE_START
 		/// [d]
 		/// e = 4
 		///
-		///
 		/// is inline? true
 		/// { a = 1, b = 2, c = 3, d = { e = 4 } }
 		/// \eout
 		///
-		/// \remarks A table being 'inline' is only relevent during printing;
+		/// \remarks A table being 'inline' is only relevant during printing;
 		/// 		 it has no effect on the general functionality of the table
 		/// 		 object.
 		///
@@ -609,6 +771,7 @@ TOML_NAMESPACE_START
 		///		{ "a", 42, },
 		///		{ "b", "is the meaning of life, apparently." }
 		///	};
+		/// std::cout << std::boolalpha;
 		///	std::cout << R"(node ["a"] exists: )"sv << !!tbl.get("a") << "\n";
 		///	std::cout << R"(node ["b"] exists: )"sv << !!tbl.get("b") << "\n";
 		///	std::cout << R"(node ["c"] exists: )"sv << !!tbl.get("c") << "\n";
@@ -697,8 +860,9 @@ TOML_NAMESPACE_START
 		TOML_PURE_GETTER
 		impl::wrap_node<T>* get_as(std::string_view key) noexcept
 		{
-			const auto n = this->get(key);
-			return n ? n->template as<T>() : nullptr;
+			if (const auto n = get(key))
+				return n->template as<T>();
+			return nullptr;
 		}
 
 		/// \brief	Gets the node at a specific key if it is a particular type (const overload).
@@ -752,11 +916,17 @@ TOML_NAMESPACE_START
 #endif // TOML_ENABLE_WINDOWS_COMPAT
 
 		/// \brief	Gets a reference to the element at a specific key, throwing `std::out_of_range` if none existed.
+		///
+		/// \warning	When the compiler has exceptions disabled, a key the table does not contain is undefined
+		///				behaviour.
 		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
 		node& at(std::string_view key);
 
 		/// \brief	Gets a reference to the element at a specific key, throwing `std::out_of_range` if none existed.
+		///
+		/// \warning	When the compiler has exceptions disabled, a key the table does not contain is undefined
+		///				behaviour.
 		TOML_NODISCARD
 		const node& at(std::string_view key) const
 		{
@@ -767,6 +937,9 @@ TOML_NAMESPACE_START
 
 		/// \brief	Gets a reference to the element at a specific key, throwing `std::out_of_range` if none existed.
 		///
+		/// \warning	When the compiler has exceptions disabled, a key the table does not contain is undefined
+		///				behaviour.
+		///
 		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		TOML_NODISCARD
 		node& at(std::wstring_view key)
@@ -775,6 +948,9 @@ TOML_NAMESPACE_START
 		}
 
 		/// \brief	Gets a reference to the element at a specific key, throwing `std::out_of_range` if none existed.
+		///
+		/// \warning	When the compiler has exceptions disabled, a key the table does not contain is undefined
+		///				behaviour.
 		///
 		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		TOML_NODISCARD
@@ -844,161 +1020,6 @@ TOML_NAMESPACE_START
 			return const_iterator{ map_.cend() };
 		}
 
-	  private:
-		/// \cond
-
-		template <typename T, typename Table>
-		using for_each_value_ref = impl::copy_cvref<impl::wrap_node<impl::remove_cvref<impl::unwrap_node<T>>>, Table>;
-
-		template <typename Func, typename Table, typename T>
-		using can_for_each = std::disjunction<std::is_invocable<Func, const key&, for_each_value_ref<T, Table>>, //
-											  std::is_invocable<Func, for_each_value_ref<T, Table>>>;
-
-		template <typename Func, typename Table, typename T>
-		using can_for_each_nothrow = std::conditional_t<
-			// first form
-			std::is_invocable_v<Func, const key&, for_each_value_ref<T, Table>>,
-			std::is_nothrow_invocable<Func, const key&, for_each_value_ref<T, Table>>,
-			std::conditional_t<
-				// second form
-				std::is_invocable_v<Func, for_each_value_ref<T, Table>>,
-				std::is_nothrow_invocable<Func, for_each_value_ref<T, Table>>,
-				std::false_type>>;
-
-		template <typename Func, typename Table>
-		using can_for_each_any = std::disjunction<can_for_each<Func, Table, table>,
-												  can_for_each<Func, Table, array>,
-												  can_for_each<Func, Table, std::string>,
-												  can_for_each<Func, Table, int64_t>,
-												  can_for_each<Func, Table, double>,
-												  can_for_each<Func, Table, bool>,
-												  can_for_each<Func, Table, date>,
-												  can_for_each<Func, Table, time>,
-												  can_for_each<Func, Table, date_time>>;
-
-		template <typename Func, typename Table, typename T>
-		using for_each_is_nothrow_one = std::disjunction<std::negation<can_for_each<Func, Table, T>>, //
-														 can_for_each_nothrow<Func, Table, T>>;
-
-		template <typename Func, typename Table>
-		using for_each_is_nothrow = std::conjunction<for_each_is_nothrow_one<Func, Table, table>,
-													 for_each_is_nothrow_one<Func, Table, array>,
-													 for_each_is_nothrow_one<Func, Table, std::string>,
-													 for_each_is_nothrow_one<Func, Table, int64_t>,
-													 for_each_is_nothrow_one<Func, Table, double>,
-													 for_each_is_nothrow_one<Func, Table, bool>,
-													 for_each_is_nothrow_one<Func, Table, date>,
-													 for_each_is_nothrow_one<Func, Table, time>,
-													 for_each_is_nothrow_one<Func, Table, date_time>>;
-
-		template <typename Func, typename Table>
-		static void do_for_each(Func&& visitor, Table&& tbl) //
-			noexcept(for_each_is_nothrow<Func&&, Table&&>::value)
-		{
-			static_assert(can_for_each_any<Func&&, Table&&>::value,
-						  "TOML table for_each visitors must be invocable for at least one of the toml::node "
-						  "specializations:" TOML_SA_NODE_TYPE_LIST);
-
-			using kvp_type = impl::copy_cv<map_pair, std::remove_reference_t<Table>>;
-
-			for (kvp_type& kvp : tbl.map_)
-			{
-				using node_ref = impl::copy_cvref<toml::node, Table&&>;
-				static_assert(std::is_reference_v<node_ref>);
-
-#if TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN
-
-#ifndef TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN_ACKNOWLEDGED
-				static_assert(impl::always_false<Func, Table, kvp_type, node_ref>, //
-							  TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN_MESSAGE);
-#endif
-
-				static_cast<node_ref>(*kvp.second)
-					.visit(
-						[&]([[maybe_unused]] auto&& v) //
-						noexcept(for_each_is_nothrow_one<Func&&, Table&&, decltype(v)>::value)
-						{
-							using value_ref = for_each_value_ref<decltype(v), Table&&>;
-							static_assert(std::is_reference_v<value_ref>);
-
-							// func(key, val)
-							if constexpr (std::is_invocable_v<Func&&, const key&, value_ref>)
-							{
-								static_cast<Func&&>(visitor)(static_cast<const key&>(kvp.first),
-															 static_cast<value_ref>(v));
-							}
-
-							// func(val)
-							else if constexpr (std::is_invocable_v<Func&&, value_ref>)
-							{
-								static_cast<Func&&>(visitor)(static_cast<value_ref>(v));
-							}
-						});
-
-#else
-				const auto keep_going =
-					static_cast<node_ref>(*kvp.second)
-						.visit(
-							[&]([[maybe_unused]] auto&& v) //
-// Define this macro as a workaround to compile errors caused by a bug in MSVC's "legacy lambda processor".
-#if !TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA
-							noexcept(for_each_is_nothrow_one<Func&&, Table&&, decltype(v)>::value)
-#endif
-							{
-								using value_ref = for_each_value_ref<decltype(v), Table&&>;
-								static_assert(std::is_reference_v<value_ref>);
-
-								// func(key, val)
-								if constexpr (std::is_invocable_v<Func&&, const key&, value_ref>)
-								{
-									using return_type = decltype(static_cast<Func&&>(
-										visitor)(static_cast<const key&>(kvp.first), static_cast<value_ref>(v)));
-
-									if constexpr (impl::is_constructible_or_convertible<bool, return_type>)
-									{
-										return static_cast<bool>(static_cast<Func&&>(
-											visitor)(static_cast<const key&>(kvp.first), static_cast<value_ref>(v)));
-									}
-									else
-									{
-										static_cast<Func&&>(visitor)(static_cast<const key&>(kvp.first),
-																	 static_cast<value_ref>(v));
-										return true;
-									}
-								}
-
-								// func(val)
-								else if constexpr (std::is_invocable_v<Func&&, value_ref>)
-								{
-									using return_type =
-										decltype(static_cast<Func&&>(visitor)(static_cast<value_ref>(v)));
-
-									if constexpr (impl::is_constructible_or_convertible<bool, return_type>)
-									{
-										return static_cast<bool>(
-											static_cast<Func&&>(visitor)(static_cast<value_ref>(v)));
-									}
-									else
-									{
-										static_cast<Func&&>(visitor)(static_cast<value_ref>(v));
-										return true;
-									}
-								}
-
-								// visitor not compatible with this particular type
-								else
-									return true;
-							});
-
-				if (!keep_going)
-					return;
-#endif
-			}
-		}
-
-		/// \endcond
-
-	  public:
 		/// \brief	Invokes a visitor on each key-value pair in the table.
 		///
 		/// \tparam	Func	A callable type invocable with one of the following signatures:
@@ -1008,8 +1029,8 @@ TOML_NAMESPACE_START
 		///					</ul>
 		///					Where:
 		///					<ul>
-		///					<li> `key` will recieve a const reference to a toml::key
-		///					<li> `val` will recieve the value as it's concrete type with cvref-qualifications matching the table
+		///					<li> `key` will receive a const reference to a toml::key
+		///					<li> `val` will receive the value as its concrete type with cvref-qualifications matching the table
 		///					</ul>
 		///					Visitors returning `bool` (or something convertible to `bool`) will cause iteration to
 		///					stop if they return `false`.
@@ -1058,7 +1079,7 @@ TOML_NAMESPACE_START
 		/// });
 		/// std::cout << "\n\n";
 		///
-		/// // visitors may also recieve the key
+		/// // visitors may also receive the key
 		/// tbl.for_each([](const toml::key& key, auto&& val)
 		/// {
 		///		std::cout << key << ": " << val << "\n";
@@ -1139,16 +1160,6 @@ TOML_NAMESPACE_START
 		/// \name Searching
 		/// @{
 
-	  private:
-		/// \cond
-
-		TOML_PURE_GETTER
-		TOML_EXPORTED_MEMBER_FUNCTION
-		map_iterator get_lower_bound(std::string_view) noexcept;
-
-		/// \endcond
-
-	  public:
 		/// \brief Returns an iterator to the first key-value pair with key that is _not less_ than the given key.
 		///
 		/// \returns	An iterator to the first matching key-value pair, or #end().
@@ -1191,10 +1202,7 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		const_iterator lower_bound(std::wstring_view key) const
 		{
-			if (empty())
-				return end();
-
-			return lower_bound(impl::narrow(key));
+			return const_cast<table&>(*this).lower_bound(key);
 		}
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
@@ -1252,7 +1260,7 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		const_iterator find(std::wstring_view key) const
 		{
-			return find(impl::narrow(key));
+			return const_cast<table&>(*this).find(key);
 		}
 
 		/// \brief	Returns true if the table contains a node at the given key.
@@ -1261,7 +1269,7 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		bool contains(std::wstring_view key) const
 		{
-			return contains(impl::narrow(key));
+			return get(key) != nullptr;
 		}
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
@@ -1271,18 +1279,6 @@ TOML_NAMESPACE_START
 		/// \name Erasure
 		/// @{
 
-	  private:
-		/// \cond
-
-		TOML_EXPORTED_MEMBER_FUNCTION
-		map_iterator erase(const_map_iterator) noexcept;
-
-		TOML_EXPORTED_MEMBER_FUNCTION
-		map_iterator erase(const_map_iterator, const_map_iterator) noexcept;
-
-		/// \endcond
-
-	  public:
 		/// \brief	Removes the specified key-value pair from the table.
 		///
 		/// \detail \cpp
@@ -1419,7 +1415,7 @@ TOML_NAMESPACE_START
 		size_t erase(std::wstring_view key)
 		{
 			if (empty())
-				return false;
+				return size_t{};
 
 			return erase(impl::narrow(key));
 		}
@@ -1469,15 +1465,6 @@ TOML_NAMESPACE_START
 		/// \name Insertion and Emplacement
 		/// @{
 
-	  private:
-		/// \cond
-
-		TOML_EXPORTED_MEMBER_FUNCTION
-		map_iterator insert_with_hint(const_iterator, key&&, impl::node_ptr&&);
-
-		/// \endcond
-
-	  public:
 		/// \brief	Emplaces a new value at a specific key if one did not already exist.
 		///
 		/// \tparam ValueType	toml::table, toml::array, or any native TOML value type.
@@ -1496,67 +1483,45 @@ TOML_NAMESPACE_START
 								  typename... ValueArgs)
 		iterator emplace_hint(const_iterator hint, KeyType&& key, ValueArgs&&... args)
 		{
-			static_assert(!impl::is_wide_string<KeyType> || TOML_ENABLE_WINDOWS_COMPAT,
-						  "Emplacement using wide-character keys is only supported on Windows with "
-						  "TOML_ENABLE_WINDOWS_COMPAT enabled.");
+			using value_type = impl::emplaced_type_or<ValueType, ValueArgs&&...>;
 
-			using raw_value_type = impl::remove_cvref<ValueType>;
-			using value_type	 = std::
-				conditional_t<std::is_void_v<raw_value_type>, impl::emplaced_type_of<ValueArgs&&...>, raw_value_type>;
+			static constexpr auto moving_node_ptr = std::is_same_v<value_type, impl::node_ptr> //
+												 && sizeof...(ValueArgs) == 1u				   //
+												 && impl::first_is_same<impl::node_ptr&&, ValueArgs&&...>;
+			using unwrapped_type				  = impl::remove_cvref<impl::unwrap_node<value_type>>;
 
-			if constexpr (impl::is_wide_string<KeyType>)
+			static_assert(moving_node_ptr										//
+							  || impl::is_native<unwrapped_type>				//
+							  || impl::is_one_of<unwrapped_type, table, array>, //
+						  "The template type argument of table::emplace_hint() must be one "
+						  "of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
+
+			const auto ipos = insert_with_hint(hint, toml::key{ narrow_key(static_cast<KeyType&&>(key)) }, nullptr);
+
+			// if second is nullptr then we successfully claimed the key and inserted the empty sentinel,
+			// so now we have to construct the actual value
+			if (!ipos->second)
 			{
-#if TOML_ENABLE_WINDOWS_COMPAT
-				return emplace_hint<value_type>(hint,
-												impl::narrow(static_cast<KeyType&&>(key)),
-												static_cast<ValueArgs&&>(args)...);
-#else
-				static_assert(impl::always_false<KeyType>, "Evaluated unreachable branch!");
-#endif
-			}
-			else
-			{
-				static constexpr auto moving_node_ptr = std::is_same_v<value_type, impl::node_ptr> //
-													 && sizeof...(ValueArgs) == 1u				   //
-													 && impl::first_is_same<impl::node_ptr&&, ValueArgs&&...>;
-				using unwrapped_type				  = impl::remove_cvref<impl::unwrap_node<value_type>>;
-
-				static_assert(moving_node_ptr										//
-								  || impl::is_native<unwrapped_type>				//
-								  || impl::is_one_of<unwrapped_type, table, array>, //
-							  "ValueType argument of table::emplace_hint() must be one "
-							  "of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
-
-				const auto ipos = insert_with_hint(hint, toml::key{ static_cast<KeyType&&>(key) }, nullptr);
-
-				// if second is nullptr then we successully claimed the key and inserted the empty sentinel,
-				// so now we have to construct the actual value
-				if (!ipos->second)
+				if constexpr (moving_node_ptr)
+					ipos->second = std::move(static_cast<ValueArgs&&>(args)...);
+				else
 				{
-					if constexpr (moving_node_ptr)
-						ipos->second = std::move(static_cast<ValueArgs&&>(args)...);
-					else
+#if TOML_COMPILER_HAS_EXCEPTIONS
+					try
 					{
-#if TOML_COMPILER_HAS_EXCEPTIONS
-						try
-						{
 #endif
-							ipos->second.reset(
-								new impl::wrap_node<unwrapped_type>{ static_cast<ValueArgs&&>(args)... });
+						ipos->second.reset(new impl::wrap_node<unwrapped_type>{ static_cast<ValueArgs&&>(args)... });
 #if TOML_COMPILER_HAS_EXCEPTIONS
-						}
-						catch (...)
-						{
-							erase(const_map_iterator{ ipos }); // strong exception guarantee
-							throw;
-						}
-#endif
 					}
+					catch (...)
+					{
+						erase(const_map_iterator{ ipos }); // strong exception guarantee
+						throw;
+					}
+#endif
 				}
-				return iterator{ ipos };
 			}
-
-			TOML_UNREACHABLE;
+			return iterator{ ipos };
 		}
 
 		/// \brief	Inserts a new value at a specific key if one did not already exist.
@@ -1571,6 +1536,7 @@ TOML_NAMESPACE_START
 		///	};
 		/// std::cout << tbl << "\n";
 		///
+		/// std::cout << std::boolalpha;
 		/// for (auto k : { "a", "d" })
 		/// {
 		///		auto result = tbl.insert(k, 42);
@@ -1583,7 +1549,6 @@ TOML_NAMESPACE_START
 		/// a = 1
 		/// b = 2
 		/// c = 3
-		///
 		/// inserted with key 'a': false
 		/// inserted with key 'd': true
 		/// a = 1
@@ -1617,37 +1582,13 @@ TOML_NAMESPACE_START
 										 ValueType&& val,
 										 value_flags flags = preserve_source_value_flags)
 		{
-			static_assert(!impl::is_wide_string<KeyType> || TOML_ENABLE_WINDOWS_COMPAT,
-						  "Insertion using wide-character keys is only supported on Windows with "
-						  "TOML_ENABLE_WINDOWS_COMPAT enabled.");
+			if (impl::is_null_node_view(val))
+				return { end(), false };
 
-			if constexpr (is_node_view<ValueType>)
-			{
-				if (!val)
-					return { end(), false };
-			}
-
-			if constexpr (impl::is_wide_string<KeyType>)
-			{
-#if TOML_ENABLE_WINDOWS_COMPAT
-				return insert(impl::narrow(static_cast<KeyType&&>(key)), static_cast<ValueType&&>(val), flags);
-#else
-				static_assert(impl::always_false<KeyType>, "Evaluated unreachable branch!");
-#endif
-			}
-			else
-			{
-				const auto key_view = std::string_view{ key };
-				auto ipos			= get_lower_bound(key_view);
-				if (ipos == map_.end() || ipos->first != key_view)
-				{
-					ipos = insert_with_hint(const_iterator{ ipos },
-											toml::key{ static_cast<KeyType&&>(key) },
-											impl::make_node(static_cast<ValueType&&>(val), flags));
-					return { iterator{ ipos }, true };
-				}
-				return { iterator{ ipos }, false };
-			}
+			const auto [ipos, inserted] =
+				insert_if_absent(narrow_key(static_cast<KeyType&&>(key)),
+								 [&]() { return impl::make_node(static_cast<ValueType&&>(val), flags); });
+			return { iterator{ ipos }, inserted };
 		}
 
 		/// \brief	Inserts a series of key-value pairs into the table.
@@ -1674,7 +1615,6 @@ TOML_NAMESPACE_START
 		/// a = 1
 		/// b = 2
 		/// c = 3
-		///
 		/// a = 1
 		/// b = 2
 		/// c = 3
@@ -1692,9 +1632,7 @@ TOML_NAMESPACE_START
 		TOML_CONSTRAINED_TEMPLATE((!is_key_or_convertible<Iter> && !impl::is_wide_string<Iter>), typename Iter)
 		void insert(Iter begin, Iter end, value_flags flags = preserve_source_value_flags)
 		{
-			if (begin == end)
-				return;
-			for (auto it = begin; it != end; it++)
+			for (auto it = begin; it != end; ++it)
 			{
 				if constexpr (std::is_rvalue_reference_v<decltype(*it)>)
 					insert(std::move((*it).first), std::move((*it).second), flags);
@@ -1728,7 +1666,6 @@ TOML_NAMESPACE_START
 		/// a = 1
 		/// b = 2
 		/// c = 3
-		///
 		/// value at key 'a' was assigned
 		/// value at key 'd' was inserted
 		/// a = 42
@@ -1762,41 +1699,14 @@ TOML_NAMESPACE_START
 												   ValueType&& val,
 												   value_flags flags = preserve_source_value_flags)
 		{
-			static_assert(!impl::is_wide_string<KeyType> || TOML_ENABLE_WINDOWS_COMPAT,
-						  "Insertion using wide-character keys is only supported on Windows with "
-						  "TOML_ENABLE_WINDOWS_COMPAT enabled.");
+			if (impl::is_null_node_view(val))
+				return { end(), false };
 
-			if constexpr (is_node_view<ValueType>)
-			{
-				if (!val)
-					return { end(), false };
-			}
-
-			if constexpr (impl::is_wide_string<KeyType>)
-			{
-#if TOML_ENABLE_WINDOWS_COMPAT
-				return insert_or_assign(impl::narrow(static_cast<KeyType&&>(key)),
-										static_cast<ValueType&&>(val),
-										flags);
-#else
-				static_assert(impl::always_false<KeyType>, "Evaluated unreachable branch!");
-#endif
-			}
-			else
-			{
-				const auto key_view = std::string_view{ key };
-				auto ipos			= get_lower_bound(key_view);
-				if (ipos == map_.end() || ipos->first != key_view)
-				{
-					ipos = insert_with_hint(const_iterator{ ipos },
-											toml::key{ static_cast<KeyType&&>(key) },
-											impl::make_node(static_cast<ValueType&&>(val), flags));
-					return { iterator{ ipos }, true };
-				}
-
-				(*ipos).second = impl::make_node(static_cast<ValueType&&>(val), flags);
-				return { iterator{ ipos }, false };
-			}
+			const auto make_node		= [&]() { return impl::make_node(static_cast<ValueType&&>(val), flags); };
+			const auto [ipos, inserted] = insert_if_absent(narrow_key(static_cast<KeyType&&>(key)), make_node);
+			if (!inserted)
+				ipos->second = make_node();
+			return { iterator{ ipos }, inserted };
 		}
 
 		/// \brief	Emplaces a new value at a specific key if one did not already exist.
@@ -1809,6 +1719,7 @@ TOML_NAMESPACE_START
 		///	};
 		/// std::cout << tbl << "\n";
 		///
+		/// std::cout << std::boolalpha;
 		/// for (auto k : { "a", "d" })
 		/// {
 		///		// add a string using std::string's substring constructor
@@ -1819,10 +1730,15 @@ TOML_NAMESPACE_START
 		/// \ecpp
 		///
 		/// \out
-		/// { a = 1, b = 2, c = 3 }
+		/// a = 1
+		/// b = 2
+		/// c = 3
 		/// emplaced with key 'a': false
 		/// emplaced with key 'd': true
-		/// { a = 1, b = 2, c = 3, d = "drill" }
+		/// a = 1
+		/// b = 2
+		/// c = 3
+		/// d = 'drill'
 		/// \eout
 		///
 		/// \tparam ValueType	toml::table, toml::array, or any native TOML value type.
@@ -1842,42 +1758,17 @@ TOML_NAMESPACE_START
 								  typename... ValueArgs)
 		std::pair<iterator, bool> emplace(KeyType&& key, ValueArgs&&... args)
 		{
-			static_assert(!impl::is_wide_string<KeyType> || TOML_ENABLE_WINDOWS_COMPAT,
-						  "Emplacement using wide-character keys is only supported on Windows with "
-						  "TOML_ENABLE_WINDOWS_COMPAT enabled.");
+			using value_type	 = impl::emplaced_type_or<ValueType, ValueArgs&&...>;
+			using unwrapped_type = impl::remove_cvref<impl::unwrap_node<value_type>>;
+			static_assert((impl::is_native<unwrapped_type> || impl::is_one_of<unwrapped_type, table, array>),
+						  "The template type argument of table::emplace() must be one "
+						  "of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
 
-			using raw_value_type = impl::remove_cvref<ValueType>;
-			using value_type	 = std::
-				conditional_t<std::is_void_v<raw_value_type>, impl::emplaced_type_of<ValueArgs&&...>, raw_value_type>;
-
-			if constexpr (impl::is_wide_string<KeyType>)
-			{
-#if TOML_ENABLE_WINDOWS_COMPAT
-				return emplace<value_type>(impl::narrow(static_cast<KeyType&&>(key)),
-										   static_cast<ValueArgs&&>(args)...);
-#else
-				static_assert(impl::always_false<KeyType>, "Evaluated unreachable branch!");
-#endif
-			}
-			else
-			{
-				using unwrapped_type = impl::remove_cvref<impl::unwrap_node<value_type>>;
-				static_assert((impl::is_native<unwrapped_type> || impl::is_one_of<unwrapped_type, table, array>),
-							  "ValueType argument of table::emplace() must be one "
-							  "of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
-
-				const auto key_view = std::string_view{ key };
-				auto ipos			= get_lower_bound(key_view);
-				if (ipos == map_.end() || ipos->first != key_view)
-				{
-					ipos = insert_with_hint(
-						const_iterator{ ipos },
-						toml::key{ static_cast<KeyType&&>(key) },
-						impl::node_ptr{ new impl::wrap_node<unwrapped_type>{ static_cast<ValueArgs&&>(args)... } });
-					return { iterator{ ipos }, true };
-				}
-				return { iterator{ ipos }, false };
-			}
+			const auto [ipos, inserted] = insert_if_absent(
+				narrow_key(static_cast<KeyType&&>(key)),
+				[&]()
+				{ return impl::node_ptr{ new impl::wrap_node<unwrapped_type>{ static_cast<ValueArgs&&>(args)... } }; });
+			return { iterator{ ipos }, inserted };
 		}
 
 		/// @}
@@ -1970,21 +1861,12 @@ TOML_NAMESPACE_START
 		/// \name Equality
 		/// @{
 
-	  private:
-		/// \cond
-
-		TOML_PURE_GETTER
-		TOML_EXPORTED_STATIC_FUNCTION
-		static bool TOML_CALLCONV equal(const table&, const table&) noexcept;
-
-		/// \endcond
-	  public:
 		/// \brief	Equality operator.
 		///
 		/// \param 	lhs	The LHS table.
 		/// \param 	rhs	The RHS table.
 		///
-		/// \returns	True if the tables contained the same keys and map.
+		/// \returns	True if the tables contained the same keys and values.
 		TOML_NODISCARD
 		friend bool operator==(const table& lhs, const table& rhs) noexcept
 		{
@@ -1996,7 +1878,7 @@ TOML_NAMESPACE_START
 		/// \param 	lhs	The LHS table.
 		/// \param 	rhs	The RHS table.
 		///
-		/// \returns	True if the tables did not contain the same keys and map.
+		/// \returns	True if the tables did not contain the same keys and values.
 		TOML_NODISCARD
 		friend bool operator!=(const table& lhs, const table& rhs) noexcept
 		{

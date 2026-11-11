@@ -68,7 +68,7 @@ str7 = """"This," she said, "is just a pointless statement.""""
 
 	parsing_should_fail(FILE_LINE_ARGS,
 						R"(str5 = """Here are three quotation marks: """.""")"sv,
-						"1:46: Error while parsing key-value pair: expected a comment or whitespace, saw '.'"sv);
+						"1:46: Error while parsing key-value pair: expected a comment or line break, saw '.'"sv);
 
 	parsing_should_succeed(FILE_LINE_ARGS,
 						   R"(
@@ -131,7 +131,7 @@ str = ''''That's still pointless', she said.'''
 
 	parsing_should_fail(FILE_LINE_ARGS,
 						R"(apos15 = '''Here are fifteen apostrophes: ''''''''''''''''''  # INVALID)"sv,
-						"1:48: Error while parsing key-value pair: expected a comment or whitespace, saw '''"sv);
+						"1:48: Error while parsing key-value pair: expected a comment or line break, saw '''"sv);
 }
 
 TEST_CASE("parsing - strings (values)")
@@ -175,41 +175,41 @@ TEST_CASE("parsing - strings (escape sequences)")
 	// check 8-digit \U scalars with insufficient digits
 	parsing_should_fail(FILE_LINE_ARGS,
 						R"(str = "\U1234567")"sv,
-						R"(1:17: Error while parsing unicode scalar sequence: expected hex digit, saw '"')"sv);
+						R"(1:17: Error while parsing unicode scalar sequence: expected hexadecimal digit, saw '"')"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						R"(str = "\U123456")"sv,
-						R"(1:16: Error while parsing unicode scalar sequence: expected hex digit, saw '"')"sv);
+						R"(1:16: Error while parsing unicode scalar sequence: expected hexadecimal digit, saw '"')"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						R"(str = "\U12345")"sv,
-						R"(1:15: Error while parsing unicode scalar sequence: expected hex digit, saw '"')"sv);
+						R"(1:15: Error while parsing unicode scalar sequence: expected hexadecimal digit, saw '"')"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						R"(str = "\U1234")"sv,
-						R"(1:14: Error while parsing unicode scalar sequence: expected hex digit, saw '"')"sv);
+						R"(1:14: Error while parsing unicode scalar sequence: expected hexadecimal digit, saw '"')"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						R"(str = "\U123")"sv,
-						R"(1:13: Error while parsing unicode scalar sequence: expected hex digit, saw '"')"sv);
+						R"(1:13: Error while parsing unicode scalar sequence: expected hexadecimal digit, saw '"')"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						R"(str = "\U12")"sv,
-						R"(1:12: Error while parsing unicode scalar sequence: expected hex digit, saw '"')"sv);
+						R"(1:12: Error while parsing unicode scalar sequence: expected hexadecimal digit, saw '"')"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						R"(str = "\U1")"sv,
-						R"(1:11: Error while parsing unicode scalar sequence: expected hex digit, saw '"')"sv);
+						R"(1:11: Error while parsing unicode scalar sequence: expected hexadecimal digit, saw '"')"sv);
 
 	// check 4-digit \u scalars with insufficient digits
 	parsing_should_fail(FILE_LINE_ARGS,
 						R"(str = "\u123")"sv,
-						R"(1:13: Error while parsing unicode scalar sequence: expected hex digit, saw '"')"sv);
+						R"(1:13: Error while parsing unicode scalar sequence: expected hexadecimal digit, saw '"')"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						R"(str = "\u12")"sv,
-						R"(1:12: Error while parsing unicode scalar sequence: expected hex digit, saw '"')"sv);
+						R"(1:12: Error while parsing unicode scalar sequence: expected hexadecimal digit, saw '"')"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						R"(str = "\u1")"sv,
-						R"(1:11: Error while parsing unicode scalar sequence: expected hex digit, saw '"')"sv);
+						R"(1:11: Error while parsing unicode scalar sequence: expected hexadecimal digit, saw '"')"sv);
 
 	// check 2-digit \x scalars with insufficient digits
 	parsing_should_fail(FILE_LINE_ARGS,
 						R"(str = "\x1")"sv,
-						R"(1:11: Error while parsing unicode scalar sequence: expected hex digit, saw '"')"sv);
+						R"(1:11: Error while parsing unicode scalar sequence: expected hexadecimal digit, saw '"')"sv);
 }
 
 TEST_CASE("parsing - strings (quotes next to multi-line delimiters)")
@@ -220,25 +220,25 @@ TEST_CASE("parsing - strings (quotes next to multi-line delimiters)")
 	parse_expected_value(FILE_LINE_ARGS, R"( """ """""        )"sv, R"( "")"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						R"(v= """ """"""       )"sv,
-						R"(1:13: Error while parsing key-value pair: expected a comment or whitespace, saw '"')"sv);
+						R"(1:13: Error while parsing key-value pair: expected a comment or line break, saw '"')"sv);
 	parse_expected_value(FILE_LINE_ARGS, R"( ''' '''          )"sv, R"( )"sv);
 	parse_expected_value(FILE_LINE_ARGS, R"( ''' ''''         )"sv, R"( ')"sv);
 	parse_expected_value(FILE_LINE_ARGS, R"( ''' '''''        )"sv, R"( '')"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						R"(v= ''' ''''''       )"sv,
-						"1:13: Error while parsing key-value pair: expected a comment or whitespace, saw '''"sv);
+						"1:13: Error while parsing key-value pair: expected a comment or line break, saw '''"sv);
 	parse_expected_value(FILE_LINE_ARGS, R"( """"""           )"sv, R"()"sv);
 	parse_expected_value(FILE_LINE_ARGS, R"( """" """         )"sv, R"(" )"sv);
 	parse_expected_value(FILE_LINE_ARGS, R"( """"" """        )"sv, R"("" )"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						R"(v= """""" """       )"sv,
-						R"(1:11: Error while parsing key-value pair: expected a comment or whitespace, saw '"')"sv);
+						R"(1:11: Error while parsing key-value pair: expected a comment or line break, saw '"')"sv);
 	parse_expected_value(FILE_LINE_ARGS, R"( ''''''           )"sv, R"()"sv);
 	parse_expected_value(FILE_LINE_ARGS, R"( '''' '''         )"sv, R"(' )"sv);
 	parse_expected_value(FILE_LINE_ARGS, R"( ''''' '''        )"sv, R"('' )"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						R"(v= '''''' '''       )"sv,
-						"1:11: Error while parsing key-value pair: expected a comment or whitespace, saw '''"sv);
+						"1:11: Error while parsing key-value pair: expected a comment or line break, saw '''"sv);
 	parse_expected_value(FILE_LINE_ARGS, R"( """""\""""""     )"sv, R"(""""")"sv);
 	parse_expected_value(FILE_LINE_ARGS, R"( """""\"""\"""""" )"sv, R"("""""""")"sv);
 }
@@ -266,18 +266,18 @@ TEST_CASE("parsing - strings (malformed)")
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		R"(str = "\uD800")"sv,
-		"1:8: Error while parsing unicode scalar sequence: unicode surrogates (U+D800 - U+DFFF) are explicitly prohibited"sv);
+		"1:8: Error while parsing unicode scalar sequence: unicode surrogates (U+D800 - U+DFFF) are prohibited"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		R"(str = "\uDFFF")"sv,
-		"1:8: Error while parsing unicode scalar sequence: unicode surrogates (U+D800 - U+DFFF) are explicitly prohibited"sv);
+		"1:8: Error while parsing unicode scalar sequence: unicode surrogates (U+D800 - U+DFFF) are prohibited"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						R"(str = "\U00110000")"sv,
 						"1:8: Error while parsing unicode scalar sequence: values greater than U+10FFFF are invalid"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		R"(str = "\U0000D800")"sv,
-		"1:8: Error while parsing unicode scalar sequence: unicode surrogates (U+D800 - U+DFFF) are explicitly prohibited"sv);
+		"1:8: Error while parsing unicode scalar sequence: unicode surrogates (U+D800 - U+DFFF) are prohibited"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						R"(str = "\q")"sv,
 						R"(1:9: Error while parsing string: unknown escape sequence '\q')"sv);
@@ -287,8 +287,9 @@ TEST_CASE("parsing - strings (malformed)")
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		R"(str = """\uD800""")"sv,
-		"1:10: Error while parsing unicode scalar sequence: unicode surrogates (U+D800 - U+DFFF) are explicitly prohibited"sv);
-	parsing_should_fail(FILE_LINE_ARGS, "str = \"\xED\xA0\x80\""sv, "1:8: Encountered invalid utf-8 sequence"sv);
+		"1:10: Error while parsing unicode scalar sequence: unicode surrogates (U+D800 - U+DFFF) are prohibited"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "str = \"\xED\xA0\x80\""sv, "1:8: Encountered invalid UTF-8 sequence"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "str = '\xED\xA0\x80'"sv, "1:8: Encountered invalid UTF-8 sequence"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						R"(str = "abc)"sv,
 						"1:11: Error while parsing string: encountered end-of-file"sv);
@@ -304,15 +305,15 @@ TEST_CASE("parsing - strings (malformed)")
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		"str = 'a\x01'"sv,
-		"1:9: Error while parsing literal string: control characters other than TAB (U+0009) are explicitly prohibited"sv);
+		R"(1:9: Error while parsing literal string: control characters other than TAB (U+0009) are prohibited, saw '\u0001')"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		"str = '''a\x01'''"sv,
-		"1:11: Error while parsing literal string: control characters other than TAB (U+0009) are explicitly prohibited"sv);
+		R"(1:11: Error while parsing literal string: control characters other than TAB (U+0009) are prohibited, saw '\u0001')"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		"str = \"a\x01\""sv,
-		"1:9: Error while parsing string: unescaped control characters other than TAB (U+0009) are explicitly prohibited"sv);
+		R"(1:9: Error while parsing string: unescaped control characters other than TAB (U+0009) are prohibited, saw '\u0001')"sv);
 }
 
 TEST_CASE("parsing - strings (at the end of the document)")
@@ -328,10 +329,13 @@ TEST_CASE("parsing - strings (at the end of the document)")
 						"1:8: Error while parsing literal string: encountered end-of-file"sv);
 	parsing_should_fail(FILE_LINE_ARGS, R"(a = """)"sv, "1:8: Error while parsing string: encountered end-of-file"sv);
 	parsing_should_fail(FILE_LINE_ARGS, "a = '\n"sv, "1:7: Error while parsing string: encountered end-of-file"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"a = \"\"\"x\\ \t"sv,
+						"1:12: Error while parsing string: encountered end-of-file"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		"a = 'a\n"sv,
-		"1:7: Error while parsing literal string: control characters other than TAB (U+0009) are explicitly prohibited"sv);
+		R"(1:7: Error while parsing literal string: control characters other than TAB (U+0009) are prohibited, saw '\n')"sv);
 }
 
 TEST_CASE("parsing - strings (bytes after long stretches)")
@@ -357,16 +361,17 @@ TEST_CASE("parsing - strings (bytes after long stretches)")
 					parsing_should_fail(
 						FILE_LINE_ARGS,
 						basic,
-						"1:47: Error while parsing key-value pair: expected a comment or whitespace, saw 'y'"sv);
+						"1:47: Error while parsing key-value pair: expected a comment or line break, saw 'y'"sv);
 				else if (c == '\\')
 					parsing_should_fail(FILE_LINE_ARGS,
 										basic,
 										R"(1:47: Error while parsing string: unknown escape sequence '\y')"sv);
 				else if (control)
-					parsing_should_fail(
-						FILE_LINE_ARGS,
-						basic,
-						"1:46: Error while parsing string: unescaped control characters other than TAB (U+0009) are explicitly prohibited"sv);
+					parsing_should_fail(FILE_LINE_ARGS,
+										basic,
+										"1:46: Error while parsing string: unescaped control characters other than TAB "
+										"(U+0009) are prohibited, saw "
+											+ quoted_control_character(c));
 				else
 					parsing_should_succeed(FILE_LINE_ARGS, basic, check);
 
@@ -375,12 +380,13 @@ TEST_CASE("parsing - strings (bytes after long stretches)")
 					parsing_should_fail(
 						FILE_LINE_ARGS,
 						literal,
-						"1:47: Error while parsing key-value pair: expected a comment or whitespace, saw 'y'"sv);
+						"1:47: Error while parsing key-value pair: expected a comment or line break, saw 'y'"sv);
 				else if (control)
-					parsing_should_fail(
-						FILE_LINE_ARGS,
-						literal,
-						"1:46: Error while parsing literal string: control characters other than TAB (U+0009) are explicitly prohibited"sv);
+					parsing_should_fail(FILE_LINE_ARGS,
+										literal,
+										"1:46: Error while parsing literal string: control characters other than TAB "
+										"(U+0009) are prohibited, saw "
+											+ quoted_control_character(c));
 				else
 					parsing_should_succeed(FILE_LINE_ARGS, literal, check);
 
@@ -399,10 +405,11 @@ TEST_CASE("parsing - strings (bytes after long stretches)")
 						multi_basic,
 						R"(1:48: Error while parsing string: vertical tabs '\v' and form-feeds '\f' are not legal line breaks in TOML)"sv);
 				else if (control && c != '\n')
-					parsing_should_fail(
-						FILE_LINE_ARGS,
-						multi_basic,
-						"1:48: Error while parsing string: unescaped control characters other than TAB (U+0009) are explicitly prohibited"sv);
+					parsing_should_fail(FILE_LINE_ARGS,
+										multi_basic,
+										"1:48: Error while parsing string: unescaped control characters other than TAB "
+										"(U+0009) are prohibited, saw "
+											+ quoted_control_character(c));
 				else
 					parsing_should_succeed(FILE_LINE_ARGS, multi_basic, check);
 
@@ -418,10 +425,11 @@ TEST_CASE("parsing - strings (bytes after long stretches)")
 						multi_literal,
 						R"(1:48: Error while parsing literal string: vertical tabs '\v' and form-feeds '\f' are not legal line breaks in TOML)"sv);
 				else if (control && c != '\n')
-					parsing_should_fail(
-						FILE_LINE_ARGS,
-						multi_literal,
-						"1:48: Error while parsing literal string: control characters other than TAB (U+0009) are explicitly prohibited"sv);
+					parsing_should_fail(FILE_LINE_ARGS,
+										multi_literal,
+										"1:48: Error while parsing literal string: control characters other than TAB "
+										"(U+0009) are prohibited, saw "
+											+ quoted_control_character(c));
 				else
 					parsing_should_succeed(FILE_LINE_ARGS, multi_literal, check);
 			}
@@ -433,19 +441,19 @@ TEST_CASE("parsing - strings (bytes after long stretches)")
 		parsing_should_fail(
 			FILE_LINE_ARGS,
 			"a = \"\xC3\xA9\xE2\x82\xAC\xF0\x9F\x98\x82\xC3\xA9\xE2\x82\xAC\xF0\x9F\x98\x82\x01\""sv,
-			"1:12: Error while parsing string: unescaped control characters other than TAB (U+0009) are explicitly prohibited"sv);
+			R"(1:12: Error while parsing string: unescaped control characters other than TAB (U+0009) are prohibited, saw '\u0001')"sv);
 		parsing_should_fail(
 			FILE_LINE_ARGS,
 			"a = '\xC3\xA9\xE2\x82\xAC\xF0\x9F\x98\x82\xC3\xA9\xE2\x82\xAC\xF0\x9F\x98\x82\x01'"sv,
-			"1:12: Error while parsing literal string: control characters other than TAB (U+0009) are explicitly prohibited"sv);
+			R"(1:12: Error while parsing literal string: control characters other than TAB (U+0009) are prohibited, saw '\u0001')"sv);
 		parsing_should_fail(
 			FILE_LINE_ARGS,
 			"a = \"\"\"\xC3\xA9\xE2\x82\xAC\xF0\x9F\x98\x82\x01\"\"\""sv,
-			"1:11: Error while parsing string: unescaped control characters other than TAB (U+0009) are explicitly prohibited"sv);
+			R"(1:11: Error while parsing string: unescaped control characters other than TAB (U+0009) are prohibited, saw '\u0001')"sv);
 		parsing_should_fail(
 			FILE_LINE_ARGS,
 			"a = '''\xC3\xA9\xE2\x82\xAC\xF0\x9F\x98\x82\x01'''"sv,
-			"1:11: Error while parsing literal string: control characters other than TAB (U+0009) are explicitly prohibited"sv);
+			R"(1:11: Error while parsing literal string: control characters other than TAB (U+0009) are prohibited, saw '\u0001')"sv);
 	}
 }
 
@@ -480,7 +488,7 @@ TEST_CASE("parsing - strings (bytes within a 16-byte block)")
 				parsing_should_fail(FILE_LINE_ARGS,
 									doc,
 									error_at(column + 1u, "key-value pair")
-										+ "expected a comment or whitespace, saw 'y'");
+										+ "expected a comment or line break, saw 'y'");
 			else if (basic && c == '\\')
 				parsing_should_fail(FILE_LINE_ARGS,
 									doc,
@@ -499,7 +507,8 @@ TEST_CASE("parsing - strings (bytes within a 16-byte block)")
 				parsing_should_fail(FILE_LINE_ARGS,
 									doc,
 									error_at(column, k.scope) + (basic ? "unescaped " : "")
-										+ "control characters other than TAB (U+0009) are explicitly prohibited");
+										+ "control characters other than TAB (U+0009) are prohibited, saw "
+										+ quoted_control_character(c));
 			else
 				parsing_should_succeed(FILE_LINE_ARGS,
 									   doc,

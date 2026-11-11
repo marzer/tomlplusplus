@@ -41,7 +41,7 @@ if(tomlplusplus_REGENERATE)
     file(GLOB_RECURSE tomlplusplus_regenerate_inputs "${PROJECT_SOURCE_DIR}/include/*")
     set_property(
         DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
-        ${tomlplusplus_regenerate_inputs} tools/regenerate.py toml.hpp
+        ${tomlplusplus_regenerate_inputs} tools/regenerate.py toml.hpp LICENSE
     )
   else()
     message(STATUS "Python 3 not found; toml.hpp and other derived files won't be kept up to date")

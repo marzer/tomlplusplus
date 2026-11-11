@@ -18,10 +18,9 @@ TEST_CASE("parsing - tables")
 							   CHECK(tbl["table"].as_table()->empty());
 							   CHECK(tbl["table"].as_table()->size() == 0u);
 						   });
-	parsing_should_fail(
-		FILE_LINE_ARGS,
-		"[]"sv,
-		"1:2: Error while parsing table header: tables with blank bare keys are explicitly prohibited"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"[]"sv,
+						"1:2: Error while parsing table header: tables with blank bare keys are prohibited"sv);
 
 	parsing_should_fail(
 		FILE_LINE_ARGS,
@@ -167,13 +166,13 @@ TEST_CASE("parsing - tables (redefinition)")
 		"7:3: Error while parsing table header: cannot redefine existing string 'fruit.apple' as table"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"a = 1\n[a.b]"sv,
-						"2:2: Error while parsing table header: cannot redefine existing integer as table"sv);
+						"2:2: Error while parsing table header: cannot redefine existing integer 'a' as table"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"a = 1\n[[a.b]]"sv,
-						"2:3: Error while parsing table header: cannot redefine existing integer as table"sv);
+						"2:3: Error while parsing table header: cannot redefine existing integer 'a' as table"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"x.a = [1]\n[x.a.c.d]"sv,
-						"2:4: Error while parsing table header: cannot redefine existing array as table"sv);
+						"2:4: Error while parsing table header: cannot redefine existing array 'a' as table"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"[a.b]\n[a]\n[a.b]"sv,
 						"3:1: Error while parsing table header: cannot redefine existing table 'a.b'"sv);
@@ -295,6 +294,29 @@ TEST_CASE("parsing - tables (headers can't redefine dotted-key tables)")
 						"6:3: Error while parsing table header: cannot redefine existing table 'fruit.apple.taste'"sv);
 }
 
+TEST_CASE("parsing - tables (headers can't redefine implicit tables that dotted keys added to)")
+{
+	for (const auto pair : { "b.x = 1"sv, "b.x = {}"sv, "b.x = [{}]"sv, "b.d.x = 1"sv })
+	{
+		std::string doc{ "[a.b.c]\n[a]\n" };
+		doc += pair;
+		doc += "\n[a.b]\n";
+		parsing_should_fail(FILE_LINE_ARGS,
+							doc,
+							"4:1: Error while parsing table header: cannot redefine existing table 'a.b'"sv);
+	}
+
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   "[a.b.c]\n[a]\nb.x = 1\nb.y = 2\n[a.b.d]\nz = 3\n"sv,
+						   [](table&& tbl)
+						   {
+							   CHECK(tbl["a"]["b"]["x"] == 1);
+							   CHECK(tbl["a"]["b"]["y"] == 2);
+							   CHECK(tbl["a"]["b"]["c"].is_table());
+							   CHECK(tbl["a"]["b"]["d"]["z"] == 3);
+						   });
+}
+
 TEST_CASE("parsing - tables (dotted keys can't redefine header tables)")
 {
 	// "Likewise, using dotted keys to redefine tables already defined in [table] form is not allowed."
@@ -316,7 +338,7 @@ TEST_CASE("parsing - tables (dotted keys can't redefine header tables)")
 		[fruit]
 		apple.taste.foo = "bar"  # INVALID
 	)"sv,
-		"6:9: Error while parsing key-value pair: cannot redefine existing table as dotted key-value pair"sv);
+		"6:9: Error while parsing key-value pair: cannot redefine existing table 'taste' as dotted key-value pair"sv);
 }
 
 TEST_CASE("parsing - tables (sub-tables of dotted-key tables)")
@@ -439,7 +461,7 @@ TEST_CASE("parsing - inline tables (self-contained)")
 		type = { name = "Nail" }
 		type.edible = false  # INVALID
 	)"sv,
-		"4:3: Error while parsing key-value pair: cannot redefine existing table as dotted key-value pair"sv);
+		"4:3: Error while parsing key-value pair: cannot redefine existing table 'type' as dotted key-value pair"sv);
 }
 
 TEST_CASE("parsing - inline tables (can't extend defined tables)")
@@ -732,7 +754,7 @@ TEST_CASE("parsing - tables (malformed)")
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		"[ [a] ]"sv,
-		"1:3: Error while parsing table header: [[array-of-table]] brackets must be contiguous (i.e. [ [ this ] ] is prohibited)"sv);
+		"1:3: Error while parsing table header: [[array-of-tables]] brackets must be contiguous (i.e. [ [ this ] ] is prohibited)"sv);
 	parsing_should_fail(FILE_LINE_ARGS, "[[a] ]"sv, "1:5: Error while parsing table header: expected ']', saw ' '"sv);
 	parsing_should_fail(FILE_LINE_ARGS, "[[a]"sv, "1:5: Error while parsing table header: encountered end-of-file"sv);
 	parsing_should_fail(FILE_LINE_ARGS, "[a"sv, "1:3: Error while parsing table header: encountered end-of-file"sv);
@@ -740,17 +762,17 @@ TEST_CASE("parsing - tables (malformed)")
 	parsing_should_fail(FILE_LINE_ARGS, "[[a b]]"sv, "1:5: Error while parsing table header: expected ']', saw 'b'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"[a]x"sv,
-						"1:4: Error while parsing table header: expected a comment or whitespace, saw 'x'"sv);
+						"1:4: Error while parsing table header: expected a comment or line break, saw 'x'"sv);
 }
 
 TEST_CASE("parsing - inline tables (malformed)")
 {
 	parsing_should_fail(FILE_LINE_ARGS,
 						"tbl = {,}"sv,
-						"1:8: Error while parsing inline table: expected key-value pair or closing '}', saw comma"sv);
+						"1:8: Error while parsing inline table: expected key-value pair or closing '}', saw ','"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"tbl = {b = 1,,c = 2}"sv,
-						"1:14: Error while parsing inline table: expected key-value pair or closing '}', saw comma"sv);
+						"1:14: Error while parsing inline table: expected key-value pair or closing '}', saw ','"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"tbl = {b = 1 c = 2}"sv,
 						"1:14: Error while parsing inline table: expected comma or closing '}', saw 'c'"sv);
@@ -878,10 +900,10 @@ TEST_CASE("parsing - thousands of tables")
 								   }
 							   });
 
-		parsing_should_fail(
-			FILE_LINE_ARGS,
-			doc + "s.x = 1\n",
-			next_line(doc)
-				+ ":1: Error while parsing key-value pair: cannot redefine existing table as dotted key-value pair");
+		parsing_should_fail(FILE_LINE_ARGS,
+							doc + "s.x = 1\n",
+							next_line(doc)
+								+ ":1: Error while parsing key-value pair: cannot redefine existing table 's' as "
+								  "dotted key-value pair");
 	}
 }

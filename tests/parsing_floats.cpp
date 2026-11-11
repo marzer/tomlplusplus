@@ -45,7 +45,7 @@ TEST_CASE("parsing - floats (underscores)")
 						"1:28: Error while parsing floating-point: underscores must be followed by digits"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"flt8 = _224_617.445_991_228"sv,
-						"1:8: Error while parsing value: values may not begin with underscores"sv);
+						"1:8: Error while parsing value: leading underscores are prohibited"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"flt8 = 224__617.445_991_228"sv,
 						"1:12: Error while parsing floating-point: underscores may only follow digits"sv);
@@ -529,13 +529,13 @@ TEST_CASE("parsing - inf and nan (malformed)")
 						"1:13: Error while parsing floating-point: expected end of value, saw '.'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						" val =   nan,1 "sv,
-						"1:13: Error while parsing key-value pair: expected a comment or whitespace, saw ','"sv);
+						"1:13: Error while parsing key-value pair: expected a comment or line break, saw ','"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						" val =    nan. "sv,
 						"1:14: Error while parsing floating-point: expected end of value, saw '.'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						" val =    nan, "sv,
-						"1:14: Error while parsing key-value pair: expected a comment or whitespace, saw ','"sv);
+						"1:14: Error while parsing key-value pair: expected a comment or line break, saw ','"sv);
 
 	parsing_should_fail(FILE_LINE_ARGS,
 						" val =     Inf "sv,
@@ -560,13 +560,23 @@ TEST_CASE("parsing - inf and nan (malformed)")
 						"1:13: Error while parsing floating-point: expected end of value, saw '.'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						" val =   inf,1 "sv,
-						"1:13: Error while parsing key-value pair: expected a comment or whitespace, saw ','"sv);
+						"1:13: Error while parsing key-value pair: expected a comment or line break, saw ','"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						" val =    inf. "sv,
 						"1:14: Error while parsing floating-point: expected end of value, saw '.'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						" val =    inf, "sv,
-						"1:14: Error while parsing key-value pair: expected a comment or whitespace, saw ','"sv);
+						"1:14: Error while parsing key-value pair: expected a comment or line break, saw ','"sv);
+}
+
+TEST_CASE("parsing - inf and nan (cut short by a control character)")
+{
+	parsing_should_fail(FILE_LINE_ARGS,
+						"val = +in\n"sv,
+						"1:10: Error while parsing floating-point: expected 'inf', saw '+in\\n'"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"val = n\tan"sv,
+						"1:8: Error while parsing floating-point: expected 'nan', saw 'n\\t'"sv);
 }
 
 TEST_CASE("parsing - floats (malformed)")
@@ -585,13 +595,22 @@ TEST_CASE("parsing - floats (malformed)")
 						"1:11: Error while parsing floating-point: underscores must be followed by digits"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"flt = 1e.5"sv,
-						"1:9: Error while parsing floating-point: expected exponent decimal digit or sign, saw '.'"sv);
+						"1:9: Error while parsing floating-point: expected exponent digit or sign, saw '.'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"flt = 1e5.3"sv,
-						"1:10: Error while parsing floating-point: expected exponent decimal digit, saw '.'"sv);
+						"1:10: Error while parsing floating-point: expected exponent digit, saw '.'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"flt = 1.2.3"sv,
 						"1:10: Error while parsing floating-point: expected decimal digit or exponent, saw '.'"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"flt = 1-0.5"sv,
+						"1:8: Error while parsing floating-point: expected decimal digit or '.', saw '-'"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"flt = 1.-0"sv,
+						"1:9: Error while parsing floating-point: expected decimal digit, saw '-'"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"flt = 1.5-0"sv,
+						"1:10: Error while parsing floating-point: expected decimal digit or exponent, saw '-'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"flt = 1.5x"sv,
 						"1:10: Error while parsing floating-point: expected decimal digit, saw 'x'"sv);
@@ -637,6 +656,22 @@ TEST_CASE("parsing - floats (malformed)")
 
 #if TOML_LANG_UNRELEASED
 
+TEST_CASE("parsing - hexadecimal floats (the forms a C++ literal can take)")
+{
+	parse_expected_value(FILE_LINE_ARGS, "0x.8p0"sv, 0x.8p0);
+	parse_expected_value(FILE_LINE_ARGS, "0x1.p0"sv, 0x1.p0);
+	parse_expected_value(FILE_LINE_ARGS, "0X1p0"sv, 0X1p0);
+	parse_expected_value(FILE_LINE_ARGS, "0x1P0"sv, 0x1P0);
+	parse_expected_value(FILE_LINE_ARGS, "0X.8P0"sv, 0X.8P0);
+
+	parsing_should_fail(FILE_LINE_ARGS,
+						"flt = 0x.p0"sv,
+						"1:10: Error while parsing hexadecimal floating-point: expected hexadecimal digit, saw 'p'"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"flt = 0xp0"sv,
+						"1:9: Error while parsing hexadecimal floating-point: expected hexadecimal digit, saw 'p'"sv);
+}
+
 TEST_CASE("parsing - hexadecimal floats (malformed)")
 {
 	parsing_should_fail(FILE_LINE_ARGS,
@@ -679,6 +714,18 @@ TEST_CASE("parsing - hexadecimal floats (malformed)")
 		"1:12: Error while parsing hexadecimal floating-point: expected hexadecimal digit or exponent, saw '.'"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
+		"flt = 0x1-8p1"sv,
+		"1:10: Error while parsing hexadecimal floating-point: expected hexadecimal digit or '.', saw '-'"sv);
+	parsing_should_fail(
+		FILE_LINE_ARGS,
+		"flt = 0x1.8-1p1"sv,
+		"1:12: Error while parsing hexadecimal floating-point: expected hexadecimal digit or exponent, saw '-'"sv);
+	parsing_should_fail(
+		FILE_LINE_ARGS,
+		"flt = 0x1.8gp1"sv,
+		"1:12: Error while parsing hexadecimal floating-point: expected hexadecimal digit or exponent, saw 'g'"sv);
+	parsing_should_fail(
+		FILE_LINE_ARGS,
 		"flt = 0x1pg"sv,
 		"1:11: Error while parsing hexadecimal floating-point: expected exponent digit or sign, saw 'g'"sv);
 }
@@ -715,9 +762,8 @@ TEST_CASE("parsing - floats (implementation limits)")
 						"flt = 1e" + std::string(200u, '1'),
 						"1:135: Error while parsing floating-point: exceeds length limit of 128 digits"sv);
 #if TOML_LANG_UNRELEASED
-	parsing_should_fail(
-		FILE_LINE_ARGS,
-		"flt = 0x1." + std::string(70u, '1') + "p1",
-		"1:35: Error while parsing hexadecimal floating-point: fragment exceeds maximum length of 24 characters"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"flt = 0x1." + std::string(70u, '1') + "p1",
+						"1:35: Error while parsing hexadecimal floating-point: exceeds length limit of 24 digits"sv);
 #endif
 }

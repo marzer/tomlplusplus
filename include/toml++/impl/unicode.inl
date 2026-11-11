@@ -18,14 +18,15 @@
 TOML_IMPL_NAMESPACE_START
 {
 	TOML_PURE_GETTER
+	TOML_ATTR(nonnull)
 	TOML_EXTERNAL_LINKAGE
 	bool is_ascii(const char* str, size_t len) noexcept
 	{
 		const char* const end = str + len;
 
-#if TOML_HAS_SSE2 && (128 % CHAR_BIT) == 0
+#if TOML_HAS_SSE2
 		{
-			constexpr size_t chars_per_vector = 128u / CHAR_BIT;
+			constexpr size_t chars_per_vector = 16;
 
 			if (const size_t simdable = len - (len % chars_per_vector))
 			{
@@ -35,15 +36,8 @@ TOML_IMPL_NAMESPACE_START
 					const __m128i current_bytes = _mm_loadu_si128(reinterpret_cast<const __m128i*>(str));
 					mask						= _mm_or_si128(mask, current_bytes);
 				}
-				const __m128i has_error = _mm_cmpgt_epi8(_mm_setzero_si128(), mask);
-
-#if TOML_HAS_SSE4_1
-				if (!_mm_testz_si128(has_error, has_error))
+				if (_mm_movemask_epi8(mask))
 					return false;
-#else
-				if (_mm_movemask_epi8(_mm_cmpeq_epi8(has_error, _mm_setzero_si128())) != 0xFFFF)
-					return false;
-#endif
 			}
 		}
 #endif

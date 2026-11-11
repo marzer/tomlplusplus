@@ -621,9 +621,9 @@ TEST_CASE("round trips - documents")
 	for (const auto flags : { toml_formatter::default_flags,
 							  format_flags::none,
 							  format_flags::indentation,
-							  toml_formatter::default_flags | format_flags::force_multiline_arrays,
+							  toml_formatter::default_flags | format_flags::force_multi_line_arrays,
 							  toml_formatter::default_flags | format_flags::terse_key_value_pairs,
-							  format_flags::force_multiline_arrays | format_flags::terse_key_value_pairs })
+							  format_flags::force_multi_line_arrays | format_flags::terse_key_value_pairs })
 	{
 		const auto printed = print_toml(*original, flags);
 		INFO("format flags: " << static_cast<uint64_t>(flags));

@@ -13,6 +13,7 @@
 
 #include "path.hpp"
 #include "at_path.hpp"
+#include "node_view.hpp"
 #include "print_to_stream.hpp"
 TOML_DISABLE_WARNINGS;
 #include <sstream>
@@ -78,25 +79,9 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	path_component& path_component::operator=(const path_component& rhs)
 	{
-		if (type_ != rhs.type_)
-		{
-			if (rhs.type_ == path_component_type::array_index)
-			{
-				destroy();
-				store_index(rhs.index(), value_storage_);
-			}
-			else
-				store_key(rhs.key(), value_storage_);
-			type_ = rhs.type_;
-		}
-		else
-		{
-			if (type_ == path_component_type::array_index)
-				index_ref() = rhs.index();
-			else
-				key_ref() = rhs.key();
-		}
-		return *this;
+		if (rhs.type_ == path_component_type::array_index)
+			return *this = rhs.index();
+		return *this = std::string_view{ rhs.key() };
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -137,25 +122,25 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	path_component& path_component::operator=(size_t new_index) noexcept
+	path_component& path_component::operator=(size_t rhs) noexcept
 	{
 		// If currently a key, string will need to be destroyed regardless
 		destroy();
 
 		type_ = path_component_type::array_index;
-		store_index(new_index, value_storage_);
+		store_index(rhs, value_storage_);
 
 		return *this;
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	path_component& path_component::operator=(std::string_view new_key)
+	path_component& path_component::operator=(std::string_view rhs)
 	{
 		if (type_ == path_component_type::key)
-			key_ref() = new_key;
+			key_ref() = rhs;
 		else
 		{
-			store_key(new_key, value_storage_);
+			store_key(rhs, value_storage_);
 			type_ = path_component_type::key;
 		}
 
@@ -165,17 +150,9 @@ TOML_NAMESPACE_START
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_EXTERNAL_LINKAGE
-	path_component& path_component::operator=(std::wstring_view new_key)
+	path_component& path_component::operator=(std::wstring_view rhs)
 	{
-		if (type_ == path_component_type::key)
-			key_ref() = impl::narrow(new_key);
-		else
-		{
-			store_key(impl::narrow(new_key), value_storage_);
-			type_ = path_component_type::key;
-		}
-
-		return *this;
+		return *this = std::string_view{ impl::narrow(rhs) };
 	}
 
 #endif
@@ -191,20 +168,18 @@ TOML_ANON_NAMESPACE_START
 	TOML_INTERNAL_LINKAGE
 	bool parse_path_into(std::string_view path_str, std::vector<path_component> & components)
 	{
-		using components_type = std::remove_reference_t<decltype(components)>;
-
 		const auto original_size = components.size();
 
 		static constexpr auto on_key = [](void* data, std::string_view key) -> bool
 		{
-			auto& comps = *static_cast<components_type*>(data);
+			auto& comps = *static_cast<std::vector<path_component>*>(data);
 			comps.emplace_back(key);
 			return true;
 		};
 
 		static constexpr auto on_index = [](void* data, size_t index) -> bool
 		{
-			auto& comps = *static_cast<components_type*>(data);
+			auto& comps = *static_cast<std::vector<path_component>*>(data);
 			comps.emplace_back(index);
 			return true;
 		};
@@ -234,7 +209,7 @@ TOML_NAMESPACE_START
 					impl::print_to_stream(os, '.');
 				impl::print_to_stream(os, component.key());
 			}
-			else if (component.type() == path_component_type::array_index) // array
+			else // array
 			{
 				impl::print_to_stream(os, '[');
 				impl::print_to_stream(os, component.index());
@@ -273,9 +248,8 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	path& path::operator=(std::string_view rhs)
 	{
-		components_.clear();
-		TOML_ANON_NAMESPACE::parse_path_into(rhs, components_);
-		return *this;
+		// rhs may view one of this path's keys
+		return *this = path{ rhs };
 	}
 
 #if TOML_ENABLE_WINDOWS_COMPAT
@@ -283,7 +257,7 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	path& path::operator=(std::wstring_view rhs)
 	{
-		return assign(impl::narrow(rhs));
+		return *this = impl::narrow(rhs);
 	}
 
 #endif
@@ -297,7 +271,7 @@ TOML_NAMESPACE_START
 		if (&rhs == this)
 			return *this += path{ rhs };
 
-		components_.insert(components_.cend(), rhs.begin(), rhs.end());
+		components_.insert(components_.end(), rhs.components_.begin(), rhs.components_.end());
 		return *this;
 	}
 
@@ -314,18 +288,18 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	path& path::operator+=(std::string_view str)
+	path& path::operator+=(std::string_view rhs)
 	{
-		TOML_ANON_NAMESPACE::parse_path_into(str, components_);
-		return *this;
+		// rhs may view one of this path's keys
+		return *this += path{ rhs };
 	}
 
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_EXTERNAL_LINKAGE
-	path& path::operator+=(std::wstring_view str)
+	path& path::operator+=(std::wstring_view rhs)
 	{
-		return *this += impl::narrow(str);
+		return *this += impl::narrow(rhs);
 	}
 
 #endif
@@ -376,7 +350,7 @@ TOML_NAMESPACE_START
 	std::string path::str() const
 	{
 		if (empty())
-			return "";
+			return {};
 
 		std::ostringstream ss;
 		print_to(ss);
@@ -393,7 +367,7 @@ TOML_NAMESPACE_START
 
 #endif
 
-	//#=== equality and comparison =================================================
+	//#=== clearing, truncation and subpaths =================================================
 
 	TOML_EXTERNAL_LINKAGE
 	void path::clear() noexcept
@@ -404,10 +378,10 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	path& path::truncate(size_t n)
 	{
-		n = n > components_.size() ? components_.size() : n;
+		n = impl::min(n, components_.size());
 
-		auto it_end = components_.end();
-		components_.erase(it_end - static_cast<int>(n), it_end);
+		const auto it_end = components_.end();
+		components_.erase(it_end - static_cast<ptrdiff_t>(n), it_end);
 
 		return *this;
 	}
@@ -415,18 +389,7 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	path path::truncated(size_t n) const
 	{
-		path truncated_path{};
-
-		n = n > components_.size() ? components_.size() : n;
-
-		// Copy all components except one
-		// Need at least two path components to have a parent, since if there is
-		// only one path component, the parent is the root/null path ""
-		truncated_path.components_.insert(truncated_path.components_.begin(),
-										  components_.begin(),
-										  components_.end() - static_cast<int>(n));
-
-		return truncated_path;
+		return subpath(0u, components_.size() - impl::min(n, components_.size()));
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -438,30 +401,19 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	path path::leaf(size_t n) const
 	{
-		path leaf_path{};
-
-		n = n > components_.size() ? components_.size() : n;
-
-		if (n > 0)
-		{
-			leaf_path.components_.insert(leaf_path.components_.begin(),
-										 components_.end() - static_cast<int>(n),
-										 components_.end());
-		}
-
-		return leaf_path;
+		n = impl::min(n, components_.size());
+		return subpath(components_.size() - n, n);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	path path::subpath(std::vector<path_component>::const_iterator start,
-					   std::vector<path_component>::const_iterator end) const
+	path path::subpath(const_iterator start, const_iterator end) const
 	{
 		if (start >= end)
 			return {};
 
-		path subpath;
-		subpath.components_.insert(subpath.components_.begin(), start, end);
-		return subpath;
+		path result;
+		result.components_.insert(result.components_.begin(), start, end);
+		return result;
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -469,8 +421,7 @@ TOML_NAMESPACE_START
 	{
 		if (start >= components_.size() || length == 0)
 			return {};
-		const size_t remaining = components_.size() - start;
-		const size_t count	   = length < remaining ? length : remaining;
+		const size_t count = impl::min(length, components_.size() - start);
 		return subpath(begin() + static_cast<ptrdiff_t>(start), begin() + static_cast<ptrdiff_t>(start + count));
 	}
 }
@@ -483,54 +434,29 @@ TOML_NAMESPACE_END;
 TOML_NAMESPACE_START
 {
 	TOML_EXTERNAL_LINKAGE
-	node_view<node> TOML_CALLCONV at_path(node & root, const toml::path& path) noexcept
+	node_view<node> TOML_CALLCONV at_path(node & root, const toml::path& p) noexcept
 	{
-		// early-exit sanity-checks
-		if (root.is_value())
-			return {};
-		if (auto tbl = root.as_table(); tbl && tbl->empty())
-			return {};
-		if (auto arr = root.as_array(); arr && arr->empty())
+		if (!impl::has_children(root))
 			return {};
 
 		node* current = &root;
 
-		for (const auto& component : path)
+		for (const auto& component : p)
 		{
-			auto type = component.type();
-			if (type == path_component_type::array_index)
-			{
-				const auto current_array = current->as<array>();
-				if (!current_array)
-					return {}; // not an array, using array index doesn't work
-
-				current = current_array->get(component.index());
-			}
-			else if (type == path_component_type::key)
-			{
-				const auto current_table = current->as<table>();
-				if (!current_table)
-					return {};
-
-				current = current_table->get(component.key());
-			}
-			else
-			{
-				// Error: invalid component
-				return {};
-			}
+			current = component.type() == path_component_type::array_index ? impl::child_at(*current, component.index())
+																		   : impl::child_at(*current, component.key());
 
 			if (!current)
-				return {}; // not found
+				return {}; // not found, or current is not the kind of container the component selects from
 		}
 
 		return node_view{ current };
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	node_view<const node> TOML_CALLCONV at_path(const node& root, const toml::path& path) noexcept
+	node_view<const node> TOML_CALLCONV at_path(const node& root, const toml::path& p) noexcept
 	{
-		return node_view<const node>{ at_path(const_cast<node&>(root), path).node() };
+		return node_view<const node>{ at_path(const_cast<node&>(root), p).node() };
 	}
 }
 TOML_NAMESPACE_END;

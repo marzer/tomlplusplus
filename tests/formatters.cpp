@@ -62,7 +62,7 @@ namespace
 		{
 			a(static_cast<uint8_t>(str_a[i]));
 			b(static_cast<uint8_t>(str_b[i]));
-			if (a.has_code_point() != b.has_code_point() || a.error() != b.error())
+			if (a.has_codepoint() != b.has_codepoint() || a.error() != b.error())
 				return diff;
 
 			if (a.error())
@@ -72,7 +72,7 @@ namespace
 				continue;
 			}
 
-			if (!a.has_code_point())
+			if (!a.has_codepoint())
 				continue;
 
 			if (a.codepoint != b.codepoint)
@@ -441,7 +441,7 @@ integers:
   bin: 10
   dec: 10
   hex: 0xA
-  oct: 0o12
+  oct: 10
   one: 1
   zero: 0
 strings: 
@@ -583,6 +583,20 @@ unicode = "café 😀")"sv);
 		CHECK_TOML_ROUND_TRIP(tabbed, format_flags::allow_multi_line_strings, R"(val = """a\tb
 it's""")"sv);
 	}
+}
+
+TEST_CASE("formatters - toml_formatter finds non-ASCII text anywhere in a long string")
+{
+	const auto data = toml::table{ { "ascii", "0123456789 0123456789 0123456789 cafe"sv },
+								   { "first_block", "caf\u00E9 0123456789 0123456789 0123456789"sv },
+								   { "second_block", "0123456789 01234 caf\u00E9 0123456789 012"sv },
+								   { "tail", "0123456789 0123456789 0123456789 caf\u00E9"sv } };
+
+	CHECK_TOML_ROUND_TRIP(data, format_flags::none, R"(
+ascii = "0123456789 0123456789 0123456789 cafe"
+first_block = "caf\u00E9 0123456789 0123456789 0123456789"
+second_block = "0123456789 01234 caf\u00E9 0123456789 012"
+tail = "0123456789 0123456789 0123456789 caf\u00E9")"sv);
 }
 
 TEST_CASE("formatters - toml_formatter string escapes")
@@ -1173,7 +1187,7 @@ name = "banana")"sv);
 			{ "a", toml::table{ { "val", 1 }, { "b", toml::table{ { "val", 2 }, { "arr", toml::array{ 1, 2 } } } } } },
 		};
 
-		CHECK_TOML_ROUND_TRIP(data, toml_formatter::default_flags | format_flags::force_multiline_arrays, R"(
+		CHECK_TOML_ROUND_TRIP(data, toml_formatter::default_flags | format_flags::force_multi_line_arrays, R"(
 val = 0
 
 [a]
@@ -1186,7 +1200,7 @@ val = 1
     ]
     val = 2)"sv);
 
-		CHECK_TOML_ROUND_TRIP(data, format_flags::indent_sub_tables | format_flags::force_multiline_arrays, R"(
+		CHECK_TOML_ROUND_TRIP(data, format_flags::indent_sub_tables | format_flags::force_multi_line_arrays, R"(
 val = 0
 
 [a]
@@ -1199,7 +1213,7 @@ val = 1
     ]
     val = 2)"sv);
 
-		CHECK_TOML_ROUND_TRIP(data, format_flags::indent_array_elements | format_flags::force_multiline_arrays, R"(
+		CHECK_TOML_ROUND_TRIP(data, format_flags::indent_array_elements | format_flags::force_multi_line_arrays, R"(
 val = 0
 
 [a]
@@ -1280,6 +1294,211 @@ temporal = [ 2021-01-02, 03:04:05, 2021-01-02T03:04:05+01:00 ])"sv);
 		CHECK_TOML_ROUND_TRIP(data, toml_formatter::default_flags, expected);
 	}
 
+	SECTION("integers take the width they print at")
+	{
+		toml::array arr;
+		std::string inline_expected	 = "arr = [ ";
+		std::string wrapped_expected = "arr = [";
+		for (int i = 0; i < 5; i++)
+		{
+			arr.push_back(999999999999999999);
+			inline_expected += "999999999999999999, ";
+			wrapped_expected += "\n    999999999999999999,";
+		}
+
+		arr.push_back(12345678901234);
+		CHECK_TOML_ROUND_TRIP(toml::table{ { "arr", arr } },
+							  toml_formatter::default_flags,
+							  inline_expected + "12345678901234 ]");
+
+		arr.pop_back();
+		arr.push_back(123456789012345);
+		CHECK_TOML_ROUND_TRIP(toml::table{ { "arr", arr } },
+							  toml_formatter::default_flags,
+							  wrapped_expected + "\n    123456789012345\n]");
+	}
+
+	SECTION("integers take the width of the base they print in")
+	{
+		toml::array arr;
+		std::string inline_expected	 = "arr = [ ";
+		std::string wrapped_expected = "arr = [";
+		for (int i = 0; i < 9; i++)
+		{
+			arr.push_back(255, value_flags::format_as_binary);
+			inline_expected += "0b11111111, ";
+			wrapped_expected += "\n    0b11111111,";
+		}
+
+		arr.push_back(4095, value_flags::format_as_octal);
+		CHECK_TOML_ROUND_TRIP(toml::table{ { "arr", arr } },
+							  toml_formatter::default_flags,
+							  inline_expected + "0o7777 ]");
+
+		arr.pop_back();
+		arr.push_back(32767, value_flags::format_as_octal);
+		CHECK_TOML_ROUND_TRIP(toml::table{ { "arr", arr } },
+							  toml_formatter::default_flags,
+							  wrapped_expected + "\n    0o77777\n]");
+	}
+
+	SECTION("a hexadecimal integer can take fewer columns than its decimal digits")
+	{
+		toml::array arr;
+		std::string inline_expected	 = "arr = [ ";
+		std::string wrapped_expected = "arr = [";
+		for (int i = 0; i < 5; i++)
+		{
+			arr.push_back(i64_max, value_flags::format_as_hexadecimal);
+			inline_expected += "0x7FFFFFFFFFFFFFFF, ";
+			wrapped_expected += "\n    0x7FFFFFFFFFFFFFFF,";
+		}
+
+		arr.push_back(12345678901234);
+		CHECK_TOML_ROUND_TRIP(toml::table{ { "arr", arr } },
+							  toml_formatter::default_flags,
+							  inline_expected + "12345678901234 ]");
+
+		arr.pop_back();
+		arr.push_back(123456789012345);
+		CHECK_TOML_ROUND_TRIP(toml::table{ { "arr", arr } },
+							  toml_formatter::default_flags,
+							  wrapped_expected + "\n    123456789012345\n]");
+	}
+
+	SECTION("an integer that prints in decimal despite its flags takes its decimal width")
+	{
+		toml::array arr;
+		std::string inline_expected	 = "arr = [ ";
+		std::string wrapped_expected = "arr = [";
+		for (int i = 0; i < 5; i++)
+		{
+			arr.push_back(999999999999999999, value_flags::format_as_binary);
+			inline_expected += "999999999999999999, ";
+			wrapped_expected += "\n    999999999999999999,";
+		}
+
+		// the formatter doesn't allow the format
+		arr.push_back(12345678901234);
+		CHECK_TOML_ROUND_TRIP(toml::table{ { "arr", arr } },
+							  toml_formatter::default_flags & ~format_flags::allow_binary_integers,
+							  inline_expected + "12345678901234 ]");
+
+		// negative integers are always decimal
+		arr.pop_back();
+		arr.push_back(-12345678901234, value_flags::format_as_hexadecimal);
+		CHECK_TOML_ROUND_TRIP(toml::table{ { "arr", arr } },
+							  toml_formatter::default_flags & ~format_flags::allow_binary_integers,
+							  wrapped_expected + "\n    -12345678901234\n]");
+	}
+
+	SECTION("floats take the width they print at")
+	{
+		CHECK_TOML_ROUND_TRIP(toml::table{ { "arr", toml::array{ 1e300, -1e300, 1e-300, 5e-324, 1e16 } } },
+							  toml_formatter::default_flags,
+							  "arr = [ 1e+300, -1e+300, 1e-300, 5e-324, 1e+16 ]"sv);
+
+		toml::array six;
+		for (int i = 0; i < 6; i++)
+			six.push_back(0.123456789012345);
+		toml::array seven = six;
+		seven.push_back(0.123456789012345);
+
+		std::string inline_expected	 = "arr = [ ";
+		std::string wrapped_expected = "arr = [";
+		for (int i = 0; i < 7; i++)
+		{
+			if (i < 6)
+				inline_expected += i ? ", 0.123456789012345" : "0.123456789012345";
+			wrapped_expected += i ? ",\n    0.123456789012345" : "\n    0.123456789012345";
+		}
+		inline_expected += " ]";
+		wrapped_expected += "\n]";
+
+		CHECK_TOML_ROUND_TRIP(toml::table{ { "arr", six } }, toml_formatter::default_flags, inline_expected);
+		CHECK_TOML_ROUND_TRIP(toml::table{ { "arr", seven } }, toml_formatter::default_flags, wrapped_expected);
+	}
+
+	SECTION("short floats take the width they print at")
+	{
+		// 119 columns stay on one line and 120 wrap: "[ ]" is 3, and each element is its text plus ", "
+		toml::array fits;
+		std::string fits_expected  = "arr = [ ";
+		std::string wraps_expected = "arr = [";
+		for (int i = 0; i < 15; i++)
+		{
+			fits.push_back(12.25);
+			fits_expected += "12.25, ";
+			wraps_expected += "\n    12.25,";
+		}
+		fits.push_back(-0.5);
+		toml::array wraps = fits;
+		fits.push_back(0.0);
+		wraps.push_back(1.25);
+		fits_expected += "-0.5, 0.0 ]";
+		wraps_expected += "\n    -0.5,\n    1.25\n]";
+
+		CHECK_TOML_ROUND_TRIP(toml::table{ { "arr", fits } }, toml_formatter::default_flags, fits_expected);
+		CHECK_TOML_ROUND_TRIP(toml::table{ { "arr", wraps } }, toml_formatter::default_flags, wraps_expected);
+	}
+
+	SECTION("dates and times take the width they print at")
+	{
+		const auto repeated = [](const auto& val, size_t count)
+		{
+			toml::array arr;
+			for (size_t i = 0; i < count; i++)
+				arr.push_back(val);
+			return toml::table{ { "arr", arr } };
+		};
+		const auto printed = [](std::string_view text, size_t count, bool wrapped)
+		{
+			std::string expected = wrapped ? "arr = [" : "arr = [ ";
+			for (size_t i = 0; i < count; i++)
+			{
+				if (wrapped)
+					expected += i ? ",\n    " : "\n    ";
+				else if (i)
+					expected += ", ";
+				expected += text;
+			}
+			return expected + (wrapped ? "\n]" : " ]");
+		};
+
+		const toml::time short_time{ 7, 32, 0 };
+		const toml::time long_time{ 7, 32, 0, 123456789 };
+		CHECK_TOML_ROUND_TRIP(repeated(short_time, 11), toml_formatter::default_flags, printed("07:32:00", 11, false));
+		CHECK_TOML_ROUND_TRIP(repeated(short_time, 12), toml_formatter::default_flags, printed("07:32:00", 12, true));
+		CHECK_TOML_ROUND_TRIP(repeated(long_time, 5),
+							  toml_formatter::default_flags,
+							  printed("07:32:00.123456789", 5, false));
+		CHECK_TOML_ROUND_TRIP(repeated(long_time, 6),
+							  toml_formatter::default_flags,
+							  printed("07:32:00.123456789", 6, true));
+
+		const toml::date date{ 1979, 5, 27 };
+		CHECK_TOML_ROUND_TRIP(repeated(date, 9), toml_formatter::default_flags, printed("1979-05-27", 9, false));
+		CHECK_TOML_ROUND_TRIP(repeated(date, 10), toml_formatter::default_flags, printed("1979-05-27", 10, true));
+
+		const toml::date_time local{ date, short_time };
+		const toml::date_time offset{ date, long_time, toml::time_offset{ -8, 0 } };
+		CHECK_TOML_ROUND_TRIP(repeated(local, 5),
+							  toml_formatter::default_flags,
+							  printed("1979-05-27T07:32:00", 5, false));
+		CHECK_TOML_ROUND_TRIP(repeated(local, 6),
+							  toml_formatter::default_flags,
+							  printed("1979-05-27T07:32:00", 6, true));
+		CHECK_TOML_ROUND_TRIP(repeated(offset, 3),
+							  toml_formatter::default_flags,
+							  printed("1979-05-27T07:32:00.123456789-08:00", 3, false));
+		CHECK_TOML_ROUND_TRIP(repeated(offset, 4),
+							  toml_formatter::default_flags,
+							  printed("1979-05-27T07:32:00.123456789-08:00", 4, true));
+
+		CHECK_TOML_ROUND_TRIP(repeated(true, 19), toml_formatter::default_flags, printed("true", 19, false));
+		CHECK_TOML_ROUND_TRIP(repeated(true, 20), toml_formatter::default_flags, printed("true", 20, true));
+	}
+
 	SECTION("arrays holding long inline tables wrap")
 	{
 		toml::table inner;
@@ -1298,11 +1517,14 @@ temporal = [ 2021-01-02, 03:04:05, 2021-01-02T03:04:05+01:00 ])"sv);
 
 	SECTION("forced multi-line")
 	{
+		static_assert(format_flags::force_multiline_arrays == format_flags::force_multi_line_arrays,
+					  "the flag's first spelling stays until v4");
+
 		auto data = toml::table{ { "arr", toml::array{ 1, toml::array{ 2, 3 }, toml::array{} } },
 								 { "inl", toml::table{ { "arr", toml::array{ 4 } } } } };
 		data["inl"].as_table()->is_inline(true);
 
-		CHECK_TOML_ROUND_TRIP(data, toml_formatter::default_flags | format_flags::force_multiline_arrays, R"(
+		CHECK_TOML_ROUND_TRIP(data, toml_formatter::default_flags | format_flags::force_multi_line_arrays, R"(
 arr = [
     1,
     [
@@ -1315,7 +1537,7 @@ inl = { arr = [
     4
 ] })"sv);
 
-		CHECK_TOML_ROUND_TRIP(data, format_flags::force_multiline_arrays, R"(
+		CHECK_TOML_ROUND_TRIP(data, format_flags::force_multi_line_arrays, R"(
 arr = [
 1,
 [
@@ -1340,7 +1562,7 @@ TEST_CASE("formatters - toml_formatter root nodes")
 	CHECK_OUTPUT(toml_formatter, toml::array{}, toml_formatter::default_flags, "[]"sv);
 	CHECK_OUTPUT(toml_formatter,
 				 toml::array{ 1, 2 },
-				 toml_formatter::default_flags | format_flags::force_multiline_arrays,
+				 toml_formatter::default_flags | format_flags::force_multi_line_arrays,
 				 "[\n    1,\n    2\n]"sv);
 
 	SECTION("documented examples")
@@ -1811,7 +2033,7 @@ TEST_CASE("formatters - yaml_formatter")
 					 "    d"sv);
 
 		CHECK_OUTPUT(yaml_formatter, toml::value{ "a\nb"s }, yaml_formatter::default_flags, "|-\n  a\n  b"sv);
-		CHECK_OUTPUT(yaml_formatter, toml::value{ "\ta\nb"s }, yaml_formatter::default_flags, "|-\n  \ta\n  b"sv);
+		CHECK_OUTPUT(yaml_formatter, toml::value{ "a\n\tb"s }, yaml_formatter::default_flags, "|-\n  a\n  \tb"sv);
 	}
 
 	SECTION("multi-line strings that block scalars can't hold are quoted")
@@ -1828,6 +2050,8 @@ TEST_CASE("formatters - yaml_formatter")
 			{ "malformed", "a\x80\nb"sv },
 			{ "next_line", "a\xC2\x85\nb"sv },
 			{ "only_newline", "\n"sv },
+			{ "tab_indented", "\ta\nb"sv },
+			{ "tab_indented_after_blank", "\n\ta"sv },
 			{ "trailing_newline", "a\n"sv },
 		};
 
@@ -1841,6 +2065,8 @@ indented_after_blank: "\n  a"
 malformed: "a\u0080\nb"
 next_line: "a\u0085\nb"
 only_newline: "\n"
+tab_indented: "\ta\nb"
+tab_indented_after_blank: "\n\ta"
 trailing_newline: "a\n")"sv);
 	}
 
@@ -1923,17 +2149,108 @@ word: nullable)"sv);
   - "y")"sv);
 	}
 
+	SECTION("keys too long for the 'key: value' form are written as explicit keys")
+	{
+		const std::string fits(1022u, 'k');
+		const std::string too_long(1023u, 'k');
+		const std::string escaped(171u, '\x01');
+		const auto data = toml::table{
+			{ escaped, 0 },
+			{ fits, 1 },
+			{ too_long, 2 },
+			{ "nested", toml::table{ { too_long, toml::array{ 3 } } } },
+			{ "seq", toml::array{ toml::table{ { too_long, "x\ny"sv }, { "z", 4 } } } },
+		};
+
+		std::string escaped_text;
+		for (size_t i = 0; i < escaped.length(); i++)
+			escaped_text += "\\u0001";
+
+		CHECK_OUTPUT(yaml_formatter,
+					 data,
+					 yaml_formatter::default_flags,
+					 "? \"" + escaped_text + "\"\n: 0\n"  //
+						 + fits + ": 1\n"				  //
+						 + "? " + too_long + "\n: 2\n"	  //
+						 + "nested: \n"					  //
+						 + "  ? " + too_long + "\n  : \n" //
+						 + "    - 3\n"					  //
+						 + "seq: \n"					  //
+						 + "  - ? " + too_long + "\n"	  //
+						 + "    : |-\n"					  //
+						 + "      x\n"					  //
+						 + "      y\n"					  //
+						 + "    z: 4");
+	}
+
+	SECTION("a key's length is counted in the characters it prints as")
+	{
+		const auto repeat = [](std::string_view text, size_t count)
+		{
+			std::string repeated;
+			for (size_t i = 0; i < count; i++)
+				repeated += text;
+			return repeated;
+		};
+		const auto with_key	  = [](const std::string& key) { return toml::table{ { key, 1 } }; };
+		const auto unicode	  = yaml_formatter::default_flags;
+		const auto no_unicode = unicode & ~format_flags::allow_unicode_strings;
+
+		// U+00D7 is two bytes, and is not a bare key character with or without unreleased features
+		static constexpr auto times = "\xC3\x97"sv;
+		CHECK_OUTPUT(yaml_formatter, with_key(repeat(times, 1022u)), unicode, "'" + repeat(times, 1022u) + "': 1");
+		CHECK_OUTPUT(yaml_formatter, with_key(repeat(times, 1023u)), unicode, "? '" + repeat(times, 1023u) + "'\n: 1");
+
+		static constexpr auto escaped_times = R"(\u00D7)"sv;
+		CHECK_OUTPUT(yaml_formatter,
+					 with_key(repeat(times, 170u)),
+					 no_unicode,
+					 "\"" + repeat(escaped_times, 170u) + "\": 1");
+		CHECK_OUTPUT(yaml_formatter,
+					 with_key(repeat(times, 171u)),
+					 no_unicode,
+					 "? \"" + repeat(escaped_times, 171u) + "\"\n: 1");
+
+		static constexpr auto emoji			= "\xF0\x9F\x98\x80"sv;
+		static constexpr auto escaped_emoji = R"(\U0001F600)"sv;
+		CHECK_OUTPUT(yaml_formatter,
+					 with_key(repeat(emoji, 102u)),
+					 no_unicode,
+					 "\"" + repeat(escaped_emoji, 102u) + "\": 1");
+		CHECK_OUTPUT(yaml_formatter,
+					 with_key(repeat(emoji, 103u)),
+					 no_unicode,
+					 "? \"" + repeat(escaped_emoji, 103u) + "\"\n: 1");
+
+		// U+0085 is escaped whatever the flags
+		static constexpr auto next_line			= "\xC2\x85"sv;
+		static constexpr auto escaped_next_line = R"(\u0085)"sv;
+		CHECK_OUTPUT(yaml_formatter,
+					 with_key(repeat(next_line, 170u)),
+					 unicode,
+					 "\"" + repeat(escaped_next_line, 170u) + "\": 1");
+		CHECK_OUTPUT(yaml_formatter,
+					 with_key(repeat(next_line, 171u)),
+					 unicode,
+					 "? \"" + repeat(escaped_next_line, 171u) + "\"\n: 1");
+	}
+
 	SECTION("flags that would make YAML read a value back as something else are ignored")
 	{
-		const auto data = toml::table{ { "a", 1 }, { "bin", 10, value_flags::format_as_binary } };
+		const auto data = toml::table{
+			{ "a", 1 },
+			{ "bin", 10, value_flags::format_as_binary },
+			{ "oct", 10, value_flags::format_as_octal },
+		};
 
 		CHECK_OUTPUT(yaml_formatter,
 					 data,
 					 yaml_formatter::default_flags | format_flags::terse_key_value_pairs
-						 | format_flags::allow_binary_integers,
+						 | format_flags::allow_binary_integers | format_flags::allow_octal_integers,
 					 R"(
 a: 1
-bin: 10)"sv);
+bin: 10
+oct: 10)"sv);
 	}
 
 	SECTION("values")
@@ -1953,7 +2270,7 @@ date: '2021-01-02'
 hex: 0xA
 inf: .inf
 nan: .NAN
-oct: 0o12)"sv);
+oct: 10)"sv);
 
 		CHECK_OUTPUT(yaml_formatter, data, format_flags::quote_infinities_and_nans, R"(
 bin: 10

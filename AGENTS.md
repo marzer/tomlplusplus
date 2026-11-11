@@ -16,6 +16,8 @@ v3 stays compatible until v4. An idea that would break someone goes on `docs/pag
 
 - The public API, its behaviour, and the CMake and Meson interfaces don't break. When it isn't clear whether something
   is a user interface, ask.
+- What is on `master` counts as released, because many people take `toml.hpp` from HEAD. A name added since the last
+  release that has to change keeps its old spelling as an undocumented alias until v4.
 - The shared library's SONAME carries only the major version, so the ABI holds as well: no layout changes, and no
   exported function removed or changed. A new exported function is fine. `symbols.txt` lists the exported names, and
   the `check-symbols` test compares a Linux build against it.
@@ -48,7 +50,8 @@ publishes a release.
   pre-commit hook. `python3 tools/regenerate.py` does it directly, and `--check` reports what is stale.
 - The `#undef` block in `include/toml++/toml.hpp` is generated too. It undefines every macro the headers define,
   except the ones in `PUBLIC_MACROS` in `tools/regenerate.py`.
-- `tests/conformance_*.cpp` come from `tools/generate_conformance_tests.py`. Don't edit them by hand.
+- `tests/conformance_*.cpp` come from `tools/generate_conformance_tests.py`, and pre-commit formats them. Don't edit
+  them by hand.
 - A new derived file goes through `tools/regenerate.py`, which stays standard-library-only. Nobody should have to
   remember to run a script.
 
@@ -57,12 +60,34 @@ publishes a release.
 clang-format decides formatting, through pre-commit. Never mix a reformat with a change in behaviour.
 
 The library reads like the standard library: `snake_case` names, `PascalCase` template parameters, `TOML_` macros.
-Return early and keep the happy path left-aligned. Member state goes at the top of a class. Zero-initialise with
-`= {}`. No Hungarian notation.
+Functions are short enough to read in one go. Return early and keep the happy path left-aligned. Member state goes at
+the top of a class. Zero-initialise with `= {}`. No Hungarian notation.
 
+- A class is ordered private, protected, public, with the data members first. A struct with public data is the
+  exception: its data comes first, and a private helper goes next to the functions that use it.
+- Private and protected data members end in `_`. No name hides a type. The operands of a binary operator are `lhs` and
+  `rhs`, stream operators included.
+- Make what doesn't change `const`. Name a constant and make it `constexpr`. Cast visibly wherever a value narrows or
+  changes sign. Pass small trivially-copyable types by value, except in an exported function's existing signature. A
+  trivial value type stays trivial.
+- Say it once, unless sharing the code takes more machinery than the repetition. A one-caller helper that names an
+  idea at its call site is fine.
+- State that is changed and then restored goes through a scope guard.
+- The `_INLINE_GETTER` attributes are for pass-throughs and trivial getters, and a function that does work gets the
+  plain variant. A `CONST` attribute never goes on a function that reads memory through `this`, a pointer or a
+  reference.
+- Unreachable branches and stale TODOs go, but a case label marked `TOML_UNREACHABLE` stays. Unused internal macros
+  wait for v4, and so do compiler workarounds and the macros and templates that old compilers needed.
+- A warning that a pedantic build reports is fixed, or suppressed where it fires. Don't suppress it for a whole file.
+- A standard header that arrives through `forward_declarations.hpp` needs no include of its own.
+- An error message uses the wording the others have for the same idea: "end-of-file", "decimal digit", "are
+  prohibited", the offending character quoted after "saw". A `static_assert` names its subject as in "The template
+  type argument of array::emplace_back() must be one of:", and a one-sentence message has no final punctuation.
 - A new macro goes in `include/toml++/impl/preprocessor.hpp`. One that users may set also needs an `#ifndef` guard, a
-  `\def` doc comment, a row in the README's configuration table and an entry in `PUBLIC_MACROS`.
-- The public API carries Doxygen markup, including poxy's commands (`\cpp`, `\out`, `\detail` and so on).
+  `\def` doc comment, a row in the README's configuration table and an entry in `PUBLIC_MACROS`. `TOML_ASSERT` and
+  `TOML_IMPLEMENTATION` have no entry: `toml.hpp` undefines both, as it did in v3.4.0.
+- The public API carries Doxygen markup, including poxy's commands (`\cpp`, `\out`, `\detail` and so on). Its examples
+  compile, and print what their `\out` block shows.
 - C library functions are called through `std::`, as in `std::memcpy`. The `<c...>` headers only promise the `std::`
   names. Maths functions are the exception: they go through the `impl::` wrappers in `forward_declarations.hpp`, so
   that `toml.hpp` doesn't include `<cmath>` with GCC or Clang.
@@ -88,12 +113,14 @@ Comments in code should be terse and to-the-point, documenting _why_, not _what_
 - NO LLM VOICE SLOP
 
 ANY COMMENTS THAT DO NOT MEET THE ABOVE CRITERIA SHOULD BE CONSIDERED A BUG AND AGGRESSIVELY FLAGGED DURING REVIEW.
-Obviously-human comments like in-jokes, banners/headers and slang are fine.
+Obviously-human comments like in-jokes, banners/headers and slang are fine. A comment a person wrote stays, whatever
+its style: correct it when it is wrong or stale, and don't delete it. The parser's comments narrate each step on
+purpose.
 
 Write the conclusion, never the investigation. The urge to comment peaks just after working something out the hard
 way, and what comes out then is the reasoning. A comment earns its place only by stopping someone breaking the code, so
 what was tried, the measurement that convinced you, an alternative nobody proposed and the bug just fixed all go. When
-you clean up comments, delete first and tighten what is left; rephrasing alone is a failed pass.
+you clean up comments that an agent wrote, delete first and tighten what is left; rephrasing alone is a failed pass.
 
 ## Tests
 
@@ -144,7 +171,8 @@ Keep build directories and scratch files outside the repository. An instrumented
 to the current directory. Run heavy work under `nice -n 19`, in bounded steps, and report progress while it runs.
 
 Measure performance; never guess. `benchmarks/` times parsing and formatting, and CONTRIBUTING.md says how to compare
-two builds. A measurement goes in the report, and the conclusion goes in the code or the docs.
+two builds. A function in the parser or the formatters is split only with a benchmark comparison that shows it is no slower. A
+measurement goes in the report, and the conclusion goes in the code or the docs.
 
 ## CI
 

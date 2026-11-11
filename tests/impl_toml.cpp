@@ -27,6 +27,12 @@ static_assert(TOML_FLOAT_CHARCONV == TOML_HAS_FLOAT_CHARCONV);
 static_assert(TOML_INT_CHARCONV);
 #endif
 
+// compiling the implementation leaves no using-directive for toml at global scope,
+// where it would make these names ambiguous
+struct date;
+struct table;
+using global_date_and_table = std::pair<date*, table*>;
+
 namespace toml
 {
 	using std::declval;
@@ -302,6 +308,8 @@ namespace toml
 	CHECK_INSERTED_AS(uint32_t, value<int64_t>);
 	CHECK_INSERTED_AS(float, value<double>);
 	CHECK_INSERTED_AS(double, value<double>);
+	using char_array = char[4];
+	CHECK_INSERTED_AS(char_array, value<std::string>);
 #if TOML_ENABLE_FLOAT16
 	CHECK_INSERTED_AS(_Float16, value<double>);
 #endif

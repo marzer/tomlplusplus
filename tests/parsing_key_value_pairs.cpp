@@ -102,7 +102,7 @@ TEST_CASE("parsing - key-value pairs (dotted)")
 		fruit.apple = 1
 		fruit.apple.smooth = true
 	)"sv,
-		"4:9: Error while parsing key-value pair: cannot redefine existing integer as dotted key-value pair"sv);
+		"4:9: Error while parsing key-value pair: cannot redefine existing integer 'apple' as dotted key-value pair"sv);
 
 	parsing_should_succeed(FILE_LINE_ARGS,
 						   R"(
@@ -521,7 +521,7 @@ TEST_CASE("parsing - key-value pairs (U+180E, U+200B, U+2060 and U+FEFF aren't w
 								"1:4: Error while parsing value: could not determine value type"sv);
 			parsing_should_fail(FILE_LINE_ARGS,
 								"a = 1" + std::string{ utf8 },
-								"1:6: Error while parsing decimal integer: expected digit, saw '"
+								"1:6: Error while parsing decimal integer: expected decimal digit, saw '"
 									+ std::string{ escaped } + "'");
 		}
 	}
@@ -561,8 +561,15 @@ TEST_CASE("parsing - key-value pairs (malformed)")
 						R"(1:7: Error while parsing key-value pair: expected '\n' after '\r', saw 'x')"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"a = 1\r"sv,
-						R"(1:7: Error while parsing key-value pair: expected '\n' after '\r', saw EOF)"sv);
-	parsing_should_fail(FILE_LINE_ARGS, "a = \x01"sv, "1:5: Error while parsing value: unexpected control character"sv);
+						R"(1:7: Error while parsing key-value pair: expected '\n' after '\r', saw end-of-file)"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"a = \x01"sv,
+						R"(1:5: Error while parsing value: unexpected control character, saw '\u0001')"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "a = +"sv, "1:6: Error while parsing value: encountered end-of-file"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "a = -"sv, "1:6: Error while parsing value: encountered end-of-file"sv);
+	parsing_should_fail(FILE_LINE_ARGS,
+						"a = +_"sv,
+						"1:6: Error while parsing decimal integer: expected decimal digit, saw '_'"sv);
 }
 
 TEST_CASE("parsing - nesting depth limit")
@@ -613,7 +620,7 @@ TEST_CASE("parsing - nesting depth limit")
 		parsing_should_fail(
 			FILE_LINE_ARGS,
 			dotted(200) + " = 1",
-			"1:258: Error while parsing key: exceeded maximum nested value depth of 128 (TOML_MAX_NESTED_VALUES)"sv);
+			"1:257: Error while parsing key: exceeded maximum nested value depth of 128 (TOML_MAX_NESTED_VALUES)"sv);
 	}
 
 	SECTION("table headers")
@@ -622,7 +629,7 @@ TEST_CASE("parsing - nesting depth limit")
 		parsing_should_fail(
 			FILE_LINE_ARGS,
 			"[" + dotted(200) + "]",
-			"1:259: Error while parsing key: exceeded maximum nested value depth of 128 (TOML_MAX_NESTED_VALUES)"sv);
+			"1:258: Error while parsing key: exceeded maximum nested value depth of 128 (TOML_MAX_NESTED_VALUES)"sv);
 	}
 
 	SECTION("a dotted key under a table header")
@@ -631,7 +638,7 @@ TEST_CASE("parsing - nesting depth limit")
 		parsing_should_fail(
 			FILE_LINE_ARGS,
 			"[" + dotted(100) + "]\n" + dotted(60) + " = 1",
-			"2:58: Error while parsing key: exceeded maximum nested value depth of 128 (TOML_MAX_NESTED_VALUES)"sv);
+			"2:57: Error while parsing key: exceeded maximum nested value depth of 128 (TOML_MAX_NESTED_VALUES)"sv);
 	}
 
 	SECTION("dotted keys in nested inline tables")
@@ -640,7 +647,7 @@ TEST_CASE("parsing - nesting depth limit")
 		parsing_should_fail(
 			FILE_LINE_ARGS,
 			"x = { " + dotted(64) + " = { " + dotted(100) + " = 1 } }",
-			"1:266: Error while parsing key: exceeded maximum nested value depth of 128 (TOML_MAX_NESTED_VALUES)"sv);
+			"1:265: Error while parsing key: exceeded maximum nested value depth of 128 (TOML_MAX_NESTED_VALUES)"sv);
 	}
 
 	SECTION("sixteen inline tables that each hold a 1024-part key")
@@ -654,7 +661,7 @@ TEST_CASE("parsing - nesting depth limit")
 		parsing_should_fail(
 			FILE_LINE_ARGS,
 			doc,
-			"1:262: Error while parsing key: exceeded maximum nested value depth of 128 (TOML_MAX_NESTED_VALUES)"sv);
+			"1:261: Error while parsing key: exceeded maximum nested value depth of 128 (TOML_MAX_NESTED_VALUES)"sv);
 	}
 
 	SECTION("an array of tables is two levels")
@@ -670,7 +677,7 @@ TEST_CASE("parsing - nesting depth limit")
 		parsing_should_fail(
 			FILE_LINE_ARGS,
 			doc + "k = 1",
-			"65:3: Error while parsing key: exceeded maximum nested value depth of 128 (TOML_MAX_NESTED_VALUES)"sv);
+			"65:1: Error while parsing key: exceeded maximum nested value depth of 128 (TOML_MAX_NESTED_VALUES)"sv);
 	}
 }
 
@@ -720,10 +727,10 @@ TEST_CASE("parsing - key-value pairs (bytes after long keys and whitespace)")
 							R"(1:22: Error while parsing key-value pair: expected '=', saw '\u000B')"sv);
 		parsing_should_fail(FILE_LINE_ARGS,
 							"a = 1" + blank + "\r",
-							R"(1:27: Error while parsing key-value pair: expected '\n' after '\r', saw EOF)"sv);
+							R"(1:27: Error while parsing key-value pair: expected '\n' after '\r', saw end-of-file)"sv);
 		parsing_should_fail(FILE_LINE_ARGS,
 							"a = 1" + blank + "x",
-							"1:26: Error while parsing key-value pair: expected a comment or whitespace, saw 'x'"sv);
+							"1:26: Error while parsing key-value pair: expected a comment or line break, saw 'x'"sv);
 		parsing_should_fail(FILE_LINE_ARGS,
 							"a = 1" + blank + "\xC2\xA0",
 							R"(1:26: Error while parsing key-value pair: expected space or tab, saw '\u00A0')"sv);

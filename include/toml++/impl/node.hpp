@@ -59,19 +59,47 @@ TOML_NAMESPACE_START
 			static_assert(toml::is_value<unwrapped_type> || toml::is_container<unwrapped_type>,
 						  "The template type argument of node::ref() must be one of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
 
-			TOML_ASSERT_ASSUME(
-				n.template is<unwrapped_type>()
-				&& "template type argument provided to toml::node::ref() didn't match the node's actual type");
+			TOML_ASSERT_ASSUME(n.template is<unwrapped_type>()
+							   && "template type argument provided to node::ref() didn't match the node's actual type");
 
-			using node_ref = std::remove_volatile_t<std::remove_reference_t<N>>&;
 			using val_type = std::remove_volatile_t<unwrapped_type>;
 			using out_ref  = ref_type<T, N&&>;
 			static_assert(std::is_reference_v<out_ref>);
 
 			if constexpr (toml::is_value<unwrapped_type>)
-				return static_cast<out_ref>(const_cast<node_ref>(n).template ref_cast<val_type>().get());
+				return static_cast<out_ref>(ref_cast<val_type>(n).get());
 			else
-				return static_cast<out_ref>(const_cast<node_ref>(n).template ref_cast<val_type>());
+				return static_cast<out_ref>(ref_cast<val_type>(n));
+		}
+
+		template <typename T, typename N>
+		TOML_PURE_INLINE_GETTER
+		static auto do_as(N& n) noexcept
+		{
+			using unwrapped_type = impl::remove_cvref<impl::unwrap_node<T>>;
+			static_assert(toml::is_value<unwrapped_type> || toml::is_container<unwrapped_type>,
+						  "The template type argument of node::as() must be one of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
+
+			if constexpr (std::is_same_v<unwrapped_type, table>)
+				return n.as_table();
+			else if constexpr (std::is_same_v<unwrapped_type, array>)
+				return n.as_array();
+			else if constexpr (std::is_same_v<unwrapped_type, std::string>)
+				return n.as_string();
+			else if constexpr (std::is_same_v<unwrapped_type, int64_t>)
+				return n.as_integer();
+			else if constexpr (std::is_same_v<unwrapped_type, double>)
+				return n.as_floating_point();
+			else if constexpr (std::is_same_v<unwrapped_type, bool>)
+				return n.as_boolean();
+			else if constexpr (std::is_same_v<unwrapped_type, date>)
+				return n.as_date();
+			else if constexpr (std::is_same_v<unwrapped_type, time>)
+				return n.as_time();
+			else if constexpr (std::is_same_v<unwrapped_type, date_time>)
+				return n.as_date_time();
+
+			TOML_UNREACHABLE;
 		}
 
 	  protected:
@@ -104,40 +132,13 @@ TOML_NAMESPACE_START
 			ref_cast_type_<T, std::add_lvalue_reference_t<N>> //
 			>;
 
-		template <typename T>
+		template <typename T, typename N>
 		TOML_PURE_INLINE_GETTER
-		ref_cast_type<T, node&> ref_cast() & noexcept
+		static ref_cast_type<T, N&&> ref_cast(N&& n) noexcept
 		{
-			using out_ref  = ref_cast_type<T, node&>;
+			using out_ref  = ref_cast_type<T, N&&>;
 			using out_type = std::remove_reference_t<out_ref>;
-			return static_cast<out_ref>(*static_cast<out_type*>(this));
-		}
-
-		template <typename T>
-		TOML_PURE_INLINE_GETTER
-		ref_cast_type<T, node&&> ref_cast() && noexcept
-		{
-			using out_ref  = ref_cast_type<T, node&&>;
-			using out_type = std::remove_reference_t<out_ref>;
-			return static_cast<out_ref>(*static_cast<out_type*>(this));
-		}
-
-		template <typename T>
-		TOML_PURE_INLINE_GETTER
-		ref_cast_type<T, const node&> ref_cast() const& noexcept
-		{
-			using out_ref  = ref_cast_type<T, const node&>;
-			using out_type = std::remove_reference_t<out_ref>;
-			return static_cast<out_ref>(*static_cast<out_type*>(this));
-		}
-
-		template <typename T>
-		TOML_PURE_INLINE_GETTER
-		ref_cast_type<T, const node&&> ref_cast() const&& noexcept
-		{
-			using out_ref  = ref_cast_type<T, const node&&>;
-			using out_type = std::remove_reference_t<out_ref>;
-			return static_cast<out_ref>(*static_cast<out_type*>(this));
+			return static_cast<out_ref>(static_cast<out_type&>(n));
 		}
 
 		/// \endcond
@@ -240,13 +241,13 @@ TOML_NAMESPACE_START
 		/// 					\conditional_return{Left as `void`}
 		///						"is every element the same type?" <br>
 		/// 					\conditional_return{Explicitly specified}
-		///						"is every element a T?"
+		///						"is every element an ElemType?"
 		///
 		/// \returns	True if the node was homogeneous.
 		///
 		/// \remarks	Always returns `false` for empty tables and arrays.
 		template <typename ElemType = void>
-		TOML_PURE_GETTER
+		TOML_PURE_INLINE_GETTER
 		bool is_homogeneous() const noexcept
 		{
 			using type = impl::remove_cvref<impl::unwrap_node<ElemType>>;
@@ -285,7 +286,7 @@ TOML_NAMESPACE_START
 		TOML_PURE_GETTER
 		virtual bool is_integer() const noexcept = 0;
 
-		/// \brief	Returns true if this node is an floating-point value.
+		/// \brief	Returns true if this node is a floating-point value.
 		TOML_PURE_GETTER
 		virtual bool is_floating_point() const noexcept = 0;
 
@@ -318,30 +319,11 @@ TOML_NAMESPACE_START
 		TOML_PURE_INLINE_GETTER
 		bool is() const noexcept
 		{
-			using type = impl::remove_cvref<impl::unwrap_node<T>>;
-			static_assert(toml::is_value<type> || toml::is_container<type>,
+			using unwrapped_type = impl::remove_cvref<impl::unwrap_node<T>>;
+			static_assert(toml::is_value<unwrapped_type> || toml::is_container<unwrapped_type>,
 						  "The template type argument of node::is() must be one of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
 
-			if constexpr (std::is_same_v<type, table>)
-				return is_table();
-			else if constexpr (std::is_same_v<type, array>)
-				return is_array();
-			else if constexpr (std::is_same_v<type, std::string>)
-				return is_string();
-			else if constexpr (std::is_same_v<type, int64_t>)
-				return is_integer();
-			else if constexpr (std::is_same_v<type, double>)
-				return is_floating_point();
-			else if constexpr (std::is_same_v<type, bool>)
-				return is_boolean();
-			else if constexpr (std::is_same_v<type, date>)
-				return is_date();
-			else if constexpr (std::is_same_v<type, time>)
-				return is_time();
-			else if constexpr (std::is_same_v<type, date_time>)
-				return is_date_time();
-
-			TOML_UNREACHABLE;
+			return type() == impl::node_type_of<unwrapped_type>;
 		}
 
 		/// @}
@@ -423,7 +405,7 @@ TOML_NAMESPACE_START
 
 		/// \brief	Gets a pointer to the node as a more specific node type.
 		///
-		/// \details \cpp
+		/// \detail \cpp
 		///
 		/// toml::value<int64_t>* int_value = node->as<int64_t>();
 		/// toml::table* tbl = node->as<toml::table>();
@@ -445,30 +427,7 @@ TOML_NAMESPACE_START
 		TOML_PURE_INLINE_GETTER
 		impl::wrap_node<T>* as() noexcept
 		{
-			using unwrapped_type = impl::unwrap_node<impl::remove_cvref<T>>;
-			static_assert(toml::is_value<unwrapped_type> || toml::is_container<unwrapped_type>,
-						  "The template type argument of node::as() must be one of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
-
-			if constexpr (std::is_same_v<unwrapped_type, table>)
-				return as_table();
-			else if constexpr (std::is_same_v<unwrapped_type, array>)
-				return as_array();
-			else if constexpr (std::is_same_v<unwrapped_type, std::string>)
-				return as_string();
-			else if constexpr (std::is_same_v<unwrapped_type, int64_t>)
-				return as_integer();
-			else if constexpr (std::is_same_v<unwrapped_type, double>)
-				return as_floating_point();
-			else if constexpr (std::is_same_v<unwrapped_type, bool>)
-				return as_boolean();
-			else if constexpr (std::is_same_v<unwrapped_type, date>)
-				return as_date();
-			else if constexpr (std::is_same_v<unwrapped_type, time>)
-				return as_time();
-			else if constexpr (std::is_same_v<unwrapped_type, date_time>)
-				return as_date_time();
-
-			TOML_UNREACHABLE;
+			return do_as<T>(*this);
 		}
 
 		/// \brief	Gets a pointer to the node as a more specific node type (const overload).
@@ -476,30 +435,7 @@ TOML_NAMESPACE_START
 		TOML_PURE_INLINE_GETTER
 		const impl::wrap_node<T>* as() const noexcept
 		{
-			using unwrapped_type = impl::unwrap_node<impl::remove_cvref<T>>;
-			static_assert(toml::is_value<unwrapped_type> || toml::is_container<unwrapped_type>,
-						  "The template type argument of node::as() must be one of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
-
-			if constexpr (std::is_same_v<unwrapped_type, table>)
-				return as_table();
-			else if constexpr (std::is_same_v<unwrapped_type, array>)
-				return as_array();
-			else if constexpr (std::is_same_v<unwrapped_type, std::string>)
-				return as_string();
-			else if constexpr (std::is_same_v<unwrapped_type, int64_t>)
-				return as_integer();
-			else if constexpr (std::is_same_v<unwrapped_type, double>)
-				return as_floating_point();
-			else if constexpr (std::is_same_v<unwrapped_type, bool>)
-				return as_boolean();
-			else if constexpr (std::is_same_v<unwrapped_type, date>)
-				return as_date();
-			else if constexpr (std::is_same_v<unwrapped_type, time>)
-				return as_time();
-			else if constexpr (std::is_same_v<unwrapped_type, date_time>)
-				return as_date_time();
-
-			TOML_UNREACHABLE;
+			return do_as<T>(*this);
 		}
 
 		/// @}
@@ -561,6 +497,7 @@ TOML_NAMESPACE_START
 		///
 		/// #define print_value(key, T) print_value_with_typename(key, #T, (T*)nullptr)
 		///
+		/// std::cout << std::boolalpha;
 		/// for (auto key : { "int", "flt", "pi", "bool", "huge", "str" })
 		/// {
 		/// 	std::cout << tbl[key].type() << " value '" << key << "' as:\n";
@@ -695,7 +632,7 @@ TOML_NAMESPACE_START
 		/// \ecpp
 		///
 		/// \note	Specifying explicit ref qualifiers acts as an explicit ref-category cast,
-		///			whereas specifying explicit cv-ref qualifiers merges them with whatever
+		///			whereas specifying explicit cv qualifiers merges them with whatever
 		///			the cv qualification of the node is (to ensure cv-correctness is propagated), e.g.:
 		///			| node        | T                      | return type                  |
 		///			|-------------|------------------------|------------------------------|
@@ -708,7 +645,7 @@ TOML_NAMESPACE_START
 		///
 		/// \returns	A reference to the underlying data.
 		template <typename T>
-		TOML_PURE_GETTER
+		TOML_PURE_INLINE_GETTER
 		decltype(auto) ref() & noexcept
 		{
 			return do_ref<T>(*this);
@@ -716,15 +653,15 @@ TOML_NAMESPACE_START
 
 		/// \brief	Gets a raw reference to a node's underlying data (rvalue overload).
 		template <typename T>
-		TOML_PURE_GETTER
+		TOML_PURE_INLINE_GETTER
 		decltype(auto) ref() && noexcept
 		{
-			return do_ref<T>(std::move(*this));
+			return do_ref<T>(static_cast<node&&>(*this));
 		}
 
 		/// \brief	Gets a raw reference to a node's underlying data (const lvalue overload).
 		template <typename T>
-		TOML_PURE_GETTER
+		TOML_PURE_INLINE_GETTER
 		decltype(auto) ref() const& noexcept
 		{
 			return do_ref<T>(*this);
@@ -732,10 +669,10 @@ TOML_NAMESPACE_START
 
 		/// \brief	Gets a raw reference to a node's underlying data (const rvalue overload).
 		template <typename T>
-		TOML_PURE_GETTER
+		TOML_PURE_INLINE_GETTER
 		decltype(auto) ref() const&& noexcept
 		{
-			return do_ref<T>(std::move(*this));
+			return do_ref<T>(static_cast<const node&&>(*this));
 		}
 
 		/// @}
@@ -744,6 +681,10 @@ TOML_NAMESPACE_START
 		/// @{
 
 		/// \brief	Returns the source region responsible for generating this node during parsing.
+		///
+		/// \detail The region of a table defined by a `[header]` is the header alone. The key-value pairs and
+		/// 		sub-tables that follow are not part of it. An array of tables runs from its first header to its
+		/// 		last.
 		TOML_PURE_INLINE_GETTER
 		const source_region& source() const noexcept
 		{
@@ -772,8 +713,6 @@ TOML_NAMESPACE_START
 										   || can_visit<Func, Node, time>		 //
 										   || can_visit<Func, Node, date_time>;
 
-		// clang-format off
-
 		template <typename Func, typename Node>
 		static constexpr bool can_visit_all = can_visit<Func, Node, table>		 //
 										   && can_visit<Func, Node, array>		 //
@@ -799,8 +738,6 @@ TOML_NAMESPACE_START
 											  && visit_is_nothrow_one<Func, Node, time>		   //
 											  && visit_is_nothrow_one<Func, Node, date_time>;
 
-		// clang-format on
-
 		template <typename Func, typename Node, typename T, bool = can_visit<Func, Node, T>>
 		struct visit_return_type_
 		{
@@ -818,58 +755,75 @@ TOML_NAMESPACE_START
 		template <typename A, typename B>
 		using nonvoid = std::conditional_t<std::is_void_v<A>, B, A>;
 
+		// clang-format off
+
+		template <typename Func, typename Node>
+		using visit_fallback_type =
+			nonvoid<visit_return_type<Func, Node, table>,
+			nonvoid<visit_return_type<Func, Node, array>,
+			nonvoid<visit_return_type<Func, Node, std::string>,
+			nonvoid<visit_return_type<Func, Node, int64_t>,
+			nonvoid<visit_return_type<Func, Node, double>,
+			nonvoid<visit_return_type<Func, Node, bool>,
+			nonvoid<visit_return_type<Func, Node, date>,
+			nonvoid<visit_return_type<Func, Node, time>,
+					visit_return_type<Func, Node, date_time>
+		>>>>>>>>;
+
+		// clang-format on
+
 		template <typename Func, typename Node>
 		static decltype(auto) do_visit(Func&& visitor, Node&& n) noexcept(visit_is_nothrow<Func&&, Node&&>)
 		{
 			static_assert(can_visit_any<Func&&, Node&&>,
 						  "TOML node visitors must be invocable for at least one of the toml::node "
-						  "specializations:" TOML_SA_NODE_TYPE_LIST);
+						  "types:" TOML_SA_NODE_TYPE_LIST);
 
 			switch (n.type())
 			{
 				case node_type::table:
 					if constexpr (can_visit<Func&&, Node&&, table>)
-						return static_cast<Func&&>(visitor)(static_cast<Node&&>(n).template ref_cast<table>());
+						return static_cast<Func&&>(visitor)(ref_cast<table>(static_cast<Node&&>(n)));
 					break;
 
 				case node_type::array:
 					if constexpr (can_visit<Func&&, Node&&, array>)
-						return static_cast<Func&&>(visitor)(static_cast<Node&&>(n).template ref_cast<array>());
+						return static_cast<Func&&>(visitor)(ref_cast<array>(static_cast<Node&&>(n)));
 					break;
 
 				case node_type::string:
 					if constexpr (can_visit<Func&&, Node&&, std::string>)
-						return static_cast<Func&&>(visitor)(static_cast<Node&&>(n).template ref_cast<std::string>());
+						return static_cast<Func&&>(visitor)(ref_cast<std::string>(static_cast<Node&&>(n)));
 					break;
 
 				case node_type::integer:
 					if constexpr (can_visit<Func&&, Node&&, int64_t>)
-						return static_cast<Func&&>(visitor)(static_cast<Node&&>(n).template ref_cast<int64_t>());
+						return static_cast<Func&&>(visitor)(ref_cast<int64_t>(static_cast<Node&&>(n)));
 					break;
 
 				case node_type::floating_point:
 					if constexpr (can_visit<Func&&, Node&&, double>)
-						return static_cast<Func&&>(visitor)(static_cast<Node&&>(n).template ref_cast<double>());
+						return static_cast<Func&&>(visitor)(ref_cast<double>(static_cast<Node&&>(n)));
 					break;
 
 				case node_type::boolean:
 					if constexpr (can_visit<Func&&, Node&&, bool>)
-						return static_cast<Func&&>(visitor)(static_cast<Node&&>(n).template ref_cast<bool>());
+						return static_cast<Func&&>(visitor)(ref_cast<bool>(static_cast<Node&&>(n)));
 					break;
 
 				case node_type::date:
 					if constexpr (can_visit<Func&&, Node&&, date>)
-						return static_cast<Func&&>(visitor)(static_cast<Node&&>(n).template ref_cast<date>());
+						return static_cast<Func&&>(visitor)(ref_cast<date>(static_cast<Node&&>(n)));
 					break;
 
 				case node_type::time:
 					if constexpr (can_visit<Func&&, Node&&, time>)
-						return static_cast<Func&&>(visitor)(static_cast<Node&&>(n).template ref_cast<time>());
+						return static_cast<Func&&>(visitor)(ref_cast<time>(static_cast<Node&&>(n)));
 					break;
 
 				case node_type::date_time:
 					if constexpr (can_visit<Func&&, Node&&, date_time>)
-						return static_cast<Func&&>(visitor)(static_cast<Node&&>(n).template ref_cast<date_time>());
+						return static_cast<Func&&>(visitor)(ref_cast<date_time>(static_cast<Node&&>(n)));
 					break;
 
 				case node_type::none:
@@ -878,21 +832,7 @@ TOML_NAMESPACE_START
 
 			if constexpr (!can_visit_all<Func&&, Node&&>)
 			{
-				// clang-format off
-
-				using return_type =
-					nonvoid<visit_return_type<Func&&, Node&&, table>,
-					nonvoid<visit_return_type<Func&&, Node&&, array>,
-					nonvoid<visit_return_type<Func&&, Node&&, std::string>,
-					nonvoid<visit_return_type<Func&&, Node&&, int64_t>,
-					nonvoid<visit_return_type<Func&&, Node&&, double>,
-					nonvoid<visit_return_type<Func&&, Node&&, bool>,
-					nonvoid<visit_return_type<Func&&, Node&&, date>,
-					nonvoid<visit_return_type<Func&&, Node&&, time>,
-							visit_return_type<Func&&, Node&&, date_time>
-				>>>>>>>>;
-
-				// clang-format on
+				using return_type = visit_fallback_type<Func&&, Node&&>;
 
 				if constexpr (!std::is_void_v<return_type>)
 				{
@@ -911,7 +851,7 @@ TOML_NAMESPACE_START
 
 		/// \brief	Invokes a visitor on the node based on the node's concrete type.
 		///
-		/// \details Visitation is useful when you expect
+		/// \detail Visitation is useful when you expect
 		/// 		 a node to be one of a set number of types and need
 		/// 		 to handle these types differently. Using `visit()` allows
 		/// 		 you to eliminate some of the casting/conversion boilerplate: \cpp
@@ -919,17 +859,17 @@ TOML_NAMESPACE_START
 		/// node.visit([](auto&& n)
 		/// {
 		///		if constexpr (toml::is_string<decltype(n)>)
-		///			do_something_with_a_string(*n)); //n is a toml::value<std::string>
+		///			do_something_with_a_string(*n); //n is a toml::value<std::string>
 		///		else if constexpr (toml::is_integer<decltype(n)>)
 		///			do_something_with_an_int(*n); //n is a toml::value<int64_t>
 		/// });
 		/// \ecpp
 		///
 		/// Visitor functions need not be generic; specifying a concrete node type as the input argument type
-		/// effectively acts a 'filter', only invoking the visitor if the concrete type is compatible.
+		/// effectively acts as a 'filter', only invoking the visitor if the concrete type is compatible.
 		/// Thus the example above can be re-written as: \cpp
-		/// node.visit([](toml::value<std::string>& s) { do_something_with_a_string(*s)); });
-		/// node.visit([](toml::value<int64_t>& i)     { do_something_with_an_int(*i)); });
+		/// node.visit([](toml::value<std::string>& s) { do_something_with_a_string(*s); });
+		/// node.visit([](toml::value<int64_t>& i)     { do_something_with_an_int(*i); });
 		/// \ecpp
 		///
 		/// \tparam	Func	A callable type invocable with one or more of the toml++ node types.
@@ -1053,29 +993,17 @@ TOML_NAMESPACE_START
 		/// { kek = 4 }
 		/// \eout
 		///
-		///
-		/// \note Keys in paths are interpreted literally, so whitespace (or lack thereof) matters:
-		/// \cpp
-		/// config.at_path(toml::path("foo.bar")) // same as node_view{ config }["foo"]["bar"]
-		/// config.at_path(toml::path("foo. bar")) // same as node_view{ config }["foo"][" bar"]
-		/// config.at_path(toml::path("foo..bar")) // same as node_view{ config }["foo"][""]["bar"]
-		/// config.at_path(toml::path(".foo.bar")) // same as node_view{ config }[""]["foo"]["bar"]
-		/// \ecpp
-		/// <br>
-		/// Additionally, TOML allows '.' (period) characters to appear in keys if they are quoted strings.
-		/// This function makes no allowance for this, instead treating all period characters as sub-table delimiters.
-		///
-		/// \param path		The "TOML path" to traverse.
+		/// \param p		The "TOML path" to traverse.
 		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
-		node_view<node> at_path(const toml::path& path) noexcept;
+		node_view<node> at_path(const toml::path& p) noexcept;
 
 		/// \brief Returns a const view of the subnode matching a fully-qualified "TOML path".
 		///
 		/// \see #at_path(const toml::path&)
 		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
-		node_view<const node> at_path(const toml::path& path) const noexcept;
+		node_view<const node> at_path(const toml::path& p) const noexcept;
 
 #if TOML_ENABLE_WINDOWS_COMPAT
 
@@ -1099,27 +1027,27 @@ TOML_NAMESPACE_START
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
 
-		/// \brief Returns a const view of the subnode matching a fully-qualified "TOML path".
+		/// \brief Returns a view of the subnode matching a fully-qualified "TOML path".
 		///
-		/// \param 	path The "TOML path" to the desired child.
+		/// \param 	p The "TOML path" to the desired child.
 		///
 		/// \returns	A view of the child node at the given path if one existed, or an empty node view.
 		///
 		/// \see toml::node_view
 		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
-		node_view<node> operator[](const toml::path& path) noexcept;
+		node_view<node> operator[](const toml::path& p) noexcept;
 
 		/// \brief Returns a const view of the subnode matching a fully-qualified "TOML path".
 		///
-		/// \param 	path The "TOML path" to the desired child.
+		/// \param 	p The "TOML path" to the desired child.
 		///
 		/// \returns	A view of the child node at the given path if one existed, or an empty node view.
 		///
 		/// \see toml::node_view
 		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
-		node_view<const node> operator[](const toml::path& path) const noexcept;
+		node_view<const node> operator[](const toml::path& p) const noexcept;
 
 		/// @}
 	};
@@ -1141,7 +1069,7 @@ TOML_IMPL_NAMESPACE_START
 		TOML_PURE_GETTER
 		bool operator()(const T& lhs) const noexcept
 		{
-			return lhs == *static_cast<const T*>(rhs);
+			return lhs == static_cast<const T&>(*rhs);
 		}
 	};
 }

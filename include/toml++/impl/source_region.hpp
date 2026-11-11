@@ -59,7 +59,7 @@ TOML_NAMESPACE_START
 
 		/// \brief	Equality operator.
 		TOML_PURE_GETTER
-		friend constexpr bool operator==(const source_position& lhs, const source_position& rhs) noexcept
+		friend constexpr bool operator==(source_position lhs, source_position rhs) noexcept
 		{
 			return lhs.line == rhs.line //
 				&& lhs.column == rhs.column;
@@ -67,7 +67,7 @@ TOML_NAMESPACE_START
 
 		/// \brief	Inequality operator.
 		TOML_PURE_INLINE_GETTER
-		friend constexpr bool operator!=(const source_position& lhs, const source_position& rhs) noexcept
+		friend constexpr bool operator!=(source_position lhs, source_position rhs) noexcept
 		{
 			return !(lhs == rhs);
 		}
@@ -76,7 +76,7 @@ TOML_NAMESPACE_START
 		/// \cond
 
 		TOML_PURE_GETTER
-		static constexpr uint64_t pack(const source_position& pos) noexcept
+		static constexpr uint64_t pack(source_position pos) noexcept
 		{
 			return static_cast<uint64_t>(pos.line) << 32 | static_cast<uint64_t>(pos.column);
 		}
@@ -86,28 +86,28 @@ TOML_NAMESPACE_START
 	  public:
 		/// \brief	Less-than operator.
 		TOML_PURE_GETTER
-		friend constexpr bool operator<(const source_position& lhs, const source_position& rhs) noexcept
+		friend constexpr bool operator<(source_position lhs, source_position rhs) noexcept
 		{
 			return pack(lhs) < pack(rhs);
 		}
 
 		/// \brief	Less-than-or-equal-to operator.
 		TOML_PURE_GETTER
-		friend constexpr bool operator<=(const source_position& lhs, const source_position& rhs) noexcept
+		friend constexpr bool operator<=(source_position lhs, source_position rhs) noexcept
 		{
 			return pack(lhs) <= pack(rhs);
 		}
 
 		/// \brief	Greater-than operator.
 		TOML_PURE_GETTER
-		friend constexpr bool operator>(const source_position& lhs, const source_position& rhs) noexcept
+		friend constexpr bool operator>(source_position lhs, source_position rhs) noexcept
 		{
 			return pack(lhs) > pack(rhs);
 		}
 
 		/// \brief	Greater-than-or-equal-to operator.
 		TOML_PURE_GETTER
-		friend constexpr bool operator>=(const source_position& lhs, const source_position& rhs) noexcept
+		friend constexpr bool operator>=(source_position lhs, source_position rhs) noexcept
 		{
 			return pack(lhs) >= pack(rhs);
 		}
@@ -208,7 +208,7 @@ TOML_NAMESPACE_START
 		/// \eout
 		///
 		/// \param 	lhs	The stream.
-		/// \param 	rhs	The source_position.
+		/// \param 	rhs	The source_region.
 		///
 		/// \returns	The input stream.
 		friend std::ostream& operator<<(std::ostream& lhs, const source_region& rhs)
@@ -240,58 +240,30 @@ TOML_NAMESPACE_START
 	TOML_NODISCARD
 	constexpr optional<std::string_view> get_line(std::string_view doc, source_index line_num) noexcept
 	{
+		// Invalid line number. Should be greater than zero.
 		if (line_num == 0)
-		{
-			// Invalid line number. Should be greater than zero.
 			return {};
-		}
 
 		// The position of the first character of the specified line.
-		const auto begin_of_line = [doc, line_num]() -> std::size_t
+		size_t begin_of_line{};
+		for (source_index current_line_num{ 1 }; current_line_num < line_num; ++current_line_num)
 		{
-			if (line_num == 1)
-			{
-				return 0;
-			}
-
-			const auto num_chars_of_doc = doc.size();
-			std::size_t current_line_num{ 1 };
-
-			for (std::size_t i{}; i < num_chars_of_doc; ++i)
-			{
-				if (doc[i] == '\n')
-				{
-					++current_line_num;
-
-					if (current_line_num == line_num)
-					{
-						return i + 1;
-					}
-				}
-			}
-			return std::string_view::npos;
-		}();
+			const auto line_break = doc.find('\n', begin_of_line);
+			if (line_break == std::string_view::npos)
+				return {};
+			begin_of_line = line_break + 1;
+		}
 
 		if (begin_of_line >= doc.size())
-		{
 			return {};
-		}
 
-		if (const auto end_of_line = doc.find('\n', begin_of_line); end_of_line != std::string_view::npos)
-		{
-			const auto num_chars_of_line = end_of_line - begin_of_line;
+		// The last line of a doc with no trailing line break runs to the end of the doc.
+		auto line = doc.substr(begin_of_line, doc.find('\n', begin_of_line) - begin_of_line);
 
-			// Trim an optional trailing carriage return.
-			return doc.substr(begin_of_line,
-							  ((num_chars_of_line > 0) && (doc[end_of_line - 1] == '\r')) ? num_chars_of_line - 1
-																						  : num_chars_of_line);
-		}
-
-		// Return the last line. Apparently this doc has no trailing line break character at the end.
-		auto last_line = doc.substr(begin_of_line);
-		if (!last_line.empty() && last_line.back() == '\r')
-			last_line.remove_suffix(1u);
-		return last_line;
+		// Trim an optional trailing carriage return.
+		if (!line.empty() && line.back() == '\r')
+			line.remove_suffix(1u);
+		return line;
 	}
 }
 TOML_NAMESPACE_END;

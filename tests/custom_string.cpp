@@ -158,6 +158,16 @@ namespace
 		[[maybe_unused]] size_t length() noexcept;
 	};
 
+	// string-like and nothrow to build from a view, but its move constructor can throw
+	struct UserDefinedStringViewThrowingMove
+	{
+		[[maybe_unused]] /*implicit*/ UserDefinedStringViewThrowingMove(std::string_view) noexcept;
+		[[maybe_unused]] UserDefinedStringViewThrowingMove(const UserDefinedStringViewThrowingMove&) noexcept;
+		[[maybe_unused]] UserDefinedStringViewThrowingMove(UserDefinedStringViewThrowingMove&&) noexcept(false);
+		[[maybe_unused]] const char* data() const noexcept;
+		[[maybe_unused]] size_t length() const noexcept;
+	};
+
 	// NOT string-like: members are not public
 	class NonStringPrivate
 	{
@@ -248,6 +258,9 @@ TEST_CASE("custom string types - noexcept propagation")
 	// UserDefinedStringView does not
 	static_assert(impl::value_retrieval_is_nothrow<UserDefinedStringView>);
 	static_assert(noexcept(std::declval<const toml::node&>().value<UserDefinedStringView>()));
+
+	// a move constructor that can throw makes retrieval throwing, whatever the copy constructor does
+	static_assert(!noexcept(std::declval<const toml::node&>().value<UserDefinedStringViewThrowingMove>()));
 
 	// unchanged for the built-ins
 	static_assert(!impl::value_retrieval_is_nothrow<std::string>);

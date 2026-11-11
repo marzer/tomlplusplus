@@ -376,6 +376,65 @@ TEST_CASE("date-times - stream output")
 
 #if TOML_ENABLE_CHRONO
 
+TEST_CASE("std::chrono - duration casts that would overflow are refused")
+{
+	using namespace std::chrono;
+	using impl::duration_cast_checked;
+
+	SECTION("to a finer duration")
+	{
+		static_assert(duration_cast_checked<nanoseconds>(microseconds{ 9223372036854775 })
+					  == nanoseconds{ 9223372036854775000 });
+		static_assert(!duration_cast_checked<nanoseconds>(microseconds{ 9223372036854776 }));
+		static_assert(duration_cast_checked<nanoseconds>(microseconds{ -9223372036854775 })
+					  == nanoseconds{ -9223372036854775000 });
+		static_assert(!duration_cast_checked<nanoseconds>(microseconds{ -9223372036854776 }));
+		static_assert(!duration_cast_checked<nanoseconds>(days{ 106752 }));
+		static_assert(duration_cast_checked<nanoseconds>(days{ 106751 }) == nanoseconds{ 9223286400000000000 });
+	}
+
+	SECTION("to a coarser duration")
+	{
+		static_assert(duration_cast_checked<seconds>(nanoseconds{ 1999999999 }) == seconds{ 1 });
+		static_assert(duration_cast_checked<seconds>(nanoseconds{ -1999999999 }) == seconds{ -1 });
+		static_assert(duration_cast_checked<seconds>((nanoseconds::max)()) == seconds{ 9223372036 });
+		static_assert(duration_cast_checked<seconds>((nanoseconds::min)()) == seconds{ -9223372036 });
+	}
+
+	SECTION("to a narrower representation")
+	{
+		using narrow_seconds   = duration<int8_t>;
+		using unsigned_seconds = duration<unsigned>;
+		using unsigned_wide	   = duration<uint64_t, std::nano>;
+		static_assert(duration_cast_checked<narrow_seconds>(nanoseconds{ 127999999999 }) == narrow_seconds{ 127 });
+		static_assert(!duration_cast_checked<narrow_seconds>(nanoseconds{ 128000000000 }));
+		static_assert(duration_cast_checked<narrow_seconds>(nanoseconds{ -128999999999 }) == narrow_seconds{ -128 });
+		static_assert(!duration_cast_checked<narrow_seconds>(nanoseconds{ -129000000000 }));
+		static_assert(duration_cast_checked<unsigned_seconds>(nanoseconds{ -999999999 }) == unsigned_seconds{ 0 });
+		static_assert(!duration_cast_checked<unsigned_seconds>(nanoseconds{ -1000000000 }));
+		static_assert(duration_cast_checked<unsigned_wide>(nanoseconds{ 5 }) == unsigned_wide{ 5 });
+		static_assert(!duration_cast_checked<unsigned_wide>(nanoseconds{ -1 }));
+	}
+
+	SECTION("periods that share no factor")
+	{
+		using thirds = duration<int16_t, std::ratio<1, 3>>;
+		using fifths = duration<int16_t, std::ratio<1, 5>>;
+		static_assert(duration_cast_checked<fifths>(thirds{ 7 }) == fifths{ 11 });
+		static_assert(duration_cast_checked<fifths>(thirds{ -7 }) == fifths{ -11 });
+		static_assert(duration_cast_checked<fifths>(thirds{ 19660 }) == fifths{ 32766 });
+		static_assert(!duration_cast_checked<fifths>(thirds{ 19661 }));
+	}
+
+	SECTION("floating-point representations take any value")
+	{
+		using float_nanoseconds = duration<double, std::nano>;
+		CHECK(duration_cast_checked<duration<double>>(nanoseconds{ 1500000000 }) == duration<double>{ 1.5 });
+		CHECK(!duration_cast_checked<nanoseconds>(days{ 106752 }));
+		CHECK(duration_cast_checked<float_nanoseconds>(days{ 106752 }) == float_nanoseconds{ 9223372800000000000.0 });
+	}
+}
+
 TEST_CASE("dates - std::chrono conversion")
 {
 	using namespace std::chrono;

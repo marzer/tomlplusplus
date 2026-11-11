@@ -33,34 +33,29 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	array::array(const impl::array_init_elem* b, const impl::array_init_elem* e)
+	array::array(const impl::array_init_elem* first, const impl::array_init_elem* last)
 	{
-#if TOML_LIFETIME_HOOKS
-		TOML_ARRAY_CREATED;
-#endif
-
-		TOML_ASSERT_ASSUME(b);
-		TOML_ASSERT_ASSUME(e);
-		TOML_ASSERT_ASSUME(b <= e);
-
-		if TOML_UNLIKELY(b == e)
-			return;
+		TOML_ASSERT_ASSUME(first);
+		TOML_ASSERT_ASSUME(last);
+		TOML_ASSERT_ASSUME(first <= last);
 
 		size_t cap{};
-		for (auto it = b; it != e; it++)
+		for (auto it = first; it != last; it++)
 		{
 			if (it->value)
 				cap++;
 		}
-		if TOML_UNLIKELY(!cap)
-			return;
 
 		elems_.reserve(cap);
-		for (; b != e; b++)
+		for (; first != last; first++)
 		{
-			if (b->value)
-				elems_.push_back(std::move(b->value));
+			if (first->value)
+				elems_.push_back(std::move(first->value));
 		}
+
+#if TOML_LIFETIME_HOOKS
+		TOML_ARRAY_CREATED;
+#endif
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -86,31 +81,33 @@ TOML_NAMESPACE_START
 		TOML_ARRAY_CREATED;
 #endif
 	}
+	// NOLINTEND(bugprone-use-after-move)
 
 	TOML_EXTERNAL_LINKAGE
 	array& array::operator=(const array& rhs)
 	{
-		if (&rhs != this)
-		{
-			vector_type copy;
-			copy.reserve(rhs.elems_.size());
-			for (const auto& elem : rhs)
-				copy.emplace_back(impl::make_node(elem));
-			node::operator=(rhs);
-			elems_.swap(copy);
-		}
+		if (&rhs == this)
+			return *this;
+
+		vector_type copy;
+		copy.reserve(rhs.elems_.size());
+		for (const auto& elem : rhs)
+			copy.emplace_back(impl::make_node(elem));
+		node::operator=(rhs);
+		elems_.swap(copy);
 		return *this;
 	}
 
+	// NOLINTBEGIN(bugprone-use-after-move)
 	TOML_EXTERNAL_LINKAGE
 	array& array::operator=(array&& rhs) noexcept
 	{
-		if (&rhs != this)
-		{
-			node::operator=(std::move(rhs));
-			vector_type stolen = std::move(rhs.elems_);
-			elems_.swap(stolen);
-		}
+		if (&rhs == this)
+			return *this;
+
+		node::operator=(std::move(rhs));
+		vector_type stolen = std::move(rhs.elems_);
+		elems_.swap(stolen);
 		return *this;
 	}
 	// NOLINTEND(bugprone-use-after-move)
@@ -120,15 +117,11 @@ TOML_NAMESPACE_START
 	{
 		TOML_ASSERT(idx <= elems_.size());
 		TOML_ASSERT_ASSUME(count >= 1u);
-		const auto old_size			= elems_.size();
-		const auto new_size			= old_size + count;
-		const auto inserting_at_end = idx == old_size;
+		const auto old_size = elems_.size();
+		const auto new_size = old_size + count;
 		elems_.resize(new_size);
-		if (!inserting_at_end)
-		{
-			for (size_t left = old_size, right = new_size - 1u; left-- > idx; right--)
-				elems_[right] = std::move(elems_[left]);
-		}
+		for (size_t left = old_size, right = new_size - 1u; left-- > idx; right--)
+			elems_[right] = std::move(elems_[left]);
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -148,17 +141,8 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	bool array::is_homogeneous(node_type ntype) const noexcept
 	{
-		if (elems_.empty())
-			return false;
-
-		if (ntype == node_type::none)
-			ntype = elems_[0]->type();
-
-		for (const auto& val : elems_)
-			if (val->type() != ntype)
-				return false;
-
-		return true;
+		const node* first_nonmatch = {};
+		return is_homogeneous(ntype, first_nonmatch);
 	}
 
 	TOML_NODISCARD
@@ -187,9 +171,9 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	bool array::is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept
 	{
-		node* fnm		  = nullptr;
-		const auto result = const_cast<array&>(*this).is_homogeneous(ntype, fnm);
-		first_nonmatch	  = fnm;
+		node* nonmatch	  = {};
+		const auto result = const_cast<array&>(*this).is_homogeneous(ntype, nonmatch);
+		first_nonmatch	  = nonmatch;
 		return result;
 	}
 
@@ -202,8 +186,8 @@ TOML_NAMESPACE_START
 
 #else
 
-		auto n = get(index);
-		TOML_ASSERT_ASSUME(n && "element index not found in array!");
+		const auto n = get(index);
+		TOML_ASSERT_ASSUME(n && "element index not found in array");
 		return *n;
 
 #endif
@@ -244,9 +228,9 @@ TOML_NAMESPACE_START
 	size_t array::total_leaf_count() const noexcept
 	{
 		size_t leaves{};
-		for (size_t i = 0, e = elems_.size(); i < e; i++)
+		for (const auto& elem : elems_)
 		{
-			auto arr = elems_[i]->as_array();
+			const auto arr = elem->as_array();
 			leaves += arr ? arr->total_leaf_count() : size_t{ 1 };
 		}
 		return leaves;
@@ -255,93 +239,69 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	void array::flatten_child(array && child, size_t& dest_index) noexcept
 	{
-		for (size_t i = 0, e = child.size(); i < e; i++)
+		for (auto& elem : child.elems_)
 		{
-			auto type = child.elems_[i]->type();
-			if (type == node_type::array)
+			if (const auto arr = elem->as_array())
 			{
-				array& arr = *static_cast<array*>(child.elems_[i].get());
-				if (!arr.empty())
-					flatten_child(std::move(arr), dest_index);
+				if (!arr->empty())
+					flatten_child(std::move(*arr), dest_index);
 			}
 			else
-				elems_[dest_index++] = std::move(child.elems_[i]);
+				elems_[dest_index++] = std::move(elem);
 		}
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	array& array::flatten() &
 	{
-		if (elems_.empty())
+		bool has_child_arrays = {};
+		for (const auto& elem : elems_)
+		{
+			if (elem->is_array())
+			{
+				has_child_arrays = true;
+				break;
+			}
+		}
+		if (!has_child_arrays)
 			return *this;
 
-		bool requires_flattening	 = false;
-		size_t size_after_flattening = elems_.size();
-		for (size_t i = elems_.size(); i-- > 0u;)
-		{
-			auto arr = elems_[i]->as_array();
-			if (!arr)
-				continue;
-			size_after_flattening--; // discount the array itself
-			const auto leaf_count = arr->total_leaf_count();
-			if (leaf_count > 0u)
-			{
-				requires_flattening = true;
-				size_after_flattening += leaf_count;
-			}
-			else
-				elems_.erase(elems_.cbegin() + static_cast<ptrdiff_t>(i));
-		}
+		array flattened;
+		flattened.elems_.resize(total_leaf_count());
 
-		if (!requires_flattening)
-			return *this;
-
-		elems_.reserve(size_after_flattening);
-
-		size_t i = 0;
-		while (i < elems_.size())
-		{
-			auto arr = elems_[i]->as_array();
-			if (!arr)
-			{
-				i++;
-				continue;
-			}
-
-			// NOLINTNEXTLINE(bugprone-unused-local-non-trivial-variable)
-			const impl::node_ptr arr_storage = std::move(elems_[i]);
-			const auto leaf_count			 = arr->total_leaf_count();
-			if (leaf_count > 1u)
-				preinsertion_resize(i + 1u, leaf_count - 1u);
-			flatten_child(std::move(*arr), i); // increments i
-		}
-
+		size_t dest_index = {};
+		flattened.flatten_child(std::move(*this), dest_index);
+		elems_ = std::move(flattened.elems_);
 		return *this;
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	array& array::prune(bool recursive) & noexcept
 	{
-		if (elems_.empty())
-			return *this;
-
-		for (size_t i = elems_.size(); i-- > 0u;)
+		size_t kept = {};
+		for (size_t i = 0, e = elems_.size(); i < e; i++)
 		{
-			if (auto arr = elems_[i]->as_array())
+			bool is_empty = {};
+			if (const auto arr = elems_[i]->as_array())
 			{
 				if (recursive)
 					arr->prune(true);
-				if (arr->empty())
-					elems_.erase(elems_.cbegin() + static_cast<ptrdiff_t>(i));
+				is_empty = arr->empty();
 			}
-			else if (auto tbl = elems_[i]->as_table())
+			else if (const auto tbl = elems_[i]->as_table())
 			{
 				if (recursive)
 					tbl->prune(true);
-				if (tbl->empty())
-					elems_.erase(elems_.cbegin() + static_cast<ptrdiff_t>(i));
+				is_empty = tbl->empty();
 			}
+			if (is_empty)
+				continue;
+
+			if (kept != i)
+				elems_[kept] = std::move(elems_[i]);
+			kept++;
 		}
+		elems_.erase(elems_.cbegin() + static_cast<ptrdiff_t>(kept), elems_.cend());
 
 		return *this;
 	}

@@ -164,7 +164,7 @@ namespace
 			   toml::format_flags::allow_literal_strings | toml::format_flags::allow_multi_line_strings
 				   | toml::format_flags::allow_real_tabs_in_strings | toml::format_flags::allow_unicode_strings,
 			   toml::toml_formatter::default_flags | toml::format_flags::terse_key_value_pairs
-				   | toml::format_flags::force_multiline_arrays })
+				   | toml::format_flags::force_multi_line_arrays })
 		{
 			std::ostringstream stream;
 			stream << toml::toml_formatter{ tbl, flags };

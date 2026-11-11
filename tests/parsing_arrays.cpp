@@ -212,10 +212,10 @@ TEST_CASE("parsing - arrays (malformed)")
 {
 	parsing_should_fail(FILE_LINE_ARGS,
 						"arr = [,]"sv,
-						"1:8: Error while parsing array: expected value or closing ']', saw comma"sv);
+						"1:8: Error while parsing array: expected value or closing ']', saw ','"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"arr = [1,,2]"sv,
-						"1:10: Error while parsing array: expected value or closing ']', saw comma"sv);
+						"1:10: Error while parsing array: expected value or closing ']', saw ','"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"arr = [1 2]"sv,
 						"1:10: Error while parsing array: expected comma or closing ']', saw '2'"sv);

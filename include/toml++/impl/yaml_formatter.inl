@@ -25,18 +25,18 @@ TOML_ANON_NAMESPACE_START
 	TOML_INTERNAL_LINKAGE
 	bool yaml_block_scalar_preserves(std::string_view str) noexcept
 	{
-		if (str.back() == '\n')
+		if (str.empty() || str.back() == '\n')
 			return false;
 
 		impl::utf8_decoder decoder;
-		bool contains_newline = false;
-		bool seen_content	  = false;
+		bool contains_newline = {};
+		bool seen_content	  = {};
 		for (auto c : str)
 		{
-			decoder(static_cast<uint8_t>(c));
+			decoder(c);
 			if (decoder.error())
 				return false;
-			if (!decoder.has_code_point())
+			if (!decoder.has_codepoint())
 				continue;
 
 			const auto cp = decoder.codepoint;
@@ -45,7 +45,8 @@ TOML_ANON_NAMESPACE_START
 				contains_newline = true;
 				continue;
 			}
-			if ((cp == U' ' && !seen_content) || impl::is_nontab_control_character(cp)
+			// libyaml rejects a block scalar whose content starts with a tab
+			if (((cp == U' ' || cp == U'\t') && !seen_content) || impl::is_nontab_control_character(cp)
 				|| impl::is_non_ascii_unprintable(cp, impl::string_dialect::yaml))
 				return false;
 			seen_content = true;
@@ -56,22 +57,68 @@ TOML_ANON_NAMESPACE_START
 	TOML_INTERNAL_LINKAGE
 	bool yaml_plain_scalar_is_string(std::string_view str) noexcept
 	{
+		static constexpr std::string_view keywords[] = { "y"sv,	  "n"sv,	"yes"sv,   "no"sv,	"on"sv,
+														 "off"sv, "true"sv, "false"sv, "null"sv };
+		static constexpr size_t max_keyword_length	 = []() constexpr noexcept
+		{
+			size_t longest = {};
+			for (auto keyword : keywords)
+				longest = keyword.length() > longest ? keyword.length() : longest;
+			return longest;
+		}();
+
 		if (str.empty() || str.front() == '-' || str.front() == '+' || (str.front() >= '0' && str.front() <= '9'))
 			return false;
-		if (str.length() > 5u)
+		if (str.length() > max_keyword_length)
 			return true;
 
-		char lower[5];
+		char lower[max_keyword_length];
 		for (size_t i = 0; i < str.length(); i++)
 			lower[i] = str[i] >= 'A' && str[i] <= 'Z' ? static_cast<char>(str[i] - 'A' + 'a') : str[i];
 		const auto word = std::string_view{ lower, str.length() };
 
-		static constexpr std::string_view keywords[] = { "y"sv,	  "n"sv,	"yes"sv,   "no"sv,	"on"sv,
-														 "off"sv, "true"sv, "false"sv, "null"sv };
 		for (auto keyword : keywords)
 			if (word == keyword)
 				return false;
 		return true;
+	}
+
+	// YAML limits a key written as 'key: value' to 1024 characters. the count here is an upper bound
+	// on what the key prints as, so it can only err towards the explicit form
+	TOML_INTERNAL_LINKAGE
+	bool yaml_key_needs_explicit_form(std::string_view key, bool unicode_allowed) noexcept
+	{
+		static constexpr size_t max_implicit_key_length = 1024;
+		static constexpr size_t escape_length			= 6;  // \uXXXX
+		static constexpr size_t long_escape_length		= 10; // \UXXXXXXXX
+		static constexpr size_t quotes					= 2;
+
+		// fits even with every byte escaped
+		if (key.length() <= (max_implicit_key_length - quotes) / escape_length)
+			return false;
+
+		size_t length = quotes;
+		impl::utf8_decoder decoder;
+		for (const auto c : key)
+		{
+			decoder(c);
+			if (decoder.error())
+				return true;
+			if (!decoder.has_codepoint())
+				continue;
+
+			const auto cp = decoder.codepoint;
+			if (cp < U'\x80')
+				length += cp >= U' ' && cp < U'\x7F' && cp != U'"' && cp != U'\\' ? size_t{ 1 } : escape_length;
+			else if (unicode_allowed && !impl::is_non_ascii_unprintable(cp, impl::string_dialect::yaml))
+				length++;
+			else
+				length += cp > U'\xFFFF' ? long_escape_length : escape_length;
+
+			if (length > max_implicit_key_length)
+				return true;
+		}
+		return decoder.needs_more_input();
 	}
 }
 TOML_ANON_NAMESPACE_END;
@@ -79,45 +126,39 @@ TOML_ANON_NAMESPACE_END;
 TOML_NAMESPACE_START
 {
 	TOML_EXTERNAL_LINKAGE
+	void yaml_formatter::print_yaml_scalar(std::string_view str)
+	{
+		print_string(str,
+					 false,
+					 TOML_ANON_NAMESPACE::yaml_plain_scalar_is_string(str),
+					 true,
+					 impl::string_dialect::yaml);
+	}
+
+	TOML_EXTERNAL_LINKAGE
 	void yaml_formatter::print_yaml_string(const value<std::string>& str)
 	{
-		if (str->empty())
+		if (!TOML_ANON_NAMESPACE::yaml_block_scalar_preserves(*str))
 		{
-			base::print(str);
+			print_yaml_scalar(*str);
 			return;
 		}
 
-		if (TOML_ANON_NAMESPACE::yaml_block_scalar_preserves(*str))
+		print_unformatted("|-"sv);
+
+		const indent_scope indented{ *this };
+
+		std::string_view remaining{ *str };
+		while (true)
 		{
-			print_unformatted("|-"sv);
-
-			increase_indent();
-
-			auto line_end  = str->c_str() - 1u;
-			const auto end = str->c_str() + str->length();
-			while (line_end != end)
-			{
-				auto line_start = line_end + 1u;
-				line_end		= line_start;
-				for (; line_end != end && *line_end != '\n'; line_end++)
-					;
-
-				if TOML_LIKELY(line_start != line_end || line_end != end)
-				{
-					print_newline();
-					print_indent();
-					print_unformatted(std::string_view{ line_start, static_cast<size_t>(line_end - line_start) });
-				}
-			}
-
-			decrease_indent();
+			const auto line_length = remaining.find('\n');
+			print_newline();
+			print_indent();
+			print_unformatted(remaining.substr(0u, line_length));
+			if (line_length == std::string_view::npos)
+				break;
+			remaining.remove_prefix(line_length + 1u);
 		}
-		else
-			print_string(*str,
-						 false,
-						 TOML_ANON_NAMESPACE::yaml_plain_scalar_is_string(*str),
-						 true,
-						 impl::string_dialect::yaml);
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -136,6 +177,21 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
+	void yaml_formatter::print_node(const toml::node& n, bool parent_is_array)
+	{
+		const auto type = n.type();
+		TOML_ASSUME(type != node_type::none);
+		switch (type)
+		{
+			case node_type::table: print(static_cast<const table&>(n), parent_is_array); break;
+			case node_type::array: print(static_cast<const array&>(n), parent_is_array); break;
+			case node_type::string: print_yaml_string(static_cast<const value<std::string>&>(n)); break;
+			case node_type::floating_point: print_yaml_float(static_cast<const value<double>&>(n)); break;
+			default: print_value(n, type);
+		}
+	}
+
+	TOML_EXTERNAL_LINKAGE
 	void yaml_formatter::print(const toml::table& tbl, bool parent_is_array)
 	{
 		if (tbl.empty())
@@ -144,37 +200,34 @@ TOML_NAMESPACE_START
 			return;
 		}
 
-		increase_indent();
+		const indent_scope indented{ *this };
 
+		bool continues_line = parent_is_array;
 		for (auto&& [k, v] : tbl)
 		{
-			if (!parent_is_array)
+			if (!continues_line)
 			{
 				print_newline();
 				print_indent();
 			}
-			parent_is_array = false;
+			continues_line = false;
 
-			print_string(k.str(),
-						 false,
-						 TOML_ANON_NAMESPACE::yaml_plain_scalar_is_string(k.str()),
-						 true,
-						 impl::string_dialect::yaml);
+			const bool explicit_key =
+				TOML_ANON_NAMESPACE::yaml_key_needs_explicit_form(k.str(), unicode_strings_allowed());
+			if (explicit_key)
+				print_unformatted("? "sv);
+
+			print_yaml_scalar(k.str());
+
+			if (explicit_key)
+			{
+				print_newline();
+				print_indent();
+			}
 			print_unformatted(": "sv);
 
-			const auto type = v.type();
-			TOML_ASSUME(type != node_type::none);
-			switch (type)
-			{
-				case node_type::table: print(*static_cast<const table*>(&v)); break;
-				case node_type::array: print(*static_cast<const array*>(&v)); break;
-				case node_type::string: print_yaml_string(*static_cast<const value<std::string>*>(&v)); break;
-				case node_type::floating_point: print_yaml_float(*static_cast<const value<double>*>(&v)); break;
-				default: print_value(v, type);
-			}
+			print_node(v);
 		}
-
-		decrease_indent();
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -186,32 +239,22 @@ TOML_NAMESPACE_START
 			return;
 		}
 
-		increase_indent();
+		const indent_scope indented{ *this };
 
+		bool continues_line = parent_is_array;
 		for (auto&& v : arr)
 		{
-			if (!parent_is_array)
+			if (!continues_line)
 			{
 				print_newline();
 				print_indent();
 			}
-			parent_is_array = false;
+			continues_line = false;
 
 			print_unformatted("- "sv);
 
-			const auto type = v.type();
-			TOML_ASSUME(type != node_type::none);
-			switch (type)
-			{
-				case node_type::table: print(*static_cast<const table*>(&v), true); break;
-				case node_type::array: print(*static_cast<const array*>(&v), true); break;
-				case node_type::string: print_yaml_string(*static_cast<const value<std::string>*>(&v)); break;
-				case node_type::floating_point: print_yaml_float(*static_cast<const value<double>*>(&v)); break;
-				default: print_value(v, type);
-			}
+			print_node(v, true);
 		}
-
-		decrease_indent();
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -220,31 +263,18 @@ TOML_NAMESPACE_START
 		if (dump_failed_parse_result())
 			return;
 
-		switch (auto source_type = source().type())
+		const auto type = source().type();
+		if (type != node_type::table && type != node_type::array)
 		{
-			case node_type::table:
-			{
-				impl::formatter_buffer buffer{ *this };
-				decrease_indent(); // so root kvps and tables have the same indent
-				print(*static_cast<const table*>(&source()));
-				buffer.flush();
-				break;
-			}
-
-			case node_type::array:
-			{
-				impl::formatter_buffer buffer{ *this };
-				print(*static_cast<const array*>(&source()));
-				buffer.flush();
-				break;
-			}
-
-			case node_type::string: print_yaml_string(*static_cast<const value<std::string>*>(&source())); break;
-
-			case node_type::floating_point: print_yaml_float(*static_cast<const value<double>*>(&source())); break;
-
-			default: print_value(source(), source_type);
+			print_node(source());
+			return;
 		}
+
+		impl::formatter_buffer buffer{ *this };
+		if (type == node_type::table)
+			decrease_indent(); // so root kvps and tables have the same indent
+		print_node(source());
+		buffer.flush();
 	}
 }
 TOML_NAMESPACE_END;

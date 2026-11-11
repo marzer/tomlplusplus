@@ -9,7 +9,6 @@
 
 #include "forward_declarations.hpp"
 #include "print_to_stream.hpp"
-#include "unicode.hpp"
 #include "header_start.hpp"
 /// \cond
 
@@ -40,13 +39,6 @@ TOML_IMPL_NAMESPACE_START
 		json,
 		yaml
 	};
-
-	TOML_CONST_GETTER
-	constexpr bool is_non_ascii_unprintable(char32_t c, string_dialect dialect) noexcept
-	{
-		return (c >= U'\x80' && c <= U'\x9F') || is_non_ascii_vertical_whitespace(c)
-			|| (dialect == string_dialect::yaml && (c == U'\xFEFF' || c == U'\xFFFE' || c == U'\xFFFF'));
-	}
 
 	class formatter_buffer;
 
@@ -80,6 +72,12 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_PURE_INLINE_GETTER
+		format_flags effective_flags() const noexcept
+		{
+			return config_.flags;
+		}
+
+		TOML_PURE_INLINE_GETTER
 		int indent() const noexcept
 		{
 			return indent_;
@@ -99,6 +97,52 @@ TOML_IMPL_NAMESPACE_START
 		{
 			indent_--;
 		}
+
+		class indent_scope
+		{
+		  private:
+			formatter* formatter_;
+			int previous_;
+
+		  public:
+			TOML_NODISCARD_CTOR
+			explicit indent_scope(formatter& fmt, bool enabled = true) noexcept //
+				: formatter_{ &fmt },
+				  previous_{ fmt.indent_ }
+			{
+				if (enabled)
+					fmt.indent_++;
+			}
+
+			// restores instead of decrementing, as the parser's scopes do (#288)
+			~indent_scope() noexcept
+			{
+				formatter_->indent_ = previous_;
+			}
+
+			TOML_DELETE_DEFAULTS(indent_scope);
+		};
+
+		class attach_scope
+		{
+		  private:
+			formatter* formatter_;
+
+		  public:
+			TOML_NODISCARD_CTOR
+			explicit attach_scope(formatter& fmt, std::ostream& stream) noexcept //
+				: formatter_{ &fmt }
+			{
+				fmt.attach(stream);
+			}
+
+			~attach_scope() noexcept
+			{
+				formatter_->detach();
+			}
+
+			TOML_DELETE_DEFAULTS(attach_scope);
+		};
 
 		TOML_PURE_INLINE_GETTER
 		size_t indent_columns() const noexcept
@@ -149,9 +193,9 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_PURE_INLINE_GETTER
-		bool force_multiline_arrays() const noexcept
+		bool force_multi_line_arrays() const noexcept
 		{
-			return !!(config_.flags & format_flags::force_multiline_arrays);
+			return !!(config_.flags & format_flags::force_multi_line_arrays);
 		}
 
 		TOML_PURE_INLINE_GETTER

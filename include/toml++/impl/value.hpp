@@ -9,7 +9,6 @@
 #include "print_to_stream.hpp"
 #include "std_utility.hpp"
 #include "header_start.hpp"
-TOML_DISABLE_ARITHMETIC_WARNINGS;
 
 /// \cond
 // clang-format off
@@ -20,67 +19,72 @@ TOML_DISABLE_ARITHMETIC_WARNINGS;
 	#define TOML_SA_VALUE_MESSAGE_WSTRING
 #endif
 #if TOML_HAS_CHAR8
+	#define TOML_SA_VALUE_MESSAGE_U8STRING			TOML_SA_LIST_SEP "std::u8string"
 	#define TOML_SA_VALUE_MESSAGE_U8STRING_VIEW		TOML_SA_LIST_SEP "std::u8string_view"
 	#define TOML_SA_VALUE_MESSAGE_CONST_CHAR8		TOML_SA_LIST_SEP "const char8_t*"
 #else
+	#define TOML_SA_VALUE_MESSAGE_U8STRING
 	#define TOML_SA_VALUE_MESSAGE_U8STRING_VIEW
 	#define TOML_SA_VALUE_MESSAGE_CONST_CHAR8
 #endif
+#if TOML_ENABLE_CHRONO
+	#define TOML_SA_VALUE_MESSAGE_CHRONO_LOSSLESS															\
+		TOML_SA_LIST_SEP "std::chrono::year_month_day"														\
+		TOML_SA_LIST_SEP "any std::chrono::hh_mm_ss or std::chrono::local_time of nanoseconds or finer"
+	#define TOML_SA_VALUE_MESSAGE_CHRONO_LOSSY																\
+		TOML_SA_LIST_SEP "any other std::chrono::hh_mm_ss or std::chrono::local_time"
+#else
+	#define TOML_SA_VALUE_MESSAGE_CHRONO_LOSSLESS
+	#define TOML_SA_VALUE_MESSAGE_CHRONO_LOSSY
+#endif
 
-#define TOML_SA_VALUE_EXACT_FUNC_MESSAGE(type_arg)															\
-	"The " type_arg " must be one of:"																		\
+#define TOML_SA_VALUE_MESSAGE_LOSSLESS																		\
 	TOML_SA_LIST_NEW "A native TOML value type"																\
 	TOML_SA_NATIVE_VALUE_TYPE_LIST																			\
 																											\
 	TOML_SA_LIST_NXT "A non-view type capable of losslessly representing a native TOML value type"			\
 	TOML_SA_LIST_BEG "std::string"																			\
+	TOML_SA_VALUE_MESSAGE_U8STRING																			\
 	TOML_SA_VALUE_MESSAGE_WSTRING																			\
 	TOML_SA_LIST_SEP "any signed integer type >= 64 bits"													\
 	TOML_SA_LIST_SEP "any floating-point type >= 64 bits"													\
-	TOML_SA_LIST_END																						\
-																											\
-	TOML_SA_LIST_NXT "An immutable view type not requiring additional temporary storage"					\
-	TOML_SA_LIST_BEG "std::string_view"																		\
-	TOML_SA_VALUE_MESSAGE_U8STRING_VIEW																		\
-	TOML_SA_LIST_SEP "const char*"																			\
-	TOML_SA_VALUE_MESSAGE_CONST_CHAR8																		\
-	TOML_SA_LIST_END																						\
-																											\
-	TOML_SA_LIST_NXT "A user-defined 'string-like' type (see toml::is_string_like)"							\
-	TOML_SA_LIST_BEG "with const char* data() const or const char* c_str() const"							\
-	TOML_SA_LIST_SEP "and size_t length() const"															\
-	TOML_SA_LIST_SEP "and constructible from std::string_view, (const char*, size_t) or const std::string&"	\
+	TOML_SA_VALUE_MESSAGE_CHRONO_LOSSLESS																	\
 	TOML_SA_LIST_END
 
-#define TOML_SA_VALUE_FUNC_MESSAGE(type_arg)																\
-	"The " type_arg " must be one of:"																		\
-	TOML_SA_LIST_NEW "A native TOML value type"																\
-	TOML_SA_NATIVE_VALUE_TYPE_LIST																			\
-																											\
-	TOML_SA_LIST_NXT "A non-view type capable of losslessly representing a native TOML value type"			\
-	TOML_SA_LIST_BEG "std::string"																			\
-	TOML_SA_VALUE_MESSAGE_WSTRING																			\
-	TOML_SA_LIST_SEP "any signed integer type >= 64 bits"													\
-	TOML_SA_LIST_SEP "any floating-point type >= 64 bits"													\
-	TOML_SA_LIST_END																						\
-																											\
+#define TOML_SA_VALUE_MESSAGE_LOSSY																			\
 	TOML_SA_LIST_NXT "A non-view type capable of (reasonably) representing a native TOML value type"		\
 	TOML_SA_LIST_BEG "any other integral type"																\
 	TOML_SA_LIST_SEP "any floating-point type"																\
-	TOML_SA_LIST_END																						\
-																											\
-	TOML_SA_LIST_NXT "An immutable view type not requiring additional temporary storage"					\
+	TOML_SA_VALUE_MESSAGE_CHRONO_LOSSY																		\
+	TOML_SA_LIST_END
+
+#define TOML_SA_VALUE_MESSAGE_VIEW																			\
+	TOML_SA_LIST_NXT "A compatible view type"																\
 	TOML_SA_LIST_BEG "std::string_view"																		\
 	TOML_SA_VALUE_MESSAGE_U8STRING_VIEW																		\
 	TOML_SA_LIST_SEP "const char*"																			\
 	TOML_SA_VALUE_MESSAGE_CONST_CHAR8																		\
-	TOML_SA_LIST_END																						\
-																											\
+	TOML_SA_LIST_END
+
+#define TOML_SA_VALUE_MESSAGE_STRING_LIKE																	\
 	TOML_SA_LIST_NXT "A user-defined 'string-like' type (see toml::is_string_like)"							\
 	TOML_SA_LIST_BEG "with const char* data() const or const char* c_str() const"							\
 	TOML_SA_LIST_SEP "and size_t length() const"															\
 	TOML_SA_LIST_SEP "and constructible from std::string_view, (const char*, size_t) or const std::string&"	\
 	TOML_SA_LIST_END
+
+#define TOML_SA_VALUE_EXACT_FUNC_MESSAGE(type_arg)															\
+	"The " type_arg " must be one of:"																		\
+	TOML_SA_VALUE_MESSAGE_LOSSLESS																			\
+	TOML_SA_VALUE_MESSAGE_VIEW																				\
+	TOML_SA_VALUE_MESSAGE_STRING_LIKE
+
+#define TOML_SA_VALUE_FUNC_MESSAGE(type_arg)																\
+	"The " type_arg " must be one of:"																		\
+	TOML_SA_VALUE_MESSAGE_LOSSLESS																			\
+	TOML_SA_VALUE_MESSAGE_LOSSY																				\
+	TOML_SA_VALUE_MESSAGE_VIEW																				\
+	TOML_SA_VALUE_MESSAGE_STRING_LIKE
 
 // clang-format on
 /// \endcond
@@ -95,13 +99,14 @@ TOML_IMPL_NAMESPACE_START
 		TOML_NODISCARD
 		static T make(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args&&...>)
 		{
-			// user-defined string-likes (see toml::is_string_like) provide their character data
-			// via data()/c_str() + length() rather than by conversion
+			// user-defined string-likes (see toml::is_string_like) provide their character data via data()/c_str()
+			// + length() when they have no conversion to std::string, or one via const char* (it stops at a nul)
 			if constexpr (std::is_same_v<T, std::string> && sizeof...(Args) == 1u && (is_string_like<Args> && ...)
-						  && !std::is_constructible_v<std::string, Args&&...>)
+						  && (!std::is_constructible_v<std::string, Args&&...>
+							  || ((std::is_convertible_v<Args&&, const char*>
+								   && !std::is_convertible_v<Args&&, std::string>)
+								  && ...)))
 				return std::string{ string_like_to_view(args)... };
-			else if constexpr (std::is_aggregate_v<T>)
-				return T{ static_cast<Args&&>(args)... };
 			else
 				return T(static_cast<Args&&>(args)...);
 		}
@@ -193,8 +198,7 @@ TOML_IMPL_NAMESPACE_START
 		{
 			if constexpr ((sizeof(T) * CHAR_BIT) < 63) // 63 bits == int64_max
 			{
-				using common_t = decltype(int64_t{} + T{});
-				if (val < int64_t{} || static_cast<common_t>(val) > static_cast<common_t>(traits::max))
+				if (val < int64_t{} || val > static_cast<int64_t>(traits::max))
 					return {};
 			}
 			else
@@ -210,6 +214,146 @@ TOML_IMPL_NAMESPACE_START
 		}
 		return { static_cast<T>(val) };
 	}
+
+	enum class TOML_CLOSED_ENUM numeric_order : int
+	{
+		less,
+		equal,
+		greater,
+		unordered
+	};
+
+	// the first value past the int64_t range; its negative is the lowest int64_t
+	inline constexpr double two_to_the_63 = 9223372036854775808.0;
+
+	template <typename T>
+	TOML_CONST_GETTER
+	inline optional<T> node_value_from_integer([[maybe_unused]] int64_t val) noexcept
+	{
+		// int -> int
+		if constexpr (is_natively_one_of<T, int64_t>)
+		{
+			if constexpr (is_native<T> || can_represent_native<T>)
+				return static_cast<T>(val);
+			else
+				return node_integer_cast<T>(val);
+		}
+
+		// int -> float
+		else if constexpr (is_natively_one_of<T, double>)
+		{
+			if constexpr (value_traits<T>::digits < 64)
+			{
+				constexpr auto largest_whole_float = (int64_t{ 1 } << value_traits<T>::digits);
+				if (val < -largest_whole_float || val > largest_whole_float)
+					return {};
+			}
+			return static_cast<T>(val);
+		}
+
+		// int -> bool
+		else if constexpr (is_natively_one_of<T, bool>)
+			return static_cast<bool>(val);
+
+		// int -> anything else
+		else
+			return {};
+	}
+
+	// by reference, as fpclassify() takes it
+	template <typename T>
+	TOML_PURE_GETTER
+	inline optional<T> node_value_from_float([[maybe_unused]] const double& val) noexcept
+	{
+		// float -> float
+		if constexpr (is_natively_one_of<T, double>)
+		{
+			if constexpr (is_native<T> || can_represent_native<T>)
+				return { static_cast<T>(val) };
+			else
+			{
+				if (fpclassify(val) == fp_class::ok
+					&& (val < static_cast<double>(float_limits<T>::lowest())
+						|| val > static_cast<double>(float_limits<T>::highest())))
+					return {};
+				return { static_cast<T>(val) };
+			}
+		}
+
+		// float -> int
+		else if constexpr (is_natively_one_of<T, int64_t>)
+		{
+			if (fpclassify(val) == fp_class::ok && val >= -two_to_the_63 && val < two_to_the_63
+				&& static_cast<double>(static_cast<int64_t>(val)) == val)
+				return node_integer_cast<T>(static_cast<int64_t>(val));
+			return {};
+		}
+
+		// float -> anything else
+		else
+			return {};
+	}
+
+	template <typename T>
+	TOML_CONST_GETTER
+	inline optional<T> node_value_from_boolean([[maybe_unused]] bool val) noexcept
+	{
+		// bool -> bool
+		if constexpr (is_natively_one_of<T, bool>)
+			return { val };
+
+		// bool -> int
+		else if constexpr (is_natively_one_of<T, int64_t>)
+			return { static_cast<T>(val) };
+
+		// bool -> anything else
+		else
+			return {};
+	}
+
+	// compares as numbers: converting either operand to the other's type can change its value
+	template <typename T>
+	TOML_CONST_GETTER
+	inline numeric_order compare_integer_with_float(int64_t lhs, T rhs) noexcept
+	{
+		static_assert(std::is_floating_point_v<T>);
+
+		// a float16 can't hold 2^63
+		using wide			 = std::common_type_t<T, double>;
+		constexpr auto limit = static_cast<wide>(two_to_the_63);
+		const auto widened	 = static_cast<wide>(rhs);
+		if (widened >= limit)
+			return numeric_order::less;
+		if (widened < -limit)
+			return numeric_order::greater;
+		if (!(widened >= -limit))
+			return numeric_order::unordered; // nan
+
+		const auto whole = static_cast<int64_t>(widened);
+		if (lhs != whole)
+			return lhs < whole ? numeric_order::less : numeric_order::greater;
+
+		const wide fraction = widened - static_cast<wide>(whole);
+		if (fraction > wide{})
+			return numeric_order::less;
+		if (fraction < wide{})
+			return numeric_order::greater;
+		return numeric_order::equal;
+	}
+
+#if TOML_ENABLE_CHRONO
+
+	// a local time can't hold a date-time that has an offset
+	template <typename T>
+	TOML_PURE_GETTER
+	inline optional<T> to_chrono_local_time(const date_time& dt) noexcept
+	{
+		if (dt.offset)
+			return {};
+		return dt.template to_chrono<typename T::duration>();
+	}
+
+#endif
 
 	template <typename...>
 	struct value_variadic_ctor_allowed : std::true_type
@@ -245,6 +389,9 @@ TOML_NAMESPACE_START
 
 		friend class TOML_PARSER_TYPENAME;
 
+		ValueType val_;
+		value_flags flags_ = {};
+
 		template <typename T, typename U>
 		TOML_CONST_INLINE_GETTER
 		static auto as_value([[maybe_unused]] U* ptr) noexcept
@@ -254,9 +401,6 @@ TOML_NAMESPACE_START
 			else
 				return nullptr;
 		}
-
-		ValueType val_;
-		value_flags flags_ = value_flags::none;
 
 		/// \endcond
 
@@ -423,7 +567,7 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		bool is_homogeneous(node_type ntype, node*& first_nonmatch) noexcept final
 		{
-			if (ntype != node_type::none && ntype != impl::node_type_of<value_type>)
+			if (!is_homogeneous(ntype))
 			{
 				first_nonmatch = this;
 				return false;
@@ -434,7 +578,7 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		bool is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept final
 		{
-			if (ntype != node_type::none && ntype != impl::node_type_of<value_type>)
+			if (!is_homogeneous(ntype))
 			{
 				first_nonmatch = this;
 				return false;
@@ -536,7 +680,7 @@ TOML_NAMESPACE_START
 			return std::is_same_v<value_type, time>;
 		}
 
-		/// \brief Returns `true` if the #value_type is toml_date_time.
+		/// \brief Returns `true` if the #value_type is toml::date_time.
 		TOML_CONST_INLINE_GETTER
 		bool is_date_time() const noexcept final
 		{
@@ -789,7 +933,7 @@ TOML_NAMESPACE_START
 		/// @{
 
 		/// \brief	Returns the metadata flags associated with this value.
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		value_flags flags() const noexcept
 		{
 			return flags_;
@@ -815,6 +959,7 @@ TOML_NAMESPACE_START
 			return *this;
 		}
 
+		/// \brief	Value-assignment operator (string rvalue overload).
 		TOML_CONSTRAINED_TEMPLATE((std::is_same_v<T, std::string>), typename T = value_type)
 		value& operator=(std::string&& rhs) noexcept
 		{
@@ -829,6 +974,9 @@ TOML_NAMESPACE_START
 		///
 		/// \detail For floating-point values, a NaN equals any other NaN, so a table holding one still equals
 		/// 		itself. Otherwise floats compare as `double` does, so `-0.0` equals `0.0`.
+		///
+		/// 		An integer value compares with a floating-point operand as numbers, in this operator and in
+		/// 		the relational ones, so `toml::value<int64_t>{ 1 } == 1.5` is false.
 		TOML_PURE_GETTER
 		friend bool operator==(const value& lhs, value_arg rhs) noexcept
 		{
@@ -900,6 +1048,101 @@ TOML_NAMESPACE_START
 		{
 			return lhs >= rhs.val_;
 		}
+
+		/// \cond
+
+		// an integer against a floating-point operand, which value_arg would truncate
+
+		TOML_CONSTRAINED_TEMPLATE((std::is_floating_point_v<T> && std::is_same_v<V, int64_t>),
+								  typename T,
+								  typename V = value_type)
+		TOML_PURE_GETTER
+		friend bool operator==(const value& lhs, T rhs) noexcept
+		{
+			return impl::compare_integer_with_float(lhs.val_, rhs) == impl::numeric_order::equal;
+		}
+		TOML_ASYMMETRICAL_EQUALITY_OPS(const value&,
+									   T,
+									   TOML_CONSTRAINED_TEMPLATE((std::is_floating_point_v<T>
+																  && std::is_same_v<V, int64_t>),
+																 typename T,
+																 typename V = value_type));
+
+		TOML_CONSTRAINED_TEMPLATE((std::is_floating_point_v<T> && std::is_same_v<V, int64_t>),
+								  typename T,
+								  typename V = value_type)
+		TOML_PURE_GETTER
+		friend bool operator<(const value& lhs, T rhs) noexcept
+		{
+			return impl::compare_integer_with_float(lhs.val_, rhs) == impl::numeric_order::less;
+		}
+
+		TOML_CONSTRAINED_TEMPLATE((std::is_floating_point_v<T> && std::is_same_v<V, int64_t>),
+								  typename T,
+								  typename V = value_type)
+		TOML_PURE_GETTER
+		friend bool operator<(T lhs, const value& rhs) noexcept
+		{
+			return impl::compare_integer_with_float(rhs.val_, lhs) == impl::numeric_order::greater;
+		}
+
+		TOML_CONSTRAINED_TEMPLATE((std::is_floating_point_v<T> && std::is_same_v<V, int64_t>),
+								  typename T,
+								  typename V = value_type)
+		TOML_PURE_GETTER
+		friend bool operator<=(const value& lhs, T rhs) noexcept
+		{
+			const auto order = impl::compare_integer_with_float(lhs.val_, rhs);
+			return order == impl::numeric_order::less || order == impl::numeric_order::equal;
+		}
+
+		TOML_CONSTRAINED_TEMPLATE((std::is_floating_point_v<T> && std::is_same_v<V, int64_t>),
+								  typename T,
+								  typename V = value_type)
+		TOML_PURE_GETTER
+		friend bool operator<=(T lhs, const value& rhs) noexcept
+		{
+			const auto order = impl::compare_integer_with_float(rhs.val_, lhs);
+			return order == impl::numeric_order::greater || order == impl::numeric_order::equal;
+		}
+
+		TOML_CONSTRAINED_TEMPLATE((std::is_floating_point_v<T> && std::is_same_v<V, int64_t>),
+								  typename T,
+								  typename V = value_type)
+		TOML_PURE_GETTER
+		friend bool operator>(const value& lhs, T rhs) noexcept
+		{
+			return rhs < lhs;
+		}
+
+		TOML_CONSTRAINED_TEMPLATE((std::is_floating_point_v<T> && std::is_same_v<V, int64_t>),
+								  typename T,
+								  typename V = value_type)
+		TOML_PURE_GETTER
+		friend bool operator>(T lhs, const value& rhs) noexcept
+		{
+			return rhs < lhs;
+		}
+
+		TOML_CONSTRAINED_TEMPLATE((std::is_floating_point_v<T> && std::is_same_v<V, int64_t>),
+								  typename T,
+								  typename V = value_type)
+		TOML_PURE_GETTER
+		friend bool operator>=(const value& lhs, T rhs) noexcept
+		{
+			return rhs <= lhs;
+		}
+
+		TOML_CONSTRAINED_TEMPLATE((std::is_floating_point_v<T> && std::is_same_v<V, int64_t>),
+								  typename T,
+								  typename V = value_type)
+		TOML_PURE_GETTER
+		friend bool operator>=(T lhs, const value& rhs) noexcept
+		{
+			return rhs <= lhs;
+		}
+
+		/// \endcond
 
 		/// \brief	Equality operator.
 		///
@@ -1044,7 +1287,7 @@ TOML_NAMESPACE_START
 
 		if constexpr (node_type_of<T> == node_type::string)
 		{
-			const auto& str = *ref_cast<std::string>();
+			const auto& str = *ref_cast<std::string>(*this);
 			if constexpr (std::is_same_v<T, std::string>)
 				return str;
 			else if constexpr (std::is_same_v<T, std::string_view>)
@@ -1057,7 +1300,7 @@ TOML_NAMESPACE_START
 #if TOML_ENABLE_WINDOWS_COMPAT
 				return widen(str);
 #else
-				static_assert(always_false<T>, "Evaluated unreachable branch!");
+				static_assert(always_false<T>, "Evaluated unreachable branch");
 #endif
 			}
 
@@ -1081,17 +1324,18 @@ TOML_NAMESPACE_START
 				return T(reinterpret_cast<const char8_t*>(str.c_str()), str.length());
 			else if constexpr (std::is_same_v<T, const char8_t*>)
 				return reinterpret_cast<const char8_t*>(str.c_str());
-			else
-				static_assert(always_false<T>, "Evaluated unreachable branch!");
 
 #endif
+
+			else
+				static_assert(always_false<T>, "Evaluated unreachable branch");
 		}
 #if TOML_ENABLE_CHRONO
 		else if constexpr (std::is_same_v<T, std::chrono::year_month_day>)
-			return ref_cast<date>()->to_chrono();
+			return ref_cast<date>(*this)->to_chrono();
 #endif
 		else
-			return static_cast<T>(*ref_cast<native_type_of<T>>());
+			return static_cast<T>(*ref_cast<native_type_of<T>>(*this));
 	}
 
 	template <typename T>
@@ -1102,7 +1346,7 @@ TOML_NAMESPACE_START
 
 		static_assert(!is_wide_string<T> || TOML_ENABLE_WINDOWS_COMPAT,
 					  "Retrieving values as wide-character strings with node::value_exact() is only "
-					  "supported on Windows with TOML_ENABLE_WINDOWS_COMPAT enabled.");
+					  "supported on Windows with TOML_ENABLE_WINDOWS_COMPAT enabled");
 
 		static_assert((is_native<T> || can_represent_native<T>) && !is_cvref<T>,
 					  TOML_SA_VALUE_EXACT_FUNC_MESSAGE("return type of node::value_exact()"));
@@ -1110,23 +1354,19 @@ TOML_NAMESPACE_START
 		// prevent additional compiler error spam when the static_assert fails by gating behind if constexpr
 		if constexpr ((is_native<T> || can_represent_native<T>) && !is_cvref<T>)
 		{
-			if (type() == node_type_of<T>)
-			{
+			if (type() != node_type_of<T>)
+				return {};
+
 #if TOML_ENABLE_CHRONO
-				if constexpr (is_chrono_local_time<T>::value)
-				{
-					const auto& dt = *ref_cast<date_time>();
-					if (dt.offset)
-						return {};
-					return dt.template to_chrono<typename T::duration>();
-				}
-				else if constexpr (is_chrono_hh_mm_ss<T>::value)
-					return ref_cast<time>()->template to_chrono<typename is_chrono_hh_mm_ss<T>::duration_type>();
-				else
+			if constexpr (is_chrono_local_time<T>::value)
+				return to_chrono_local_time<T>(*ref_cast<date_time>(*this));
+			else if constexpr (is_chrono_hh_mm_ss<T>::value)
+				return ref_cast<time>(*this)->template to_chrono<typename is_chrono_hh_mm_ss<T>::duration_type>();
+			else
+				return { this->get_value_exact<T>() };
+#else
+			return { this->get_value_exact<T>() };
 #endif
-					return { this->get_value_exact<T>() };
-			}
-			return {};
 		}
 	}
 
@@ -1138,7 +1378,7 @@ TOML_NAMESPACE_START
 
 		static_assert(!is_wide_string<T> || TOML_ENABLE_WINDOWS_COMPAT,
 					  "Retrieving values as wide-character strings with node::value() is only "
-					  "supported on Windows with TOML_ENABLE_WINDOWS_COMPAT enabled.");
+					  "supported on Windows with TOML_ENABLE_WINDOWS_COMPAT enabled");
 		static_assert((is_native<T> || can_represent_native<T> || can_partially_represent_native<T>) && !is_cvref<T>,
 					  TOML_SA_VALUE_FUNC_MESSAGE("return type of node::value()"));
 
@@ -1146,18 +1386,19 @@ TOML_NAMESPACE_START
 		// semantics to be mindful of so the exact retrieval is enough.
 		if constexpr (is_natively_one_of<T, std::string, time, date, date_time>)
 		{
-			if (type() == node_type_of<T>)
-			{
+			if (type() != node_type_of<T>)
+				return {};
+
 #if TOML_ENABLE_CHRONO
-				if constexpr (is_chrono_local_time<T>::value)
-					return ref_cast<date_time>()->template to_chrono<typename T::duration>();
-				else if constexpr (is_chrono_hh_mm_ss<T>::value)
-					return ref_cast<time>()->template to_chrono<typename is_chrono_hh_mm_ss<T>::duration_type>();
-				else
+			if constexpr (is_chrono_local_time<T>::value)
+				return to_chrono_local_time<T>(*ref_cast<date_time>(*this));
+			else if constexpr (is_chrono_hh_mm_ss<T>::value)
+				return ref_cast<time>(*this)->template to_chrono<typename is_chrono_hh_mm_ss<T>::duration_type>();
+			else
+				return { this->get_value_exact<T>() };
+#else
+			return { this->get_value_exact<T>() };
 #endif
-					return { this->get_value_exact<T>() };
-			}
-			return {};
 		}
 
 		// everything else requires a bit of logicking.
@@ -1166,91 +1407,17 @@ TOML_NAMESPACE_START
 			switch (type())
 			{
 				// int -> *
-				case node_type::integer:
-				{
-					// int -> int
-					if constexpr (is_natively_one_of<T, int64_t>)
-					{
-						if constexpr (is_native<T> || can_represent_native<T>)
-							return static_cast<T>(*ref_cast<int64_t>());
-						else
-							return node_integer_cast<T>(*ref_cast<int64_t>());
-					}
-
-					// int -> float
-					else if constexpr (is_natively_one_of<T, double>)
-					{
-						const int64_t val = *ref_cast<int64_t>();
-						if constexpr (value_traits<T>::digits < 64)
-						{
-							constexpr auto largest_whole_float = (int64_t{ 1 } << value_traits<T>::digits);
-							if (val < -largest_whole_float || val > largest_whole_float)
-								return {};
-						}
-						return static_cast<T>(val);
-					}
-
-					// int -> bool
-					else if constexpr (is_natively_one_of<T, bool>)
-						return static_cast<bool>(*ref_cast<int64_t>());
-
-					// int -> anything else
-					else
-						return {};
-				}
+				case node_type::integer: return node_value_from_integer<T>(*ref_cast<int64_t>(*this));
 
 				// float -> *
-				case node_type::floating_point:
-				{
-					// float -> float
-					if constexpr (is_natively_one_of<T, double>)
-					{
-						if constexpr (is_native<T> || can_represent_native<T>)
-							return { static_cast<T>(*ref_cast<double>()) };
-						else
-						{
-							const double val = *ref_cast<double>();
-							if (impl::fpclassify(val) == fp_class::ok
-								&& (val < float_limits<T>::lowest() || val > float_limits<T>::highest()))
-								return {};
-							return { static_cast<T>(val) };
-						}
-					}
-
-					// float -> int
-					else if constexpr (is_natively_one_of<T, int64_t>)
-					{
-						const double val = *ref_cast<double>();
-						if (impl::fpclassify(val) == fp_class::ok && val >= -9223372036854775808.0
-							&& val < 9223372036854775808.0 && static_cast<double>(static_cast<int64_t>(val)) == val)
-							return node_integer_cast<T>(static_cast<int64_t>(val));
-						return {};
-					}
-
-					// float -> anything else
-					else
-						return {};
-				}
+				case node_type::floating_point: return node_value_from_float<T>(*ref_cast<double>(*this));
 
 				// bool -> *
-				case node_type::boolean:
-				{
-					// bool -> bool
-					if constexpr (is_natively_one_of<T, bool>)
-						return { *ref_cast<bool>() };
+				case node_type::boolean: return node_value_from_boolean<T>(*ref_cast<bool>(*this));
 
-					// bool -> int
-					else if constexpr (is_natively_one_of<T, int64_t>)
-						return { static_cast<T>(*ref_cast<bool>()) };
-
-					// bool -> anything else
-					else
-						return {};
-				}
+				// non-values, or 'exact' types covered above
+				default: return {};
 			}
-
-			// non-values, or 'exact' types covered above
-			return {};
 		}
 	}
 
@@ -1262,19 +1429,19 @@ TOML_NAMESPACE_START
 
 		static_assert(!is_wide_string<T> || TOML_ENABLE_WINDOWS_COMPAT,
 					  "Retrieving values as wide-character strings with node::value_or() is only "
-					  "supported on Windows with TOML_ENABLE_WINDOWS_COMPAT enabled.");
+					  "supported on Windows with TOML_ENABLE_WINDOWS_COMPAT enabled");
 
 		if constexpr (is_wide_string<T>)
 		{
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 			if (type() == node_type::string)
-				return widen(*ref_cast<std::string>());
+				return widen(*ref_cast<std::string>(*this));
 			return std::wstring{ static_cast<T&&>(default_value) };
 
 #else
 
-			static_assert(always_false<T>, "Evaluated unreachable branch!");
+			static_assert(always_false<T>, "Evaluated unreachable branch");
 
 #endif
 		}
@@ -1291,22 +1458,8 @@ TOML_NAMESPACE_START
 			static_assert(
 				traits::is_native || traits::can_represent_native || traits::can_partially_represent_native,
 				"The default value type of node::value_or() must be one of:"
-				TOML_SA_LIST_NEW "A native TOML value type"
-				TOML_SA_NATIVE_VALUE_TYPE_LIST
-
-				TOML_SA_LIST_NXT "A non-view type capable of losslessly representing a native TOML value type"
-				TOML_SA_LIST_BEG "std::string"
-				#if TOML_ENABLE_WINDOWS_COMPAT
-				TOML_SA_LIST_SEP "std::wstring"
-				#endif
-				TOML_SA_LIST_SEP "any signed integer type >= 64 bits"
-				TOML_SA_LIST_SEP "any floating-point type >= 64 bits"
-				TOML_SA_LIST_END
-
-				TOML_SA_LIST_NXT "A non-view type capable of (reasonably) representing a native TOML value type"
-				TOML_SA_LIST_BEG "any other integral type"
-				TOML_SA_LIST_SEP "any floating-point type"
-				TOML_SA_LIST_END
+				TOML_SA_VALUE_MESSAGE_LOSSLESS
+				TOML_SA_VALUE_MESSAGE_LOSSY
 
 				TOML_SA_LIST_NXT "A compatible view type"
 				TOML_SA_LIST_BEG "std::string_view"
@@ -1325,11 +1478,7 @@ TOML_NAMESPACE_START
 				#endif
 				TOML_SA_LIST_END
 
-				TOML_SA_LIST_NXT "A user-defined 'string-like' type (see toml::is_string_like)"
-				TOML_SA_LIST_BEG "with const char* data() const or const char* c_str() const"
-				TOML_SA_LIST_SEP "and size_t length() const"
-				TOML_SA_LIST_SEP "and constructible from std::string_view, (const char*, size_t) or const std::string&"
-				TOML_SA_LIST_END
+				TOML_SA_VALUE_MESSAGE_STRING_LIKE
 			);
 
 			// clang-format on
@@ -1340,7 +1489,7 @@ TOML_NAMESPACE_START
 				if constexpr (traits::is_native)
 				{
 					if (type() == node_type_of<value_type>)
-						return *ref_cast<typename traits::native_type>();
+						return *ref_cast<typename traits::native_type>(*this);
 				}
 				if (auto val = this->value<value_type>())
 					return *std::move(val);

@@ -387,7 +387,7 @@
 
 // TOML_ALWAYS_INLINE
 #ifndef TOML_ALWAYS_INLINE
-#ifdef _MSC_VER
+#if TOML_MSVC_LIKE
 #define TOML_ALWAYS_INLINE __forceinline
 #elif TOML_GCC || TOML_CLANG || TOML_HAS_ATTR(__always_inline__)
 #define TOML_ALWAYS_INLINE                                                                                             \
@@ -400,7 +400,7 @@
 
 // TOML_NEVER_INLINE
 #ifndef TOML_NEVER_INLINE
-#ifdef _MSC_VER
+#if TOML_MSVC_LIKE
 #define TOML_NEVER_INLINE TOML_DECLSPEC(noinline)
 #elif TOML_CUDA // https://gitlab.gnome.org/GNOME/glib/-/issues/2555
 #define TOML_NEVER_INLINE TOML_ATTR(noinline)
@@ -433,7 +433,7 @@
 
 // TOML_NODISCARD
 #ifndef TOML_NODISCARD
-#if TOML_CPP >= 17 && TOML_HAS_CPP_ATTR(nodiscard) >= 201603
+#if TOML_HAS_CPP_ATTR(nodiscard) >= 201603
 #define TOML_NODISCARD [[nodiscard]]
 #elif TOML_CLANG || TOML_GCC || TOML_HAS_ATTR(__warn_unused_result__)
 #define TOML_NODISCARD TOML_ATTR(__warn_unused_result__)
@@ -444,7 +444,7 @@
 
 // TOML_NODISCARD_CTOR
 #ifndef TOML_NODISCARD_CTOR
-#if TOML_CPP >= 17 && TOML_HAS_CPP_ATTR(nodiscard) >= 201907
+#if TOML_HAS_CPP_ATTR(nodiscard) >= 201907
 #define TOML_NODISCARD_CTOR [[nodiscard]]
 #else
 #define TOML_NODISCARD_CTOR
@@ -496,7 +496,7 @@
 
 // TOML_ASSUME
 #ifndef TOML_ASSUME
-#ifdef _MSC_VER
+#if TOML_MSVC_LIKE
 #define TOML_ASSUME(expr) __assume(expr)
 #elif TOML_ICC || TOML_CLANG || TOML_HAS_BUILTIN(__builtin_assume)
 #define TOML_ASSUME(expr) __builtin_assume(expr)
@@ -511,7 +511,7 @@
 
 // TOML_UNREACHABLE
 #ifndef TOML_UNREACHABLE
-#ifdef _MSC_VER
+#if TOML_MSVC_LIKE
 #define TOML_UNREACHABLE __assume(0)
 #elif TOML_ICC || TOML_CLANG || TOML_GCC || TOML_HAS_BUILTIN(__builtin_unreachable)
 #define TOML_UNREACHABLE __builtin_unreachable()
@@ -615,19 +615,19 @@
 
 #define TOML_ASYMMETRICAL_EQUALITY_OPS(LHS, RHS, ...)                                                                  \
 	__VA_ARGS__ TOML_NODISCARD                                                                                         \
-	friend bool operator==(RHS rhs, LHS lhs) noexcept                                                                  \
+	friend bool operator==(RHS lhs, LHS rhs) TOML_NOEXCEPT_AS(rhs == lhs)                                              \
 	{                                                                                                                  \
-		return lhs == rhs;                                                                                             \
+		return rhs == lhs;                                                                                             \
 	}                                                                                                                  \
 	__VA_ARGS__ TOML_NODISCARD                                                                                         \
-	friend bool operator!=(LHS lhs, RHS rhs) noexcept                                                                  \
+	friend bool operator!=(LHS lhs, RHS rhs) TOML_NOEXCEPT_AS(lhs == rhs)                                              \
 	{                                                                                                                  \
 		return !(lhs == rhs);                                                                                          \
 	}                                                                                                                  \
 	__VA_ARGS__ TOML_NODISCARD                                                                                         \
-	friend bool operator!=(RHS rhs, LHS lhs) noexcept                                                                  \
+	friend bool operator!=(RHS lhs, LHS rhs) TOML_NOEXCEPT_AS(rhs == lhs)                                              \
 	{                                                                                                                  \
-		return !(lhs == rhs);                                                                                          \
+		return !(rhs == lhs);                                                                                          \
 	}                                                                                                                  \
 	static_assert(true)
 
@@ -638,9 +638,14 @@
 #define POXY_IMPLEMENTATION_DETAIL(...) __VA_ARGS__
 #endif
 
-//======================================================================================================================
-// COMPILER-SPECIFIC WARNING MANAGEMENT
-//======================================================================================================================
+//#=====================================================================================================================
+//# COMPILER-SPECIFIC WARNING MANAGEMENT
+//#=====================================================================================================================
+
+// set by this repository's own builds, which then see the warnings toml.hpp turns off for users
+#ifndef TOML_PEDANTIC
+#define TOML_PEDANTIC 0
+#endif
 
 #if TOML_CLANG
 #define TOML_PUSH_WARNINGS                                                                                             \
@@ -698,7 +703,6 @@
 	TOML_DISABLE_CLANG_WARNING("-Wswitch");                                                                            \
 	TOML_DISABLE_CLANG_WARNING("-Wswitch-enum");                                                                       \
 	TOML_DISABLE_CLANG_WARNING("-Wswitch-default");                                                                    \
-	TOML_DISABLE_CLANG_WARNING("-Wcovered-switch-default");                                                            \
 	TOML_DISABLE_GCC_WARNING("-Wswitch");                                                                              \
 	TOML_DISABLE_GCC_WARNING("-Wswitch-enum");                                                                         \
 	TOML_DISABLE_GCC_WARNING("-Wswitch-default");                                                                      \
@@ -706,8 +710,7 @@
 	TOML_DISABLE_MSVC_WARNING(4062);                                                                                   \
 	TOML_DISABLE_MSVC_WARNING(4063);                                                                                   \
 	TOML_DISABLE_MSVC_WARNING(4468);                                                                                   \
-	TOML_DISABLE_MSVC_WARNING(5262);  /* switch-case implicit fallthrough (false-positive) */                          \
-	TOML_DISABLE_MSVC_WARNING(26819); /* cg: unannotated fallthrough */                                                \
+	TOML_DISABLE_MSVC_WARNING(5262); /* switch-case implicit fallthrough (false-positive) */                           \
 	static_assert(true)
 
 #define TOML_DISABLE_ARITHMETIC_WARNINGS                                                                               \
@@ -724,6 +727,16 @@
 	TOML_DISABLE_MSVC_WARNING(5219); /* implicit conversion from integral to float */                                  \
 	static_assert(true)
 
+#define TOML_DISABLE_ANALYSIS_WARNINGS                                                                                 \
+	TOML_DISABLE_CLANG_WARNING("-Wtautological-pointer-compare");                                                      \
+	TOML_DISABLE_GCC_WARNING("-Wcast-align");                                                                          \
+	TOML_DISABLE_GCC_WARNING("-Wtype-limits");                                                                         \
+	TOML_DISABLE_GCC_WARNING("-Wmaybe-uninitialized");                                                                 \
+	TOML_DISABLE_GCC_WARNING("-Wnull-dereference");                                                                    \
+	TOML_DISABLE_MSVC_WARNING(26451);                                                                                  \
+	TOML_DISABLE_MSVC_WARNING(26495);                                                                                  \
+	static_assert(true)
+
 #define TOML_DISABLE_SUGGEST_ATTR_WARNINGS                                                                             \
 	TOML_DISABLE_GCC_WARNING("-Wsuggest-attribute=const");                                                             \
 	TOML_DISABLE_GCC_WARNING("-Wsuggest-attribute=pure");                                                              \
@@ -736,8 +749,6 @@
 	TOML_DISABLE_CLANG_WARNING("-Wsuggest-destructor-override");                                                       \
 	TOML_DISABLE_CLANG_WARNING("-Wweak-vtables");                                                                      \
 	TOML_DISABLE_CLANG_WARNING("-Wweak-template-vtables");                                                             \
-	TOML_DISABLE_CLANG_WARNING("-Wdouble-promotion");                                                                  \
-	TOML_DISABLE_CLANG_WARNING("-Wchar-subscripts");                                                                   \
 	TOML_DISABLE_CLANG_WARNING("-Wmissing-field-initializers");                                                        \
 	TOML_DISABLE_CLANG_WARNING("-Wpadded");                                                                            \
 	TOML_DISABLE_CLANG_WARNING("-Wc++20-compat");                                                                      \
@@ -749,20 +760,14 @@
 	TOML_DISABLE_CLANG_WARNING("-Wdisabled-macro-expansion");                                                          \
 	TOML_DISABLE_CLANG_WARNING("-Wnrvo");                                                                              \
 	TOML_DISABLE_CLANG_WARNING("-Wpacked");                                                                            \
-	TOML_DISABLE_CLANG_WARNING("-Wtautological-pointer-compare");                                                      \
 	TOML_DISABLE_CLANG_WARNING("-Wunsafe-buffer-usage");                                                               \
 	TOML_DISABLE_CLANG_WARNING("-Wused-but-marked-unused");                                                            \
 	TOML_DISABLE_GCC_WARNING("-Wpadded");                                                                              \
-	TOML_DISABLE_GCC_WARNING("-Wcast-align");                                                                          \
 	TOML_DISABLE_GCC_WARNING("-Wcomment");                                                                             \
-	TOML_DISABLE_GCC_WARNING("-Wtype-limits");                                                                         \
 	TOML_DISABLE_GCC_WARNING("-Wuseless-cast");                                                                        \
-	TOML_DISABLE_GCC_WARNING("-Wchar-subscripts");                                                                     \
 	TOML_DISABLE_GCC_WARNING("-Wsubobject-linkage");                                                                   \
 	TOML_DISABLE_GCC_WARNING("-Wmissing-field-initializers");                                                          \
-	TOML_DISABLE_GCC_WARNING("-Wmaybe-uninitialized");                                                                 \
 	TOML_DISABLE_GCC_WARNING("-Wnoexcept");                                                                            \
-	TOML_DISABLE_GCC_WARNING("-Wnull-dereference");                                                                    \
 	TOML_DISABLE_GCC_WARNING("-Wduplicated-branches");                                                                 \
 	TOML_DISABLE_MSVC_WARNING(4127); /* conditional expr is constant */                                                \
 	TOML_DISABLE_MSVC_WARNING(4324); /* structure was padded due to alignment specifier */                             \
@@ -788,35 +793,33 @@
 	TOML_DISABLE_MSVC_WARNING(5045); /* Compiler will insert Spectre mitigation */                                     \
 	TOML_DISABLE_MSVC_WARNING(5246);                                                                                   \
 	TOML_DISABLE_MSVC_WARNING(5264); /* const variable is not used (false-positive) */                                 \
-	TOML_DISABLE_MSVC_WARNING(26451);                                                                                  \
 	TOML_DISABLE_MSVC_WARNING(26490);                                                                                  \
-	TOML_DISABLE_MSVC_WARNING(26495);                                                                                  \
 	TOML_DISABLE_MSVC_WARNING(26812);                                                                                  \
-	TOML_DISABLE_MSVC_WARNING(26819);                                                                                  \
+	TOML_DISABLE_MSVC_WARNING(26819); /* cg: unannotated fallthrough */                                                \
 	static_assert(true)
 
 #if TOML_CLANG
 #define TOML_DISABLE_WARNINGS                                                                                          \
 	TOML_PRAGMA_CLANG(diagnostic push)                                                                                 \
 	TOML_PRAGMA_CLANG(diagnostic ignored "-Weverything")                                                               \
-	static_assert(true, "")
+	static_assert(true)
 #elif TOML_MSVC
 #define TOML_DISABLE_WARNINGS                                                                                          \
 	__pragma(warning(push, 0))                                                                                         \
-	TOML_DISABLE_MSVC_WARNING(4348);                                                                                   \
 	TOML_DISABLE_MSVC_WARNING(4668);                                                                                   \
 	TOML_DISABLE_MSVC_WARNING(5105);                                                                                   \
-	TOML_DISABLE_MSVC_WARNING(5264);                                                                                   \
 	TOML_DISABLE_CODE_ANALYSIS_WARNINGS;                                                                               \
 	TOML_DISABLE_SWITCH_WARNINGS;                                                                                      \
 	TOML_DISABLE_SPAM_WARNINGS;                                                                                        \
 	TOML_DISABLE_ARITHMETIC_WARNINGS;                                                                                  \
+	TOML_DISABLE_ANALYSIS_WARNINGS;                                                                                    \
 	static_assert(true)
 #elif TOML_GCC
 #define TOML_DISABLE_WARNINGS                                                                                          \
 	TOML_PRAGMA_GCC(diagnostic push)                                                                                   \
 	TOML_DISABLE_SWITCH_WARNINGS;                                                                                      \
 	TOML_DISABLE_ARITHMETIC_WARNINGS;                                                                                  \
+	TOML_DISABLE_ANALYSIS_WARNINGS;                                                                                    \
 	TOML_DISABLE_SUGGEST_ATTR_WARNINGS;                                                                                \
 	TOML_DISABLE_SPAM_WARNINGS;                                                                                        \
 	TOML_DISABLE_GCC_WARNING("-Wabi");                                                                                 \
@@ -982,6 +985,13 @@
 /// \brief An additional header to include before any other toml++ header files.
 /// \detail Not defined by default.
 //# }}
+
+// some defaults below depend on the standard library's version macros
+#if TOML_HAS_INCLUDE(<version>)
+TOML_DISABLE_WARNINGS;
+#include <version>
+TOML_ENABLE_WARNINGS;
+#endif
 
 // is the library being built as a shared lib/dll using meson and friends?
 #ifndef TOML_SHARED_LIB
@@ -1154,13 +1164,15 @@
 #undef TOML_ENABLE_CHRONO
 #define TOML_ENABLE_CHRONO 1
 #endif
-#if TOML_CPP < 20
+// libstdc++ has <version> from GCC 9 and the calendar types from GCC 11
+#if TOML_CPP < 20 || !TOML_HAS_INCLUDE(<version>) || (defined(_GLIBCXX_RELEASE) && _GLIBCXX_RELEASE < 11)
 #undef TOML_ENABLE_CHRONO
 #define TOML_ENABLE_CHRONO 0
 #endif
 /// \def		TOML_ENABLE_CHRONO
 /// \brief		Sets whether conversions to and from the C++20 `std::chrono` types are enabled.
-/// \detail		Defaults to `1` from C++20, and is always `0` before C++20.
+/// \detail		Defaults to `1` from C++20. It is always `0` before C++20, and with a libstdc++ older than GCC 11's,
+///				which lacks the calendar types.
 /// \remarks	If you don't use them, setting `TOML_ENABLE_CHRONO` to `0` stops toml++ including `<chrono>`,
 ///				which can improve compilation speed.
 
@@ -1314,7 +1326,7 @@ TOML_ENABLE_WARNINGS;
 #endif
 /// \def TOML_ASSERT(expr)
 /// \brief Sets the assert function used by the library.
-/// \detail Defaults to the standard C `assert()`.
+/// \detail Defaults to the standard C `assert()`. Ignored when `NDEBUG` is defined.
 
 //# {{
 #if TOML_DOXYGEN
@@ -1346,18 +1358,16 @@ TOML_ENABLE_WARNINGS;
 /// \brief Disable using noexcept(<condition>) in lambda definitions within the toml++ library implementation.
 /// \detail This macro offers a workaround to a bug in the old "legacy lambda processor" of Visual C++, which
 /// caused compile errors like "error C2057: expected constant expression", when it encountered such lambda's.
-/// These compile errors were reported by Kevin Dick, Jan 19, 2024, at https://github.com/marzer/tomlplusplus/issues/219
+/// These compile errors are described at https://github.com/marzer/tomlplusplus/issues/219
 /// Defaults to `1` for MSVC before C++20, which uses the legacy lambda processor unless `/permissive-` or
 /// `/Zc:lambda` is given, and to `0` otherwise.
 //# }}
 
 #ifndef TOML_DISABLE_NOEXCEPT_NOEXCEPT
 #define TOML_DISABLE_NOEXCEPT_NOEXCEPT 0
-#ifdef _MSC_VER
-#if _MSC_VER <= 1943 // Up to Visual Studio 2022 Version 17.13.6
+#if TOML_MSVC_LIKE && TOML_MSVC_LIKE <= 1943 // Up to Visual Studio 2022 Version 17.13.6
 #undef TOML_DISABLE_NOEXCEPT_NOEXCEPT
 #define TOML_DISABLE_NOEXCEPT_NOEXCEPT 1
-#endif
 #endif
 #endif
 //# {{
@@ -1365,17 +1375,38 @@ TOML_ENABLE_WARNINGS;
 /// \brief Disable using noexcept(noexcept(<expression>)) within the toml++ library implementation.
 /// \detail This macro offers a workaround to a bug in Visual C++ (Visual Studio 2022), which caused
 /// compile errors, saying: "error C3878: syntax error: unexpected token ',' following 'simple-type-specifier'"
+/// Defaults to `1` for Visual Studio 2022 version 17.13 and older, clang-cl included, and to `0` otherwise.
 //# }}
+
+#if TOML_DISABLE_NOEXCEPT_NOEXCEPT
+#define TOML_NOEXCEPT_AS(...) noexcept
+#else
+#define TOML_NOEXCEPT_AS(...) noexcept(noexcept(__VA_ARGS__))
+#endif
+
+#ifndef TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN
+#if TOML_GCC && TOML_GCC <= 7
+#define TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN 1
+#else
+#define TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN 0
+#endif
+#endif
+
+#if TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN && !defined(TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN_ACKNOWLEDGED)
+#define TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN_MESSAGE                                                                  \
+	"If you're seeing this error it's because you're using one of toml++'s for_each() functions on a compiler with "   \
+	"known bugs in that area (e.g. GCC 7). On these compilers returning a bool (or bool-convertible) value from the "  \
+	"for_each() callable causes spurious compilation failures, while returning nothing (void) works fine. "            \
+	"If you believe this message is incorrect for your compiler, you can try your luck by #defining "                  \
+	"TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN as 0 and recompiling - if it works, great! Let me know at "                 \
+	"https://github.com/marzer/tomlplusplus/issues. Alternatively, if you don't have any need for early-exiting from " \
+	"for_each(), you can suppress this error by #defining TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN_ACKNOWLEDGED "         \
+	"and moving on with your life."
+#endif
 
 //#====================================================================================================================
 //# CHARCONV SUPPORT
 //#====================================================================================================================
-
-#if TOML_HAS_INCLUDE(<version>)
-TOML_DISABLE_WARNINGS;
-#include <version>
-TOML_ENABLE_WARNINGS;
-#endif
 
 // libc++ never defines __cpp_lib_to_chars, and its availability flags follow the deployment target on apple
 #if !TOML_HAS_INCLUDE(<charconv>)
@@ -1421,9 +1452,9 @@ TOML_ENABLE_WARNINGS;
 #endif
 //# {{
 /// \def TOML_INT_CHARCONV
-/// \brief Use `std::from_chars()` and `std::to_chars()` to parse and print integers.
-/// \detail Defaults to `1` when the standard library has `<charconv>`, except libc++ before version 15 on Apple
-///			platforms and Emscripten. Both settings give the same results.
+/// \brief Has no effect. The library parses and prints integers without `<charconv>`.
+/// \detail Still defined for code that reads it: `1` when the standard library has `<charconv>`, except libc++ before
+///			version 15 on Apple platforms and Emscripten.
 //# }}
 
 #if (TOML_INT_CHARCONV || TOML_FLOAT_CHARCONV) && !TOML_HAS_INCLUDE(<charconv>)
@@ -1541,19 +1572,15 @@ TOML_ENABLE_WARNINGS;
 	#define TOML_EXTERNAL_LINKAGE				inline
 	#define TOML_INTERNAL_LINKAGE				inline
 #else
-	#define TOML_ANON_NAMESPACE_START			static_assert(TOML_IMPLEMENTATION);	\
-												using namespace toml;				\
+	#define TOML_ANON_NAMESPACE_START			static_assert(TOML_IMPLEMENTATION); TOML_IMPL_NAMESPACE_START {	\
 												namespace
-	#define TOML_ANON_NAMESPACE_END				static_assert(true)
-	#define TOML_ANON_NAMESPACE
+	#define TOML_ANON_NAMESPACE_END				} TOML_IMPL_NAMESPACE_END
+	#define TOML_ANON_NAMESPACE					TOML_NAMESPACE::impl
 	#define TOML_EXTERNAL_LINKAGE
 	#define TOML_INTERNAL_LINKAGE				static
 #endif
 
 // clang-format on
-//#====================================================================================================================
-//# ASSERT
-//#====================================================================================================================
 
 //#====================================================================================================================
 //# STATIC ASSERT MESSAGE FORMATTING

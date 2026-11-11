@@ -75,12 +75,33 @@
 - fixed `toml_formatter`, `json_formatter` and `yaml_formatter` not escaping some control characters
 - fixed crashes when parsing with mixed `TOML_EXCEPTIONS` settings
 - fixed stack overflow when destroying deeply nested tables
+- fixed use-after-free when assigning or appending a `toml::path`'s own key to it
+- fixed `toml::table` iterators referring to a deleted node after `insert_or_assign()`
+- fixed inserting a `toml::inserter` of a null `node_view` adding a null node
+- fixed undefined behaviour when calling `toml::parse_file()` with an empty `std::u8string_view`
+- fixed a `toml::value` losing its source region when assigned to itself
+- fixed `value()` and `value_or()` not compiling for scoped enums with a small unsigned underlying type
+- fixed `emplace()` and `emplace_back()` not compiling when given a string literal
+- fixed comparisons of a `toml::value<int64_t>` with a float truncating the float first
+- fixed long parse error descriptions ending in an incomplete UTF-8 sequence
+- fixed some parse errors quoting a control character without escaping it
+- fixed some table headers redefining a dotted-key table without a parse error
+- fixed `toml::parse_file()` failing to open pipes and FIFOs
+- fixed `yaml_formatter` writing multi-line strings that start with a tab in a form libyaml rejects
+- fixed `yaml_formatter` writing keys over 1024 characters in a form YAML parsers reject
+- fixed `yaml_formatter` writing octal integers such as `0o755` that YAML 1.1 loaders read as strings
+- fixed `using namespace toml;` leaking into the source file that defines `TOML_IMPLEMENTATION`
+- fixed `toml_formatter` wrapping arrays of floats at the wrong width
+- fixed `toml_formatter` wrapping arrays of very large integers too early
+- fixed `toml_formatter` wrapping arrays of times and date-times at the wrong width
+- fixed `toml_formatter` wrapping arrays of non-decimal integers at the wrong width
+- fixed strings made from some user-defined string types stopping at the first NUL
 
 #### Additions
 
 - added support for TOML v1.1.0 (#289)
 - added `toml::get_line()` (#255, #256, #258) (@N-Dekker)
-- added `toml::format_flags::force_multiline_arrays` (#282) (@rafal-c)
+- added `toml::format_flags::force_multi_line_arrays` (#282) (@rafal-c)
 - added support for user-defined string types, which `toml::is_string_like` detects automatically (#306) (@mikomikotaishi)
 - added support for C++20 `std::chrono` types (#291, #322) (@mikomikotaishi)
 - added C++20 module support with `import tomlplusplus;` (#266, #267, #273, #303) (@mikomikotaishi, @N-Dekker, @davidstone)
@@ -97,11 +118,16 @@
 - improvements to float parsing, using `<charconv>` in more places where it is supported
 - improvements to text formatting speed (`json_formatter` in particular)
 - improvements to compile speed and binary size
+- improvements to `array::flatten()` speed on large arrays
+- improvements to `array::prune()` speed on large arrays
 - `TOML_MAX_NESTED_VALUES` now limits the nesting depth of tables too
+- `TOML_INT_CHARCONV` no longer has any effect
+- changed the wording of some parse error messages
 
 #### Removals
 
 - removed the Visual Studio solution and project files; use CMake or Meson
+- removed the `parse_benchmark` example
 
 #### Build system
 

@@ -17,12 +17,12 @@ namespace
 	// note that this implementation always prioritizes 'rhs' over 'lhs' in the event of a conflict;
 	// extending it to handle conflicts in some other manner is left as an exercise to the reader :)
 
-	static void merge_left(toml::table& lhs, toml::table&& rhs);
+	void merge_left(toml::table& lhs, toml::table&& rhs);
 
-	static void merge_left(toml::array& lhs, toml::array&& rhs)
+	void merge_left(toml::array& lhs, toml::array&& rhs)
 	{
 		std::move(rhs).for_each(
-			[&](std::size_t index, auto&& rhs_val)
+			[&](size_t index, auto&& rhs_val)
 			{
 				// rhs index not found in lhs - direct move
 				if (lhs.size() <= index)
@@ -48,7 +48,7 @@ namespace
 			});
 	}
 
-	static void merge_left(toml::table& lhs, toml::table&& rhs)
+	void merge_left(toml::table& lhs, toml::table&& rhs)
 	{
 		std::move(rhs).for_each(
 			[&](const toml::key& rhs_key, auto&& rhs_val)
@@ -58,8 +58,7 @@ namespace
 				// rhs key not found in lhs - direct move
 				if (lhs_it == lhs.cend() || lhs_it->first != rhs_key)
 				{
-					using rhs_type = std::remove_cv_t<std::remove_reference_t<decltype(rhs_val)>>;
-					lhs.emplace_hint<rhs_type>(lhs_it, rhs_key, std::forward<decltype(rhs_val)>(rhs_val));
+					lhs.emplace_hint(lhs_it, rhs_key, std::forward<decltype(rhs_val)>(rhs_val));
 					return;
 				}
 

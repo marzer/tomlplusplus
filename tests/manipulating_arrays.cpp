@@ -475,11 +475,11 @@ TEST_CASE("arrays - is_homogeneous")
 			CHECK(carr.is_homogeneous(sample.type()));
 			CHECK(carr.is_array_of_tables() == (sample.type() == node_type::table));
 
-			node* nonmatch{};
+			node* nonmatch = {};
 			CHECK(arr.is_homogeneous(node_type::none, nonmatch));
 			CHECK(arr.is_homogeneous(sample.type(), nonmatch));
 
-			const node* cnonmatch{};
+			const node* cnonmatch = {};
 			CHECK(carr.is_homogeneous(node_type::none, cnonmatch));
 			CHECK(carr.is_homogeneous(sample.type(), cnonmatch));
 
@@ -633,6 +633,56 @@ TEST_CASE("arrays - element access")
 		const array single{ 42 };
 		CHECK(&single.front() == &single.back());
 	}
+}
+
+TEST_CASE("arrays - getters see a change made between two calls")
+{
+	array arr{ 1, 2 };
+
+	const auto size		= arr.size();
+	const auto capacity = arr.capacity();
+	const auto first	= &arr.front();
+	const auto second	= &arr[1];
+	const auto last		= &arr.back();
+	CHECK(!arr.empty());
+	CHECK(arr.end() - arr.begin() == 2);
+	CHECK(arr.cend() - arr.cbegin() == 2);
+	CHECK(arr.get_as<int64_t>(0));
+	CHECK(!arr.get_as<std::string>(0));
+	CHECK(arr.is_homogeneous<int64_t>());
+	CHECK(arr[1].ref<int64_t>() == 2);
+
+	arr.reserve(capacity + 100u);
+	arr.insert(arr.cbegin(), "zero"sv);
+	arr.push_back(3);
+	arr[2].ref<int64_t>() = 22;
+
+	CHECK(arr.size() == size + 2u);
+	CHECK(arr.capacity() >= capacity + 100u);
+	CHECK(&arr.front() != first);
+	CHECK(&arr[1] == first);
+	CHECK(&arr[1] != second);
+	CHECK(&arr.back() != last);
+	CHECK(arr.end() - arr.begin() == 4);
+	CHECK(arr.cend() - arr.cbegin() == 4);
+	CHECK(!arr.get_as<int64_t>(0));
+	CHECK(arr.get_as<std::string>(0));
+	CHECK(!arr.is_homogeneous<int64_t>());
+	CHECK(arr[2].ref<int64_t>() == 22);
+
+	const array& carr = arr;
+	CHECK(&carr.front() == &arr.front());
+	CHECK(&carr[1] == first);
+	CHECK(&carr.back() == &arr.back());
+	CHECK(carr.end() - carr.begin() == 4);
+
+	arr.clear();
+	CHECK(arr.empty());
+	CHECK(carr.empty());
+	CHECK(arr.size() == 0u);
+	CHECK(arr.end() - arr.begin() == 0);
+	CHECK(carr.end() - carr.begin() == 0);
+	CHECK(!arr.is_homogeneous<int64_t>());
 }
 
 TEST_CASE("arrays - capacity")
@@ -1049,6 +1099,12 @@ TEST_CASE("arrays - emplace")
 		CHECK(arr == array{ "zero"sv, 1, 2, 2.5 });
 	}
 
+	SECTION("deduces a string from a character array")
+	{
+		arr.emplace(arr.cbegin(), "zero");
+		CHECK(arr == array{ "zero"sv, 1, 2 });
+	}
+
 	SECTION("containers")
 	{
 		arr.emplace<table>(arr.cend());
@@ -1075,6 +1131,14 @@ TEST_CASE("arrays - emplace_back")
 		static_assert(std::is_same_v<decltype(elem), toml::value<double>&>);
 		CHECK(&elem == &arr.back());
 		CHECK(arr == array{ 1, 2, 2.5 });
+	}
+
+	SECTION("deduces a string from a character array")
+	{
+		auto& elem = arr.emplace_back("three");
+		static_assert(std::is_same_v<decltype(elem), toml::value<std::string>&>);
+		CHECK(&elem == &arr.back());
+		CHECK(arr == array{ 1, 2, "three"sv });
 	}
 
 	SECTION("value types")
@@ -1163,6 +1227,29 @@ TEST_CASE("arrays - replace")
 		arr.replace(arr.cbegin(), 10, value_flags::format_as_octal);
 		CHECK(arr[0].as_integer()->flags() == value_flags::format_as_octal);
 	}
+}
+
+TEST_CASE("arrays - an inserter holding a null node_view inserts nothing")
+{
+	array arr{ 1, 2 };
+	node_view<node> null_view;
+
+	SECTION("push_back")
+	{
+		arr.push_back(inserter{ null_view });
+	}
+
+	SECTION("insert")
+	{
+		CHECK(arr.insert(arr.cbegin(), inserter{ null_view }) == arr.end());
+	}
+
+	SECTION("replace")
+	{
+		CHECK(arr.replace(arr.cbegin(), inserter{ null_view }) == arr.end());
+	}
+
+	CHECK(arr == array{ 1, 2 });
 }
 
 TEST_CASE("arrays - erasure")
@@ -1268,6 +1355,21 @@ TEST_CASE("arrays - flattening")
 		const array flat = array{ 1, array{ 2, array{ 3, 4 } }, 5 }.flatten();
 		CHECK(flat == array{ 1, 2, 3, 4, 5 });
 	}
+
+	SECTION("leaves are moved, not copied")
+	{
+		array arr{ 1, array{ 2, array{ 3 } }, 4 };
+		const node* const one	= arr.get(0);
+		const node* const two	= arr.get(1)->as_array()->get(0);
+		const node* const three = arr.get(1)->as_array()->get(1)->as_array()->get(0);
+		const node* const four	= arr.get(2);
+		arr.flatten();
+		REQUIRE(arr.size() == 4u);
+		CHECK(arr.get(0) == one);
+		CHECK(arr.get(1) == two);
+		CHECK(arr.get(2) == three);
+		CHECK(arr.get(3) == four);
+	}
 }
 
 TEST_CASE("arrays - pruning")
@@ -1304,6 +1406,19 @@ TEST_CASE("arrays - pruning")
 	{
 		array arr;
 		CHECK(arr.prune().empty());
+	}
+
+	SECTION("the elements that stay are moved, not copied")
+	{
+		array arr{ array{}, 1, table{}, array{ 2 }, array{}, 3 };
+		const node* const one	= arr.get(1);
+		const node* const inner = arr.get(3);
+		const node* const three = arr.get(5);
+		arr.prune();
+		REQUIRE(arr.size() == 3u);
+		CHECK(arr.get(0) == one);
+		CHECK(arr.get(1) == inner);
+		CHECK(arr.get(2) == three);
 	}
 }
 

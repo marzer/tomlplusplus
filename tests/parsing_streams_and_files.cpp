@@ -9,6 +9,9 @@
 #include <optional>
 #include <random>
 #include <stdexcept>
+#ifdef __linux__
+#include <unistd.h>
+#endif
 
 namespace
 {
@@ -564,7 +567,7 @@ TEST_CASE("parsing - stream edge cases")
 		std::istringstream stream{ "# " + std::string(29u, ' ') + "\xE2" };
 		const auto err = parse_failure([&]() { return toml::parse(stream); });
 		REQUIRE(err);
-		CHECK(err->description() == "Encountered EOF during incomplete utf-8 code point sequence"sv);
+		CHECK(err->description() == "Encountered end-of-file during incomplete UTF-8 code point sequence"sv);
 		CHECK(err->source().begin == source_position{ 1, 32 });
 	}
 
@@ -610,9 +613,9 @@ TEST_CASE("parsing - code points split across reads")
 					CHECK(err->source().begin == lead);
 				};
 				fails_at_lead(head + std::string{ cp.substr(0u, split) } + "x'",
-							  "Encountered invalid utf-8 sequence"sv);
+							  "Encountered invalid UTF-8 sequence"sv);
 				fails_at_lead(head + std::string{ cp.substr(0u, split) },
-							  "Encountered EOF during incomplete utf-8 code point sequence"sv);
+							  "Encountered end-of-file during incomplete UTF-8 code point sequence"sv);
 			}
 		}
 	};
@@ -667,21 +670,24 @@ TEST_CASE("parsing - long stretches across a read or validation boundary")
 									comment + "\x01",
 									column_after(comment)
 										+ ": Error while parsing comment: control characters other than TAB (U+0009) "
-										  "are explicitly prohibited in comments");
+										  "are prohibited in comments, saw "
+										+ quoted_control_character('\x01'));
 
 				const auto basic = stretch("a = \"", cp, end);
 				parsing_should_fail(FILE_LINE_ARGS,
 									basic + "\x01\"",
 									column_after(basic)
 										+ ": Error while parsing string: unescaped control characters other than TAB "
-										  "(U+0009) are explicitly prohibited");
+										  "(U+0009) are prohibited, saw "
+										+ quoted_control_character('\x01'));
 
 				const auto literal = stretch("a = '", cp, end);
 				parsing_should_fail(FILE_LINE_ARGS,
 									literal + "\x01'",
 									column_after(literal)
 										+ ": Error while parsing literal string: control characters other than TAB "
-										  "(U+0009) are explicitly prohibited");
+										  "(U+0009) are prohibited, saw "
+										+ quoted_control_character('\x01'));
 			}
 
 			INFO("ascii up to byte " << end);
@@ -746,7 +752,7 @@ TEST_CASE("parsing - runs reaching the end of the bytes read")
 				fails(
 					"#" + content + "\x01" + std::string{ after },
 					{ 1, columns + 2u },
-					"Error while parsing comment: control characters other than TAB (U+0009) are explicitly prohibited in comments"sv);
+					R"(Error while parsing comment: control characters other than TAB (U+0009) are prohibited in comments, saw '\u0001')"sv);
 			parses("a = '" + content + "'", value(content));
 			parses("a = \"" + content + "\"", value(content));
 			parses("a = \"" + content + "\\t\"", value(content + "\t"));
@@ -898,6 +904,44 @@ TEST_CASE("parsing - files")
 	}
 }
 
+#ifdef __linux__
+
+TEST_CASE("parsing - files that are pipes")
+{
+	if (::access("/dev/fd", F_OK) != 0)
+		SKIP("/dev/fd is not available");
+
+	int pipe_ends[2];
+	REQUIRE(::pipe(pipe_ends) == 0);
+
+	// what a shell passes for <(command)
+	const auto path = "/dev/fd/" + std::to_string(pipe_ends[0]);
+
+	SECTION("a document")
+	{
+		static constexpr auto doc = "a = 1\n[b]\nc = 'two'\n"sv;
+		REQUIRE(::write(pipe_ends[1], doc.data(), doc.length()) == static_cast<ssize_t>(doc.length()));
+		REQUIRE(::close(pipe_ends[1]) == 0);
+
+		auto tbl = toml::parse_file(path);
+		CHECK(tbl["a"] == 1);
+		CHECK(tbl["b"]["c"] == "two"sv);
+		REQUIRE(tbl["a"].node());
+		REQUIRE(tbl["a"].node()->source().path);
+		CHECK(*tbl["a"].node()->source().path == path);
+	}
+
+	SECTION("nothing written")
+	{
+		REQUIRE(::close(pipe_ends[1]) == 0);
+		CHECK(!parse_failure([&]() { return toml::parse_file(path); }));
+	}
+
+	::close(pipe_ends[0]);
+}
+
+#endif
+
 #if TOML_HAS_CHAR8
 
 TEST_CASE("parsing - char8_t")
@@ -931,6 +975,13 @@ TEST_CASE("parsing - char8_t")
 		const auto path = file.str();
 		auto tbl = toml::parse_file(std::u8string_view{ reinterpret_cast<const char8_t*>(path.data()), path.length() });
 		CHECK(tbl["a"] == 1);
+	}
+
+	SECTION("a default-constructed file path")
+	{
+		const auto err = parse_failure([]() { return toml::parse_file(std::u8string_view{}); });
+		REQUIRE(err);
+		CHECK(err->description() == "File could not be opened for reading"sv);
 	}
 }
 

@@ -13,7 +13,7 @@ TEST_CASE("user feedback")
 	{
 		parsing_should_fail(FILE_LINE_ARGS,
 							"a = 2026-10-13 1\n"sv,
-							"1:16: Error while parsing key-value pair: expected a comment or whitespace, saw '1'"sv);
+							"1:16: Error while parsing key-value pair: expected a comment or line break, saw '1'"sv);
 	}
 
 	SECTION("tomlplusplus/issues/49") // https://github.com/marzer/tomlplusplus/issues/49#issuecomment-664428571
@@ -89,10 +89,10 @@ TEST_CASE("user feedback")
 		// - overlong numeric literals
 		// all should fail to parse, but correctly issue an error (not crash!)
 
-		parsing_should_fail(FILE_LINE_ARGS, "#\xf1\x63", "1:2: Encountered invalid utf-8 sequence"sv);
+		parsing_should_fail(FILE_LINE_ARGS, "#\xf1\x63", "1:2: Encountered invalid UTF-8 sequence"sv);
 		parsing_should_fail(FILE_LINE_ARGS,
 							"1= 0x6cA#+\xf1",
-							"1:11: Encountered EOF during incomplete utf-8 code point sequence"sv);
+							"1:11: Encountered end-of-file during incomplete UTF-8 code point sequence"sv);
 		parsing_should_fail(
 			FILE_LINE_ARGS,
 			"p=06:06:06#\x0b\xff",
@@ -178,7 +178,7 @@ b = []
 
 		parsing_should_fail(FILE_LINE_ARGS,
 							"fl =[ [[[[[[[[[[[[[[[\x36\x80\x86\x00\x00\x00\x2D\x36\x9F\x20\x00"sv,
-							"1:23: Encountered invalid utf-8 sequence"sv);
+							"1:23: Encountered invalid UTF-8 sequence"sv);
 
 		std::string s(2048_sz, '[');
 		constexpr auto start = "fl =[ "sv;
@@ -200,7 +200,7 @@ b = []
 			parsing_should_fail(
 				FILE_LINE_ARGS,
 				std::string_view{ nested_tables },
-				"1:389: Error while parsing key: exceeded maximum nested value depth of 128 (TOML_MAX_NESTED_VALUES)"sv);
+				"1:388: Error while parsing key: exceeded maximum nested value depth of 128 (TOML_MAX_NESTED_VALUES)"sv);
 		}
 	}
 
@@ -325,7 +325,7 @@ b = []
 	{
 		parsing_should_fail(FILE_LINE_ARGS,
 							"#\r"sv,
-							R"(1:3: Error while parsing comment: expected '\n' after '\r', saw EOF)"sv);
+							R"(1:3: Error while parsing comment: expected '\n' after '\r', saw end-of-file)"sv);
 	}
 
 	SECTION("tomlplusplus/issues/134") // https://github.com/marzer/tomlplusplus/issues/134
@@ -475,7 +475,7 @@ b = []
 			[a.c]
 			foo = 1
 		)"sv,
-							"3:5: Error while parsing table header: cannot redefine existing array as table"sv);
+							"3:5: Error while parsing table header: cannot redefine existing array 'a' as table"sv);
 
 		parsing_should_succeed(FILE_LINE_ARGS, R"(
 			[[a]]
@@ -542,7 +542,7 @@ b = []
 		parsing_should_fail(
 			FILE_LINE_ARGS,
 			"\"a\nb\" = \"x\\ty\""sv,
-			"1:3: Error while parsing string: unescaped control characters other than TAB (U+0009) are explicitly prohibited"sv);
+			R"(1:3: Error while parsing string: unescaped control characters other than TAB (U+0009) are prohibited, saw '\n')"sv);
 
 		static constexpr auto input = R"(
 								"a"    = "x\ty"

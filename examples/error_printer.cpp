@@ -9,6 +9,7 @@
 #include "examples.hpp"
 #include <toml++/toml.hpp>
 #include <cctype>  // For iscntrl.
+#include <cstring> // For memcpy.
 #include <iomanip> // For setfill, hex, etc.
 #include <optional>
 
@@ -16,7 +17,7 @@ using namespace std::string_view_literals;
 
 namespace
 {
-	inline constexpr auto invalid_parses = std::array{
+	constexpr auto invalid_parses = std::array{
 		"########## comments and whitespace"sv,
 		"# bar\rkek"sv,
 		"# bar\bkek"sv,
@@ -27,10 +28,8 @@ namespace
 
 		"########## inline tables"sv,
 		"val = {,}"sv,
-		"val = {a='b',}"sv, // allowed when TOML_ENABLE_UNRELEASED_FEATURES == 1
 		"val = {a='b',,}"sv,
 		"val = {a='b',"sv,
-		"val = {a='b',\n c='d'}"sv, // allowed when TOML_ENABLE_UNRELEASED_FEATURES == 1
 		"val = {?='b'}"sv,
 		"foo = {} \n [foo.bar]"sv,
 
@@ -73,7 +72,6 @@ namespace
 		"val = \" \r \""sv,
 		R"(val = ")"sv,
 		R"(val = "\g")"sv,
-		R"(val = "\x20")"sv, // allowed when TOML_ENABLE_UNRELEASED_FEATURES == 1
 		R"(val = "\uFFF")"sv,
 		R"(val = "\uFFFG")"sv,
 		R"(val = "\UFFFFFFF")"sv,
@@ -106,8 +104,7 @@ namespace
 		R"(val = 100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000.0)"sv,
 	};
 
-	inline constexpr auto divider =
-		"################################################################################"sv;
+	constexpr auto divider = "################################################################################"sv;
 
 	void print_string(std::string_view str)
 	{
@@ -125,19 +122,16 @@ namespace
 			{
 				std::cout << *escape_sequence;
 			}
+			else if (const auto byte = static_cast<unsigned char>(c); byte < 0x80u && std::iscntrl(byte))
+			{
+				// Print a string, just like `toml::impl::control_char_escapes[c]`.
+				std::ostringstream stream;
+				stream << "\\u00"sv << std::setfill('0') << std::setw(2) << std::hex << std::uppercase << int{ c };
+				std::cout << stream.str();
+			}
 			else
 			{
-				if (const auto byte = static_cast<unsigned char>(c); byte < 0x80u && std::iscntrl(byte))
-				{
-					// Print a string, just like `toml::impl::control_char_escapes[c]`.
-					std::ostringstream stream;
-					stream << "\\u00"sv << std::setfill('0') << std::setw(2) << std::hex << std::uppercase << int{ c };
-					std::cout << stream.str();
-				}
-				else
-				{
-					std::cout << c;
-				}
+				std::cout << c;
 			}
 		}
 	}
@@ -179,9 +173,6 @@ int main()
 
 	for (auto str : invalid_parses)
 	{
-		if (str.empty())
-			continue;
-
 		// section headings
 		if (str.substr(0, 10) == "##########"sv)
 		{

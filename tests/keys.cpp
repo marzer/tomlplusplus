@@ -260,3 +260,49 @@ TEST_CASE("keys - traits")
 	static_assert(!is_key_or_convertible<int>);
 	static_assert(!is_key_or_convertible<toml::table>);
 }
+
+TEST_CASE("keys - a key is a string-like type")
+{
+	static_assert(toml::is_string_like<toml::key>);
+	static_assert(std::is_same_v<toml::inserted_type_of<toml::key>, toml::value<std::string>>);
+
+	const toml::key k{ "name"sv, source_region{ { 1, 2 }, { 1, 6 }, {} } };
+
+	SECTION("as the initialiser of a string value")
+	{
+		toml::table tbl;
+		tbl.insert("inserted", k);
+		tbl.insert_or_assign("assigned", k);
+		toml::array arr;
+		arr.push_back(k);
+
+		for (const auto* n : { tbl.get("inserted"), tbl.get("assigned"), arr.get(0) })
+		{
+			REQUIRE(n);
+			REQUIRE(n->is_string());
+			CHECK(n->as_string()->get() == "name"sv);
+			CHECK(n->source().begin == source_position{});
+		}
+		CHECK(toml::value<std::string>{ k }.get() == "name"sv);
+	}
+
+	SECTION("as a retrieval target")
+	{
+		const auto tbl = toml::parse("str = 'name'\nint = 1"sv);
+
+		const auto retrieved = tbl["str"].value<toml::key>();
+		REQUIRE(retrieved);
+		CHECK(retrieved->str() == "name"sv);
+		CHECK(retrieved->source().begin == source_position{});
+		CHECK(tbl["str"].value_exact<toml::key>() == k);
+		CHECK(!tbl["int"].value<toml::key>());
+		CHECK(tbl["int"].value_or(toml::key{ "fallback"sv }).str() == "fallback"sv);
+	}
+
+	SECTION("in comparisons")
+	{
+		const toml::table tbl{ { "str", "name"sv } };
+		CHECK(tbl["str"] == k);
+		CHECK(tbl["str"] != toml::key{ "other"sv });
+	}
+}

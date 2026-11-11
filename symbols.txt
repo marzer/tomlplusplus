@@ -33,6 +33,8 @@ toml::v3::impl::formatter::print_value
 toml::v3::impl::node_deep_equality
 toml::v3::impl::print_to_stream
 toml::v3::json_formatter::print
+toml::v3::json_formatter::print_json_string
+toml::v3::json_formatter::print_node
 toml::v3::node::at_path
 toml::v3::node::node
 toml::v3::node::operator=
@@ -68,8 +70,14 @@ toml::v3::table::prune
 toml::v3::table::table
 toml::v3::table::~table
 toml::v3::toml_formatter::print
+toml::v3::toml_formatter::print_equals
 toml::v3::toml_formatter::print_inline
+toml::v3::toml_formatter::print_key_path
 toml::v3::toml_formatter::print_pending_table_separator
+toml::v3::toml_formatter::print_sub_table
+toml::v3::toml_formatter::print_table_array
 toml::v3::yaml_formatter::print
+toml::v3::yaml_formatter::print_node
 toml::v3::yaml_formatter::print_yaml_float
+toml::v3::yaml_formatter::print_yaml_scalar
 toml::v3::yaml_formatter::print_yaml_string

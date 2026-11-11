@@ -69,6 +69,14 @@ or later works; `pipx install meson` gets the latest.
 > ℹ&#xFE0F; Pass `-Duse_vendored_libs=false` to Meson if you wish to use the system-installed version
 > of Catch2 (v3 or newer) rather than the vendored one.
 
+### Warnings
+
+The library turns some groups of warnings off inside its own headers, so that it can't break a user's build that
+treats warnings as errors. A pedantic build (`-Dtomlplusplus_PEDANTIC=ON` with CMake, `-Dpedantic=true` or
+`-Ddevel=true` with Meson) defines `TOML_PEDANTIC`, which leaves the switch, arithmetic and analysis groups on.
+
+A warning that such a build reports in library code is fixed, or suppressed where it fires.
+
 ### Locales
 
 The tests run once per locale, and a run whose locale isn't installed is reported as skipped. On Debian and Ubuntu,
@@ -163,6 +171,9 @@ Every timed parse starts from a heap shaped by the allocations before it, so a c
 number of allocations can move a result by up to 20% either way. With glibc, `GLIBC_TUNABLES=glibc.malloc.mxfast=0`
 turns off the fast bins behind most of this, and results then hold to about 1%. Elsewhere, time one benchmark at a time
 by passing its full name.
+
+The address a hot function is linked at can also move a result, by up to 10%, with no change to its code. GCC and Clang
+builds of the benchmark align every function to 64 bytes for that reason.
 
 <br>
 

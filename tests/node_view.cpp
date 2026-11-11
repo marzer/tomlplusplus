@@ -285,6 +285,9 @@ TEST_CASE("node_view - equality")
 			CHECK(tbl[key] == other[key]);
 			CHECK(ctbl[key] == other[key]);
 			CHECK(!(tbl[key] != other[key]));
+			CHECK(!(ctbl[key] != other[key]));
+			CHECK(!(tbl[key] != ctbl[key]));
+			CHECK(ctbl[key] != tbl["missing"]);
 			CHECK(tbl[key] != tbl["missing"]);
 			CHECK(tbl["missing"] != tbl[key]);
 			if (key != "int"sv)

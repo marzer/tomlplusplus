@@ -186,6 +186,27 @@ bool parsing_should_fail(std::string_view test_file, uint32_t test_line, std::st
 	return parsing_should_fail_impl(test_file, test_line, toml_str, std::nullopt);
 }
 
+std::string quoted_control_character(char c)
+{
+	switch (c)
+	{
+		case '\b': return R"('\b')";
+		case '\t': return R"('\t')";
+		case '\n': return R"('\n')";
+		case '\f': return R"('\f')";
+		case '\r': return R"('\r')";
+		default: break;
+	}
+
+	static constexpr char digits[] = "0123456789ABCDEF";
+	const auto value			   = static_cast<unsigned char>(c);
+	std::string quoted			   = "'\\u00";
+	quoted += digits[value >> 4];
+	quoted += digits[value & 0x0Fu];
+	quoted += '\'';
+	return quoted;
+}
+
 template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const int&);
 template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const unsigned int&);
 template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const bool&);

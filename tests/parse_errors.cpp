@@ -44,6 +44,23 @@ namespace
 		ss << err;
 		return std::move(ss).str();
 	}
+
+	bool ends_with_a_whole_code_point(std::string_view text)
+	{
+		size_t continuation_bytes = {};
+		while (!text.empty() && (static_cast<unsigned char>(text.back()) & 0xC0u) == 0x80u)
+		{
+			continuation_bytes++;
+			text.remove_suffix(1u);
+		}
+		if (text.empty())
+			return !continuation_bytes;
+
+		const auto lead = static_cast<unsigned char>(text.back());
+		if (lead < 0x80u)
+			return !continuation_bytes;
+		return continuation_bytes == (lead < 0xE0u ? 1u : lead < 0xF0u ? 2u : 3u);
+	}
 }
 
 TEST_CASE("parse errors - construction")
@@ -143,28 +160,49 @@ TEST_CASE("parse errors - long descriptions are truncated")
 	CHECK(std::string_view{ full }.substr(0u, desc.length()) == desc);
 }
 
+TEST_CASE("parse errors - long descriptions are not cut inside a code point")
+{
+	for (const auto character : { "\xC3\xA9"sv, "\xE2\x82\xAC"sv, "\xF0\x9F\x98\x80"sv })
+	{
+		for (size_t ascii_prefix = 0; ascii_prefix < 4u; ascii_prefix++)
+		{
+			INFO("a " << character.length() << "-byte character after " << ascii_prefix << " ASCII characters");
+
+			std::string key(ascii_prefix, 'k');
+			for (size_t i = 0; i < 300u; i++)
+				key += character;
+			const auto quoted = '"' + key + '"';
+
+			const auto err = parse_failure(quoted + " = 1\n" + quoted + " = 2\n", "long.toml"sv);
+			REQUIRE(err);
+			CHECK(err->description().length() > 400u);
+			CHECK(ends_with_a_whole_code_point(err->description()));
+		}
+	}
+}
+
 TEST_CASE("parse errors - positions after multi-byte code points")
 {
 	static constexpr auto saw_x =
-		"1:9: Error while parsing key-value pair: expected a comment or whitespace, saw 'x'"sv;
+		"1:9: Error while parsing key-value pair: expected a comment or line break, saw 'x'"sv;
 	parsing_should_fail(FILE_LINE_ARGS, "a = '\xC3\xA9' x"sv, saw_x);
 	parsing_should_fail(FILE_LINE_ARGS, "a = '\xE2\x82\xAC' x"sv, saw_x);
 	parsing_should_fail(FILE_LINE_ARGS, "a = '\xF0\x9F\x98\x82' x"sv, saw_x);
 
 	parsing_should_fail(FILE_LINE_ARGS,
 						"'\xC3\xA9\xE2\x82\xAC\xF0\x9F\x98\x82' = 1 x"sv,
-						"1:11: Error while parsing key-value pair: expected a comment or whitespace, saw 'x'"sv);
+						"1:11: Error while parsing key-value pair: expected a comment or line break, saw 'x'"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		"# \xC3\xA9\xE2\x82\xAC\xF0\x9F\x98\x82\x01"sv,
-		"1:6: Error while parsing comment: control characters other than TAB (U+0009) are explicitly prohibited in comments"sv);
+		R"(1:6: Error while parsing comment: control characters other than TAB (U+0009) are prohibited in comments, saw '\u0001')"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"a = \"\xC3\xA9\xE2\x82\xAC\xF0\x9F\x98\x82\\q\""sv,
 						R"(1:10: Error while parsing string: unknown escape sequence '\q')"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		"a = \"\xC3\xA9\xE2\x82\xAC\xF0\x9F\x98\x82\\uD800\""sv,
-		"1:9: Error while parsing unicode scalar sequence: unicode surrogates (U+D800 - U+DFFF) are explicitly prohibited"sv);
+		"1:9: Error while parsing unicode scalar sequence: unicode surrogates (U+D800 - U+DFFF) are prohibited"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"a = '\xC3\xA9\xE2\x82\xAC\xF0\x9F\x98\x82'\nb = x"sv,
 						"2:5: Error while parsing value: could not determine value type"sv);
@@ -181,7 +219,7 @@ TEST_CASE("parse errors - code points")
 		parsing_should_fail(
 			FILE_LINE_ARGS,
 			"a = 1\xC2\x85"sv,
-			R"(1:6: Error while parsing key-value pair: expected a comment or whitespace, saw '\u0085')"sv);
+			R"(1:6: Error while parsing key-value pair: expected a comment or line break, saw '\u0085')"sv);
 		parsing_should_fail(FILE_LINE_ARGS,
 							"a\xE2\x80\xA9 = 1"sv,
 							R"(1:2: Error while parsing key-value pair: expected '=', saw '\u2029')"sv);
@@ -205,20 +243,20 @@ TEST_CASE("parse errors - code points")
 			R"(1:7: Error while parsing hexadecimal integer: expected hexadecimal digit, saw '\u0080')"sv);
 		parsing_should_fail(FILE_LINE_ARGS,
 							"a = 1\xC2\x9B"sv,
-							R"(1:6: Error while parsing decimal integer: expected digit, saw '\u009B')"sv);
+							R"(1:6: Error while parsing decimal integer: expected decimal digit, saw '\u009B')"sv);
 		parsing_should_fail(FILE_LINE_ARGS,
 							"a = 1\xE2\x80\x8D"sv,
-							R"(1:6: Error while parsing decimal integer: expected digit, saw '\u200D')"sv);
+							R"(1:6: Error while parsing decimal integer: expected decimal digit, saw '\u200D')"sv);
 		parsing_should_fail(FILE_LINE_ARGS,
 							"a = 1\xE2\x80\xAE"sv,
-							R"(1:6: Error while parsing decimal integer: expected digit, saw '\u202E')"sv);
+							R"(1:6: Error while parsing decimal integer: expected decimal digit, saw '\u202E')"sv);
 		parsing_should_fail(
 			FILE_LINE_ARGS,
 			"a = 0x\xC2\xAD"sv,
 			R"(1:7: Error while parsing hexadecimal integer: expected hexadecimal digit, saw '\u00AD')"sv);
 		parsing_should_fail(FILE_LINE_ARGS,
 							"a = 1\xF3\xA0\x80\x81"sv,
-							R"(1:6: Error while parsing decimal integer: expected digit, saw '\U000E0001')"sv);
+							R"(1:6: Error while parsing decimal integer: expected decimal digit, saw '\U000E0001')"sv);
 	}
 
 	SECTION("other non-ASCII code points are printed raw")
@@ -237,7 +275,7 @@ TEST_CASE("parse errors - positions after a byte order mark")
 {
 	parsing_should_fail(FILE_LINE_ARGS,
 						BOM_PREFIX "a = 1 x"sv,
-						"1:7: Error while parsing key-value pair: expected a comment or whitespace, saw 'x'"sv);
+						"1:7: Error while parsing key-value pair: expected a comment or line break, saw 'x'"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		BOM_PREFIX "= 1"sv,
@@ -258,17 +296,17 @@ TEST_CASE("parse errors - positions after a byte order mark")
 	parsing_should_fail(FILE_LINE_ARGS,
 						"\xEF\xBB"
 						"a = 1"sv,
-						"1:1: Encountered invalid utf-8 sequence"sv);
+						"1:1: Encountered invalid UTF-8 sequence"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"\xEF\xBB"sv,
-						"1:1: Encountered EOF during incomplete utf-8 code point sequence"sv);
+						"1:1: Encountered end-of-file during incomplete UTF-8 code point sequence"sv);
 }
 
 TEST_CASE("parse errors - carriage returns")
 {
 	parsing_should_fail(FILE_LINE_ARGS,
 						"\r"sv,
-						R"(1:2: Error while parsing root table: expected '\n' after '\r', saw EOF)"sv);
+						R"(1:2: Error while parsing root table: expected '\n' after '\r', saw end-of-file)"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"\rx"sv,
 						R"(1:2: Error while parsing root table: expected '\n' after '\r', saw 'x')"sv);
@@ -299,11 +337,11 @@ TEST_CASE("parse errors - carriage returns")
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		"a = \"x\ry\""sv,
-		"1:7: Error while parsing string: unescaped control characters other than TAB (U+0009) are explicitly prohibited"sv);
+		R"(1:7: Error while parsing string: unescaped control characters other than TAB (U+0009) are prohibited, saw '\r')"sv);
 	parsing_should_fail(
 		FILE_LINE_ARGS,
 		"a = 'x\ry'"sv,
-		"1:7: Error while parsing literal string: control characters other than TAB (U+0009) are explicitly prohibited"sv);
+		R"(1:7: Error while parsing literal string: control characters other than TAB (U+0009) are prohibited, saw '\r')"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"a = \"\"\"x\ry\"\"\""sv,
 						R"(1:10: Error while parsing string: expected '\n' after '\r', saw 'y')"sv);

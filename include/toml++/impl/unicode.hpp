@@ -31,26 +31,26 @@ TOML_IMPL_NAMESPACE_START
 	TOML_CONST_GETTER
 	constexpr bool is_octal_digit(char32_t c) noexcept
 	{
-		return (c >= U'0' && c <= U'7');
+		return c >= U'0' && c <= U'7';
 	}
 
 	TOML_CONST_GETTER
 	constexpr bool is_decimal_digit(char32_t c) noexcept
 	{
-		return (c >= U'0' && c <= U'9');
+		return c >= U'0' && c <= U'9';
 	}
 
 	TOML_CONST_GETTER
 	constexpr bool is_hexadecimal_digit(char32_t c) noexcept
 	{
-		return U'0' <= c && c <= U'f' && (1ull << (static_cast<uint_least64_t>(c) - 0x30u)) & 0x7E0000007E03FFull;
+		return c >= U'0' && c <= U'f' && (1ull << (static_cast<uint_least64_t>(c) - 0x30u)) & 0x7E0000007E03FFull;
 	}
 
 	template <typename T>
 	TOML_CONST_GETTER
 	constexpr uint_least32_t hex_to_dec(const T c) noexcept
 	{
-		if constexpr (std::is_same_v<remove_cvref<T>, uint_least32_t>)
+		if constexpr (std::is_same_v<T, uint_least32_t>)
 			return c >= 0x41u					 // >= 'A'
 					 ? 10u + (c | 0x20u) - 0x61u // - 'a'
 					 : c - 0x30u				 // - '0'
@@ -108,6 +108,9 @@ TOML_IMPL_NAMESPACE_START
 	TOML_CONST_GETTER
 	constexpr bool is_default_ignorable(char32_t c) noexcept
 	{
+		if (c < U'\u00AD')
+			return false;
+
 		return c == U'\u00AD' || c == U'\u034F' || c == U'\u061C' || (c >= U'\u115F' && c <= U'\u1160')
 			|| (c >= U'\u17B4' && c <= U'\u17B5') || (c >= U'\u180B' && c <= U'\u180F')
 			|| (c >= U'\u200B' && c <= U'\u200F') || (c >= U'\u202A' && c <= U'\u202E')
@@ -166,7 +169,7 @@ TOML_IMPL_NAMESPACE_START
 	TOML_CONST_GETTER
 	constexpr bool is_control_character(char c) noexcept
 	{
-		return c <= '\u001F' || c == '\u007F';
+		return static_cast<unsigned char>(c) <= 0x1Fu || c == '\x7F';
 	}
 
 	TOML_CONST_GETTER
@@ -184,7 +187,7 @@ TOML_IMPL_NAMESPACE_START
 	TOML_CONST_GETTER
 	constexpr bool is_unicode_surrogate(char32_t c) noexcept
 	{
-		return c >= 0xD800u && c <= 0xDFFF;
+		return c >= 0xD800u && c <= 0xDFFFu;
 	}
 
 	struct utf8_decoder
@@ -220,7 +223,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_PURE_INLINE_GETTER
-		constexpr bool has_code_point() const noexcept
+		constexpr bool has_codepoint() const noexcept
 		{
 			return state == uint_least32_t{};
 		}
@@ -228,7 +231,7 @@ TOML_IMPL_NAMESPACE_START
 		TOML_PURE_INLINE_GETTER
 		constexpr bool needs_more_input() const noexcept
 		{
-			return !has_code_point() && !error();
+			return !has_codepoint() && !error();
 		}
 
 		constexpr void operator()(uint8_t byte) noexcept
@@ -237,9 +240,9 @@ TOML_IMPL_NAMESPACE_START
 
 			const auto type = state_table[byte];
 
-			codepoint = static_cast<char32_t>(has_code_point() ? (uint_least32_t{ 255u } >> type) & byte
-															   : (byte & uint_least32_t{ 63u })
-																	 | (static_cast<uint_least32_t>(codepoint) << 6));
+			codepoint = static_cast<char32_t>(has_codepoint() ? (uint_least32_t{ 255u } >> type) & byte
+															  : (byte & uint_least32_t{ 63u })
+																	| (static_cast<uint_least32_t>(codepoint) << 6));
 
 			state = state_table[state + uint_least32_t{ 256u } + type];
 		}

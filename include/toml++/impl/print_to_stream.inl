@@ -20,7 +20,7 @@
 #include "table.hpp"
 TOML_DISABLE_WARNINGS;
 #include <ostream>
-#if TOML_INT_CHARCONV || TOML_FLOAT_CHARCONV
+#if TOML_FLOAT_CHARCONV
 #include <charconv>
 #endif
 #if !TOML_FLOAT_CHARCONV
@@ -29,7 +29,6 @@ TOML_DISABLE_WARNINGS;
 #endif
 TOML_ENABLE_WARNINGS;
 #include "header_start.hpp"
-TOML_DISABLE_ARITHMETIC_WARNINGS;
 
 TOML_ANON_NAMESPACE_START
 {
@@ -41,59 +40,56 @@ TOML_ANON_NAMESPACE_START
 			value_flags::format_as_binary | value_flags::format_as_octal | value_flags::format_as_hexadecimal;
 		format &= value_flags_mask;
 
-		int base = 10;
-		if (format != value_flags::none && val > T{})
+		// zero for decimal
+		unsigned bits_per_digit = {};
+		if (val > T{})
 		{
 			switch (format)
 			{
-				case value_flags::format_as_binary: base = 2; break;
-				case value_flags::format_as_octal: base = 8; break;
-				case value_flags::format_as_hexadecimal: base = 16; break;
+				case value_flags::format_as_binary: bits_per_digit = 1; break;
+				case value_flags::format_as_octal: bits_per_digit = 3; break;
+				case value_flags::format_as_hexadecimal: bits_per_digit = 4; break;
 				default: break;
 			}
 		}
 
-		static constexpr size_t max_padding = 16;
-		char buf[max_padding + (sizeof(T) * CHAR_BIT)];
-
-#if TOML_INT_CHARCONV
-
-		char* const first	   = buf + max_padding;
-		const char* const last = std::to_chars(first, buf + sizeof(buf), val, base).ptr;
-		if (base == 16)
-		{
-			for (auto c = first; c != last; c++)
-				if (*c >= 'a')
-					*c -= 32;
-		}
-
-#else
-
 		using unsigned_type = std::make_unsigned_t<T>;
-		const auto radix	= static_cast<unsigned_type>(base);
 		auto magnitude		= static_cast<unsigned_type>(val);
 		if (val < T{})
 			magnitude = static_cast<unsigned_type>(unsigned_type{} - magnitude);
 
+		static constexpr size_t max_padding = 16;
+		char buf[max_padding + (sizeof(T) * CHAR_BIT)];
 		char* const last = buf + sizeof(buf);
-		char* first		 = last;
-		do
+		char* digits	 = last;
+		if (bits_per_digit)
 		{
-			*--first  = "0123456789ABCDEF"[magnitude % radix];
-			magnitude = static_cast<unsigned_type>(magnitude / radix);
+			const auto mask = static_cast<unsigned_type>((unsigned_type{ 1 } << bits_per_digit) - 1u);
+			do
+			{
+				*--digits = "0123456789ABCDEF"[magnitude & mask];
+				magnitude = static_cast<unsigned_type>(magnitude >> bits_per_digit);
+			}
+			while (magnitude);
 		}
-		while (magnitude);
-		if (val < T{})
-			*--first = '-';
+		else
+		{
+			do
+			{
+				*--digits = static_cast<char>('0' + (magnitude % 10u));
+				magnitude = static_cast<unsigned_type>(magnitude / 10u);
+			}
+			while (magnitude);
+		}
 
-#endif
-
-		const auto len = static_cast<size_t>(last - first);
+		const auto len = static_cast<size_t>(last - digits);
 		size_t padding = min_digits > len ? min_digits - len : 0u;
+		if (val < T{})
+			impl::print_to_stream(stream, '-');
 		for (; padding > max_padding; padding--)
-			stream.put('0');
-		std::memset(first - padding, '0', padding);
-		impl::print_to_stream(stream, first - padding, len + padding);
+			impl::print_to_stream(stream, '0');
+		std::memset(digits - padding, '0', padding);
+		impl::print_to_stream(stream, digits - padding, len + padding);
 	}
 
 	template <typename T>
@@ -123,7 +119,7 @@ TOML_ANON_NAMESPACE_START
 	}
 
 	TOML_INTERNAL_LINKAGE
-	char* write_date(char* out, const toml::date& val) noexcept
+	char* write_date(char* out, toml::date val) noexcept
 	{
 		out	   = write_decimal(out, val.year, 4u);
 		*out++ = '-';
@@ -133,7 +129,7 @@ TOML_ANON_NAMESPACE_START
 	}
 
 	TOML_INTERNAL_LINKAGE
-	char* write_time(char* out, const toml::time& val) noexcept
+	char* write_time(char* out, toml::time val) noexcept
 	{
 		out	   = write_decimal(out, val.hour, 2u);
 		*out++ = ':';
@@ -155,7 +151,7 @@ TOML_ANON_NAMESPACE_START
 	}
 
 	TOML_INTERNAL_LINKAGE
-	char* write_time_offset(char* out, const toml::time_offset& val) noexcept
+	char* write_time_offset(char* out, toml::time_offset val) noexcept
 	{
 		if (!val.minutes)
 		{
@@ -172,9 +168,20 @@ TOML_ANON_NAMESPACE_START
 		return write_decimal(out, static_cast<uint_least32_t>(mins % 60), 2u);
 	}
 
+	TOML_INTERNAL_LINKAGE
+	char* write_date_time(char* out, const toml::date_time& val) noexcept
+	{
+		out	   = write_date(out, val.date);
+		*out++ = 'T';
+		out	   = write_time(out, val.time);
+		if (val.offset)
+			out = write_time_offset(out, *val.offset);
+		return out;
+	}
+
 	struct float_digits
 	{
-		char digits[17];
+		char digits[std::numeric_limits<double>::max_digits10];
 		size_t count;
 		int exponent;
 	};
@@ -227,7 +234,7 @@ TOML_ANON_NAMESPACE_START
 	float_digits rounded_digits(T val, int precision) noexcept
 	{
 		char buf[33];
-		*std::to_chars(buf, buf + 32, val, std::chars_format::scientific, precision).ptr = '\0';
+		*std::to_chars(buf, buf + sizeof(buf) - 1, val, std::chars_format::scientific, precision).ptr = '\0';
 		return read_scientific(buf);
 	}
 
@@ -236,7 +243,7 @@ TOML_ANON_NAMESPACE_START
 	float_digits shortest_digits(T val) noexcept
 	{
 		char buf[33];
-		*std::to_chars(buf, buf + 32, val, std::chars_format::scientific).ptr = '\0';
+		*std::to_chars(buf, buf + sizeof(buf) - 1, val, std::chars_format::scientific).ptr = '\0';
 		return read_scientific(buf);
 	}
 
@@ -312,6 +319,98 @@ TOML_ANON_NAMESPACE_START
 
 #endif
 
+	// floats print in fixed form inside this window, given here as values and as decimal exponents
+	TOML_INTERNAL_LINKAGE
+	constexpr double fixed_form_min = 1e-4;
+	TOML_INTERNAL_LINKAGE
+	constexpr double fixed_form_max = 1e16;
+	TOML_INTERNAL_LINKAGE
+	constexpr int fixed_form_min_exponent = -4;
+	TOML_INTERNAL_LINKAGE
+	constexpr int fixed_form_max_exponent = 16;
+
+	// the significant digits of %g, which relaxed precision follows
+	TOML_INTERNAL_LINKAGE
+	constexpr int relaxed_digits = 6;
+
+#if TOML_FLOAT_CHARCONV
+
+	// val is positive and not zero
+	TOML_INTERNAL_LINKAGE
+	char* write_shortest_double(char* out, char* end, double val, bool point_before_exponent) noexcept
+	{
+		// the shortest text reads back, so comparing the value with the bounds matches comparing the text
+		const bool fixed  = val >= fixed_form_min && val < fixed_form_max;
+		char* const first = out;
+		out = std::to_chars(first, end, val, fixed ? std::chars_format::fixed : std::chars_format::scientific).ptr;
+		if (fixed)
+		{
+			if (!std::memchr(first, '.', static_cast<size_t>(out - first)))
+			{
+				*out++ = '.';
+				*out++ = '0';
+			}
+			return out;
+		}
+
+		if (point_before_exponent && first[1] == 'e')
+		{
+			std::memmove(first + 3, first + 1, static_cast<size_t>(out - first - 1));
+			first[1] = '.';
+			first[2] = '0';
+			out += 2;
+		}
+		return out;
+	}
+
+#endif
+
+	TOML_INTERNAL_LINKAGE
+	char* write_scientific(char* out, const float_digits& val, bool point_before_exponent) noexcept
+	{
+		*out++ = val.digits[0];
+		if (val.count > 1u)
+		{
+			*out++ = '.';
+			std::memcpy(out, val.digits + 1, val.count - 1u);
+			out += val.count - 1u;
+		}
+		else if (point_before_exponent)
+		{
+			*out++ = '.';
+			*out++ = '0';
+		}
+		*out++ = 'e';
+		*out++ = val.exponent < 0 ? '-' : '+';
+		return write_decimal(out, static_cast<uint_least32_t>(val.exponent < 0 ? -val.exponent : val.exponent), 2u);
+	}
+
+	TOML_INTERNAL_LINKAGE
+	char* write_fixed(char* out, const float_digits& val) noexcept
+	{
+		if (val.exponent < 0)
+		{
+			*out++ = '0';
+			*out++ = '.';
+			for (int i = val.exponent + 1; i < 0; i++)
+				*out++ = '0';
+			std::memcpy(out, val.digits, val.count);
+			return out + val.count;
+		}
+
+		const auto whole = static_cast<size_t>(val.exponent) + 1u;
+		for (size_t i = 0; i < whole; i++)
+			*out++ = i < val.count ? val.digits[i] : '0';
+		*out++ = '.';
+		if (whole >= val.count)
+		{
+			*out++ = '0';
+			return out;
+		}
+		std::memcpy(out, val.digits + whole, val.count - whole);
+		return out + (val.count - whole);
+	}
+
 	// python's repr() layout, or %g's when relaxed
 	template <typename T, size_t N>
 	TOML_INTERNAL_LINKAGE
@@ -336,90 +435,34 @@ TOML_ANON_NAMESPACE_START
 #if TOML_FLOAT_CHARCONV
 		// fixed form keeps integer digits the shortest text drops once the gap between values passes 2,
 		// which happens below 1e16 for floats
-		if (std::is_same_v<T, double> && !relaxed_precision)
+		if constexpr (std::is_same_v<T, double>)
 		{
-			// the shortest text reads back, so comparing the value with the bounds matches comparing the text
-			const bool fixed  = val >= 1e-4 && val < 1e16;
-			char* const first = out;
-			out = std::to_chars(first, buf + N, val, fixed ? std::chars_format::fixed : std::chars_format::scientific)
-					  .ptr;
-			if (fixed)
-			{
-				if (!std::memchr(first, '.', static_cast<size_t>(out - first)))
-				{
-					*out++ = '.';
-					*out++ = '0';
-				}
-			}
-			else if (point_before_exponent && first[1] == 'e')
-			{
-				std::memmove(first + 3, first + 1, static_cast<size_t>(out - first - 1));
-				first[1] = '.';
-				first[2] = '0';
-				out += 2;
-			}
-			return out;
+			if (!relaxed_precision)
+				return write_shortest_double(out, buf + N, val, point_before_exponent);
 		}
 #endif
 
 #if !TOML_FLOAT_CHARCONV
 		[[maybe_unused]] const impl::default_fenv fenv;
 #endif
-		auto digits = shortest_digits(val);
-		if (relaxed_precision && digits.count > 6u)
-			digits = rounded_digits(val, 5);
-		while (digits.count > 1u && digits.digits[digits.count - 1u] == '0')
-			digits.count--;
+		auto decimal = shortest_digits(val);
+		if (relaxed_precision && decimal.count > static_cast<size_t>(relaxed_digits))
+			decimal = rounded_digits(val, relaxed_digits - 1);
+		while (decimal.count > 1u && decimal.digits[decimal.count - 1u] == '0')
+			decimal.count--;
 
-		if (digits.exponent < -4 || digits.exponent >= (relaxed_precision ? 6 : 16))
-		{
-			*out++ = digits.digits[0];
-			if (digits.count > 1u)
-			{
-				*out++ = '.';
-				std::memcpy(out, digits.digits + 1, digits.count - 1u);
-				out += digits.count - 1u;
-			}
-			else if (point_before_exponent)
-			{
-				*out++ = '.';
-				*out++ = '0';
-			}
-			*out++ = 'e';
-			*out++ = digits.exponent < 0 ? '-' : '+';
-			return write_decimal(out,
-								 static_cast<uint_least32_t>(digits.exponent < 0 ? -digits.exponent : digits.exponent),
-								 2u);
-		}
+		if (decimal.exponent < fixed_form_min_exponent
+			|| decimal.exponent >= (relaxed_precision ? relaxed_digits : fixed_form_max_exponent))
+			return write_scientific(out, decimal, point_before_exponent);
 
-		if (digits.exponent < 0)
-		{
-			*out++ = '0';
-			*out++ = '.';
-			for (int i = digits.exponent + 1; i < 0; i++)
-				*out++ = '0';
-			std::memcpy(out, digits.digits, digits.count);
-			return out + digits.count;
-		}
-
-		const auto whole = static_cast<size_t>(digits.exponent) + 1u;
-		for (size_t i = 0; i < whole; i++)
-			*out++ = i < digits.count ? digits.digits[i] : '0';
-		*out++ = '.';
-		if (whole >= digits.count)
-		{
-			*out++ = '0';
-			return out;
-		}
-		std::memcpy(out, digits.digits + whole, digits.count - whole);
-		return out + (digits.count - whole);
+		return write_fixed(out, decimal);
 	}
 
 	template <typename T>
 	TOML_INTERNAL_LINKAGE
 	void print_floating_point_to_stream(std::ostream & stream, T val, bool relaxed_precision)
 	{
-		switch (impl::fpclassify(val))
+		switch (impl::fpclassify(static_cast<double>(val)))
 		{
 			case impl::fp_class::neg_inf: impl::print_to_stream(stream, "-inf"sv); break;
 
@@ -577,12 +620,7 @@ TOML_IMPL_NAMESPACE_START
 	void TOML_CALLCONV print_to_stream(std::ostream & stream, const toml::date_time& val)
 	{
 		char buf[64];
-		auto end = TOML_ANON_NAMESPACE::write_date(buf, val.date);
-		*end++	 = 'T';
-		end		 = TOML_ANON_NAMESPACE::write_time(end, val.time);
-		if (val.offset)
-			end = TOML_ANON_NAMESPACE::write_time_offset(end, *val.offset);
-		print_to_stream(stream, buf, static_cast<size_t>(end - buf));
+		print_to_stream(stream, buf, static_cast<size_t>(TOML_ANON_NAMESPACE::write_date_time(buf, val) - buf));
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -607,7 +645,7 @@ TOML_IMPL_NAMESPACE_START
 		{
 			print_to_stream(stream, " of '"sv);
 			print_to_stream(stream, *val.path);
-			stream.put('\'');
+			print_to_stream(stream, '\'');
 		}
 	}
 

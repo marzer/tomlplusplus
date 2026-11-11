@@ -23,7 +23,6 @@ function(add_example name)
 endfunction()
 
 add_example(error_printer)
-add_example(parse_benchmark)
 add_example(toml_generator)
 
 if(tomlplusplus_EXCEPTIONS OR NOT DEFINED tomlplusplus_EXCEPTIONS)

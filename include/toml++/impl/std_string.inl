@@ -40,26 +40,23 @@ extern "C" __declspec(dllimport) int __stdcall MultiByteToWideChar(unsigned int 
 
 TOML_IMPL_NAMESPACE_START
 {
+	// CP_UTF8
+	inline constexpr unsigned int utf8_code_page = 65001u;
+
 	TOML_EXTERNAL_LINKAGE
 	std::string narrow(std::wstring_view str)
 	{
-		if (str.empty())
+		// the win32 conversions take an int length; a longer string converts to nothing
+		const auto str_len = static_cast<int>(str.length());
+		if (str.empty() || static_cast<size_t>(str_len) != str.length())
 			return {};
 
 		std::string s;
-		const auto len =
-			::WideCharToMultiByte(65001, 0, str.data(), static_cast<int>(str.length()), nullptr, 0, nullptr, nullptr);
+		const auto len = ::WideCharToMultiByte(utf8_code_page, 0, str.data(), str_len, nullptr, 0, nullptr, nullptr);
 		if (len)
 		{
 			s.resize(static_cast<size_t>(len));
-			::WideCharToMultiByte(65001,
-								  0,
-								  str.data(),
-								  static_cast<int>(str.length()),
-								  s.data(),
-								  len,
-								  nullptr,
-								  nullptr);
+			::WideCharToMultiByte(utf8_code_page, 0, str.data(), str_len, s.data(), len, nullptr, nullptr);
 		}
 		return s;
 	}
@@ -67,15 +64,16 @@ TOML_IMPL_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	std::wstring widen(std::string_view str)
 	{
-		if (str.empty())
+		const auto str_len = static_cast<int>(str.length());
+		if (str.empty() || static_cast<size_t>(str_len) != str.length())
 			return {};
 
 		std::wstring s;
-		const auto len = ::MultiByteToWideChar(65001, 0, str.data(), static_cast<int>(str.length()), nullptr, 0);
+		const auto len = ::MultiByteToWideChar(utf8_code_page, 0, str.data(), str_len, nullptr, 0);
 		if (len)
 		{
 			s.resize(static_cast<size_t>(len));
-			::MultiByteToWideChar(65001, 0, str.data(), static_cast<int>(str.length()), s.data(), len);
+			::MultiByteToWideChar(utf8_code_page, 0, str.data(), str_len, s.data(), len);
 		}
 		return s;
 	}

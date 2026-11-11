@@ -2,7 +2,7 @@ default_language_version:
     python: python3
     node: lts
 
-exclude: ^(vendor/|toml[.]hpp$|tests/conformance_|docs/images/)
+exclude: ^(vendor/|toml[.]hpp$|docs/images/)
 
 repos:
     - repo: https://github.com/pre-commit/pre-commit-hooks

@@ -14,16 +14,16 @@ int main(int argc, char** argv)
 {
 	const auto path = argc > 1 ? std::string_view{ argv[1] } : ""sv;
 
-	toml::table table;
+	toml::table tbl;
 	try
 	{
 		// read directly from stdin
 		if (path == "-"sv || path.empty())
-			table = toml::parse(std::cin, "stdin"sv);
+			tbl = toml::parse(std::cin, "stdin"sv);
 
 		// read from a file
 		else
-			table = toml::parse_file(argv[1]);
+			tbl = toml::parse_file(path);
 	}
 	catch (const toml::parse_error& err)
 	{
@@ -31,6 +31,6 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	std::cout << toml::json_formatter{ table } << "\n";
+	std::cout << toml::json_formatter{ tbl } << "\n";
 	return 0;
 }

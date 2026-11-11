@@ -598,6 +598,27 @@ TEST_CASE("path - appending or prepending a path to itself")
 	}
 }
 
+TEST_CASE("path - assigning or appending one of the path's own keys")
+{
+	SECTION("assigning a key too long for the small-string buffer")
+	{
+		toml::path p{ "a_key_that_is_too_long_for_any_small_string_buffer.second" };
+		p = p[0].key();
+		CHECK(p.str() == "a_key_that_is_too_long_for_any_small_string_buffer");
+	}
+
+	SECTION("appending a short key that reallocates the components")
+	{
+		toml::path p{ "a" };
+		p[0] = "x.y"sv;
+		p += p[0].key();
+		REQUIRE(p.size() == 3u);
+		CHECK(p[0].key() == "x.y");
+		CHECK(p[1].key() == "x");
+		CHECK(p[2].key() == "y");
+	}
+}
+
 TEST_CASE("path - element access")
 {
 	SECTION("const subscript")
@@ -756,6 +777,18 @@ TEST_CASE("path - component copying and moving")
 	}
 }
 
+TEST_CASE("path - copy-assigning a component to itself")
+{
+	const auto source = GENERATE(path_component{ "kek"sv },
+								 path_component{ "a key too long for the small-string buffer"sv },
+								 path_component{ 42_sz });
+
+	path_component pc{ source };
+	const auto& self = pc;
+	pc				 = self;
+	CHECK(pc == source);
+}
+
 TEST_CASE("path - component assignment from an index or a key")
 {
 	SECTION("index over a key")
@@ -789,6 +822,26 @@ TEST_CASE("path - component assignment from an index or a key")
 		CHECK(pc.type() == path_component_type::key);
 		CHECK(pc.key() == "kek");
 	}
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+	SECTION("wide key over an index")
+	{
+		path_component pc{ 7_sz };
+		CHECK(&(pc = L"kek"sv) == &pc);
+		CHECK(pc.type() == path_component_type::key);
+		CHECK(pc.key() == "kek");
+	}
+
+	SECTION("wide key over a key")
+	{
+		path_component pc{ "foo"sv };
+		pc = L"kek"sv;
+		CHECK(pc.type() == path_component_type::key);
+		CHECK(pc.key() == "kek");
+	}
+
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 }
 
 TEST_CASE("path - accessing")

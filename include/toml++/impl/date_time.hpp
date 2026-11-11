@@ -16,19 +16,46 @@ TOML_IMPL_NAMESPACE_START
 	TOML_NODISCARD
 	constexpr optional<ToDuration> duration_cast_checked(FromDuration value) noexcept
 	{
-		using to_rep				  = typename ToDuration::rep;
-		const long double seconds	  = static_cast<long double>(value.count())
-									  * static_cast<long double>(FromDuration::period::num)
-									  / static_cast<long double>(FromDuration::period::den);
-		const long double min_seconds = static_cast<long double>((std::numeric_limits<to_rep>::lowest)())
-									  * static_cast<long double>(ToDuration::period::num)
-									  / static_cast<long double>(ToDuration::period::den);
-		const long double max_seconds = static_cast<long double>((std::numeric_limits<to_rep>::max)())
-									  * static_cast<long double>(ToDuration::period::num)
-									  / static_cast<long double>(ToDuration::period::den);
-		if (seconds < min_seconds || seconds > max_seconds)
-			return {};
-		return std::chrono::duration_cast<ToDuration>(value);
+		using to_rep = typename ToDuration::rep;
+		static_assert(std::is_integral_v<typename FromDuration::rep>);
+
+		if constexpr (!std::is_integral_v<to_rep>)
+			return std::chrono::duration_cast<ToDuration>(value);
+		else
+		{
+			using ratio		 = std::ratio_divide<typename FromDuration::period, typename ToDuration::period>;
+			using to_limits	 = std::numeric_limits<to_rep>;
+			using max_limits = std::numeric_limits<std::intmax_t>;
+			static_assert(ratio::num <= (max_limits::max)() / ratio::den,
+						  "the periods of the two durations are too far apart to convert between");
+
+			// the result is count * num / den, worked out in intmax_t without overflowing it
+			constexpr bool wide = sizeof(to_rep) >= sizeof(std::intmax_t);
+			constexpr std::intmax_t highest =
+				wide ? (max_limits::max)() : static_cast<std::intmax_t>((to_limits::max)());
+			constexpr std::intmax_t lowest = !to_limits::is_signed ? std::intmax_t{}
+										   : wide				   ? (max_limits::lowest)()
+																   : static_cast<std::intmax_t>((to_limits::lowest)());
+
+			const auto count = static_cast<std::intmax_t>(value.count());
+			const auto whole = count / ratio::den;
+			if (whole > highest / ratio::num || whole < lowest / ratio::num)
+				return {};
+
+			const auto scaled	 = whole * ratio::num;
+			const auto remainder = (count % ratio::den) * ratio::num / ratio::den;
+			if ((remainder > 0 && remainder > highest - scaled) || (remainder < 0 && remainder < lowest - scaled))
+				return {};
+
+			return ToDuration{ static_cast<to_rep>(scaled + remainder) };
+		}
+	}
+
+	TOML_CONST_GETTER
+	constexpr auto time_of_day(uint8_t hour, uint8_t minute, uint8_t second, uint32_t nanosecond) noexcept
+	{
+		return std::chrono::hours{ hour } + std::chrono::minutes{ minute } + std::chrono::seconds{ second }
+			 + std::chrono::nanoseconds{ nanosecond };
 	}
 }
 TOML_IMPL_NAMESPACE_END;
@@ -66,6 +93,8 @@ TOML_NAMESPACE_START
 
 #if TOML_DOXYGEN || TOML_ENABLE_CHRONO
 		/// \brief Constructs a date from a year_month_day value.
+		///
+		/// \attention The year is stored as a `uint16_t`, so a year outside 0 to 65535 wraps.
 		TOML_NODISCARD_CTOR
 		constexpr date(std::chrono::year_month_day value) noexcept
 			: year{ static_cast<uint16_t>(static_cast<int>(value.year())) },
@@ -74,6 +103,8 @@ TOML_NAMESPACE_START
 		{}
 
 		/// \brief Constructs a date from year/month/day values.
+		///
+		/// \attention The year is stored as a `uint16_t`, so a year outside 0 to 65535 wraps.
 		TOML_NODISCARD_CTOR
 		constexpr date(std::chrono::year y, std::chrono::month m, std::chrono::day d) noexcept
 			: date{ std::chrono::year_month_day{ y, m, d } }
@@ -82,7 +113,7 @@ TOML_NAMESPACE_START
 
 		/// \brief	Equality operator.
 		TOML_PURE_GETTER
-		friend constexpr bool operator==(const date& lhs, const date& rhs) noexcept
+		friend constexpr bool operator==(date lhs, date rhs) noexcept
 		{
 			return lhs.year == rhs.year	  //
 				&& lhs.month == rhs.month //
@@ -91,7 +122,7 @@ TOML_NAMESPACE_START
 
 		/// \brief	Inequality operator.
 		TOML_PURE_INLINE_GETTER
-		friend constexpr bool operator!=(const date& lhs, const date& rhs) noexcept
+		friend constexpr bool operator!=(date lhs, date rhs) noexcept
 		{
 			return !(lhs == rhs);
 		}
@@ -100,7 +131,7 @@ TOML_NAMESPACE_START
 		/// \cond
 
 		TOML_PURE_GETTER
-		static constexpr uint32_t pack(const date& d) noexcept
+		static constexpr uint32_t pack(date d) noexcept
 		{
 			return (static_cast<uint32_t>(d.year) << 16) | (static_cast<uint32_t>(d.month) << 8)
 				 | static_cast<uint32_t>(d.day);
@@ -111,28 +142,28 @@ TOML_NAMESPACE_START
 	  public:
 		/// \brief	Less-than operator.
 		TOML_PURE_GETTER
-		friend constexpr bool operator<(const date& lhs, const date& rhs) noexcept
+		friend constexpr bool operator<(date lhs, date rhs) noexcept
 		{
 			return pack(lhs) < pack(rhs);
 		}
 
 		/// \brief	Less-than-or-equal-to operator.
 		TOML_PURE_GETTER
-		friend constexpr bool operator<=(const date& lhs, const date& rhs) noexcept
+		friend constexpr bool operator<=(date lhs, date rhs) noexcept
 		{
 			return pack(lhs) <= pack(rhs);
 		}
 
 		/// \brief	Greater-than operator.
 		TOML_PURE_GETTER
-		friend constexpr bool operator>(const date& lhs, const date& rhs) noexcept
+		friend constexpr bool operator>(date lhs, date rhs) noexcept
 		{
 			return pack(lhs) > pack(rhs);
 		}
 
 		/// \brief	Greater-than-or-equal-to operator.
 		TOML_PURE_GETTER
-		friend constexpr bool operator>=(const date& lhs, const date& rhs) noexcept
+		friend constexpr bool operator>=(date lhs, date rhs) noexcept
 		{
 			return pack(lhs) >= pack(rhs);
 		}
@@ -202,6 +233,8 @@ TOML_NAMESPACE_START
 
 #if TOML_DOXYGEN || TOML_ENABLE_CHRONO
 		/// \brief Constructs a time from a hh_mm_ss value.
+		///
+		/// \attention The value is taken as a time of day: its sign is dropped, and hours above 255 wrap.
 		template <typename Duration>
 		TOML_NODISCARD_CTOR
 		constexpr time(std::chrono::hh_mm_ss<Duration> value) noexcept
@@ -215,7 +248,7 @@ TOML_NAMESPACE_START
 
 		/// \brief	Equality operator.
 		TOML_PURE_GETTER
-		friend constexpr bool operator==(const time& lhs, const time& rhs) noexcept
+		friend constexpr bool operator==(time lhs, time rhs) noexcept
 		{
 			return lhs.hour == rhs.hour		//
 				&& lhs.minute == rhs.minute //
@@ -225,7 +258,7 @@ TOML_NAMESPACE_START
 
 		/// \brief	Inequality operator.
 		TOML_PURE_INLINE_GETTER
-		friend constexpr bool operator!=(const time& lhs, const time& rhs) noexcept
+		friend constexpr bool operator!=(time lhs, time rhs) noexcept
 		{
 			return !(lhs == rhs);
 		}
@@ -234,10 +267,10 @@ TOML_NAMESPACE_START
 		/// \cond
 
 		TOML_PURE_GETTER
-		static constexpr uint64_t pack(const time& t) noexcept
+		static constexpr uint64_t pack(time t) noexcept
 		{
-			return static_cast<uint64_t>(t.hour) << 48 | static_cast<uint64_t>(t.minute) << 40
-				 | static_cast<uint64_t>(t.second) << 32 | static_cast<uint64_t>(t.nanosecond);
+			return (static_cast<uint64_t>(t.hour) << 48) | (static_cast<uint64_t>(t.minute) << 40)
+				 | (static_cast<uint64_t>(t.second) << 32) | static_cast<uint64_t>(t.nanosecond);
 		}
 
 		/// \endcond
@@ -245,28 +278,28 @@ TOML_NAMESPACE_START
 	  public:
 		/// \brief	Less-than operator.
 		TOML_PURE_GETTER
-		friend constexpr bool operator<(const time& lhs, const time& rhs) noexcept
+		friend constexpr bool operator<(time lhs, time rhs) noexcept
 		{
 			return pack(lhs) < pack(rhs);
 		}
 
 		/// \brief	Less-than-or-equal-to operator.
 		TOML_PURE_GETTER
-		friend constexpr bool operator<=(const time& lhs, const time& rhs) noexcept
+		friend constexpr bool operator<=(time lhs, time rhs) noexcept
 		{
 			return pack(lhs) <= pack(rhs);
 		}
 
 		/// \brief	Greater-than operator.
 		TOML_PURE_GETTER
-		friend constexpr bool operator>(const time& lhs, const time& rhs) noexcept
+		friend constexpr bool operator>(time lhs, time rhs) noexcept
 		{
 			return pack(lhs) > pack(rhs);
 		}
 
 		/// \brief	Greater-than-or-equal-to operator.
 		TOML_PURE_GETTER
-		friend constexpr bool operator>=(const time& lhs, const time& rhs) noexcept
+		friend constexpr bool operator>=(time lhs, time rhs) noexcept
 		{
 			return pack(lhs) >= pack(rhs);
 		}
@@ -281,15 +314,14 @@ TOML_NAMESPACE_START
 		TOML_PURE_GETTER
 		constexpr optional<std::chrono::hh_mm_ss<Duration>> to_chrono() const noexcept
 		{
-			const auto duration = std::chrono::hours{ hour } + std::chrono::minutes{ minute }
-								+ std::chrono::seconds{ second } + std::chrono::nanoseconds{ nanosecond };
-			if (auto value = impl::duration_cast_checked<Duration>(duration))
+			if (auto value = impl::duration_cast_checked<Duration>(impl::time_of_day(hour, minute, second, nanosecond)))
 				return std::chrono::hh_mm_ss<Duration>{ *value };
 			return {};
 		}
 #endif
 
-		/// \brief	Prints a time out to a stream as `HH:MM:SS.FFFFFF` (per RFC 3339).
+		/// \brief	Prints a time out to a stream as `HH:MM:SS` (per RFC 3339), followed by a fraction of up to
+		/// 		nine digits when the nanoseconds are not zero.
 		/// \detail \cpp
 		/// std::cout << toml::time{ 10, 20, 34 } << "\n";
 		/// std::cout << toml::time{ 10, 20, 34, 500000000 } << "\n";
@@ -353,6 +385,8 @@ TOML_NAMESPACE_START
 		///
 		/// \param 	h  	The total hours.
 		/// \param 	m	The total minutes.
+		///
+		/// \attention The offset is stored as an `int16_t` of minutes, so a total outside -32768 to 32767 wraps.
 		TOML_NODISCARD_CTOR
 		constexpr time_offset(std::chrono::hours h, std::chrono::minutes m) noexcept //
 			: time_offset{ h + m }
@@ -361,6 +395,8 @@ TOML_NAMESPACE_START
 		/// \brief Constructs a time_offset from a minutes value.
 		///
 		/// \param 	m	The total minutes.
+		///
+		/// \attention The offset is stored as an `int16_t` of minutes, so a total outside -32768 to 32767 wraps.
 		TOML_NODISCARD_CTOR
 		constexpr time_offset(std::chrono::minutes m) noexcept : minutes{ static_cast<int16_t>(m.count()) }
 		{}
@@ -417,7 +453,8 @@ TOML_NAMESPACE_START
 		}
 #endif
 
-		/// \brief	Prints a time_offset out to a stream as `+-HH:MM or Z` (per RFC 3339).
+		/// \brief	Prints a time_offset out to a stream as `+HH:MM` or `-HH:MM`, or as `Z` when it is zero
+		/// 		(per RFC 3339).
 		/// \detail \cpp
 		/// std::cout << toml::time_offset{ 2, 30 } << "\n";
 		/// std::cout << toml::time_offset{ 2, -30 } << "\n";
@@ -465,7 +502,7 @@ TOML_NAMESPACE_START
 		/// \param 	d	The date component.
 		/// \param 	t	The time component.
 		TOML_NODISCARD_CTOR
-		constexpr date_time(const toml::date& d, const toml::time& t) noexcept //
+		constexpr date_time(toml::date d, toml::time t) noexcept //
 			: date{ d },
 			  time{ t },
 			  offset{} // TINAE - icc bugfix
@@ -475,7 +512,7 @@ TOML_NAMESPACE_START
 		///
 		/// \param 	d	The date component.
 		TOML_NODISCARD_CTOR
-		explicit constexpr date_time(const toml::date& d) noexcept //
+		explicit constexpr date_time(toml::date d) noexcept //
 			: date{ d },
 			  time{},
 			  offset{} // TINAE - icc bugfix
@@ -485,7 +522,7 @@ TOML_NAMESPACE_START
 		///
 		/// \param 	t	The time component.
 		TOML_NODISCARD_CTOR
-		explicit constexpr date_time(const toml::time& t) noexcept //
+		explicit constexpr date_time(toml::time t) noexcept //
 			: date{},
 			  time{ t },
 			  offset{} // TINAE - icc bugfix
@@ -497,7 +534,7 @@ TOML_NAMESPACE_START
 		/// \param 	t	  	The time component.
 		/// \param 	off	The timezone offset.
 		TOML_NODISCARD_CTOR
-		constexpr date_time(const toml::date& d, const toml::time& t, const toml::time_offset& off) noexcept
+		constexpr date_time(toml::date d, toml::time t, toml::time_offset off) noexcept
 			: date{ d },
 			  time{ t },
 			  offset{ off }
@@ -627,10 +664,9 @@ TOML_NAMESPACE_START
 		TOML_PURE_GETTER
 		constexpr optional<std::chrono::local_time<Duration>> to_chrono() const noexcept
 		{
-			const auto days			= std::chrono::local_days{ date.to_chrono() }.time_since_epoch();
-			const auto time_value	= std::chrono::hours{ time.hour } + std::chrono::minutes{ time.minute }
-									+ std::chrono::seconds{ time.second } + std::chrono::nanoseconds{ time.nanosecond };
-			const auto day_duration = impl::duration_cast_checked<Duration>(days);
+			const auto days			 = std::chrono::local_days{ date.to_chrono() }.time_since_epoch();
+			const auto time_value	 = impl::time_of_day(time.hour, time.minute, time.second, time.nanosecond);
+			const auto day_duration	 = impl::duration_cast_checked<Duration>(days);
 			const auto time_duration = impl::duration_cast_checked<Duration>(time_value);
 			if (!day_duration || !time_duration
 				|| day_duration->count()

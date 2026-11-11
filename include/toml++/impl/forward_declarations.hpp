@@ -181,6 +181,13 @@ TOML_IMPL_NAMESPACE_START
 	};
 
 	// clang-format on
+
+	template <typename T>
+	TOML_CONST_INLINE_GETTER
+	constexpr std::underlying_type_t<T> unwrap_enum(T val) noexcept
+	{
+		return static_cast<std::underlying_type_t<T>>(val);
+	}
 }
 TOML_IMPL_NAMESPACE_END;
 
@@ -248,7 +255,7 @@ TOML_NAMESPACE_START // abi namespace
 	///
 	/// \detail \cpp
 	/// auto arr = toml::array{ 1, 2.0, "3", false };
-	/// for (size_t i = 0; i < arr.size() i++)
+	/// for (size_t i = 0; i < arr.size(); i++)
 	/// 	std::cout << "Element ["sv << i << "] is: "sv << arr[i].type() << "\n";
 	/// \ecpp
 	///
@@ -261,7 +268,7 @@ TOML_NAMESPACE_START // abi namespace
 	template <typename Char>
 	inline std::basic_ostream<Char>& operator<<(std::basic_ostream<Char>& lhs, node_type rhs)
 	{
-		const auto str	 = impl::node_type_friendly_names[static_cast<std::underlying_type_t<node_type>>(rhs)];
+		const auto str	 = impl::node_type_friendly_names[impl::unwrap_enum(rhs)];
 		using str_char_t = decltype(str)::value_type;
 		if constexpr (std::is_same_v<Char, str_char_t>)
 			return lhs << str;
@@ -275,6 +282,9 @@ TOML_NAMESPACE_START // abi namespace
 	}
 
 	/// \brief Metadata associated with TOML values.
+	///
+	/// \note	The three integer formats are mutually exclusive, and #format_as_hexadecimal has the bits of the
+	///			other two. To test for one, mask the flags with #format_as_hexadecimal and compare with `==`.
 	enum class TOML_OPEN_FLAGS_ENUM value_flags : uint16_t // being an "OPEN" flags enum is not an error
 	{
 		/// \brief None.
@@ -353,8 +363,15 @@ TOML_NAMESPACE_START // abi namespace
 		/// \brief Avoids the use of whitespace around key-value pairs.
 		terse_key_value_pairs = (1ull << 12),
 
-		/// \brief Always print multiline arrays (one element per line).
-		force_multiline_arrays = (1ull << 13),
+		/// \brief Print every non-empty array with one element per line.
+		///
+		/// \remarks Only #toml::toml_formatter uses this flag.
+		force_multi_line_arrays = (1ull << 13),
+
+		/// \cond
+		// the flag's first spelling; removed in v4
+		force_multiline_arrays = force_multi_line_arrays,
+		/// \endcond
 	};
 	TOML_MAKE_FLAGS(format_flags);
 
@@ -364,8 +381,8 @@ TOML_NAMESPACE_START // abi namespace
 	/// // desired result: [ [ 42 ] ]
 	/// auto bad = toml::array{ toml::array{ 42 } };
 	/// auto good = toml::array{ toml::inserter{ toml::array{ 42 } } };
-	/// std::cout << "bad: " << bad << "\n";
-	/// std::cout << "good:" << good << "\n";
+	/// std::cout << "bad:  " << bad << "\n";
+	/// std::cout << "good: " << good << "\n";
 	/// \ecpp
 	/// \out
 	/// bad:  [ 42 ]
@@ -489,8 +506,7 @@ TOML_IMPL_NAMESPACE_START
 			 : (std::is_constructible_v<remove_cvref<T>, const char*, size_t>
 					? std::is_nothrow_constructible_v<remove_cvref<T>, const char*, size_t>
 					: std::is_nothrow_constructible_v<remove_cvref<T>, const std::string&>))
-		&& (std::is_nothrow_move_constructible_v<remove_cvref<T>>
-			|| std::is_nothrow_copy_constructible_v<remove_cvref<T>>);
+		&& std::is_nothrow_move_constructible_v<remove_cvref<T>>;
 
 	template <typename T>
 	inline constexpr bool value_retrieval_is_nothrow =
@@ -659,7 +675,6 @@ TOML_IMPL_NAMESPACE_START
 	template <typename T>
 	struct signed_integer_traits : integer_traits_base<T>
 	{
-		using native_type = int64_t;
 		static constexpr bool is_losslessly_convertible_to_native =
 			integer_limits<underlying_type<T>>::min >= (-9223372036854775807LL - 1LL)
 			&& integer_limits<underlying_type<T>>::max <= 9223372036854775807LL;
@@ -777,13 +792,13 @@ TOML_IMPL_NAMESPACE_START
 	struct float_limits
 	{
 		TOML_NODISCARD
-		static T lowest()
+		static constexpr T lowest() noexcept
 		{
 			return (std::numeric_limits<T>::lowest)();
 		}
 
 		TOML_NODISCARD
-		static T highest()
+		static constexpr T highest() noexcept
 		{
 			return (std::numeric_limits<T>::max)();
 		}
@@ -1109,6 +1124,9 @@ TOML_IMPL_NAMESPACE_START
 	template <typename T>
 	using unwrap_node = typename node_unwrapper<std::remove_reference_t<T>>::type;
 
+	template <typename T, typename Container>
+	using for_each_ref = copy_cvref<wrap_node<remove_cvref<unwrap_node<T>>>, Container>;
+
 	template <typename T>
 	struct node_type_getter
 	{
@@ -1135,6 +1153,23 @@ TOML_IMPL_NAMESPACE_START
 	template <typename T, typename ConvertFrom>
 	inline constexpr bool is_constructible_or_convertible = std::is_constructible_v<T, ConvertFrom> //
 														 || std::is_convertible_v<ConvertFrom, T>;
+
+	// calls a for_each() visitor; false means it returned something that converts to false, to stop the loop
+	template <typename Func, typename... Args>
+	TOML_NODISCARD
+	TOML_ALWAYS_INLINE
+	bool for_each_keep_going(Func && visitor, Args && ... args) noexcept(std::is_nothrow_invocable_v<Func&&, Args&&...>)
+	{
+		using return_type = decltype(static_cast<Func&&>(visitor)(static_cast<Args&&>(args)...));
+
+		if constexpr (is_constructible_or_convertible<bool, return_type>)
+			return static_cast<bool>(static_cast<Func&&>(visitor)(static_cast<Args&&>(args)...));
+		else
+		{
+			static_cast<Func&&>(visitor)(static_cast<Args&&>(args)...);
+			return true;
+		}
+	}
 }
 TOML_IMPL_NAMESPACE_END;
 /// \endcond
@@ -1218,21 +1253,35 @@ TOML_NAMESPACE_START
 
 	/// \brief	Metafunction for determining if a type is a user-defined 'string-like' type.
 	///
-	/// \detail User-defined string types are detected automatically and may be used anywhere the library
-	/// 		expects a string - as an initializer for TOML string values, and as a target type for
-	/// 		node::value(), node::value_or() and friends: \cpp
+	/// \detail User-defined string types are detected automatically. One may be used as an initializer for
+	/// 		TOML string values, as a target type for node::value(), node::value_or() and friends, and in
+	/// 		comparisons with a node_view or an array: \cpp
 	/// tbl.insert("hostname", foo::String{ "localhost" });
 	/// auto hostname = tbl["hostname"].value<foo::String>();
 	/// \ecpp
+	///
+	/// 		Table keys, path strings and the documents given to toml::parse() take the standard string
+	/// 		types only.
 	///
 	/// 		A type is detected as string-like when it has:
 	/// 		 - a const-qualified `data()` or `c_str()` member returning (something convertible to) `const char*`, and
 	/// 		 - a const-qualified `length()` member returning (something convertible to) `size_t`.
 	///
+	/// 		`std::string` and `std::string_view` are not detected, because the library handles them itself.
+	/// 		Neither is a type that is not a class, such as `const char*`, nor one whose characters are not
+	/// 		`char`, such as `std::wstring`.
+	///
 	/// 		Being detected is sufficient to use a type as an initializer; to also be usable as a
 	/// 		retrieval target it must additionally be constructible from one of `std::string_view`,
 	/// 		`(const char*, size_t)` or `const std::string&`. Attempting to retrieve a value as a
 	/// 		string-like type without a suitable constructor is a compile error.
+	///
+	/// 		A string-like initializer is converted as `std::string{ str }` would be where that compiles,
+	/// 		unless it would go through a conversion to `const char*`. Otherwise its text is read from
+	/// 		`data()` (or `c_str()`) and `length()`, which keeps embedded NULs.
+	///
+	/// 		toml::key is detected as string-like too, so a key can initialize a string value and be the
+	/// 		target of a retrieval. Only the key's text is copied; its source region is not.
 	///
 	/// \note	TOML string values are always stored internally as std::string; detection governs conversions
 	/// 		at the API boundary only, not the underlying storage, so retrieving a value as a user-defined
@@ -1248,13 +1297,6 @@ TOML_NAMESPACE_END;
 /// \cond
 TOML_IMPL_NAMESPACE_START
 {
-	template <typename T>
-	TOML_CONST_INLINE_GETTER
-	constexpr std::underlying_type_t<T> unwrap_enum(T val) noexcept
-	{
-		return static_cast<std::underlying_type_t<T>>(val);
-	}
-
 	// Q: "why not use std::fpclassify?"
 	// A: Because it gets broken by -ffast-math and friends
 	enum class TOML_CLOSED_ENUM fp_class : unsigned
@@ -1265,6 +1307,7 @@ TOML_IMPL_NAMESPACE_START
 		nan
 	};
 
+	// by reference on purpose: a by-value copy has lost its inf/nan bits under fast-math on some compilers
 	TOML_PURE_GETTER
 	inline fp_class fpclassify(const double& val) noexcept
 	{
@@ -1291,18 +1334,6 @@ TOML_IMPL_NAMESPACE_START
 		return __builtin_ldexp(x, exp);
 	}
 
-	TOML_CONST_INLINE_GETTER
-	double log10(double x) noexcept
-	{
-		return __builtin_log10(x);
-	}
-
-	TOML_CONST_INLINE_GETTER
-	double fabs(double x) noexcept
-	{
-		return __builtin_fabs(x);
-	}
-
 	template <typename T>
 	TOML_CONST_INLINE_GETTER
 	bool signbit(T x) noexcept
@@ -1310,9 +1341,7 @@ TOML_IMPL_NAMESPACE_START
 		return __builtin_signbit(x);
 	}
 #else
-	using std::fabs;
 	using std::ldexp;
-	using std::log10;
 	using std::signbit;
 #endif
 

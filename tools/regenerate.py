@@ -26,13 +26,15 @@ PUBLIC_MACROS = (
     r'TOML_CONCAT_1',
     r'TOML_CONFIG_HEADER',
     r'TOML_CUDA',
+    r'TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA',
+    r'TOML_DISABLE_NOEXCEPT_NOEXCEPT',
     r'TOML_ENABLE_CHRONO',
+    r'TOML_ENABLE_FLOAT16',
     r'TOML_ENABLE_FORMATTERS',
     r'TOML_ENABLE_PARSER',
     r'TOML_ENABLE_SIMD',
     r'TOML_ENABLE_UNRELEASED_FEATURES',
     r'TOML_ENABLE_WINDOWS_COMPAT',
-    r'TOML_ENABLE_FLOAT16',
     r'TOML_EXCEPTIONS',
     r'TOML_EXPORTED_CLASS',
     r'TOML_EXPORTED_FREE_FUNCTION',
@@ -52,14 +54,12 @@ PUBLIC_MACROS = (
     r'TOML_NAMESPACE_END',
     r'TOML_NAMESPACE_START',
     r'TOML_OPTIONAL_TYPE',
+    r'TOML_SHARED_LIB',
     r'TOML_SMALL_FLOAT_TYPE',
     r'TOML_SMALL_INT_TYPE',
     r'TOML_UNDEF_MACROS',
     r'TOMLPLUSPLUS_H',
     r'TOMLPLUSPLUS_HPP',
-    r'TOML_SHARED_LIB',
-    r'TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA',
-    r'TOML_DISABLE_NOEXCEPT_NOEXCEPT',
 )
 
 
@@ -76,24 +76,20 @@ def write_text_file(path, text):
     os.replace(temp, path)
 
 
-def repeat_pattern(pattern, count):
-    if len(pattern) == 1:
-        return pattern * count
-    text = ''
-    for i in range(0, count):
-        text = text + pattern[i % len(pattern)]
-    return text
+def is_ascii(text):
+    try:
+        text.encode('ascii')
+    except UnicodeEncodeError:
+        return False
+    return True
 
 
-def make_divider(text=None, text_col=40, pattern='-', line_length=120):
+def make_divider(text=None):
+    line_length = 120
     if text is None:
-        return "//" + repeat_pattern(pattern, line_length - 2)
-    else:
-        text = f"//{repeat_pattern(pattern, text_col - 2)}  {text}  "
-        if len(text) < line_length:
-            return text + repeat_pattern(pattern, line_length - len(text))
-        else:
-            return text
+        return '//' + '-' * (line_length - 2)
+    text = f'//********  {text}  '
+    return text + '*' * (line_length - len(text))
 
 
 class Preprocessor:
@@ -102,51 +98,56 @@ class Preprocessor:
 
     def __init__(self, file, read_file):
         self.__read_file = read_file
-        self.__processed_files = set()
         self.__once_only = set()
         self.__directory_stack = [Path.cwd()]
         self.__include_stack = []
-        self.__entry_root = ''
+        self.__entry_root = None
         self.__string = self.__preprocess(file)
+
+    def __relative_to_entry_root(self, path):
+        try:
+            path = path.relative_to(self.__entry_root)
+        except ValueError:
+            pass
+        return path.as_posix()
 
     def __preprocess(self, incl):
 
         if not isinstance(incl, (Path, str)):  # a regex match object
             incl = incl.group(1).strip()
         if isinstance(incl, str):
-            incl = Path(incl.strip().replace('\\', r'/'))
+            incl = Path(incl.strip())
         if not incl.is_absolute():
             incl = Path(self.__directory_stack[-1], incl).resolve()
-        self.__processed_files.add(incl)
         if incl in self.__once_only:
             return ''
         self.__include_stack.append(incl)
 
-        text = self.__read_file(incl).strip() + '\n'
-        text = text.replace('\r\n', '\n')  # convert windows newlines
+        text = self.__read_file(incl).replace('\r\n', '\n')
+        non_ascii_line = next((number for number, line in enumerate(text.split('\n'), 1) if not is_ascii(line)), None)
+        if non_ascii_line is not None:
+            sys.exit(
+                rf'error: {incl.relative_to(ROOT).as_posix()}:{non_ascii_line}: non-ASCII character; '
+                r'write it as an escape, because not every compiler reads the source as UTF-8'
+            )
+        text = text.strip() + '\n'
 
         self.__directory_stack.append(incl.parent)
         if self.__re_pragma_once.search(text):
             self.__once_only.add(incl)
-        if len(self.__include_stack) == 1 and self.__entry_root == '':
-            self.__entry_root = str(incl.parent).replace('\\', r'/')
+        if self.__entry_root is None:
+            self.__entry_root = incl.parent
         if len(self.__include_stack) > 1:
             text = self.__re_pragma_once.sub('', text)
 
         text = self.__re_includes.sub(lambda m: self.__preprocess(m), text, 0)
 
-        incl_normalized = str(incl).replace('\\', r'/')
-        if incl_normalized.startswith(self.__entry_root):
-            incl_normalized = incl_normalized[len(self.__entry_root) :].strip('/')
-
-        if len(self.__include_stack) > 1 and incl_normalized not in (r'impl/header_start.hpp', r'impl/header_end.hpp'):
-            header = make_divider(incl_normalized, 10, pattern=r'*')
+        name = self.__relative_to_entry_root(incl)
+        if len(self.__include_stack) > 1 and name not in (r'impl/header_start.hpp', r'impl/header_end.hpp'):
+            header = make_divider(name)
             footer = ''
             if len(self.__include_stack) > 2:
-                footer = str(self.__include_stack[-2]).replace('\\', r'/')
-                if footer.startswith(self.__entry_root):
-                    footer = footer[len(self.__entry_root) :].strip('/')
-                footer = make_divider(footer, 10, pattern=r'*')
+                footer = make_divider(self.__relative_to_entry_root(self.__include_stack[-2]))
 
             text = f'\n\n{header}\n\n{text}\n\n{footer}'.rstrip()
 
@@ -157,11 +158,6 @@ class Preprocessor:
     def __str__(self):
         return self.__string
 
-    def processed_files(self):
-        out = list(self.__processed_files)
-        out.sort()
-        return out
-
 
 def generate_single_header(version, read_file):
 
@@ -169,43 +165,42 @@ def generate_single_header(version, read_file):
     toml_h = str(Preprocessor(ROOT / 'include' / 'toml++' / 'toml.hpp', read_file))
 
     # strip various things:
-    if 1:
-        for i in range(3):
-            # trailing whitespace
-            toml_h = re.sub('([^ \t])[ \t]+\n', r'\1\n', toml_h)
-            # explicit 'strip this' blocks
-            toml_h = re.sub(r'(?:\n[ \t]*)?//[#!][ \t]*[{][{].*?//[#!][ \t]*[}][}].*?\n', '\n', toml_h, flags=re.S)
-            # spdx license identifiers
-            toml_h = re.sub(r'^\s*//\s*SPDX-License-Identifier:.+?$', '', toml_h, flags=re.I | re.M)
-            # double blank lines
-            toml_h = re.sub('\n(?:[ \t]*\n[ \t]*)+\n', '\n\n', toml_h)
-            # magic comments
-            blank_line = r'(?:[ \t]*\n)'
-            comment_line = r'(?:[ \t]*//(?:[/#!<]| ?(?:---|===|\^\^\^|vvv))[^\n]*\n)'
-            toml_h = re.sub(rf'\n{comment_line}{blank_line}+{comment_line}', '\n', toml_h)
-            toml_h = re.sub(rf'([{{,])\s*\n(?:{comment_line}|{blank_line})+', r'\1\n', toml_h)
-            toml_h = re.sub(rf'{comment_line}+', '\n', toml_h)
-            # consecutive header separators
-            header_separator = r'(?://\*\*\*\**[ \t]+[a-zA-Z0-9_/.-]+[ \t]+\*\*\*\*+\n)'
-            toml_h = re.sub(rf'(?:{header_separator}{blank_line}*)+({header_separator})', r'\1', toml_h)
-            # weird spacing edge case between } and pp directives
-            toml_h = re.sub('\n[}]\n#', r'\n}\n\n#', toml_h)
-            # enable warnings -> disable warnings
-            toml_h = re.sub('(TOML_ENABLE_WARNINGS;)\n[ \t\n]*\n(TOML_DISABLE_WARNINGS;)', r'', toml_h)
-            # blank lines between consecutive TOML_XXXXX_WARNINGS statements
-            toml_h = re.sub('(TOML_[A-Z_]+?_WARNINGS;)\n[ \t\n]*\n(TOML_[A-Z_]+?_WARNINGS;)', r'\1\n\2', toml_h)
-            # blank lines between consecutive #includes
-            toml_h = re.sub(
-                r'[#]\s*include\s*<(.+?)>\n[ \t\n]*\n[#]\s*include\s*<(.+?)>', r'#include <\1>\n#include <\2>', toml_h
-            )
-            # blank lines following opening brackets or a comma
-            toml_h = re.sub(r'([^@][({,])\n\n', r'\1\n', toml_h)
-            # blank lines preceeding closing brackets
-            toml_h = re.sub(r'\n\n([ \t]*[})])', r'\n\1', toml_h)
-            # IWYU pragmas
-            toml_h = re.sub(r'\n// IWYU pragma: [^\n]+\n', '\n', toml_h)
-        # ensure only one trailing newline
-        toml_h = toml_h.strip() + '\n'
+    for i in range(3):
+        # trailing whitespace
+        toml_h = re.sub('([^ \t])[ \t]+\n', r'\1\n', toml_h)
+        # explicit 'strip this' blocks
+        toml_h = re.sub(r'(?:\n[ \t]*)?//[#!][ \t]*[{][{].*?//[#!][ \t]*[}][}].*?\n', '\n', toml_h, flags=re.S)
+        # spdx license identifiers
+        toml_h = re.sub(r'^\s*//\s*SPDX-License-Identifier:.+?$', '', toml_h, flags=re.I | re.M)
+        # double blank lines
+        toml_h = re.sub('\n(?:[ \t]*\n[ \t]*)+\n', '\n\n', toml_h)
+        # magic comments
+        blank_line = r'(?:[ \t]*\n)'
+        comment_line = r'(?:[ \t]*//(?:[/#!<]| ?(?:---|===|\^\^\^|vvv))[^\n]*\n)'
+        toml_h = re.sub(rf'\n{comment_line}{blank_line}+{comment_line}', '\n', toml_h)
+        toml_h = re.sub(rf'([{{,])\s*\n(?:{comment_line}|{blank_line})+', r'\1\n', toml_h)
+        toml_h = re.sub(rf'{comment_line}+', '\n', toml_h)
+        # consecutive header separators
+        header_separator = r'(?://\*\*\*\**[ \t]+[a-zA-Z0-9_/.-]+[ \t]+\*\*\*\*+\n)'
+        toml_h = re.sub(rf'(?:{header_separator}{blank_line}*)+({header_separator})', r'\1', toml_h)
+        # weird spacing edge case between } and pp directives
+        toml_h = re.sub('\n[}]\n#', r'\n}\n\n#', toml_h)
+        # enable warnings -> disable warnings
+        toml_h = re.sub('(TOML_ENABLE_WARNINGS;)\n[ \t\n]*\n(TOML_DISABLE_WARNINGS;)', r'', toml_h)
+        # blank lines between consecutive TOML_XXXXX_WARNINGS statements
+        toml_h = re.sub('(TOML_[A-Z_]+?_WARNINGS;)\n[ \t\n]*\n(TOML_[A-Z_]+?_WARNINGS;)', r'\1\n\2', toml_h)
+        # blank lines between consecutive #includes
+        toml_h = re.sub(
+            r'[#]\s*include\s*<(.+?)>\n[ \t\n]*\n[#]\s*include\s*<(.+?)>', r'#include <\1>\n#include <\2>', toml_h
+        )
+        # blank lines following opening brackets or a comma
+        toml_h = re.sub(r'([^@][({,])\n\n', r'\1\n', toml_h)
+        # blank lines preceding closing brackets
+        toml_h = re.sub(r'\n\n([ \t]*[})])', r'\n\1', toml_h)
+        # IWYU pragmas
+        toml_h = re.sub(r'\n// IWYU pragma: [^\n]+\n', '\n', toml_h)
+    # ensure only one trailing newline
+    toml_h = toml_h.strip() + '\n'
 
     # change TOML_LIB_SINGLE_HEADER to 1
     toml_h = re.sub(
@@ -228,6 +223,7 @@ def generate_single_header(version, read_file):
     preamble.append(r'''
 // TOML Language Specifications:
 // latest:      https://github.com/toml-lang/toml/blob/master/README.md
+// v1.1.0:      https://toml.io/en/v1.1.0
 // v1.0.0:      https://toml.io/en/v1.0.0
 // v0.5.0:      https://toml.io/en/v0.5.0
 // changelog:   https://github.com/toml-lang/toml/blob/master/CHANGELOG.md''')
@@ -237,8 +233,7 @@ def generate_single_header(version, read_file):
     with StringIO(newline='\n') as output:
         # build in a string buffer
         write = lambda txt, end='\n': print(txt, file=output, end=end)
-        if len(preamble) > 0:
-            write(make_divider())
+        write(make_divider())
         for pre in preamble:
             write('//')
             for line in pre.strip().splitlines():
@@ -256,17 +251,20 @@ def generate_single_header(version, read_file):
         return output.getvalue().strip() + '\n'
 
 
-def with_generated_undefs(text, single_header):
+def generate_undefs(single_header):
     defined = dict()
     for match in re.finditer(r'(?m)^\s*#\s*(define|undef)\s+([A-Za-z0-9_]+)', UNDEF_BLOCK.sub('', single_header)):
         defined[match.group(2)] = match.group(1) == r'define'
     names = sorted(
         (n for n, d in defined.items() if d and n not in PUBLIC_MACROS), key=lambda n: n.replace('_', ' ').lower()
     )
-    undefs = ''.join(rf'#undef {name}' + '\n' for name in names)
+    return ''.join(rf'#undef {name}' + '\n' for name in names)
+
+
+def with_undefs(path, text, undefs):
     text, count = UNDEF_BLOCK.subn(lambda m: m.group(1) + undefs + m.group(2), text)
     if count != 1:
-        sys.exit(r'error: include/toml++/toml.hpp: no "#if TOML_UNDEF_MACROS" block of #undefs found')
+        sys.exit(rf'error: {path.relative_to(ROOT).as_posix()}: no "#if TOML_UNDEF_MACROS" block of #undefs found')
     return text
 
 
@@ -278,8 +276,8 @@ def parse_version():
     return (match[1], match[2], match[3])
 
 
-def version_rules(major, minor, patch):
-    version = rf'{major}.{minor}.{patch}'
+def version_rules(version):
+    major, minor, patch = version.split('.')
     snippets = [
         (rf'(?i)(toml(?:plusplus|\+\+|pp)\s*[/:^]\s*){TRIPLET}', rf'\g<1>{version}'),
         (rf'(?i)(GIT_TAG\s+)(?:v\s*)?{TRIPLET}', rf'\g<1>v{version}'),
@@ -323,24 +321,25 @@ def main():
     args = parser.parse_args()
 
     if args.inputs:
-        inputs = [VERSION_FILE, Path(__file__).resolve(), ROOT / 'toml.hpp']
+        inputs = [VERSION_FILE, Path(__file__).resolve(), ROOT / 'toml.hpp', ROOT / 'LICENSE']
         inputs += sorted(path for path in (ROOT / 'include').rglob('*') if path.is_file())
         for path in inputs:
             print(path.relative_to(ROOT).as_posix())
         return 0
 
-    major, minor, patch = parse_version()
-    version = rf'{major}.{minor}.{patch}'
+    version = '.'.join(parse_version())
 
-    outputs = {ROOT / path: apply_rules(path, rules) for path, rules in version_rules(major, minor, patch).items()}
+    outputs = {ROOT / path: apply_rules(path, rules) for path, rules in version_rules(version).items()}
     outputs[ROOT / 'CHANGELOG.md'] = updated_changelog(version)
 
     def read(path):
         return outputs[path] if path in outputs else read_text_file(path)
 
     toml_hpp = ROOT / 'include' / 'toml++' / 'toml.hpp'
-    outputs[toml_hpp] = with_generated_undefs(read(toml_hpp), generate_single_header(version, read))
-    outputs[ROOT / 'toml.hpp'] = generate_single_header(version, read)
+    single_header = generate_single_header(version, read)
+    undefs = generate_undefs(single_header)
+    outputs[toml_hpp] = with_undefs(toml_hpp, read(toml_hpp), undefs)
+    outputs[ROOT / 'toml.hpp'] = with_undefs(ROOT / 'toml.hpp', single_header, undefs)
 
     stale = [path for path, text in outputs.items() if not path.exists() or read_text_file(path) != text]
 

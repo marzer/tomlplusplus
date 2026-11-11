@@ -11,6 +11,18 @@
 #include "parse_result.hpp"
 #include "header_start.hpp"
 
+/// \cond
+TOML_IMPL_NAMESPACE_START
+{
+	TOML_PURE_INLINE_GETTER
+	constexpr std::string_view source_path_or_empty(const char* source_path) noexcept
+	{
+		return source_path ? std::string_view{ source_path } : std::string_view{};
+	}
+}
+TOML_IMPL_NAMESPACE_END;
+/// \endcond
+
 TOML_NAMESPACE_START
 {
 	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex);
@@ -42,7 +54,7 @@ TOML_NAMESPACE_START
 	/// \brief	Parses a TOML document from a string view.
 	///
 	/// \detail \cpp
-	/// auto tbl = toml::parse("a = 3"sv, "foo.toml");
+	/// auto tbl = toml::parse("a = 3"sv, std::string{ "foo.toml" });
 	/// std::cout << tbl["a"] << "\n";
 	/// \ecpp
 	///
@@ -65,6 +77,15 @@ TOML_NAMESPACE_START
 
 	/// \brief	Parses a TOML document from a string view.
 	///
+	/// \detail \cpp
+	/// auto tbl = toml::parse("a = 3"sv, "foo.toml");
+	/// std::cout << tbl["a"] << "\n";
+	/// \ecpp
+	///
+	/// \out
+	/// 3
+	/// \eout
+	///
 	/// \param 	doc				The TOML document to parse. Must be valid UTF-8.
 	/// \param 	source_path		The path used to initialize each node's `source().path`. A null pointer is the same as
 	/// 						an empty path.
@@ -77,7 +98,7 @@ TOML_NAMESPACE_START
 	TOML_ALWAYS_INLINE
 	parse_result parse(std::string_view doc, const char* source_path)
 	{
-		return parse(doc, source_path ? std::string_view{ source_path } : std::string_view{});
+		return parse(doc, impl::source_path_or_empty(source_path));
 	}
 
 	/// \brief	Parses a TOML document from a file.
@@ -89,7 +110,7 @@ TOML_NAMESPACE_START
 	/// }
 	/// \ecpp
 	///
-	/// \param 	file_path		The TOML document to parse. Must be valid UTF-8.
+	/// \param 	file_path		The path of the file to parse. Its contents must be valid UTF-8.
 	///
 	/// \returns	\conditional_return{With exceptions}
 	///				A toml::table.
@@ -128,7 +149,7 @@ TOML_NAMESPACE_START
 	/// \brief	Parses a TOML document from a char8_t string view.
 	///
 	/// \detail \cpp
-	/// auto tbl = toml::parse(u8"a = 3"sv, "foo.toml");
+	/// auto tbl = toml::parse(u8"a = 3"sv, std::string{ "foo.toml" });
 	/// std::cout << tbl["a"] << "\n";
 	/// \ecpp
 	///
@@ -151,6 +172,15 @@ TOML_NAMESPACE_START
 
 	/// \brief	Parses a TOML document from a char8_t string view.
 	///
+	/// \detail \cpp
+	/// auto tbl = toml::parse(u8"a = 3"sv, "foo.toml");
+	/// std::cout << tbl["a"] << "\n";
+	/// \ecpp
+	///
+	/// \out
+	/// 3
+	/// \eout
+	///
 	/// \param 	doc				The TOML document to parse. Must be valid UTF-8.
 	/// \param 	source_path		The path used to initialize each node's `source().path`. A null pointer is the same as
 	/// 						an empty path.
@@ -163,7 +193,7 @@ TOML_NAMESPACE_START
 	TOML_ALWAYS_INLINE
 	parse_result parse(std::u8string_view doc, const char* source_path)
 	{
-		return parse(doc, source_path ? std::string_view{ source_path } : std::string_view{});
+		return parse(doc, impl::source_path_or_empty(source_path));
 	}
 
 	/// \brief	Parses a TOML document from a file.
@@ -175,7 +205,7 @@ TOML_NAMESPACE_START
 	/// }
 	/// \ecpp
 	///
-	/// \param 	file_path		The TOML document to parse. Must be valid UTF-8.
+	/// \param 	file_path		The path of the file to parse. Its contents must be valid UTF-8.
 	///
 	/// \returns	\conditional_return{With exceptions}
 	///				A toml::table.
@@ -223,7 +253,7 @@ TOML_NAMESPACE_START
 	/// std::stringstream ss;
 	/// ss << "a = 3"sv;
 	///
-	/// auto tbl = toml::parse(ss);
+	/// auto tbl = toml::parse(ss, L"foo.toml");
 	/// std::cout << tbl["a"] << "\n";
 	/// \ecpp
 	///
@@ -255,7 +285,7 @@ TOML_NAMESPACE_START
 	/// }
 	/// \ecpp
 	///
-	/// \param 	file_path		The TOML document to parse. Must be valid UTF-8.
+	/// \param 	file_path		The path of the file to parse. Its contents must be valid UTF-8.
 	///
 	/// \returns	\conditional_return{With exceptions}
 	///				A toml::table.
@@ -330,7 +360,7 @@ TOML_NAMESPACE_START
 	/// std::stringstream ss;
 	/// ss << "a = 3"sv;
 	///
-	/// auto tbl = toml::parse(ss, "foo.toml");
+	/// auto tbl = toml::parse(ss, std::string{ "foo.toml" });
 	/// std::cout << tbl["a"] << "\n";
 	/// \ecpp
 	///
@@ -353,6 +383,18 @@ TOML_NAMESPACE_START
 
 	/// \brief	Parses a TOML document from a stream.
 	///
+	/// \detail \cpp
+	/// std::stringstream ss;
+	/// ss << "a = 3"sv;
+	///
+	/// auto tbl = toml::parse(ss, "foo.toml");
+	/// std::cout << tbl["a"] << "\n";
+	/// \ecpp
+	///
+	/// \out
+	/// 3
+	/// \eout
+	///
 	/// \param 	doc				The TOML document to parse. Must be valid UTF-8.
 	/// \param 	source_path		The path used to initialize each node's `source().path`. A null pointer is the same as
 	/// 						an empty path.
@@ -365,7 +407,7 @@ TOML_NAMESPACE_START
 	TOML_ALWAYS_INLINE
 	parse_result parse(std::istream & doc, const char* source_path)
 	{
-		return parse(doc, source_path ? std::string_view{ source_path } : std::string_view{});
+		return parse(doc, impl::source_path_or_empty(source_path));
 	}
 
 	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS

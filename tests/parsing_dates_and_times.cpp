@@ -226,7 +226,7 @@ TEST_CASE("parsing - dates and times (end of input)")
 						"1:20: Error while parsing time: encountered end-of-file"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = 1987-03-16 1"sv,
-						"1:18: Error while parsing key-value pair: expected a comment or whitespace, saw '1'"sv);
+						"1:18: Error while parsing key-value pair: expected a comment or line break, saw '1'"sv);
 }
 
 TEST_CASE("parsing - dates and times (malformed)")
@@ -236,10 +236,10 @@ TEST_CASE("parsing - dates and times (malformed)")
 						"1:14: Error while parsing date: expected '-', saw 'x'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = 1987-03-16 1#"sv,
-						"1:18: Error while parsing key-value pair: expected a comment or whitespace, saw '1'"sv);
+						"1:18: Error while parsing key-value pair: expected a comment or line break, saw '1'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = 1987-03-16 1,"sv,
-						"1:18: Error while parsing key-value pair: expected a comment or whitespace, saw '1'"sv);
+						"1:18: Error while parsing key-value pair: expected a comment or line break, saw '1'"sv);
 	parsing_should_fail(FILE_LINE_ARGS,
 						"val = 1987-03-16T:"sv,
 						"1:18: Error while parsing date-time: expected 2-digit hour, saw ':'"sv);
