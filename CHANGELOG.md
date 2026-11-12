@@ -2,13 +2,12 @@
 
 ## Unreleased
 
-#### Fixes
+**Fixes**
 
 - fixed assertion failure when parsing an incomplete date-time followed by a value terminator (#313) (@allenflux)
 - fixed `is_homogeneous()` overloads with `first_nonmatch` outparam being broken in optimized builds (#231) (@Forbinn)
 - fixed unclear error message when parsing integers that would overflow (#224) (@chrimbo)
 - fixed CMake `install` target installing `meson.build` files (#236) (@JWCS)
-- fixed `TOML_MAX_NESTED_VALUES` default being too high (@danielbodorin)
 - fixed "unresolved symbol" error with nvc++ (#220) (@Tomcat-42)
 - fixed stack overflow when parsing deeply nested dotted keys (#242) (@tyler92)
 - fixed some malformed input hitting an assertion in the parser; it now gets a parse error (#321) (@emincan2000)
@@ -97,7 +96,7 @@
 - fixed `toml_formatter` wrapping arrays of non-decimal integers at the wrong width
 - fixed strings made from some user-defined string types stopping at the first NUL
 
-#### Additions
+**Additions**
 
 - added support for TOML v1.1.0 (#289)
 - added `toml::get_line()` (#255, #256, #258) (@N-Dekker)
@@ -111,7 +110,7 @@
 - added IWYU pragmas to `toml++/toml.hpp` (#277) (@fnuecke)
 - added `const char*` source-path overloads of `toml::parse()`, so string literals work as source paths
 
-#### Changes
+**Changes**
 
 - `operator<<` for `source_region` also prints the end of the region when it differs from the start (#244) (@N-Dekker)
 - improvements to general parsing speed, particularly for documents containing mostly strings
@@ -120,18 +119,20 @@
 - improvements to compile speed and binary size
 - improvements to `array::flatten()` speed on large arrays
 - improvements to `array::prune()` speed on large arrays
+- lowered the default of `TOML_MAX_NESTED_VALUES` from 256 to 128 (#293) (@danielbodorin)
 - `TOML_MAX_NESTED_VALUES` now limits the nesting depth of tables too
 - `TOML_INT_CHARCONV` no longer has any effect
 - changed the wording of some parse error messages
 
-#### Removals
+**Removals**
 
 - removed the Visual Studio solution and project files; use CMake or Meson
 - removed the `parse_benchmark` example
 
-#### Build system
+**Build system**
 
-- meson: builds are header-only by default to reflect what the documentation indicates (#296) (@jfsimoneau)
+- meson: fixed a default build compiling the library instead of being header-only (#296) (@jfsimoneau)
+- meson: tests built with `-Duse_vendored_libs=false` now need Catch2 v3
 - meson: installs the examples when they're built in a top-level build (#233) (@Scrumplex)
 - meson: fixed the installed CMake package failing `find_package()` on CMake 3.14 and 3.15 when the library is compiled
 - cmake: added `tomlplusplus_INSTALL` (#240) (@DapengFeng)
@@ -149,7 +150,7 @@
 
 ## v3.4.0
 
-#### Fixes
+**Fixes**
 
 - fixed `value_flags` not being preserved correctly when inserting into tables and arrays (#108) (@LebJe)
 - fixed `toml::value::flags()` not being cleared when `std::move`-ing a value
@@ -161,15 +162,15 @@
 - fixed keys containing `\t` incorrectly formatting as bare keys (@jasmine-zhu, @arp242)
 - fixed keys containing `\t` and `\n` not round-tripping correctly (@arp242)
 
-#### Additions
+**Additions**
 
 - added support for using enums with `value_or()`
 
-#### Changes
+**Changes**
 
 - renamed header files to have `.hpp` extension (`toml.h` is still present for backwards-compatibility)
 
-#### Build system
+**Build system**
 
 - fixed meson builds with `-Ddefault_library=static` having hidden symbols on GNU compilers (#201) (@vlad0x00)
 
@@ -179,7 +180,7 @@
 
 [Released](https://github.com/marzer/tomlplusplus/releases/tag/v3.3.0) 2023-01-29
 
-#### Fixes
+**Fixes**
 
 - fixed null pointer dereference in parser when exceptions are disabled (#169) (@ncaklovic)
 - fixed spurious warnings in MSVC 19.34
@@ -188,16 +189,16 @@
 - fixed UB edge-case in integer parsing (#188) (@jorisvr)
 - fixed some build issues with Apple-flavoured Clang (#189) (@eddelbuettel)
 
-#### Additions
+**Additions**
 
 - added `toml::format_flags::terse_key_value_pairs`
 - added `TOML_ENABLE_FLOAT16` config (#178) (@Scrumplex)
 
-#### Removals
+**Removals**
 
 - removed automatic detection of `_Float16` (you must explicitly set `TOML_ENABLE_FLOAT16` to enable it) (#186) (@benthetechguy)
 
-#### Build system
+**Build system**
 
 - re-wrote the meson scripts to fix a number of issues (#185, #186) (@Tachi107, @benthetechguy)
 - increased the minimum required meson version to `0.61.0`
@@ -208,20 +209,20 @@
 
 [Released](https://github.com/marzer/tomlplusplus/releases/tag/v3.2.0) 2022-08-29
 
-#### Fixes
+**Fixes**
 
 - fixed `[dotted.table]` source columns sometimes being off by one (#152) (@vaartis)
 - fixed spurious `Wnull-dereference` warning on GCC (#164) (@zaporozhets)
 - fixed `print_to_stream` ambiguity for `size_t` (#167) (@acronce)
 
-#### Additions
+**Additions**
 
 - added value type deduction to `emplace()` methods
 - added `toml::path` utility type (#153, #156, #168) (@jonestristand, @kcsaul)
 - added config option `TOML_CALLCONV`
 - added missing relational operators for `source_position`
 
-#### Changes
+**Changes**
 
 - relaxed cvref requirements of `is_homogeneous()`, `emplace()`, `emplace_back()`, `emplace_hint()`
 - relaxed mantissa and digits10 requirements of extended float support
@@ -232,13 +233,13 @@
 
 [Released](https://github.com/marzer/tomlplusplus/releases/tag/v3.1.0) 2022-04-22
 
-#### Fixes
+**Fixes**
 
 - fixed potential segfault when calling `at_path()` with an empty string
 - fixed UB in internal unicode machinery (#144) (@kchalmer)
 - fixed a number of spurious warnings with Clang 10 (#145, #146) (@chronoxor)
 
-#### Additions
+**Additions**
 
 - added `toml::array::for_each()`
 - added `toml::table::for_each()`
@@ -246,12 +247,12 @@
 - added support for escape sequence `\e` when using `TOML_ENABLE_UNRELEASED_FEATURES` ([toml/790](https://github.com/toml-lang/toml/pull/790))
 - added support for more unicode in bare keys when using `TOML_ENABLE_UNRELEASED_FEATURES` ([toml/891](https://github.com/toml-lang/toml/pull/891))
 
-#### Removals/Deprecations
+**Removals/Deprecations**
 
 - deprecated old `TOML_API` option in favour new `TOML_EXPORTED_X` options
     (it will continue to work as it did before if none of the new function export options are defined)
 
-#### Build system
+**Build system**
 
 - meson: added `compile_library` option (@Tachi107)
 - meson: added `ubsan_tests` and `ubsan_examples` options
@@ -267,7 +268,7 @@ This is a single-bugfix release to fix an ODR issue for people using header-only
 translation units. If you aren't seeing linker errors because of `toml::array::insert_at()`,
 this release holds nothing of value over v3.0.0.
 
-#### Fixes
+**Fixes**
 
 - fixed erroneous use of `TOML_API` causing ODR issue (#136) (@Azarael)
 
@@ -280,7 +281,7 @@ this release holds nothing of value over v3.0.0.
 This release will be a major version bump, so it's ABI breaks all around.
 Any changes that are likely to cause migration issues (API changes, build system breakage, etc.) are indicated with ⚠&#xFE0F;.
 
-#### Fixes
+**Fixes**
 
 - ⚠&#xFE0F; fixed `toml::table` init-list constructor requiring double-brackets
 - ⚠&#xFE0F; fixed `TOML_API` + extern templates causing linker errors in some circumstances
@@ -298,7 +299,7 @@ Any changes that are likely to cause migration issues (API changes, build system
 - fixed some incorrect unicode scalar sequence transformations (#125)
 - fixed strong exception guarantee edge-cases in `toml::table` and `toml::array`
 
-#### Additions
+**Additions**
 
 - added value flags to array + table insert methods (#44) (@levicki)
 - added support for Unicode 14.0
@@ -333,7 +334,7 @@ Any changes that are likely to cause migration issues (API changes, build system
 - added `parse_benchmark` example
 - added `operator->` to `toml::value` for class types
 
-#### Changes
+**Changes**
 
 - ⚠&#xFE0F; `toml::format_flags` is now backed by `uint64_t` (was previously `uint8_t`)
 - ⚠&#xFE0F; `toml::source_index` is now an alias for `uint32_t` unconditionally (was previously dependent on `TOML_LARGE_FILES`)
@@ -352,14 +353,14 @@ Any changes that are likely to cause migration issues (API changes, build system
 - renamed all implementation headers to `.h` and 'source' headers to `.inl`
 - updated conformance tests
 
-#### Removals
+**Removals**
 
 - ⚠&#xFE0F; removed `toml::format_flags::allow_value_format_flags`
 - ⚠&#xFE0F; removed `TOML_LARGE_FILES` (it is now default - explicitly setting `TOML_LARGE_FILES` to `0` will invoke an `#error`)
 - ⚠&#xFE0F; removed unnecessary template machinery (esp. where ostreams were involved)
 - removed unnecessary uses of `final`
 
-#### Build system
+**Build system**
 
 - ⚠&#xFE0F; increased minimum required meson version to `0.54.0`
 - disabled 'install' path when being used as a meson subproject (#114) (@Tachi107)
@@ -373,21 +374,21 @@ Any changes that are likely to cause migration issues (API changes, build system
 
 [Released](https://github.com/marzer/tomlplusplus/releases/tag/v2.5.0) 2021-07-11
 
-#### Fixes
+**Fixes**
 
 - fixed linkage error with windows compat mode
 - fixed `TOML_CONSTEVAL` broken in MSVC (again)
 - fixed minor documentation bugs
 - fixed cmake project version being incorrect (#110) (@GiulioRomualdi)
 
-#### Additions
+**Additions**
 
 - added support for lowercase 't' and 'z' in datetimes (per spec)
 - added natvis file to cmake install (#106) (@Ryan-rsm-McKenzie)
 - added VS cpp.hint file to cmake install
 - added metafunctions `is_container`, `is_chronological`, `is_value`, `is_node`, `inserted_type_of`
 
-#### Changes
+**Changes**
 
 - improved debug code size by removing unnecessary std::forwards and std::moves
 - modernized the CMake build files (#102, #103, #105) (@friendlyanon)
@@ -399,7 +400,7 @@ Any changes that are likely to cause migration issues (API changes, build system
 
 [Released](https://github.com/marzer/tomlplusplus/releases/tag/v2.4.0) 2021-05-19
 
-#### Fixes
+**Fixes**
 
 - fixed `node::value()` not retrieving inf and nan correctly
 - fixed dotted kvps being unable to add subtables (#61) (@Validark)
@@ -417,12 +418,12 @@ Any changes that are likely to cause migration issues (API changes, build system
 - fixed unnecessary `TOML_API` declarations
 - fixed many small documentation issues
 
-#### Additions
+**Additions**
 
 - added proper cmake support (#85) (@ClausKlein)
 - added cmake FetchContent information to documentation (#101) (@proydakov)
 
-#### Removals
+**Removals**
 
 - removed explicit `#include <fstream>` requirement for `parse_file()`
 
@@ -432,7 +433,7 @@ Any changes that are likely to cause migration issues (API changes, build system
 
 [Released](https://github.com/marzer/tomlplusplus/releases/tag/v2.3.0) 2020-12-29
 
-#### Fixes
+**Fixes**
 
 - fixed compiler errors caused by `<charconv>` with Apple-flavoured clang
 - fixed array and table iterators missing `iterator_category` (#77) (@HazardyKnusperkeks)
@@ -451,7 +452,7 @@ Any changes that are likely to cause migration issues (API changes, build system
 
 [Released](https://github.com/marzer/tomlplusplus/releases/tag/v2.2.0) 2020-08-09
 
-#### Fixes
+**Fixes**
 
 - fixed some issues building with VS2017 (#55) (@sobczyk)
 - fixed `_Float16` erroneously detected as supported on g++ (#57) (@sobczyk)
@@ -460,19 +461,19 @@ Any changes that are likely to cause migration issues (API changes, build system
 - fixed memory leak during parsing (#64) (@sneves)
 - fixed ambiguous `operator==` error on MSVC (#56) (@HellsingDarge)
 
-#### Additions
+**Additions**
 
 - added additional node_view constructors
 - added ability to specify serialization format of integer values
 - added integer value serialization format round trip (e.g. hex in, hex out)
 
-#### Changes
+**Changes**
 
 - updated conformance tests
 - TOML version bump to v1.0.0-rc.3
 - refactors and cleanups based on feedback given [here](https://medium.com/@julienjorge/code-review-of-toml-f816a6071120)
 
-#### Build system
+**Build system**
 
 - renamed build options to `snake_case`
 - tests, examples and cmake config now explicitly disabled when used as a subproject
@@ -485,7 +486,7 @@ Any changes that are likely to cause migration issues (API changes, build system
 
 [Released](https://github.com/marzer/tomlplusplus/releases/tag/v2.1.0) 2020-07-11
 
-#### Fixes
+**Fixes**
 
 - fixed inconsistent emission of leading/trailing newlines when writing a table to an ostream (#48) (@levicki)
 - fixed `Wcast-align` warning spam on ARM
@@ -495,7 +496,7 @@ Any changes that are likely to cause migration issues (API changes, build system
 - fixed some issues handling infinities and NaNs (#51) (@Reedbeta)
 - fixed some minor documentation issues
 
-#### Additions
+**Additions**
 
 - added support for `__fp16`, `_Float16`, `__float128`, `__int128_t` and `__uint128_t`
 - added copy construction/assignment for arrays, tables and values
@@ -506,7 +507,7 @@ Any changes that are likely to cause migration issues (API changes, build system
 - added `is_homogenous` overload for identifying failure-causing element
 - added implicit conversion operator from `node` to `node_view` (#52) (@Reedbeta)
 
-#### Changes
+**Changes**
 
 - renamed `TOML_ALL_INLINE` to `TOML_HEADER_ONLY` (the old name will still work, but is no longer documented)
 - general cleanup
@@ -520,7 +521,7 @@ Any changes that are likely to cause migration issues (API changes, build system
 This release contains a fairly significant number of 'quality of life' improvements, yay! But also necessitates an ABI
 break (hence the version number bump). Changes that might block a migration are annotated with ⚠&#xFE0F;.
 
-#### Fixes
+**Fixes**
 
 - fixed infinity and NaN-related code breaking when using `-ffast-math` and friends
 - fixed narrowing conversion warnings when constructing int values from unsigned
@@ -528,7 +529,7 @@ break (hence the version number bump). Changes that might block a migration are 
 - fixed some static assert messages being badly formatted on clang
 - fixed internal macro `assert_or_assume` leaking out of `toml_parser.hpp`
 
-#### Additions
+**Additions**
 
 - added additional types allowed in `node::value()` and `node::value_or()` ([see `value()` dox for examples](https://marzer.github.io/tomlplusplus/classtoml_1_1node.html#ab144c1ae90338b6b03f6af0574c87993))
 - added additional types allowed in `node_view::value()` and `node_view::value_or()`
@@ -548,14 +549,14 @@ break (hence the version number bump). Changes that might block a migration are 
 - added non-template version of `array::is_homogeneous()`
 - added explicit instantiations of more template types when `!TOML_ALL_INLINE`
 
-#### Changes
+**Changes**
 
 - ⚠&#xFE0F; deprecated `parse_result::get()` in favour of `parse_result::table()`
 - ⚠&#xFE0F; deprecated `node_view::get()` in favour of `node_view::node()`
 - ⚠&#xFE0F; simplified internal ABI namespaces
 - improved the quality of many static_assert error messages
 
-#### Removals
+**Removals**
 
 - ⚠&#xFE0F; renamed `date_time::time_offset` to just 'offset'
 - ⚠&#xFE0F; removed `TOML_CHAR_8_STRINGS` since it no longer makes sense
@@ -566,7 +567,7 @@ break (hence the version number bump). Changes that might block a migration are 
 
 [Released](https://github.com/marzer/tomlplusplus/releases/tag/v1.3.3) 2020-06-29
 
-#### Fixes
+**Fixes**
 
 - fixed some minor TOML spec conformance bugs
 - fixed BOM check causing EOF on very short iostream inputs
@@ -574,14 +575,14 @@ break (hence the version number bump). Changes that might block a migration are 
 - fixed 'unknown pragma' warning spam in older versions of GCC
 - fixed a few minor documentation issues
 
-#### Additions
+**Additions**
 
 - added rvalue overload of `array::flatten`
 - added conformance tests from `BurntSushi/toml-test` and `iarna/toml-spec-tests`
 - added `toml::inserter` as a workaround for nested construction of single-element `toml::arrays` performing move-construction instead
 - added license boilerplate to test files
 
-#### Changes
+**Changes**
 
 - refactored the parser to reduce binary size
 
@@ -591,14 +592,14 @@ break (hence the version number bump). Changes that might block a migration are 
 
 [Released](https://github.com/marzer/tomlplusplus/releases/tag/v1.3.2) 2020-06-19
 
-#### Fixes
+**Fixes**
 
 - fixed single-digit negative integers parsing as positive
 - fixed parse failure when parsing an empty file
 - fixed multi-line strings being allowed in keys
 - fixed overflow for very long binary integer literals
 
-#### Changes
+**Changes**
 
 - improved the performance of toml::parse_file
 - improved the performance of printing to streams for deepy-nested TOML data
@@ -609,21 +610,21 @@ break (hence the version number bump). Changes that might block a migration are 
 
 [Released](https://github.com/marzer/tomlplusplus/releases/tag/v1.3.0) 2020-06-02
 
-#### Fixes
+**Fixes**
 
 - fixed `formatter::print_inline()` causing compilation failures in DLL builds
 - fixed BOMs occasionally causing overflow/crash in char8 mode
 - fixed some spurious warnings in GCC 10
 - fixed clang static analyzer warning in BOM handling code
 
-#### Additions
+**Additions**
 
 - added `table_iterator::operator ->`
 - added `array::resize()` and `array::truncate()`
 - added `array::capacity()`, `array::shrink_to_fit()`, `array::max_size()`
 - added non-const -> const conversion for table and array iterators
 
-#### Changes
+**Changes**
 
 - renamed table iterator proxy pair members to `first` and `second` to match STL
 
@@ -633,7 +634,7 @@ break (hence the version number bump). Changes that might block a migration are 
 
 [Released](https://github.com/marzer/tomlplusplus/releases/tag/v1.2.5) 2020-04-24
 
-#### Fixes
+**Fixes**
 
 - fixed some multi-line string parsing issues
 - fixed pedantic warnings on gcc 10 and clang 11
@@ -641,13 +642,13 @@ break (hence the version number bump). Changes that might block a migration are 
 - fixed `TOML_LIKELY` not being correct on older versions of gcc and clang
 - fixed minor documentation issues (#26, #38) (@prince-chrismc)
 
-#### Additions
+**Additions**
 
 - added additional error message cases to the parser
 - added `error_printer` example
 - added `toml_generator` example
 
-#### Changes
+**Changes**
 
 - improved unicode-related codegen
 
@@ -657,7 +658,7 @@ break (hence the version number bump). Changes that might block a migration are 
 
 [Released](https://github.com/marzer/tomlplusplus/releases/tag/v1.2.3) 2020-04-11
 
-#### Fixes
+**Fixes**
 
 - fixed printing of inf and nan
 - fixed parser not handling floats with leading '.' characters
@@ -665,14 +666,14 @@ break (hence the version number bump). Changes that might block a migration are 
 - fixed a number of documentation bugs
 - fixed `TOML_UNRELEASED_FEATURES` default being 1 (it should have been 0)
 
-#### Additions
+**Additions**
 
 - added `TOML_PARSER` configuration option
 - added `TOML_LIB_SINGLE_HEADER` indicator
 - added doxygen page for the configuration options
 - added SPDX-License-Identifiers around the place
 
-#### Changes
+**Changes**
 
 - split some header files up to make future maintenance easier
 - refactored and greatly simplified parser
@@ -683,7 +684,7 @@ break (hence the version number bump). Changes that might block a migration are 
 
 [Released](https://github.com/marzer/tomlplusplus/releases/tag/v1.2.0) 2020-04-07
 
-#### Fixes
+**Fixes**
 
 - fixed some parsing and printing ops being locale-dependent
 - fixed some parsing errors at EOF when `TOML_EXCEPTIONS = 0`
@@ -691,7 +692,7 @@ break (hence the version number bump). Changes that might block a migration are 
 - fixed some 'maybe-uninitialized' false-positives on GCC9
 - fixed pkgconfig subdir being wrong
 
-#### Additions
+**Additions**
 
 - added support for implementations without `<charconv>`
 - added cmake package config generator (#22) (@GiulioRomualdi)
@@ -704,12 +705,12 @@ break (hence the version number bump). Changes that might block a migration are 
 
 [Released](https://github.com/marzer/tomlplusplus/releases/tag/v1.1.0) 2020-04-03
 
-#### Fixes
+**Fixes**
 
 - fixed some parser error paths not returning early enough `TOML_EXCEPTIONS=0`
 - fixed a number of minor documentation issues
 
-#### Additions
+**Additions**
 
 - added support for [TOML 1.0.0-rc.1](https://github.com/toml-lang/toml/releases/tag/v1.0.0-rc.1) 🎉
 - added `operator[]`, `begin()`, `end()` to `toml::parse_result` for `TOML_EXCEPTIONS=0`
@@ -725,11 +726,11 @@ break (hence the version number bump). Changes that might block a migration are 
 
 [Released](https://github.com/marzer/tomlplusplus/releases/tag/1.0.0) 2020-03-28
 
-#### Fixes
+**Fixes**
 
 - fixed minor documentation issues
 
-#### Changes
+**Changes**
 
 - refactoring of ABI-based inline namespaces
 
@@ -739,12 +740,12 @@ break (hence the version number bump). Changes that might block a migration are 
 
 [Released](https://github.com/marzer/tomlplusplus/releases/tag/v0.6.0) 2020-03-24
 
-#### Fixes
+**Fixes**
 
 - fixed minor preprocessor/macro issues
 - fixed minor documentation issues
 
-#### Additions
+**Additions**
 
 - added `<cassert>` include directly in 'debug' builds when `TOML_ASSERT` isn't defined
 - added Clang's `[[trivial_abi]]` attribute to `date`, `time`, `time_offset`
@@ -755,7 +756,7 @@ break (hence the version number bump). Changes that might block a migration are 
 
 [Released](https://github.com/marzer/tomlplusplus/releases/tag/v0.5.0) 2020-03-18
 
-#### Fixes
+**Fixes**
 
 - fixed crash when reaching EOF while parsing a string when exceptions are disabled
 - fixed some attribute warnings in GCC
@@ -764,7 +765,7 @@ break (hence the version number bump). Changes that might block a migration are 
 - fixed compilation on older implementations without `std::launder`
 - fixed `json_formatter` type deduction on older compilers
 
-#### Additions
+**Additions**
 
 - added support for Unicode 13.0
 - added support for `\xHH` escape sequences ([toml/pull/796](https://github.com/toml-lang/toml/pull/796))
@@ -777,15 +778,15 @@ break (hence the version number bump). Changes that might block a migration are 
 
 [Released](https://github.com/marzer/tomlplusplus/releases/tag/v0.4.3) 2020-03-10
 
-#### Fixes
+**Fixes**
 
 - fixed ICE in VS2019 when using `/std:c++17` instead of `/std:c++latest`
 
-#### Additions
+**Additions**
 
 - added `#error` when `TOML_EXCEPTIONS` is set to `1` but compiler exceptions were disabled
 
-#### Changes
+**Changes**
 
 - parsing performance improvements
 
@@ -795,12 +796,12 @@ break (hence the version number bump). Changes that might block a migration are 
 
 [Released](https://github.com/marzer/tomlplusplus/releases/tag/v0.4.0) 2020-03-05
 
-#### Fixes
+**Fixes**
 
 - fixed `parse_file()` failing to compile with plain string literals
 - fixed tests being built when used as a meson subproject (#14) (@shdnx)
 
-#### Additions
+**Additions**
 
 - added support for compiling into DLLs on windows (`TOML_API`)
 - added support for explicitly setting the `TOML_EXCEPTION` mode
@@ -813,12 +814,12 @@ break (hence the version number bump). Changes that might block a migration are 
 
 [Released](https://github.com/marzer/tomlplusplus/releases/tag/v0.3.0) 2020-03-01
 
-#### Fixes
+**Fixes**
 
 - fixed some pedantic clang warnings
 - fixed some minor documentation errors
 
-#### Additions
+**Additions**
 
 - added `node::value()` and `node::value_or()`
 - added `node_view::value()`
@@ -826,7 +827,7 @@ break (hence the version number bump). Changes that might block a migration are 
 - added `TOML_ALL_INLINE` and `TOML_IMPLEMENTATION` options
 - added preliminary support for ICC
 
-#### Removals
+**Removals**
 
 - removed `<cmath>` dependency
 
@@ -836,16 +837,16 @@ break (hence the version number bump). Changes that might block a migration are 
 
 [Released](https://github.com/marzer/tomlplusplus/releases/tag/v0.2.1) 2020-02-26
 
-#### Fixes
+**Fixes**
 
 - fixed minor printing bug in `operator<<(ostream, source_position)`
 - fixed minor documentation issues
 
-#### Additions
+**Additions**
 
 - added `operator<<(ostream&, parse_error)`
 
-#### Changes
+**Changes**
 
 - improved quality of error messages for boolean and inf/nan parsing
 
@@ -855,14 +856,14 @@ break (hence the version number bump). Changes that might block a migration are 
 
 [Released](https://github.com/marzer/tomlplusplus/releases/tag/v0.2.0) 2020-02-23
 
-#### Fixes
+**Fixes**
 
 - fixed truncation of floating-point values when using ostreams
 - fixed missing value deduction guides for dates and times
 - fixed potential ODR issues relating to exception mode handling etc.
 - fixed some documentation issues
 
-#### Additions
+**Additions**
 
 - added serialization round-trip tests
 - added `node::is_number()`
