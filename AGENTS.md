@@ -118,9 +118,11 @@ its style: correct it when it is wrong or stale, and don't delete it. The parser
 purpose.
 
 Write the conclusion, never the investigation. The urge to comment peaks just after working something out the hard
-way, and what comes out then is the reasoning. A comment earns its place only by stopping someone breaking the code, so
-what was tried, the measurement that convinced you, an alternative nobody proposed and the bug just fixed all go. When
-you clean up comments that an agent wrote, delete first and tighten what is left; rephrasing alone is a failed pass.
+way, and what comes out then is the reasoning. A comment is there only to stop someone breaking the code, so what was
+tried, the measurement that convinced you, an alternative nobody proposed and the bug just fixed all go. When you clean
+up comments that an agent wrote, delete first and tighten what is left; rephrasing alone is a failed pass.
+
+Doxygen on the public API is documentation: the Writing section covers it, and the list above does not.
 
 ## Tests
 
@@ -177,21 +179,28 @@ measurement goes in the report, and the conclusion goes in the code or the docs.
 ## CI
 
 The job matrix only shrinks. New coverage goes into a job that already exists, and an untested combination is something
-to report. Jobs run on the `-latest` runner images. Linux and Windows ARM64 have no `-latest` label, so those jobs use
-the ARM64 image of the release `ubuntu-latest` points at, and `windows-11-arm`. They run the code x64 never compiles,
-the paths without SSE2, under the sanitizers and with MSVC. A test job is named `<os>-<toolchain>-<arch>`, plus a
-final trait where that alone doesn't tell it apart, as in `windows-msvc-x64-permissive`. A job that isn't a matrix uses
-that name as its key and has no `name:`, and the workflow holds the rest of its configuration. Actions stay on version
-tags, which dependabot updates. No CodeQL.
+to report.
+
+Jobs run on the `-latest` runner images. Linux and Windows ARM64 have no `-latest` label, so those jobs use the ARM64
+image of the release `ubuntu-latest` points at, and `windows-11-arm`. They run the code x64 never compiles, the paths
+without SSE2, under the sanitizers and with MSVC.
+
+A test job is named `<os>-<toolchain>-<arch>`, plus a final trait where that alone doesn't tell it apart, as in
+`windows-msvc-x64-permissive`. A job that isn't a matrix uses that name as its key and has no `name:`, and the workflow
+holds the rest of its configuration. Actions stay on version tags, which dependabot updates. No CodeQL.
 
 ## Changelog
 
 A user-visible change gets one line under `## Unreleased` in `CHANGELOG.md`, of about 60 characters before the credits.
-Aim for that length in the first draft. A fix reads "fixed X when doing Y", as the user meets the bug, with no cause,
-internals, numbers or advice. Two changes are two lines: never "fixed X and Y", and never a semicolon that adds an item
-or context. The exception is an umbrella line that names no single fix, such as "fixed a number of spec conformance
-issues". Credit the issue and the person as `(#123) (@name)`. A change nobody using or packaging the library can see
-gets no entry.
+Aim for that length in the first draft. A change nobody using or packaging the library can see gets no entry.
+
+A fix reads "fixed X when doing Y", as the user meets the bug, with no cause, internals, numbers or advice. Two changes
+are two lines: never "fixed X and Y", and never a semicolon that adds an item or context. The exception is an umbrella
+line that names no single fix, such as "fixed a number of spec conformance issues". Credit the issue and the person as
+`(#123) (@name)`.
+
+    before: fixed some malformed input hitting an assertion in the parser; it now gets a parse error
+    after:  fixed assertion failure when parsing some malformed documents
 
 ## Source control
 
@@ -204,21 +213,45 @@ gets no entry.
 
 ## Writing
 
-This covers docs, comments, changelog entries, commit messages and pull requests.
+This covers docs, comments, changelog entries, commit messages, pull requests and the descriptions of CMake and Meson
+options.
 
-Neutral and terse, in British English and ASCII. Keep paragraphs short and inline backticks few, with one exception.
+Say the point first, say it once, then stop. Cut what the reader doesn't need to act:
+
+- the reason, unless the reader would get it wrong without it
+- the alternative nobody proposed: "not X but Y", "X, not Y", "X rather than Y", "X instead of Y", "whatever Y says".
+  A rule that says "do X, not Y" is fine.
+- mechanism, history, measurements and edge cases
+- a cross-reference that repeats the other page
+- a closing sentence that repeats the paragraph, and a summary under any label ("In summary")
+
+An option's description is a phrase:
+
+    before: Compile the library, rather than consuming it in header-only mode
+    after:  Compile the library
+
+Reread before handing over, and delete. A pass that deleted nothing failed, and rewording a long page doesn't shorten
+it. Existing prose is not a style reference: agents wrote some of it, in the voice this section bans.
+
+Neutral and terse, in British English and ASCII, so no em dashes. No marketing. Contractions, semicolons, parentheses
+and the passive are fine. Keep paragraphs to five lines at most, and inline backticks few: name a token once, then
+refer back to it in words.
+
 Prettier formats the Markdown outside `docs/`, `CHANGELOG.md` and the issue templates, and it turns an asterisk, or an
 underscore at the start or end of a word, into emphasis. Backtick any token like that, such as `count * 8` or
 `__init__`.
 
-LLM voice has named shapes. Cut them:
+LLM voice has other named shapes. Cut them:
 
-- the contrast reflex in descriptive prose: "not X but Y", "X, not Y", "X rather than Y". A rule that says "do X, not
-  Y" is fine.
 - bold-lead bullets, trailing participle clauses ("..., ensuring that"), "serves as" for "is", and nominalisations
   ("perform an analysis")
-- metaphor standing in for a plain verb: "what X buys", "where X lives", "earns its keep"
-- the tidy closer ("In summary") and a heading that summarises an argument. A heading names a place.
+- metaphor standing in for a plain verb: "what X buys" (costs, saves), "where X lives" (is defined, is in), "X
+  answers" and "X names" (returns, reports), "stands" (is, has), "reads as" (looks like), "poses the question"
+  (tests), "lands" (is done, is built), and "earns its keep" or "load-bearing" (useful, or delete). The thing that
+  acts is the subject; an abstract noun does not act.
+- "its own" as filler
+- a sentence chained from comma-separated fragments, as in "X, Y, Z, which is W". Split it.
+- a heading that summarises an argument. A heading names a place.
 
 Documents describe the present. No dates, no "used to" or "now does", and no done-marks: a finished item is deleted.
 Fix a stale sentence in place, and never append a correction below it. Don't list what the tree can list, and check
@@ -229,6 +262,6 @@ every figure you write. Name a role, such as the maintainer or the user, and nev
 - Do what was asked. Point out fragile code nearby, and leave it for someone to decide.
 - A question gets an answer. It doesn't start the work behind it.
 - Ask nothing the work already answers: take the defensible default and say which.
-- Edit files with an editing tool. Shell redirection overwrites a file without seeing it.
+- A shell write has to be one git can undo: a new file, or an in-place edit of tracked files named in the command. Overwriting an untracked file or uncommitted changes goes through an editing tool, which refuses a file it has not read.
 - After a bug hunt, add whatever would have found it faster: an assert, a test, a clearer error message.
 - After a batch of work, review your own changes for LLM voice, comment spam, needless helpers and throwaway code.
