@@ -17,7 +17,10 @@ target_compile_definitions(toml_fuzzer PRIVATE NDEBUG) # Do not want assertions
 add_executable(toml_float_fuzzer toml_float_fuzzer.cpp)
 target_compile_definitions(toml_float_fuzzer PRIVATE NDEBUG)
 
-set(fuzzers toml_fuzzer toml_float_fuzzer)
+add_executable(toml_parse_sources_fuzzer toml_parse_sources_fuzzer.cpp)
+target_compile_definitions(toml_parse_sources_fuzzer PRIVATE NDEBUG) # Do not want assertions
+
+set(fuzzers toml_fuzzer toml_float_fuzzer toml_parse_sources_fuzzer)
 
 # a compiled toml++ has its own exception and feature settings
 get_target_property(tomlplusplus_type tomlplusplus::tomlplusplus TYPE)
@@ -26,6 +29,11 @@ if(tomlplusplus_type STREQUAL "INTERFACE_LIBRARY")
     target_compile_options(toml_no_exceptions_fuzzer PRIVATE -fno-exceptions -UNDEBUG)
     target_compile_definitions(toml_no_exceptions_fuzzer PRIVATE TOML_ENABLE_UNRELEASED_FEATURES=1)
     list(APPEND fuzzers toml_no_exceptions_fuzzer)
+
+    add_executable(toml_parse_sources_no_exceptions_fuzzer toml_parse_sources_fuzzer.cpp)
+    target_compile_options(toml_parse_sources_no_exceptions_fuzzer PRIVATE -fno-exceptions -UNDEBUG)
+    target_compile_definitions(toml_parse_sources_no_exceptions_fuzzer PRIVATE TOML_ENABLE_UNRELEASED_FEATURES=1)
+    list(APPEND fuzzers toml_parse_sources_no_exceptions_fuzzer)
 endif()
 
 foreach(fuzzer IN LISTS fuzzers)
