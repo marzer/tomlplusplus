@@ -3,6 +3,11 @@
 // See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
 
+#ifdef _MSC_VER
+// msvc 14.52 bug: C3774 in <optional> without this
+#include <compare>
+#endif
+
 import tomlplusplus;
 
 int main()
