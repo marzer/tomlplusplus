@@ -17,7 +17,10 @@ target_compile_definitions(toml_fuzzer PRIVATE NDEBUG) # Do not want assertions
 add_executable(toml_float_fuzzer toml_float_fuzzer.cpp)
 target_compile_definitions(toml_float_fuzzer PRIVATE NDEBUG)
 
-set(fuzzers toml_fuzzer toml_float_fuzzer)
+add_executable(toml_node_api_fuzzer toml_node_api_fuzzer.cpp)
+target_compile_definitions(toml_node_api_fuzzer PRIVATE NDEBUG) # Do not want assertions
+
+set(fuzzers toml_fuzzer toml_float_fuzzer toml_node_api_fuzzer)
 
 # a compiled toml++ has its own exception and feature settings
 get_target_property(tomlplusplus_type tomlplusplus::tomlplusplus TYPE)
