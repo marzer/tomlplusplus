@@ -25,6 +25,10 @@ add_executable(toml_at_path_fuzzer toml_at_path_fuzzer.cpp)
 target_compile_definitions(toml_at_path_fuzzer PRIVATE NDEBUG) # Do not want assertions
 list(APPEND fuzzers toml_at_path_fuzzer)
 
+add_executable(toml_parse_sources_fuzzer toml_parse_sources_fuzzer.cpp)
+target_compile_definitions(toml_parse_sources_fuzzer PRIVATE NDEBUG) # Do not want assertions
+list(APPEND fuzzers toml_parse_sources_fuzzer)
+
 add_executable(toml_node_api_fuzzer toml_node_api_fuzzer.cpp)
 target_compile_definitions(toml_node_api_fuzzer PRIVATE NDEBUG) # Do not want assertions
 list(APPEND fuzzers toml_node_api_fuzzer)
@@ -36,6 +40,11 @@ if(tomlplusplus_type STREQUAL "INTERFACE_LIBRARY")
     target_compile_options(toml_no_exceptions_fuzzer PRIVATE -fno-exceptions -UNDEBUG)
     target_compile_definitions(toml_no_exceptions_fuzzer PRIVATE TOML_ENABLE_UNRELEASED_FEATURES=1)
     list(APPEND fuzzers toml_no_exceptions_fuzzer)
+
+    add_executable(toml_parse_sources_no_exceptions_fuzzer toml_parse_sources_fuzzer.cpp)
+    target_compile_options(toml_parse_sources_no_exceptions_fuzzer PRIVATE -fno-exceptions -UNDEBUG)
+    target_compile_definitions(toml_parse_sources_no_exceptions_fuzzer PRIVATE TOML_ENABLE_UNRELEASED_FEATURES=1)
+    list(APPEND fuzzers toml_parse_sources_no_exceptions_fuzzer)
 endif()
 
 foreach(fuzzer IN LISTS fuzzers)
