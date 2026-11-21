@@ -491,7 +491,7 @@ and [emoji sundae] Regular. The API is the same for both.
 
 @subsection mainpage-adding-lib-conan Conan
 
-Add `tomlplusplus/3.4.0` to your conanfile.
+Add `tomlplusplus/3.5.0` to your conanfile.
 
 <!-- --------------------------------------------------------------------------------------------------------------- -->
 
@@ -539,7 +539,7 @@ include(FetchContent)
 FetchContent_Declare(
     tomlplusplus
     GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
-    GIT_TAG v3.4.0
+    GIT_TAG v3.5.0
 )
 FetchContent_MakeAvailable(tomlplusplus)
 @endcmake

@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------------------------------------------------------
 //
-// toml++ v3.4.0
+// toml++ v3.5.0
 // https://github.com/marzer/tomlplusplus
 // SPDX-License-Identifier: MIT
 //
@@ -1341,7 +1341,7 @@ TOML_ENABLE_WARNINGS;
 //********  impl/version.hpp  ******************************************************************************************
 
 #define TOML_LIB_MAJOR 3
-#define TOML_LIB_MINOR 4
+#define TOML_LIB_MINOR 5
 #define TOML_LIB_PATCH 0
 
 #define TOML_LANG_MAJOR 1
