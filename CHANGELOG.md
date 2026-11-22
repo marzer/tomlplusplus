@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.5.1
+
+No code changes. Patch bump only to address a git tag snafu.
+
 ## v3.5.0
 
 **Highlights**

@@ -118,7 +118,7 @@ You'll find some more code examples in the `examples` directory, and plenty more
 
 ### Conan
 
-Add `tomlplusplus/3.5.0` to your conanfile.
+Add `tomlplusplus/3.5.1` to your conanfile.
 
 ### Tipi.build
 
@@ -159,7 +159,7 @@ include(FetchContent)
 FetchContent_Declare(
     tomlplusplus
     GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
-    GIT_TAG        v3.5.0
+    GIT_TAG        v3.5.1
 )
 FetchContent_MakeAvailable(tomlplusplus)
 # Example add library: target_link_libraries(MyApp tomlplusplus::tomlplusplus)
