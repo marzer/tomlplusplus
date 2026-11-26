@@ -14,6 +14,7 @@
 -   Supports serializing to JSON and YAML
 -   Proper UTF-8 handling (incl. BOM)
 -   C++17 (plus some C++20 features where available, e.g. experimental support for char8_t strings)
+-   Reflection serialization/deserialization support (C++26)
 -   Doesn't require RTTI
 -   Works with or without exceptions
 -   Tested on GCC 11 and 15, Clang 21, Apple Clang 21 and MSVC 19.51 (VS 2026); other compilers are best effort

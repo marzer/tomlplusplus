@@ -32,6 +32,7 @@ parsing_utf8.cpp
 path.cpp
 printing.cpp
 round_trips.cpp
+serde.cpp
 source_regions.cpp
 tests.cpp
 unicode.cpp
